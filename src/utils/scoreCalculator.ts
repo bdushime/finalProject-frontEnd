@@ -1,4 +1,4 @@
-import { SCORE_CHANGES, SCORE_LEVELS } from '../types'
+import { SCORE_CHANGES, SCORE_LEVELS } from '../types/enums'
 
 type ScoreLevel = 'TRUSTED' | 'GOOD' | 'FAIR' | 'AT_RISK'
 
@@ -108,6 +108,17 @@ export function getScoreColorClass(score: number): string {
 export function calculateNewScore(currentScore: number, change: number): number {
   const newScore = currentScore + change
   return Math.max(0, Math.min(100, newScore)) // Clamp between 0 and 100
+}
+
+// Simple reliability score based on usage stats
+export function calculateReliabilityScore(stats: { totalCheckouts: number; lateReturns: number; damages: number }): number {
+  const { totalCheckouts, lateReturns, damages } = stats
+  const base = 100
+  const latePenalty = Math.min(lateReturns * 5, 50) // cap
+  const damagePenalty = Math.min(damages * 15, 60)
+  const experienceBonus = Math.min(Math.max(totalCheckouts - 10, 0) * 0.5, 10)
+  const score = base - latePenalty - damagePenalty + experienceBonus
+  return Math.max(0, Math.min(100, Math.round(score)))
 }
 
 /**

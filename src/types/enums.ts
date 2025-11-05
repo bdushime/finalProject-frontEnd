@@ -46,6 +46,15 @@ export enum EquipmentCondition {
   DAMAGED = 'damaged',
 }
 
+// Locations where equipment can be picked up/returned
+export enum EquipmentLocation {
+  BUILDING_A_ROOM_101 = 'Building A, Room 101',
+  BUILDING_A_ROOM_102 = 'Building A, Room 102',
+  MEDIA_LAB = 'Building B, Media Lab',
+  EQUIPMENT_ROOM = 'Building C, Equipment Room',
+  DESIGN_LAB = 'Building D, Design Lab',
+}
+
 /**
  * Checkout Status
  */
