@@ -1,6 +1,7 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
 import { cn } from "./utils";
 
@@ -34,16 +35,7 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
+function Button({ className, variant, size, asChild = false, ...props }) {
   const Comp = asChild ? Slot : "button";
 
   return (
@@ -55,4 +47,20 @@ function Button({
   );
 }
 
+Button.propTypes = {
+  className: PropTypes.string,
+  variant: PropTypes.oneOf([
+    "default",
+    "destructive",
+    "outline",
+    "secondary",
+    "ghost",
+    "link",
+  ]),
+  size: PropTypes.oneOf(["default", "sm", "lg", "icon"]),
+  asChild: PropTypes.bool,
+};
+
 export { Button, buttonVariants };
+
+

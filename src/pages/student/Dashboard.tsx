@@ -10,11 +10,8 @@ export function Dashboard() {
 			<div className="space-y-6">
 				{/* Summary Cards */}
 				<DashboardCards />
-
-				{/* Charts Section */}
 				<Charts />
 
-				{/* Bottom Section: Quick Actions and Recent Activity */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<QuickActions />
 					<RecentActivity />

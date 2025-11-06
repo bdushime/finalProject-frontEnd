@@ -1,8 +1,9 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 
 import { cn } from "./utils";
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+function Card({ className, ...props }) {
   return (
     <div
       data-slot="card"
@@ -15,7 +16,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+Card.propTypes = { className: PropTypes.string };
+
+function CardHeader({ className, ...props }) {
   return (
     <div
       data-slot="card-header"
@@ -28,7 +31,9 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+CardHeader.propTypes = { className: PropTypes.string };
+
+function CardTitle({ className, ...props }) {
   return (
     <h4
       data-slot="card-title"
@@ -38,7 +43,9 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+CardTitle.propTypes = { className: PropTypes.string };
+
+function CardDescription({ className, ...props }) {
   return (
     <p
       data-slot="card-description"
@@ -48,7 +55,9 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+CardDescription.propTypes = { className: PropTypes.string };
+
+function CardAction({ className, ...props }) {
   return (
     <div
       data-slot="card-action"
@@ -61,7 +70,9 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+CardAction.propTypes = { className: PropTypes.string };
+
+function CardContent({ className, ...props }) {
   return (
     <div
       data-slot="card-content"
@@ -71,7 +82,9 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+CardContent.propTypes = { className: PropTypes.string };
+
+function CardFooter({ className, ...props }) {
   return (
     <div
       data-slot="card-footer"
@@ -80,6 +93,8 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     />
   );
 }
+
+CardFooter.propTypes = { className: PropTypes.string };
 
 export {
   Card,
@@ -90,3 +105,5 @@ export {
   CardDescription,
   CardContent,
 };
+
+
