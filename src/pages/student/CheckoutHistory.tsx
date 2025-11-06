@@ -21,7 +21,7 @@ export default function CheckoutHistory() {
 				<div className="mt-4 rounded-2xl shadow-lg bg-white">
 					<div className="overflow-x-auto">
 						<Table className="w-full text-sm border-separate border-spacing-y-2 border-spacing-x-0">
-							<TableHeader className="text-left text-neutral-500">
+							<TableHeader className="text-left text-white">
 								<TableRow>
 									<th className="px-4 py-3">Item</th>
 									<th className="px-4 py-3">Checked Out</th>
