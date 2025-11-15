@@ -1,0 +1,217 @@
+// Mock data for Student pages
+
+export const studentMockData = {
+    student: {
+        id: 'STU-2024-001',
+        name: 'John Doe',
+        email: 'john.doe@auca.ac.rw',
+        studentId: '2024-001',
+        phone: '+250 788 123 456',
+        department: 'Computer Science',
+        year: 'Year 3',
+        photo: '/api/placeholder/150/150',
+        joinDate: '2024-01-15',
+    },
+};
+
+export const borrowedItems = [
+    {
+        id: 'BR-001',
+        equipmentId: 'EQ-002',
+        equipmentName: 'Dell XPS 15',
+        category: 'Laptop',
+        borrowedDate: '2024-11-01',
+        dueDate: '2024-11-15',
+        returnDate: null,
+        status: 'active', // active, pending, overdue, returned
+        condition: 'excellent',
+        location: 'Building A, Room 101',
+        requestId: 'REQ-001',
+        approvedBy: 'IT Staff - Jane Smith',
+        approvedDate: '2024-10-30',
+    },
+    {
+        id: 'BR-002',
+        equipmentId: 'EQ-004',
+        equipmentName: 'Sony A7 III Camera',
+        category: 'Camera',
+        borrowedDate: '2024-10-25',
+        dueDate: '2024-11-08',
+        returnDate: null,
+        status: 'overdue',
+        condition: 'good',
+        location: 'Building B, Media Lab',
+        requestId: 'REQ-002',
+        approvedBy: 'IT Staff - Jane Smith',
+        approvedDate: '2024-10-24',
+    },
+    {
+        id: 'BR-003',
+        equipmentId: 'EQ-006',
+        equipmentName: 'Shure SM7B Microphone',
+        category: 'Audio',
+        borrowedDate: null,
+        dueDate: null,
+        returnDate: null,
+        status: 'pending',
+        condition: 'excellent',
+        location: 'Building B, Audio Studio',
+        requestId: 'REQ-003',
+        approvedBy: null,
+        approvedDate: null,
+        requestedDate: '2024-11-05',
+    },
+    {
+        id: 'BR-004',
+        equipmentId: 'EQ-001',
+        equipmentName: 'MacBook Pro 16"',
+        category: 'Laptop',
+        borrowedDate: '2024-09-01',
+        dueDate: '2024-09-15',
+        returnDate: '2024-09-10',
+        status: 'returned',
+        condition: 'excellent',
+        location: 'Building A, Room 101',
+        requestId: 'REQ-004',
+        approvedBy: 'IT Staff - Jane Smith',
+        approvedDate: '2024-08-30',
+    },
+];
+
+export const notifications = [
+    {
+        id: 'NOTIF-001',
+        type: 'overdue', // overdue, approved, rejected, reminder, system
+        title: 'Item Overdue: Sony A7 III Camera',
+        message: 'Your borrowed item "Sony A7 III Camera" was due on Nov 8, 2024. Please return it as soon as possible.',
+        timestamp: '2024-11-09T10:30:00',
+        read: false,
+        actionUrl: '/student/borrowed-items',
+    },
+    {
+        id: 'NOTIF-002',
+        type: 'approved',
+        title: 'Request Approved: Shure SM7B Microphone',
+        message: 'Your borrow request for "Shure SM7B Microphone" has been approved. Please collect it from Building B, Audio Studio.',
+        timestamp: '2024-11-05T14:20:00',
+        read: false,
+        actionUrl: '/student/borrowed-items',
+    },
+    {
+        id: 'NOTIF-003',
+        type: 'reminder',
+        title: 'Return Reminder: Dell XPS 15',
+        message: 'Your borrowed item "Dell XPS 15" is due in 3 days (Nov 15, 2024).',
+        timestamp: '2024-11-12T09:00:00',
+        read: true,
+        actionUrl: '/student/borrowed-items',
+    },
+    {
+        id: 'NOTIF-004',
+        type: 'system',
+        title: 'System Maintenance Scheduled',
+        message: 'The equipment tracking system will be under maintenance on Nov 15, 2024 from 1:00 AM to 3:00 AM.',
+        timestamp: '2024-11-10T16:45:00',
+        read: true,
+        actionUrl: null,
+    },
+    {
+        id: 'NOTIF-005',
+        type: 'rejected',
+        title: 'Request Rejected: Canon EOS R6',
+        message: 'Your borrow request for "Canon EOS R6" has been rejected. Reason: Equipment currently unavailable.',
+        timestamp: '2024-11-08T11:15:00',
+        read: false,
+        actionUrl: '/student/browse',
+    },
+];
+
+export const borrowHistory = [
+    {
+        id: 'HIST-001',
+        equipmentName: 'MacBook Pro 16"',
+        category: 'Laptop',
+        borrowedDate: '2024-09-01',
+        returnedDate: '2024-09-10',
+        status: 'returned',
+        conditionBorrowed: 'excellent',
+        conditionReturned: 'excellent',
+        daysBorrowed: 9,
+    },
+    {
+        id: 'HIST-002',
+        equipmentName: 'Epson PowerLite Projector',
+        category: 'Projector',
+        borrowedDate: '2024-08-01',
+        returnedDate: '2024-08-05',
+        status: 'returned',
+        conditionBorrowed: 'good',
+        conditionReturned: 'good',
+        daysBorrowed: 4,
+    },
+    {
+        id: 'HIST-003',
+        equipmentName: 'iPad Pro 12.9"',
+        category: 'Tablet',
+        borrowedDate: '2024-07-15',
+        returnedDate: '2024-07-20',
+        status: 'returned',
+        conditionBorrowed: 'excellent',
+        conditionReturned: 'excellent',
+        daysBorrowed: 5,
+    },
+    {
+        id: 'HIST-004',
+        equipmentName: 'GoPro HERO 12',
+        category: 'Camera',
+        borrowedDate: '2024-06-10',
+        returnedDate: '2024-06-18',
+        status: 'returned',
+        conditionBorrowed: 'good',
+        conditionReturned: 'good',
+        daysBorrowed: 8,
+    },
+];
+
+export const dashboardStats = {
+    totalBorrowed: 4,
+    activeBorrows: 2,
+    pendingRequests: 1,
+    overdueItems: 1,
+    returnedItems: 4,
+    totalRequests: 5,
+};
+
+export const faqData = [
+    {
+        id: 'FAQ-001',
+        question: 'How long can I borrow equipment?',
+        answer: 'The standard borrowing period is 14 days. Some equipment may have different borrowing periods based on availability and type.',
+    },
+    {
+        id: 'FAQ-002',
+        question: 'What happens if I return equipment late?',
+        answer: 'Late returns may result in penalties or restrictions on future borrowing. Please return equipment on or before the due date.',
+    },
+    {
+        id: 'FAQ-003',
+        question: 'Can I extend my borrowing period?',
+        answer: 'Yes, you can request an extension through the system. Extensions are subject to approval by IT staff and equipment availability.',
+    },
+    {
+        id: 'FAQ-004',
+        question: 'What should I do if equipment is damaged?',
+        answer: 'Report any damage immediately when returning the equipment. You may be held responsible for damages that occurred during your borrowing period.',
+    },
+    {
+        id: 'FAQ-005',
+        question: 'How do I scan QR codes?',
+        answer: 'Use the QR code scanner in the borrow request page. Make sure your device camera has permission to access the camera.',
+    },
+    {
+        id: 'FAQ-006',
+        question: 'Can I borrow multiple items at once?',
+        answer: 'Yes, you can borrow multiple items, but each request needs to be approved separately by IT staff.',
+    },
+];
+

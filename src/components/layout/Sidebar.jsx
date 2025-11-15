@@ -1,15 +1,16 @@
 import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutGrid, Package, ClipboardList, FileText, Settings } from "lucide-react";
+import { LayoutGrid, Package, ClipboardList, Bell, User, HelpCircle } from "lucide-react";
 import logo from "@/assets/images/logo.svg";
 
 const links = [
     { name: "Dashboard", path: "/student/dashboard", icon: LayoutGrid },
     { name: "Equipment", path: "/student/browse", icon: Package },
-    { name: "Borrowed Items", path: "/student/current-checkouts", icon: ClipboardList },
-    { name: "Reports", path: "/student/history", icon: FileText },
-    { name: "Settings", path: "/settings", icon: Settings },
+    { name: "Borrowed Items", path: "/student/borrowed-items", icon: ClipboardList },
+    { name: "Notifications", path: "/student/notifications", icon: Bell },
+    { name: "Profile", path: "/student/profile", icon: User },
+    { name: "Help & Support", path: "/student/help", icon: HelpCircle },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -47,11 +48,10 @@ export default function Sidebar({ isOpen, onClose }) {
                                     }}
                                     className={({ isActive: navIsActive }) => {
                                         const active = navIsActive || isActive;
-                                        return `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                                            active
+                                        return `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${active
                                                 ? "bg-white/10 text-white shadow-sm"
                                                 : "text-white/70 hover:bg-white/5 hover:text-white"
-                                        }`;
+                                            }`;
                                     }}
                                 >
                                     <Icon className="h-5 w-5 shrink-0" />
