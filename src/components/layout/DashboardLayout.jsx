@@ -4,70 +4,92 @@ import { useLocation } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 
+const DESKTOP_BREAKPOINT = 640; // matches `sm:` in Tailwind config
+
 export default function DashboardLayout({ children }) {
-    const [sidebarOpen, setSidebarOpen] = useState(() => {
-        try {
-            const stored = localStorage.getItem("sidebarOpen");
-            if (stored !== null) {
-                return stored === "1";
-            }
-            if (typeof window !== "undefined") {
-                return window.innerWidth >= 640;
-            }
-            return false;
-        } catch {
-            return false;
-        }
-    });
+  // Controls visibility on mobile; on desktop the sidebar is always visible
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    try {
+      if (typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT) {
+        return true;
+      }
+      const stored = localStorage.getItem("sidebarOpen");
+      if (stored !== null) {
+        return stored === "1";
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  });
 
-    useEffect(() => {
-        try {
-            localStorage.setItem("sidebarOpen", sidebarOpen ? "1" : "0");
-        } catch {
-        }
-    }, [sidebarOpen]);
+  // Current sidebar width (0 / 64 / 240) used to offset main content on desktop
+  const [sidebarWidth, setSidebarWidth] = useState(0);
 
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth >= 640) {
-                setSidebarOpen(true);
-            }
-        };
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+  useEffect(() => {
+    try {
+      localStorage.setItem("sidebarOpen", sidebarOpen ? "1" : "0");
+    } catch {
+      // ignore storage errors
+    }
+  }, [sidebarOpen]);
 
-    const location = useLocation();
-    useEffect(() => {
-        const checkMobile = () => window.innerWidth < 640;
-        if (checkMobile()) {
-            setSidebarOpen(false);
-        }
-    }, [location.pathname]);
+  // Sync sidebar visibility with viewport size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= DESKTOP_BREAKPOINT) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/30 sm:hidden z-30"
-                    onClick={() => setSidebarOpen(false)}
-                    aria-hidden
-                />
-            )}
-            <div className="sm:pl-60 flex flex-col min-h-screen">
-                <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
-                <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-6 py-6">
-                    {children}
-                </main>
-            </div>
-        </div>
-    );
+  // Auto-close sidebar on route change when on mobile
+  const location = useLocation();
+  useEffect(() => {
+    if (window.innerWidth < DESKTOP_BREAKPOINT) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname]);
+
+  const isDesktop = typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onWidthChange={setSidebarWidth}
+      />
+
+      {/* Mobile backdrop when sidebar is open */}
+      {sidebarOpen && !isDesktop && (
+        <div
+          className="fixed inset-0 bg-black/30 sm:hidden z-30"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      {/* Main content shifts based on current sidebar width on desktop */}
+      <div
+        className="flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out"
+        style={{
+          paddingLeft: isDesktop ? `${sidebarWidth}px` : 0,
+        }}
+      >
+        <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
+        <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-6 py-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
 }
 
 DashboardLayout.propTypes = {
-    children: PropTypes.node,
+  children: PropTypes.node,
 };
-
-

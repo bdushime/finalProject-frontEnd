@@ -10,7 +10,7 @@ import { PageContainer, PageHeader } from "@/components/common/Page";
 import { studentMockData, borrowHistory } from "./data/mockData";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "./components/StatusBadge";
-import { CategoryBadge } from "./components/CategoryBadge";
+import CategoryBadge from "./components/CategoryBadge";
 
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false);

@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QrCode, MapPin, Calendar } from "lucide-react";
 import { getEquipmentById } from "@/components/lib/equipmentData";
-import { CategoryBadge } from "../components/CategoryBadge";
+import CategoryBadge from "../components/CategoryBadge";
 import PropTypes from "prop-types";
 
 export default function BorrowRequestForm({ onSuccess }) {

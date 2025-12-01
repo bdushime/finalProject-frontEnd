@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Bell, Clock } from "lucide-react";
 import { listNotifications } from "@/components/lib/equipmentData";
 
-export default function Notifications() {
+export default function ITStaffNotifications() {
 	const items = listNotifications();
 
 	return (

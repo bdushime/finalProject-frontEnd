@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Package, MapPin, Calendar, QrCode } from "lucide-react";
 import { getEquipmentById } from "@/components/lib/equipmentData";
-import { CategoryBadge } from "./components/CategoryBadge";
+import CategoryBadge from "./components/CategoryBadge";
 import { PageContainer } from "@/components/common/Page";
 
 export default function EquipmentDetails() {

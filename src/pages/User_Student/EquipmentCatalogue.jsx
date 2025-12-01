@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Grid3x3, List, Package, Eye, QrCode } from "lucide-react";
 import { equipmentData, categories } from "@/components/lib/equipmentData";
 import { PageContainer, PageHeader } from "@/components/common/Page";
-import { CategoryBadge } from "./components/CategoryBadge";
+import CategoryBadge from "./components/CategoryBadge";
 import { useNavigate } from "react-router-dom";
 
 export default function EquipmentCatalogue() {

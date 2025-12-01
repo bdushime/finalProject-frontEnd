@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Calendar, Package, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import { StatusBadge } from "./components/StatusBadge";
-import { CategoryBadge } from "./components/CategoryBadge";
+import CategoryBadge from "./components/CategoryBadge";
 import { borrowedItems } from "./data/mockData";
 import { useNavigate } from "react-router-dom";
 

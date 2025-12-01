@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Grid3x3, List, Package, Eye } from 'lucide-react';
 import { equipmentData, categories } from '@components/lib/equipmentData';
 import { PageContainer, PageHeader } from '@components/common/Page';
-import { CategoryBadge } from '@/pages/student/components/CategoryBadge';
+import CategoryBadge from '../User_Student/components/CategoryBadge';
 import MainLayout from '@/components/layout/MainLayout';
 
 export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
