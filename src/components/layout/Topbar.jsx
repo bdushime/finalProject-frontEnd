@@ -50,11 +50,8 @@ export default function Topbar({ onMenuClick }) {
   return (
     <header
       className={`
-        sticky top-0 z-30 w-full border-b transition-all duration-300 
-        ${isScrolled 
-          ? "bg-white shadow-lg backdrop-blur-lg border-gray-200"
-          : "bg-white/40 shadow-sm border-gray-100"
-        }
+        sticky top-0 z-30 w-full border-b transition-all duration-300 bg-[#BEBEE0] shadow-sm border-gray-100
+        
       `}
     >
       <div className="h-full flex items-center justify-between px-4 sm:px-6 py-4 gap-4">

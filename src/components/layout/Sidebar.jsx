@@ -168,7 +168,7 @@ export default function Sidebar({ isOpen, onWidthChange }) {
               src={logo}
               alt="Tracknity"
               className={`w-full h-full transition-all duration-300 ${
-                effectiveExpanded ? "w-32 h-32" : "w-16 h-16"
+                effectiveExpanded ? "w-18 h-18" : "w-16 h-16"
               }`}
             />
           </motion.div>

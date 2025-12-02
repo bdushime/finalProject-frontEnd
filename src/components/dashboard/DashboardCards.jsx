@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@components/ui/card";
 import { Package, Activity, WifiOff, AlertTriangle, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const metrics = [
   {
@@ -34,18 +35,23 @@ const metrics = [
     label: "Overdue Loans",
     value: 45,
     icon: Clock,
-    color: "text-purple-600 dark:text-purple-400",
+    color: "text-white dark:text-purple-400",
     bgGradient: "from-purple-500 to-purple-600",
   },
 ];
 
 export default function DashboardCards() {
+  const navigate = useNavigate();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+
+      {/* the numbers to be used here should be got from the it-equipment.json file or the database */}
       {metrics.map((metric) => {
         const Icon = metric.icon;
         return (
           <Card
+            onClick={() => navigate(`/it/browse`)}
             key={metric.label}
             className="bg-card border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="p-6">

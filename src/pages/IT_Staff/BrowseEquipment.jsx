@@ -9,6 +9,7 @@ import { Search, Grid3x3, List, Package, Eye } from 'lucide-react';
 import { PageContainer, PageHeader } from '@components/common/Page';
 import CategoryBadge from '../User_Student/components/CategoryBadge';
 import MainLayout from '@/components/layout/MainLayout';
+import { useNavigate } from 'react-router-dom';
 
 // Simple helper to derive a category from the equipment name
 function deriveCategory(name = '') {
@@ -35,6 +36,7 @@ function deriveCategory(name = '') {
 }
 
 export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('grid');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [searchQuery, setSearchQuery] = useState('');
@@ -201,7 +203,11 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentEquipment.map(equipment => (
-              <Card key={equipment.id} className="flex flex-col border-gray-400 hover:shadow-lg hover:bg-[#BEBEE0] transition-shadow shadow-sm bg-background rounded-lg">
+              <Card 
+              key={equipment.id} 
+              className="flex flex-col border-gray-400 hover:shadow-lg hover:bg-[#BEBEE0] transition-shadow shadow-sm bg-background rounded-lg"
+              onClick={() => navigate(`/it/equipment/${equipment.id}`)}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <CategoryBadge category={equipment.category} />
@@ -232,13 +238,18 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         variant="outline"
                         className="flex-1 bg-blue-600 text-white"
                         onClick={() => {
-                          if (onViewDetails) onViewDetails(equipment);
+                          // Prefer router navigation; fall back to callback if provided
+                          if (onViewDetails) {
+                            onViewDetails(equipment);
+                          } else {
+                            navigate(`/it/equipment/${equipment.id}`);
+                          }
                         }}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Details
                       </Button>
-                      <Button
+                      {/* <Button
                         className="flex-1 bg-[#343264] text-white"
                         disabled={equipment.available === 0}
                         onClick={() => {
@@ -246,7 +257,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         }}
                       >
                         Borrow
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 </CardContent>
@@ -286,13 +297,17 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         variant="outline"
                         className="flex-1 bg-[#343264] text-white"
                         onClick={() => {
-                          if (onViewDetails) onViewDetails(equipment);
+                          if (onViewDetails) {
+                            onViewDetails(equipment);
+                          } else {
+                            navigate(`/it/equipment/${equipment.id}`);
+                          }
                         }}
                       >
                         <Eye className="h-4 w-4 sm:mr-2" />
                         <span className="hidden sm:inline">Details</span>
                       </Button>
-                      <Button
+                      {/* <Button
                         className="flex-1"
                         disabled={equipment.available === 0}
                         onClick={() => {
@@ -300,7 +315,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         }}
                       >
                         Borrow
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 </CardContent>
