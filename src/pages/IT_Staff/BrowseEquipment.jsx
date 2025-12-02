@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { Button } from '@components/ui/button';
@@ -6,16 +6,80 @@ import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Search, Grid3x3, List, Package, Eye } from 'lucide-react';
-import { equipmentData, categories } from '@components/lib/equipmentData';
 import { PageContainer, PageHeader } from '@components/common/Page';
 import CategoryBadge from '../User_Student/components/CategoryBadge';
 import MainLayout from '@/components/layout/MainLayout';
+
+// Simple helper to derive a category from the equipment name
+function deriveCategory(name = '') {
+  const lower = name.toLowerCase();
+  if (lower.includes('macbook') || lower.includes('laptop') || lower.includes('thinkpad') || lower.includes('surface')) {
+    return 'Laptop';
+  }
+  if (lower.includes('tablet') || lower.includes('ipad') || lower.includes('galaxy tab') || lower.includes('android tablet')) {
+    return 'Tablet';
+  }
+  if (lower.includes('camera') || lower.includes('gopro')) {
+    return 'Camera';
+  }
+  if (lower.includes('microphone') || lower.includes('speaker') || lower.includes('audio')) {
+    return 'Audio';
+  }
+  if (lower.includes('projector')) {
+    return 'Projector';
+  }
+  if (lower.includes('router') || lower.includes('switch') || lower.includes('access point')) {
+    return 'Accessories';
+  }
+  return 'Other';
+}
 
 export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
   const [viewMode, setViewMode] = useState('grid');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [equipment, setEquipment] = useState([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 9;
+
+  // Load equipment from trackers JSON so count always matches trackers
+  useEffect(() => {
+    async function loadEquipment() {
+      try {
+        const res = await fetch('/trackers.json');
+        const trackers = await res.json();
+
+        const normalized = trackers.map((t) => {
+          const category = deriveCategory(t.equipment);
+          return {
+            id: t.id,
+            name: t.equipment,
+            category,
+            description: 'Tracked device with IoT monitoring',
+            available: t.status === 'online' ? 1 : 0,
+            total: 1,
+            condition: t.status === 'online' ? 'online' : 'offline',
+            location: t.location,
+          };
+        });
+
+        setEquipment(normalized);
+      } catch (e) {
+        console.error('Failed to load IT equipment data', e);
+      }
+    }
+    loadEquipment();
+  }, []);
+
+  // Derive category list from loaded equipment (plus "All")
+  const categories = useMemo(() => {
+    const unique = new Set();
+    equipment.forEach((item) => {
+      if (item.category) unique.add(item.category);
+    });
+    return ['All Categories', ...Array.from(unique)];
+  }, [equipment]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -24,12 +88,11 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
     }
   };
 
-  const filteredEquipment = equipmentData
+  const filteredEquipment = equipment
     .filter(item => 
       (selectedCategory === 'All Categories' || item.category === selectedCategory) &&
       (searchQuery === '' || 
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
     )
@@ -45,6 +108,18 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
           return 0;
       }
     });
+
+  // Reset to first page when filters or view mode change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedCategory, sortBy, viewMode]);
+
+  const totalItems = filteredEquipment.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentEquipment = filteredEquipment.slice(startIndex, endIndex);
 
   return (
     <MainLayout>
@@ -114,14 +189,19 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
           </CardContent>
         </Card>
 
-        <div className="mb-4 text-sm text-gray-600">
-          Found {filteredEquipment.length} {filteredEquipment.length === 1 ? 'item' : 'items'}
+        <div className="mb-4 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <span>
+            Showing {currentEquipment.length} of {filteredEquipment.length} {filteredEquipment.length === 1 ? 'item' : 'items'}
+          </span>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
         </div>
 
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEquipment.map(equipment => (
-              <Card key={equipment.id} className="flex flex-col">
+            {currentEquipment.map(equipment => (
+              <Card key={equipment.id} className="flex flex-col border-gray-400 hover:shadow-lg hover:bg-[#BEBEE0] transition-shadow shadow-sm bg-background rounded-lg">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <CategoryBadge category={equipment.category} />
@@ -130,7 +210,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     </Badge>
                   </div>
                   <CardTitle className="text-lg">{equipment.name}</CardTitle>
-                  <CardDescription>{equipment.brand} • {equipment.model}</CardDescription>
+                  <CardDescription>{equipment.id}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col">
                   <p className="text-sm text-gray-600 mb-4 line-clamp-2">
@@ -175,9 +255,9 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredEquipment.map(equipment => (
-              <Card key={equipment.id}>
-                <CardContent className="p-6">
+            {currentEquipment.map(equipment => (
+              <Card key={equipment.id} className="p-6 border-none shadow-sm bg-background rounded-lg">
+                <CardContent className="">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                       <div className="flex items-start gap-3 mb-3">
@@ -187,9 +267,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         </Badge>
                       </div>
                       <h3 className="text-gray-900 mb-1">{equipment.name}</h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {equipment.brand} • {equipment.model}
-                      </p>
+                      <p className="text-sm text-gray-600 mb-2">{equipment.id}</p>
                       <p className="text-sm text-gray-600 mb-3">
                         {equipment.description}
                       </p>
@@ -206,7 +284,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     <div className="flex sm:flex-col gap-2 sm:w-32">
                       <Button
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 bg-[#343264] text-white"
                         onClick={() => {
                           if (onViewDetails) onViewDetails(equipment);
                         }}
@@ -228,6 +306,29 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* Pagination controls */}
+        {filteredEquipment.length > 0 && (
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              disabled={currentPage === totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Next
+            </Button>
           </div>
         )}
 

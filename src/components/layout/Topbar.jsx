@@ -13,14 +13,15 @@ import {
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@components/ui/avatar";
+import { useAuth } from "@/pages/auth/AuthContext";
 
 const pageTitles = {
-  "/student/dashboard": "Dashboard",
-  "/student/browse": "Devices",
-  "/student/current-checkouts": "Borrowed Items",
-  "/student/history": "Reports",
-  "/student/notifications": "Notifications",
-  "/student/profile": "Profile",
+  "/it/dashboard": "Dashboard",
+  "/it/browse": "Devices",
+  "/it/current-checkouts": "Borrowed Items",
+  "/it/history": "Reports",
+  "/it/notifications": "Notifications",
+  "/it/profile": "Profile",
   "/settings": "Settings",
 };
 
@@ -29,8 +30,14 @@ export default function Topbar({ onMenuClick }) {
   const pageTitle = pageTitles[location.pathname] || "Dashboard";
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user } = useAuth();
 
-  // Detect scroll
+  const role = user?.role || "it";
+  const notificationPath =
+    role === "it" ? "/it/notifications" : "/it/notifications";
+  const profilePath =
+    role === "it" ? "/it/profile" : "/it/profile";
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10); // scrolled more than 10px
@@ -74,7 +81,7 @@ export default function Topbar({ onMenuClick }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link to="it/notifications">
+          <Link to={notificationPath}>
             <Button
               variant="outline"
               size="icon"
@@ -98,11 +105,11 @@ export default function Topbar({ onMenuClick }) {
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="border-none bg-[#BEBEE0] rounded-lg">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to="it/profile">Profile</Link>
+                <Link to={profilePath}>Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/settings">Settings</Link>

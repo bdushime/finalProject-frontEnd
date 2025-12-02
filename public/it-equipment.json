@@ -1,0 +1,153 @@
+[
+  {
+    "id": "EQ-001",
+    "name": "MacBook Pro 16\"",
+    "category": "Laptop",
+    "brand": "Apple",
+    "model": "MacBook Pro 16\" M3 Pro",
+    "description": "High-performance laptop perfect for video editing, software development, and intensive computing tasks.",
+    "available": 3,
+    "total": 10,
+    "condition": "excellent",
+    "location": "Building A, Room 101",
+    "specs": {
+      "Processor": "Apple M3 Pro",
+      "RAM": "32GB",
+      "Storage": "1TB SSD",
+      "Display": "16.2\" Liquid Retina XDR",
+      "Battery": "Up to 22 hours"
+    },
+    "borrowHistory": [
+      {
+        "borrowId": "BR-1001",
+        "borrowerName": "John Doe",
+        "borrowerId": "STD-001",
+        "borrowedAt": "2025-01-02T10:00:00Z",
+        "dueDate": "2025-01-16T10:00:00Z",
+        "returnedAt": "2025-01-15T15:30:00Z",
+        "status": "returned"
+      },
+      {
+        "borrowId": "BR-1020",
+        "borrowerName": "Jane Smith",
+        "borrowerId": "STD-014",
+        "borrowedAt": "2025-02-10T09:30:00Z",
+        "dueDate": "2025-02-24T09:30:00Z",
+        "returnedAt": null,
+        "status": "active"
+      }
+    ]
+  },
+  {
+    "id": "EQ-002",
+    "name": "Dell XPS 15",
+    "category": "Laptop",
+    "brand": "Dell",
+    "model": "XPS 15 9530",
+    "description": "Premium Windows laptop with stunning OLED display and powerful performance for creative professionals.",
+    "available": 5,
+    "total": 8,
+    "condition": "excellent",
+    "location": "Building A, Room 101",
+    "specs": {
+      "Processor": "Intel Core i7-13700H",
+      "RAM": "16GB",
+      "Storage": "512GB SSD",
+      "Display": "15.6\" OLED 3.5K",
+      "Graphics": "NVIDIA RTX 4050"
+    },
+    "borrowHistory": [
+      {
+        "borrowId": "BR-1030",
+        "borrowerName": "Alice Green",
+        "borrowerId": "STD-022",
+        "borrowedAt": "2025-01-20T13:00:00Z",
+        "dueDate": "2025-02-03T13:00:00Z",
+        "returnedAt": "2025-02-01T10:15:00Z",
+        "status": "returned"
+      }
+    ]
+  },
+  {
+    "id": "EQ-003",
+    "name": "Sony A7 III Camera",
+    "category": "Camera",
+    "brand": "Sony",
+    "model": "Alpha A7 III",
+    "description": "Full-frame mirrorless camera with exceptional image quality for photography and videography projects.",
+    "available": 2,
+    "total": 5,
+    "condition": "good",
+    "location": "Building B, Media Lab",
+    "specs": {
+      "Sensor": "24.2MP Full-Frame",
+      "Video": "4K 30fps",
+      "ISO Range": "100-51200",
+      "Autofocus": "693-point AF",
+      "Battery Life": "710 shots"
+    },
+    "borrowHistory": [
+      {
+        "borrowId": "BR-1050",
+        "borrowerName": "Media Club",
+        "borrowerId": "GRP-009",
+        "borrowedAt": "2025-03-01T08:00:00Z",
+        "dueDate": "2025-03-08T18:00:00Z",
+        "returnedAt": null,
+        "status": "active"
+      }
+    ]
+  },
+  {
+    "id": "EQ-004",
+    "name": "Shure SM7B Microphone",
+    "category": "Audio",
+    "brand": "Shure",
+    "model": "SM7B",
+    "description": "Professional studio microphone ideal for podcasting, vocals, and broadcast applications.",
+    "available": 6,
+    "total": 10,
+    "condition": "excellent",
+    "location": "Building B, Audio Studio",
+    "specs": {
+      "Type": "Dynamic",
+      "Frequency Response": "50Hz - 20kHz",
+      "Polar Pattern": "Cardioid",
+      "Output Impedance": "150 ohms",
+      "Connector": "XLR"
+    },
+    "borrowHistory": []
+  },
+  {
+    "id": "EQ-005",
+    "name": "Epson PowerLite Projector",
+    "category": "Projector",
+    "brand": "Epson",
+    "model": "PowerLite 2250U",
+    "description": "High-brightness projector suitable for presentations in large lecture halls and conference rooms.",
+    "available": 5,
+    "total": 8,
+    "condition": "good",
+    "location": "Building C, Equipment Room",
+    "specs": {
+      "Brightness": "5000 lumens",
+      "Resolution": "WUXGA (1920x1200)",
+      "Contrast": "15000:1",
+      "Lamp Life": "Up to 12000 hours",
+      "Connectivity": "HDMI, VGA, USB, Wireless"
+    },
+    "borrowHistory": [
+      {
+        "borrowId": "BR-1100",
+        "borrowerName": "Prof. Nkurunziza",
+        "borrowerId": "STF-004",
+        "borrowedAt": "2025-02-15T07:30:00Z",
+        "dueDate": "2025-02-20T19:00:00Z",
+        "returnedAt": "2025-02-20T19:10:00Z",
+        "status": "returned"
+      }
+    ]
+  }
+]
+
+
