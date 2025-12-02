@@ -102,7 +102,7 @@ export default function Sidebar({ isOpen, onWidthChange }) {
 
   const showSidebar = isOpen || isDesktop;
   const effectiveExpanded = isDesktop ? !isCollapsed || isHovered : true;
-  console.log("effectiveExpanded", effectiveExpanded);
+  // console.log("effectiveExpanded", effectiveExpanded);
 
   const currentVariant = !showSidebar
     ? "closed"
