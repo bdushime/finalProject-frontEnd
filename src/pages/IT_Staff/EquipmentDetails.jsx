@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { QrCode, CircleDot, ArrowLeft } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
+import BorrowingHistory from "./components/BorrowingHistory";
 
 export default function EquipmentDetails() {
   const { id } = useParams(); // tracker / equipment ID from route
@@ -123,65 +124,9 @@ export default function EquipmentDetails() {
               </div>
             </div>
 
-            {/* Borrow history table */}
-            <div className="mt-8">
-              <h3 className="font-semibold mb-3 text-base">Borrowing history</h3>
-              {history.length === 0 ? (
-                <p className="text-sm text-neutral-500">
-                  No borrowing records found for this equipment.
-                </p>
-              ) : (
-                <div className="overflow-x-auto rounded-xl border border-neutral-200">
-                  <table className="min-w-full text-sm">
-                    <thead className="bg-neutral-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left font-medium text-neutral-600">
-                          Borrower
-                        </th>
-                        <th className="px-4 py-2 text-left font-medium text-neutral-600">
-                          Borrowed At
-                        </th>
-                        <th className="px-4 py-2 text-left font-medium text-neutral-600">
-                          Due Date
-                        </th>
-                        <th className="px-4 py-2 text-left font-medium text-neutral-600">
-                          Returned At
-                        </th>
-                        <th className="px-4 py-2 text-left font-medium text-neutral-600">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {history.map((entry) => (
-                        <tr key={entry.borrowId} className="border-t border-neutral-200">
-                          <td className="px-4 py-2">
-                            <div className="flex flex-col">
-                              <span className="font-medium">{entry.borrowerName}</span>
-                              <span className="text-xs text-neutral-500">
-                                {entry.borrowerId}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-2">
-                            {new Date(entry.borrowedAt).toLocaleString()}
-                          </td>
-                          <td className="px-4 py-2">
-                            {new Date(entry.dueDate).toLocaleString()}
-                          </td>
-                          <td className="px-4 py-2">
-                            {entry.returnedAt
-                              ? new Date(entry.returnedAt).toLocaleString()
-                              : "Not yet returned"}
-                          </td>
-                          <td className="px-4 py-2 capitalize">{entry.status}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            {/* Borrow history table - should enable sorting by borrower name, borrowed at, due date, returned at, and status */}
+            <BorrowingHistory history={history} />
+
           </motion.div>
 
           <motion.div

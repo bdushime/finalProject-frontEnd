@@ -43,7 +43,10 @@ export default function Charts() {
                     <CardTitle className="text-lg font-semibold">Device Status</CardTitle>
                     <CardDescription>Distribution of device statuses</CardDescription>
                 </CardHeader>
-                {/* the data to be used here should be got from the it-equipment.json file or the database */}
+                {/* 
+                the data to be used here should be got from the it-equipment.json file or the database 
+                and this applies to the other charts as well
+                */}
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>

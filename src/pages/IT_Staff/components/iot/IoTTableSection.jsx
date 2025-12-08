@@ -49,6 +49,8 @@ import {
   getTemperatureColor,
   formatLastSeen,
 } from "./iotUtils";
+import { usePagination } from "@/hooks/usePagination";
+import PaginationControls from "@/components/common/PaginationControls";
 
 export function IoTTableSection({
   viewMode,
@@ -64,13 +66,12 @@ export function IoTTableSection({
 
   const effectivePageSize = 10;
 
-  const totalItems = filteredTrackers.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
-  const currentPage = Math.min(page, totalPages);
-
-  const startIndex = (currentPage - 1) * effectivePageSize;
-  const endIndex = startIndex + effectivePageSize;
-  const currentTrackers = filteredTrackers.slice(startIndex, endIndex);
+  // Use pagination hook
+  const {
+    totalPages,
+    currentPage,
+    paginatedItems: currentTrackers,
+  } = usePagination(filteredTrackers, page, effectivePageSize);
 
   return (
     <>
@@ -204,28 +205,12 @@ export function IoTTableSection({
           </div>
         </CardContent>
 
-        <div className="flex justify-center gap-4 items-center mt-4 p-4">
-          <Button
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() => setPage(currentPage - 1)}
-            className="border-gray-200 shadow-sm bg-background rounded-lg"
-          >
-            Previous
-          </Button>
-
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <Button
-            variant="outline"
-            disabled={currentPage === totalPages}
-            onClick={() => setPage(currentPage + 1)}
-          >
-            Next
-          </Button>
-        </div>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          className="mt-4 p-4"
+        />
       </Card>
 
       {/* Mobile / card view */}

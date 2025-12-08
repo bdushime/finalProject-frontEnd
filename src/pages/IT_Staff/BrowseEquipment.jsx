@@ -10,6 +10,8 @@ import { PageContainer, PageHeader } from '@components/common/Page';
 import CategoryBadge from '../User_Student/components/CategoryBadge';
 import MainLayout from '@/components/layout/MainLayout';
 import { useNavigate } from 'react-router-dom';
+import { usePagination } from '@/hooks/usePagination';
+import PaginationControls from '@components/common/PaginationControls';
 
 // Simple helper to derive a category from the equipment name
 function deriveCategory(name = '') {
@@ -116,12 +118,12 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
     setPage(1);
   }, [searchQuery, selectedCategory, sortBy, viewMode]);
 
-  const totalItems = filteredEquipment.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentEquipment = filteredEquipment.slice(startIndex, endIndex);
+  // Use pagination hook
+  const {
+    totalPages,
+    currentPage,
+    paginatedItems: currentEquipment,
+  } = usePagination(filteredEquipment, page, pageSize);
 
   return (
     <MainLayout>
@@ -195,9 +197,11 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
           <span>
             Showing {currentEquipment.length} of {filteredEquipment.length} {filteredEquipment.length === 1 ? 'item' : 'items'}
           </span>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
+          {totalPages > 1 && (
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+          )}
         </div>
 
         {viewMode === 'grid' ? (
@@ -249,15 +253,6 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         <Eye className="h-4 w-4 mr-2" />
                         Details
                       </Button>
-                      {/* <Button
-                        className="flex-1 bg-[#343264] text-white"
-                        disabled={equipment.available === 0}
-                        onClick={() => {
-                          if (onCheckout) onCheckout(equipment);
-                        }}
-                      >
-                        Borrow
-                      </Button> */}
                     </div>
                   </div>
                 </CardContent>
@@ -326,25 +321,12 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
 
         {/* Pagination controls */}
         {filteredEquipment.length > 0 && (
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              disabled={currentPage === 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-gray-600">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              disabled={currentPage === totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              Next
-            </Button>
-          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            className="mt-6"
+          />
         )}
 
         {filteredEquipment.length === 0 && (
