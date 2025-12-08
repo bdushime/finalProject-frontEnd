@@ -112,15 +112,15 @@ export default function BorrowRequestForm({ onSuccess }) {
     return (
         <div className="space-y-6">
             {isScanning ? (
-                <Card className="border-gray-300">
+                <Card className="border-2 border-[#468faf] rounded-xl">
                     <CardContent className="py-12 text-center">
                         <div className="mb-6">
-                            <div className="relative w-64 h-64 mx-auto border-4 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                                <QrCode className="h-24 w-24 text-gray-400 animate-pulse" />
+                            <div className="relative w-64 h-64 mx-auto border-4 border-dashed border-[#468faf] rounded-2xl flex items-center justify-center bg-[#a9d6e5]">
+                                <QrCode className="h-24 w-24 text-black animate-pulse" />
                             </div>
                         </div>
-                        <h3 className="text-lg font-semibold mb-2">Scanning QR Code...</h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        <h3 className="text-lg font-bold text-black mb-2">Scanning QR Code...</h3>
+                        <p className="text-black mb-4">
                             Point your camera at the equipment QR code
                         </p>
                         <Button variant="outline" onClick={() => setIsScanning(false)}>
@@ -131,25 +131,25 @@ export default function BorrowRequestForm({ onSuccess }) {
             ) : (
                 <>
                     {equipment && (
-                        <Card className="border-gray-300">
+                        <Card className="border-2 border-[#468faf] rounded-xl shadow-md hover:shadow-lg hover:bg-[#a9d6e5] transition-all duration-300">
                             <CardHeader>
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
                                             <CategoryBadge category={equipment.category} />
                                         </div>
-                                        <CardTitle>{equipment.name}</CardTitle>
-                                        <CardDescription>{equipment.brand} • {equipment.model}</CardDescription>
+                                        <CardTitle className="font-bold text-black">{equipment.name}</CardTitle>
+                                        <CardDescription className="text-black">{equipment.brand} • {equipment.model}</CardDescription>
                                     </div>
                                 </div>
                             </CardHeader>
                         </Card>
                     )}
 
-                    <Card className="border-gray-300">
+                    <Card className="border-2 border-[#468faf] rounded-xl shadow-md hover:shadow-lg transition-all">
                         <CardHeader>
-                            <CardTitle>Borrow Request Form</CardTitle>
-                            <CardDescription>
+                            <CardTitle className="font-bold text-black">Borrow Request Form</CardTitle>
+                            <CardDescription className="text-black">
                                 Fill in the details to request equipment borrowing
                             </CardDescription>
                         </CardHeader>
@@ -187,14 +187,14 @@ export default function BorrowRequestForm({ onSuccess }) {
                                             </Button>
                                         </div>
                                         {errors.equipmentId && (
-                                            <p className="text-sm text-red-600">{errors.equipmentId}</p>
+                                            <p className="text-sm text-black">{errors.equipmentId}</p>
                                         )}
                                     </div>
                                 )}
 
                                 <div className="space-y-2">
                                     <Label htmlFor="purpose">
-                                        Purpose <span className="text-red-500">*</span>
+                                        Purpose <span className="text-black">*</span>
                                     </Label>
                                     <Textarea
                                         id="purpose"
@@ -205,16 +205,16 @@ export default function BorrowRequestForm({ onSuccess }) {
                                         className={errors.purpose ? 'border-red-500' : ''}
                                     />
                                     {errors.purpose && (
-                                        <p className="text-sm text-red-600">{errors.purpose}</p>
+                                        <p className="text-sm text-black">{errors.purpose}</p>
                                     )}
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="location">
-                                        Location/Pickup Location <span className="text-red-500">*</span>
+                                        Location/Pickup Location <span className="text-black">*</span>
                                     </Label>
                                     <div className="relative">
-                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black" />
                                         <Input
                                             id="location"
                                             placeholder="e.g., Building A, Room 101"
@@ -224,16 +224,16 @@ export default function BorrowRequestForm({ onSuccess }) {
                                         />
                                     </div>
                                     {errors.location && (
-                                        <p className="text-sm text-red-600">{errors.location}</p>
+                                        <p className="text-sm text-black">{errors.location}</p>
                                     )}
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="expectedReturnDate">
-                                        Expected Return Date <span className="text-red-500">*</span>
+                                        Expected Return Date <span className="text-black">*</span>
                                     </Label>
                                     <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black" />
                                         <Input
                                             id="expectedReturnDate"
                                             type="date"
@@ -245,9 +245,9 @@ export default function BorrowRequestForm({ onSuccess }) {
                                         />
                                     </div>
                                     {errors.expectedReturnDate && (
-                                        <p className="text-sm text-red-600">{errors.expectedReturnDate}</p>
+                                        <p className="text-sm text-black">{errors.expectedReturnDate}</p>
                                     )}
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs text-black">
                                         Maximum borrowing period is 14 days
                                     </p>
                                 </div>
@@ -274,7 +274,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                                     </Button>
                                     <Button
                                         type="submit"
-                                        className="flex-1 bg-[#343264] hover:bg-[#2a2752] text-white"
+                                        className="flex-1 bg-gradient-to-r from-[#013a63] to-[#01497c] hover:from-[#01497c] hover:to-[#014f86] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                                     >
                                         Submit Request
                                     </Button>

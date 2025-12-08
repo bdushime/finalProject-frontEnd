@@ -7,6 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Custom blue colors
+        'dark-blue-1': '#012a4a',
+        'dark-blue-2': '#013a63',
+        'light-blue-1': '#a9d6e5',
+        'light-blue-2': '#89c2d9',
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

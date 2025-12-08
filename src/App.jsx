@@ -1,7 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+// Landing
+import Landing from "./pages/Landing";
+
 // Auth
 import Login from "./pages/auth/Login";
+import SignUp from "./pages/auth/SignUp";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import OTPVerify from "./pages/auth/OTPVerify";
 
 // Student (User) pages
 import Dashboard from "./pages/User_Student/Dashboard";
@@ -17,8 +23,14 @@ export default function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Auth */}
+                {/* Landing Page */}
+                <Route path="/" element={<Landing />} />
+
+                {/* Auth Pages */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/otp-verify" element={<OTPVerify />} />
 
                 {/* Student (User) Pages */}
                 <Route path="/student/dashboard" element={<Dashboard />} />
@@ -36,9 +48,8 @@ export default function App() {
                 <Route path="/student/notifications" element={<Notifications />} />
                 <Route path="/student/help" element={<HelpSupport />} />
 
-                {/* Default and fallback */}
-                <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
-                <Route path="*" element={<Navigate to="/student/dashboard" replace />} />
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </BrowserRouter>
     );

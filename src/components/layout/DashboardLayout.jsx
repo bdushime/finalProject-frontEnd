@@ -1,8 +1,9 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 
 export default function DashboardLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -47,7 +48,7 @@ export default function DashboardLayout({ children }) {
     }, [location.pathname]);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[#f3f6fb]">
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
             {sidebarOpen && (
                 <div
@@ -56,9 +57,13 @@ export default function DashboardLayout({ children }) {
                     aria-hidden
                 />
             )}
-            <div className="sm:pl-60 flex flex-col min-h-screen">
-                <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
-                <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-6 py-6">
+            <div className="sm:pl-64 flex flex-col min-h-screen">
+                <div className="sm:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 p-4">
+                    <Button variant="outline" size="icon" onClick={() => setSidebarOpen((v) => !v)} aria-label="Open menu">
+                        <Menu className="h-5 w-5" />
+                    </Button>
+                </div>
+                <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-8 py-8 mt-16 sm:mt-0">
                     {children}
                 </main>
             </div>

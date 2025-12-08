@@ -10,6 +10,7 @@ import { Search, Calendar, Package, AlertCircle, CheckCircle, Clock } from "luci
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import { StatusBadge } from "./components/StatusBadge";
 import { CategoryBadge } from "./components/CategoryBadge";
+import BackButton from "./components/BackButton";
 import { borrowedItems } from "./data/mockData";
 import { useNavigate } from "react-router-dom";
 
@@ -53,25 +54,26 @@ export default function MyBorrowedItems() {
     return (
         <MainLayout>
             <PageContainer>
+                <BackButton to="/student/dashboard" />
                 <PageHeader
                     title="My Borrowed Items"
                     subtitle="View and manage your borrowed equipment"
                 />
 
-                <Card className="mb-6 border-gray-300">
+                <Card className="mb-6 border border-slate-200 rounded-2xl shadow-[0_16px_38px_-22px_rgba(8,47,73,0.25)] bg-white/95 backdrop-blur-sm">
                     <CardContent className="pt-6">
                         <div className="flex flex-col md:flex-row gap-4">
                             <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                                 <Input
                                     placeholder="Search by equipment name or ID..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
+                                    className="pl-10 bg-white border border-slate-200 rounded-xl focus-visible:ring-2 focus-visible:ring-sky-300 text-[#0b1d3a] placeholder:text-slate-400"
                                 />
                             </div>
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-full md:w-[200px]">
+                                <SelectTrigger className="w-full md:w-[200px] rounded-xl border-slate-200 focus:ring-2 focus:ring-sky-200 text-[#0b1d3a]">
                                     <SelectValue placeholder="Filter by status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -87,13 +89,15 @@ export default function MyBorrowedItems() {
                 </Card>
 
                 {filteredItems.length === 0 ? (
-                    <Card className="border-gray-300">
+                    <Card className="border border-slate-200 rounded-2xl bg-white/95">
                         <CardContent className="py-12 text-center">
-                            <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                            <div className="p-4 rounded-full bg-sky-50 w-20 h-20 mx-auto mb-4 flex items-center justify-center border border-sky-100">
+                                <Package className="h-10 w-10 text-sky-700" />
+                            </div>
+                            <h3 className="text-lg font-bold text-black mb-2">
                                 No items found
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                            <p className="text-black mb-4">
                                 {searchQuery || statusFilter !== 'all'
                                     ? 'Try adjusting your search or filter'
                                     : 'You haven\'t borrowed any equipment yet'}
@@ -112,7 +116,7 @@ export default function MyBorrowedItems() {
                             const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
 
                             return (
-                                <Card key={item.id} className="border-gray-300">
+                                <Card key={item.id} className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_16px_38px_-22px_rgba(8,47,73,0.3)] hover:border-sky-200 hover:shadow-[0_22px_40px_-22px_rgba(8,47,73,0.35)] transition-all duration-300">
                                     <CardContent className="p-6">
                                         <div className="flex flex-col lg:flex-row gap-6">
                                             <div className="flex-1">
@@ -122,10 +126,10 @@ export default function MyBorrowedItems() {
                                                             <CategoryBadge category={item.category} />
                                                             <StatusBadge status={item.status} />
                                                         </div>
-                                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                                                        <h3 className="text-xl font-semibold text-black mb-1">
                                                             {item.equipmentName}
                                                         </h3>
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                        <p className="text-sm text-black">
                                                             Request ID: {item.requestId} • Equipment ID: {item.equipmentId}
                                                         </p>
                                                     </div>
@@ -133,44 +137,44 @@ export default function MyBorrowedItems() {
 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                     <div className="flex items-center gap-3">
-                                                        <Calendar className="h-5 w-5 text-gray-400" />
+                                                        <Calendar className="h-5 w-5 text-slate-600" />
                                                         <div>
-                                                            <div className="text-xs text-gray-500">Borrowed Date</div>
-                                                            <div className="font-medium">
+                                                            <div className="text-xs text-black">Borrowed Date</div>
+                                                            <div className="font-medium text-black">
                                                                 {item.borrowedDate ? formatDate(item.borrowedDate) : 'Not yet borrowed'}
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <Calendar className="h-5 w-5 text-gray-400" />
+                                                        <Calendar className="h-5 w-5 text-slate-600" />
                                                         <div>
-                                                            <div className="text-xs text-gray-500">Due Date</div>
-                                                            <div className={`font-medium ${isOverdue ? 'text-red-600 dark:text-red-400' : ''}`}>
+                                                            <div className="text-xs text-black">Due Date</div>
+                                                            <div className={`font-medium ${isOverdue ? 'text-black' : 'text-black'}`}>
                                                                 {item.dueDate ? formatDate(item.dueDate) : 'N/A'}
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <Package className="h-5 w-5 text-gray-400" />
+                                                        <Package className="h-5 w-5 text-slate-600" />
                                                         <div>
-                                                            <div className="text-xs text-gray-500">Location</div>
-                                                            <div className="font-medium">{item.location}</div>
+                                                            <div className="text-xs text-black">Location</div>
+                                                            <div className="font-medium text-black">{item.location}</div>
                                                         </div>
                                                     </div>
                                                     {item.approvedBy && (
                                                         <div className="flex items-center gap-3">
-                                                            <CheckCircle className="h-5 w-5 text-gray-400" />
+                                                            <CheckCircle className="h-5 w-5 text-slate-600" />
                                                             <div>
-                                                                <div className="text-xs text-gray-500">Approved By</div>
-                                                                <div className="font-medium">{item.approvedBy}</div>
+                                                                <div className="text-xs text-black">Approved By</div>
+                                                                <div className="font-medium text-black">{item.approvedBy}</div>
                                                             </div>
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {isOverdue && (
-                                                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
-                                                        <div className="flex items-center gap-2 text-red-800 dark:text-red-400">
+                                                    <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg mb-4">
+                                                        <div className="flex items-center gap-2 text-rose-700">
                                                             <AlertCircle className="h-5 w-5" />
                                                             <span className="font-semibold">
                                                                 Overdue by {Math.abs(daysUntilDue)} day(s). Please return immediately.
@@ -180,8 +184,8 @@ export default function MyBorrowedItems() {
                                                 )}
 
                                                 {daysUntilDue !== null && daysUntilDue > 0 && daysUntilDue <= 3 && !isOverdue && (
-                                                    <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mb-4">
-                                                        <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400">
+                                                    <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg mb-4">
+                                                        <div className="flex items-center gap-2 text-amber-700">
                                                             <Clock className="h-5 w-5" />
                                                             <span className="font-semibold">
                                                                 Due in {daysUntilDue} day(s). Please prepare for return.
@@ -194,25 +198,25 @@ export default function MyBorrowedItems() {
                                             <div className="lg:w-48 flex flex-col gap-2">
                                                 {(item.status === 'active' || item.status === 'overdue') && (
                                                     <Button
-                                                        className="w-full bg-[#343264] hover:bg-[#2a2752] text-white"
+                                                        className="w-full bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-bold rounded-xl shadow-sm shadow-sky-200/60 transition-all duration-300"
                                                         onClick={() => handleReturn(item)}
                                                     >
                                                         Return Item
                                                     </Button>
                                                 )}
                                                 {item.status === 'pending' && (
-                                                    <div className="text-center text-sm text-gray-600 dark:text-gray-400 py-2">
+                                                    <div className="text-center text-sm text-black py-2">
                                                         Awaiting approval
                                                     </div>
                                                 )}
                                                 {item.status === 'returned' && (
-                                                    <div className="text-center text-sm text-green-600 dark:text-green-400 py-2">
+                                                    <div className="text-center text-sm text-black font-bold py-2">
                                                         ✓ Returned
                                                     </div>
                                                 )}
                                                 <Button
                                                     variant="outline"
-                                                    className="w-full"
+                                                    className="w-full rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a] transition-all duration-300"
                                                     onClick={() => navigate(`/student/equipment/${item.equipmentId}`)}
                                                 >
                                                     View Details

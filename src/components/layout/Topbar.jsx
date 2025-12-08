@@ -8,38 +8,44 @@ import { Avatar, AvatarFallback } from "@components/ui/avatar";
 
 const pageTitles = {
     "/student/dashboard": "Dashboard",
-    "/student/browse": "Devices",
-    "/student/current-checkouts": "Borrowed Items",
-    "/student/history": "Reports",
+    "/student/browse": "Equipment Catalogue",
+    "/student/equipment": "Equipment Details",
+    "/student/borrow-request": "Request Equipment",
+    "/student/borrowed-items": "My Borrowed Items",
     "/student/notifications": "Notifications",
     "/student/profile": "Profile",
+    "/student/help": "Help & Support",
     "/settings": "Settings",
 };
+
+const pagesWithSearch = ["/student/dashboard", "/student/borrowed-items", "/student/notifications", "/student/profile", "/student/help"];
 
 export default function Topbar({ onMenuClick }) {
     const location = useLocation();
     const pageTitle = pageTitles[location.pathname] || "Dashboard";
+    const showSearch = pagesWithSearch.some(path => location.pathname.startsWith(path));
 
     return (
-        <header className="h-16 sticky top-0 z-30 bg-card border-b border-gray-400 backdrop-blur-sm w-full">
+        <header className="h-16 sticky top-0 z-30 bg-card border-b border-gray-300 dark:border-gray-700 backdrop-blur-sm w-full">
             <div className="h-full flex items-center justify-between px-4 sm:px-6 gap-4">
-                <div className="flex items-center gap-4 flex-1">
-                    <Button variant="outline" size="icon" className="sm:hidden" onClick={onMenuClick} aria-label="Open menu">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <Button variant="outline" size="icon" className="sm:hidden flex-shrink-0" onClick={onMenuClick} aria-label="Open menu">
                         <Menu className="h-5 w-5" />
                     </Button>
-                    <h1 className="text-xl font-bold text-slate-700 ">
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {pageTitle}
                     </h1>
-                    <div className="relative hidden sm:block ml-auto ">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Search..." className="pl-9 w-64 bg-background" />
-                    </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {showSearch && (
+                        <div className="relative hidden sm:block">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="Search..." className="pl-9 w-64 bg-background" />
+                        </div>
+                    )}
                     <Link to="/student/notifications">
-                        <Button variant="outline" size="icon" aria-label="Notifications" className="relative">
+                        <Button variant="outline" size="icon" aria-label="Notifications">
                             <Bell className="h-4 w-4" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
                         </Button>
                     </Link>
                     <DropdownMenu>

@@ -10,12 +10,12 @@ export default function Dashboard() {
         <MainLayout>
             <div className="space-y-6">
                 {/* Page Header */}
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                        Dashboard
+                <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-[#0b2545] tracking-tight mb-1">
+                        Student Dashboard
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        Overview of your equipment borrowing activity
+                    <p className="text-slate-600 text-sm">
+                        Your IT equipment activity, status, and quick actions in one place
                     </p>
                 </div>
 
