@@ -1,0 +1,41 @@
+[
+  {
+    "id": "TTGO-006",
+    "history": [
+      {
+        "borrowId": "BR-2001",
+        "borrowerName": "John Doe",
+        "borrowerId": "STD-001",
+        "borrowedAt": "2025-01-02T10:00:00Z",
+        "dueDate": "2025-01-16T10:00:00Z",
+        "returnedAt": "2025-01-15T15:30:00Z",
+        "status": "returned"
+      },
+      {
+        "borrowId": "BR-2015",
+        "borrowerName": "Jane Smith",
+        "borrowerId": "STD-014",
+        "borrowedAt": "2025-02-10T09:30:00Z",
+        "dueDate": "2025-02-24T09:30:00Z",
+        "returnedAt": null,
+        "status": "active"
+      }
+    ]
+  },
+  {
+    "id": "TTGO-004",
+    "history": [
+      {
+        "borrowId": "BR-2100",
+        "borrowerName": "Media Club",
+        "borrowerId": "GRP-009",
+        "borrowedAt": "2025-03-01T08:00:00Z",
+        "dueDate": "2025-03-08T18:00:00Z",
+        "returnedAt": null,
+        "status": "active"
+      }
+    ]
+  }
+]
+
+
