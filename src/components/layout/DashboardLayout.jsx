@@ -34,7 +34,6 @@ export default function DashboardLayout({ children }) {
     }
   }, [sidebarOpen]);
 
-  // Sync sidebar visibility with viewport size
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= DESKTOP_BREAKPOINT) {
@@ -48,7 +47,6 @@ export default function DashboardLayout({ children }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto-close sidebar on route change when on mobile
   const location = useLocation();
   useEffect(() => {
     if (window.innerWidth < DESKTOP_BREAKPOINT) {
@@ -60,12 +58,6 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar
-        isOpen={sidebarOpen}
-        onWidthChange={setSidebarWidth}
-      />
-
-      {/* Mobile backdrop when sidebar is open */}
       {sidebarOpen && !isDesktop && (
         <div
           className="fixed inset-0 bg-black/30 sm:hidden z-30"
@@ -74,12 +66,8 @@ export default function DashboardLayout({ children }) {
         />
       )}
 
-      {/* Main content shifts based on current sidebar width on desktop */}
       <div
         className="flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out"
-        style={{
-          paddingLeft: isDesktop ? `${sidebarWidth}px` : 0,
-        }}
       >
         <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
         <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-6 py-6">

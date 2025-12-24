@@ -158,7 +158,6 @@ export default function Sidebar({ isOpen, onWidthChange }) {
           className="fixed left-0 top-0 z-40 h-screen bg-[#1A2240] dark:bg-[#1E2546] text-white flex flex-col shadow-lg"
           aria-label="Sidebar navigation"
         >
-          {/* Header / Logo */}
           <motion.div
             layout
             className="flex justify-center items-center gap-3 px-4 py-4 border-b border-white/10"
@@ -173,36 +172,6 @@ export default function Sidebar({ isOpen, onWidthChange }) {
             />
           </motion.div>
 
-          {/* Nav links */}
-          <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
-            {links.map((link) => {
-              const Icon = link.icon;
-              const active = isLinkActive(link.path);
-
-              return (
-                <NavLink
-                  key={link.path}
-                  to={link.path}
-                  className={() =>
-                    [
-                      "relative flex items-center rounded-lg text-sm font-medium transition-colors",
-                      effectiveExpanded
-                        ? "px-3 py-2"
-                        : "px-2 py-2 justify-center",
-                      active
-                        ? "bg-white/12 text-white shadow-sm"
-                        : "text-white/70 hover:bg-white/8 hover:text-white",
-                    ].join(" ")
-                  }
-                >
-                  <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                  {effectiveExpanded && (
-                    <span className="ml-3 truncate">{link.label}</span>
-                  )}
-                </NavLink>
-              );
-            })}
-          </nav>
 
           {/* Footer */}
           <div className="border-t border-white/10 px-2 py-3 flex flex-col gap-2">

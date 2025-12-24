@@ -57,9 +57,10 @@ export default function DashboardCards() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between gap-5">
               <div
-                  className={`p-3 rounded-lg bg-gradient-to-br ${metric.bgGradient}`}
+                  className="p-3 rounded-lg"
+                  style={{ backgroundColor: "#BEBEE0" }}
                 >
-                  <Icon className={`h-6 w-6 ${metric.color}`} />
+                  <Icon className={`h-6 w-6 text-white`} />
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium text-muted-foreground mb-1">

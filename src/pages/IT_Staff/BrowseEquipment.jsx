@@ -205,11 +205,11 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
         </div>
 
         {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {currentEquipment.map(equipment => (
               <Card 
               key={equipment.id} 
-              className="flex flex-col border-gray-400 hover:shadow-lg hover:bg-[#BEBEE0] transition-shadow shadow-sm bg-background rounded-lg"
+              className="flex flex-col border-gray-400 hover:shadow-lg hover:bg-gray-100 transition-shadow shadow-sm bg-background rounded-lg"
               onClick={() => navigate(`/it/equipment/${equipment.id}`)}
               >
                 <CardHeader>
@@ -240,7 +240,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
-                        className="flex-1 bg-blue-600 text-white"
+                        className="flex-1 bg-[#BEBEE0] text-white"
                         onClick={() => {
                           // Prefer router navigation; fall back to callback if provided
                           if (onViewDetails) {
