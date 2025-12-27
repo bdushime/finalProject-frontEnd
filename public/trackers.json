@@ -1,8 +1,8 @@
 [
     {
       "id": "TTGO-001",
-      "equipment": "MacBook Pro 16\"",
-      "location": "Computer Lab A",
+      "equipment": "Projector\"",
+      "location": "Room 204 - Computer Lab A",
       "coords": { "lat": -1.945, "lng": 30.089 },
       "battery": 82,
       "temperature": 27.3,
@@ -12,8 +12,8 @@
     },
     {
       "id": "TTGO-002",
-      "equipment": "Sony A7 III Camera",
-      "location": "Library Zone",
+      "equipment": "TV Remote",
+      "location": "Room 206",
       "coords": { "lat": -1.943, "lng": 30.091 },
       "battery": 64,
       "temperature": 29,
@@ -23,8 +23,8 @@
     },
     {
       "id": "TTGO-003",
-      "equipment": "Portable Projector",
-      "location": "Store Room",
+      "equipment": "Extension Cable",
+      "location": "Room 208",
       "coords": { "lat": -1.946, "lng": 30.087 },
       "battery": 48,
       "temperature": 31.2,
@@ -34,8 +34,8 @@
     },
     {
       "id": "TTGO-004",
-      "equipment": "Dell XPS 15",
-      "location": "Lecture Hall B",
+      "equipment": "TV Remote",
+      "location": "Room 210",
       "coords": { "lat": -1.944, "lng": 30.09 },
       "battery": 76,
       "temperature": 26.4,
@@ -45,8 +45,8 @@
     },
     {
       "id": "TTGO-005",
-      "equipment": "iPad Pro 12.9\"",
-      "location": "Admin Building",
+      "equipment": "Apple TV Remote\"",
+      "location": "Room 306",
       "coords": { "lat": -1.942, "lng": 30.092 },
       "battery": 59,
       "temperature": 28.1,
@@ -56,8 +56,8 @@
     },
     {
       "id": "TTGO-006",
-      "equipment": "3D Printer",
-      "location": "Workshop Area",
+      "equipment": "Projector 2",
+      "location": "Room 308",
       "coords": { "lat": -1.947, "lng": 30.088 },
       "battery": 33,
       "temperature": 32.5,
@@ -67,8 +67,8 @@
     },
     {
       "id": "TTGO-007",
-      "equipment": "Lenovo ThinkPad T14",
-      "location": "Computer Lab A",
+      "equipment": "TV Remote",
+      "location": "Room 310",
       "coords": { "lat": -1.945, "lng": 30.089 },
       "battery": 91,
       "temperature": 25.9,
@@ -78,8 +78,8 @@
     },
     {
       "id": "TTGO-008",
-      "equipment": "Audio Mixer Console",
-      "location": "Lecture Hall B",
+      "equipment": "TV Remote",
+      "location": "Room 312",
       "coords": { "lat": -1.944, "lng": 30.09 },
       "battery": 41,
       "temperature": 30.1,
@@ -90,8 +90,8 @@
     
     {
       "id": "TTGO-009",
-      "equipment": "HP EliteBook 840",
-      "location": "Computer Lab B",
+      "equipment": "Extension Cable",
+      "location": "Room 306",
       "coords": { "lat": -1.944, "lng": 30.088 },
       "battery": 73,
       "temperature": 27.1,

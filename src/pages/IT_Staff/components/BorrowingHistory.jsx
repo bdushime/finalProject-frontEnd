@@ -1,17 +1,18 @@
+import { useState } from "react";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/common/PaginationControls";
 
 
 function BorrowingHistory({ history }) {
-
+  const [currentPage, setCurrentPage] = useState(1);
   const effectivePageSize = 10;
 
   // Use pagination hook
   const {
     totalPages,
-    currentPage,
+    currentPage: safeCurrentPage,
     paginatedItems: currentHistory,
-  } = usePagination(history, page, effectivePageSize);
+  } = usePagination(history, currentPage, effectivePageSize);
 
   return (
     <div className="mt-8">
@@ -36,7 +37,7 @@ function BorrowingHistory({ history }) {
                 </thead>
 
                 <tbody>
-                    {history.map(entry => (
+                    {currentHistory.map(entry => (
                     <tr key={entry.borrowId} className="border-t border-neutral-200">
                         <td className="px-4 py-2">
                         <div className="flex flex-col">
@@ -64,7 +65,7 @@ function BorrowingHistory({ history }) {
 
             {/* MOBILE CARDS */}
             <div className="md:hidden space-y-4">
-                {history.map(entry => (
+                {currentHistory.map(entry => (
                 <div
                     key={entry.borrowId}
                     className="p-4 rounded-xl border border-neutral-200 shadow-sm bg-white"
@@ -109,6 +110,13 @@ function BorrowingHistory({ history }) {
                 </div>
                 ))}
             </div>
+
+            <PaginationControls
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              className="mt-6"
+            />
             </>
         )}
     </div>

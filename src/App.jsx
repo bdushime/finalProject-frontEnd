@@ -29,7 +29,7 @@ import SearchResults from "./pages/IT_Staff/SearchResults";
 import SelectEquipment from "./pages/IT_Staff/checkout/SelectEquipment";
 import ScanQRCode from "./pages/IT_Staff/checkout/ScanQRCode";
 import CaptureCondition from "./pages/IT_Staff/checkout/CaptureCondition";
-import CheckoutDetails from "./pages/IT_Staff/checkout/CheckoutDetails";
+import CheckoutDetailsDialog from "./pages/IT_Staff/checkout/CheckoutDetailsDialog";
 import DigitalSignature from "./pages/IT_Staff/checkout/DigitalSignature";
 import CheckoutConfirmation from "./pages/IT_Staff/checkout/CheckoutConfirmation";
 
@@ -221,7 +221,7 @@ export default function App() {
           path="/it/checkout/details"
           element={
             <ProtectedRoute allowedRoles={["it"]}>
-              <CheckoutDetails />
+              <CheckoutDetailsDialog />
             </ProtectedRoute>
           }
         />

@@ -14,7 +14,8 @@ import {
 } from "@components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@components/ui/avatar";
 import { useAuth } from "@/pages/auth/AuthContext";
-import logo from "@/assets/logo_tracknity.png";
+import logo from "@/assets/tracknity_logo.jpeg";
+import smallLogo from "@/assets/logo_small.png";
 
 const baseStudentLinks = [
   { label: "Dashboard", path: "/student/dashboard", icon: LayoutGrid },
@@ -89,6 +90,7 @@ export default function Topbar({ onMenuClick }) {
   const pageTitle = pageTitles[location.pathname] || "Dashboard";
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
 
   const role = user?.role ?? "student";
@@ -116,16 +118,26 @@ export default function Topbar({ onMenuClick }) {
   }, []);
 
   return (
-    <div className="w-full mt-2 px-1 flex items-center gap-2 justify-between sticky top-0 z-30 transition-all duration-300">
+    <div className={`w-full mt-2 px-1 flex items-center gap-2 justify-between sticky top-0 z-30 transition-all duration-300 ${isScrolled ? 'bg-white shadow-sm rounded-b-lg' : 'bg-transparent'}`}>
 
-      <Button variant="outline" size="icon" className="sm:hidden" onClick={onMenuClick}>
+      <Button variant="outline" size="icon" className="sm:hidden border-none" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           <Menu className="h-5 w-5" />
       </Button>
-      <img src={logo} alt="Tracknity" className="rounded-full w-32 h-14" />
-<div className="hidden sm:flex items-center gap-1">
-    <header className=' rounded-full border border-gray-300 shadow-sm'>
-        <div className="flex items-center justify-between p-1">
-          <nav className=" sm:flex items-center justify-between">
+      <img 
+        src={smallLogo} 
+        alt="Tracknity" 
+        className="block md:hidden w-12 rounded-full" 
+      />
+
+      <img 
+        src={logo} 
+        alt="Tracknity" 
+        className="hidden md:block rounded-full w-32 h-14" 
+      />
+<div className={`${isMobileMenuOpen ? "flex flex-col justify-center items-center absolute top-full left-0 right-0 rounded-b-lg bg-white shadow-lg p-4 gap-3 z-50 w-2/3" : "hidden"} sm:flex sm:flex-row sm:relative sm:shadow-none sm:p-0 items-center gap-1`}>
+    <header className={`${!isMobileMenuOpen ? " rounded-full border border-gray-300 shadow-sm w-full sm:w-auto" : "empty:hidden"}`}>
+        <div className={`${!isMobileMenuOpen ? "flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-1" : "empty:hidden justify-center items-center"}`}>
+          <nav className="flex flex-col sm:flex-row items-stretch sm:items-center justify-betweeen gap-1 sm:gap-0">
             {links.map((link) => {
               const active = isLinkActive(link.path);
 
@@ -135,7 +147,7 @@ export default function Topbar({ onMenuClick }) {
                   to={link.path}
                   className={({ isActive }) =>
                     [
-                      " flex w-full text-sm font-medium transition-colors px-3 py-2",
+                      " flex w-full justify-center items-center text-sm font-medium transition-colors px-3 py-2",
                       active || isActive
                         ? "bg-[#1A2240] text-gray-100 shadow-sm rounded-full"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
@@ -149,39 +161,37 @@ export default function Topbar({ onMenuClick }) {
           </nav>
         </div>
     </header>
-          <Link to="/settings">
+          <Link to="/settings" className="w-full sm:w-auto">
             <Button
               variant="outline"
-              // size="icon"
-              // size="lg"
               aria-label="Settings"
-              className="border-gray-300 shadow-sm rounded-full px-6 py-[25px]"
+              className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""}`}
             >
-              <Settings className="h-4 w-4" />
-              <span className="text-sm font-medium ">Settings</span>
+              {isMobileMenuOpen ? <span className="text-sm font-medium transition-colors">Settings</span> : <><Settings className="h-4 w-4" /> <span className="text-sm font-medium ">Settings</span></>}
             </Button>
           </Link>
 
-          <Link to={notificationPath}>
+          
+          {!isMobileMenuOpen && <Link to={notificationPath} className="w-full sm:w-auto">
             <Button
               variant="outline"
               size="icon"
               aria-label="Settings"
-              className="relative border-gray-300 shadow-sm w-12 h-12 rounded-full"
+              className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""}`}
             >
-              <Bell className="h-4 w-4" />
+              {isMobileMenuOpen ? <span className="text-sm font-medium">Notifications</span> : <Bell className="h-4 w-4" />}
             </Button>
-          </Link>
+          </Link>}
           
       <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="w-12 h-12 border border-gray-300 shadow-sm rounded-full flex items-center justify-center"
-              >
-                <Avatar>
+                className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""}`}
+                >
+                {isMobileMenuOpen ? <span className="text-sm font-medium transition-colors ">My Account</span> : <Avatar>
                   <AvatarFallback className="text-md font-bold">JS</AvatarFallback>
-                </Avatar>
+                </Avatar>}
               </Button>
             </DropdownMenuTrigger>
 

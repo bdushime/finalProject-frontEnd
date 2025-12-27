@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import Sidebar from "@/components/layout/Sidebar";
+// import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 
 const DESKTOP_BREAKPOINT = 640; // matches `sm:` in Tailwind config

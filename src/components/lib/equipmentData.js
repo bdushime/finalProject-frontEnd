@@ -272,8 +272,45 @@ export function listCheckoutEligible(search) {
 
 export function listActiveCheckouts() {
   return [
-    { checkoutId: "CO-1001", equipmentName: "Canon EOS M50", checkedOutAt: "2025-10-28", dueDate: "2025-11-11" },
-    { checkoutId: "CO-1002", equipmentName: "Dell XPS 15", checkedOutAt: "2025-10-30", dueDate: "2025-11-06" },
+    { 
+      checkoutId: "CO-1001", 
+      equipmentName: "Canon EOS M50", 
+      checkedOutAt: "2025-10-28", 
+      dueDate: "2025-11-11",
+      userName: "John Doe",
+      userEmail: "john.doe@university.edu",
+      userPhone: "+250788111222",
+      purpose: "Photography project for Media Studies",
+      destination: "Media Lab, Building B",
+      checkoutPhoto: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=800&h=600&fit=crop",
+      signature: "https://images.unsplash.com/photo-1558655146-364adaf1fcc9?w=400&h=200&fit=crop"
+    },
+    { 
+      checkoutId: "CO-1002", 
+      equipmentName: "Dell XPS 15", 
+      checkedOutAt: "2025-10-30", 
+      dueDate: "2025-11-06",
+      userName: "Jane Smith",
+      userEmail: "jane.smith@university.edu",
+      userPhone: "+250788333444",
+      purpose: "Software development project",
+      destination: "Computer Lab, Building A",
+      checkoutPhoto: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=600&fit=crop",
+      signature: "https://images.unsplash.com/photo-1558655146-364adaf1fcc9?w=400&h=200&fit=crop"
+    },
+    { 
+      checkoutId: "CO-1003", 
+      equipmentName: "MacBook Pro 16\"", 
+      checkedOutAt: "2025-11-01", 
+      dueDate: "2025-11-15",
+      userName: "Alice Johnson",
+      userEmail: "alice.johnson@university.edu",
+      userPhone: "+250788555666",
+      purpose: "Video editing for final project",
+      destination: "Design Lab, Building D",
+      checkoutPhoto: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=600&fit=crop",
+      signature: "https://images.unsplash.com/photo-1558655146-364adaf1fcc9?w=400&h=200&fit=crop"
+    },
   ];
 }
 
