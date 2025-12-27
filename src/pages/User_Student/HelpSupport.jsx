@@ -150,7 +150,7 @@ export default function HelpSupport() {
                                         Need Immediate Help?
                                     </h4>
                                     <p className="text-sm text-slate-700">
-                                        Visit the IT Department office at Building A, Room 101
+                                        Visit the IT Department office In Room 108
                                     </p>
                                     <p className="text-sm text-slate-700 mt-1">
                                         Phone: +250 788 123 456

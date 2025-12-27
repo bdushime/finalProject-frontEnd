@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { LayoutGrid, Package, ClipboardList, Bell, User, HelpCircle, LogOut } from "lucide-react";
+import logo from "@/assets/images/logo8noback.png";
 
 const links = [
     { name: "Dashboard", path: "/student/dashboard", icon: LayoutGrid },
@@ -27,10 +28,8 @@ export default function Sidebar({ isOpen, onClose }) {
                 aria-label="Sidebar"
             >
                 <div className="h-full flex flex-col">
-                    <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10 bg-gradient-to-r from-[#0b2346] to-[#0a1b35]/90 shadow-inner shadow-black/20">
-                        <div className="h-10 w-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-lg font-semibold">
-                            <LayoutGrid className="h-5 w-5 text-sky-200" />
-                        </div>
+                    <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10 bg-[#0a1b35]">
+                        <img src={logo} alt="Tracknity logo" className="h-10 w-10 object-contain drop-shadow-sm" />
                         <div>
                             <div className="text-white font-semibold text-lg leading-tight">Tracknity</div>
                             <p className="text-xs text-slate-200/80">Student Portal</p>
@@ -48,7 +47,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                     key={link.path}
                                     to={link.path}
                                     onClick={() => {
-                                        if (window.innerWidth < 640 && onClose) {
+                                        if (window.innerWidth < 1024 && onClose) {
                                             onClose();
                                         }
                                     }}

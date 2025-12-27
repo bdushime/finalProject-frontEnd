@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Calendar, Package, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Search, Package } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import { StatusBadge } from "./components/StatusBadge";
-import { CategoryBadge } from "./components/CategoryBadge";
 import BackButton from "./components/BackButton";
+import ExtendModal from "@/components/ui/ExtendModal";
 import { borrowedItems } from "./data/mockData";
 import { useNavigate } from "react-router-dom";
 
@@ -19,19 +19,14 @@ export default function MyBorrowedItems() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
+    // Extend modal state
+    const [extendModalOpen, setExtendModalOpen] = useState(false);
+    const [selectedItemForExtend, setSelectedItemForExtend] = useState(null);
+
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    };
-
-    const getDaysUntilDue = (dueDate) => {
-        if (!dueDate) return null;
-        const today = new Date();
-        const due = new Date(dueDate);
-        const diffTime = due - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
     };
 
     const filteredItems = borrowedItems.filter(item => {
@@ -45,10 +40,60 @@ export default function MyBorrowedItems() {
         return matchesSearch && matchesStatus;
     });
 
+    const activeItems = useMemo(
+        () => filteredItems.filter((item) => item.status === 'active' || item.status === 'overdue'),
+        [filteredItems]
+    );
+    const historyItems = useMemo(
+        () => filteredItems.filter((item) => item.status !== 'active' && item.status !== 'overdue'),
+        [filteredItems]
+    );
+
+    const scoreImpact = (status) => {
+        switch (status) {
+            case 'returned':
+            case 'returned-early':
+                return { value: +2, tone: 'text-emerald-700', badge: 'bg-emerald-50 border border-emerald-100 text-emerald-700' };
+            case 'on-time':
+                return { value: +1, tone: 'text-emerald-700', badge: 'bg-emerald-50 border border-emerald-100 text-emerald-700' };
+            case 'pending':
+                return { value: 0, tone: 'text-slate-600', badge: 'bg-slate-100 border border-slate-200 text-slate-600' };
+            case 'overdue':
+            case 'late':
+                return { value: -3, tone: 'text-rose-700', badge: 'bg-rose-50 border border-rose-100 text-rose-700' };
+            default:
+                return { value: 0, tone: 'text-slate-600', badge: 'bg-slate-100 border border-slate-200 text-slate-600' };
+        }
+    };
+
+    const getCountdown = (dueDate) => {
+        if (!dueDate) return null;
+        const now = new Date();
+        const due = new Date(dueDate);
+        const diffMs = due - now;
+        if (diffMs <= 0) return { hours: 0, mins: 0, overdue: true };
+        const totalMinutes = Math.floor(diffMs / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        return { hours, mins, overdue: false };
+    };
+
     const handleReturn = (item) => {
         if (item.status === 'active' || item.status === 'overdue') {
             navigate(`/student/return?itemId=${item.id}`);
         }
+    };
+
+    const handleExtend = (item) => {
+        setSelectedItemForExtend(item);
+        setExtendModalOpen(true);
+    };
+
+    const handleExtendConfirm = (extensionData) => {
+        console.log('Extension confirmed:', extensionData);
+        // Here you would call your API to extend the borrowing time
+        // After success, you might want to refresh the items list
+        alert(`Successfully extended ${selectedItemForExtend?.equipmentName} until ${new Date(extensionData.newEndTime).toLocaleTimeString()}`);
     };
 
     return (
@@ -73,7 +118,7 @@ export default function MyBorrowedItems() {
                                 />
                             </div>
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-full md:w-[200px] rounded-xl border-slate-200 focus:ring-2 focus:ring-sky-200 text-[#0b1d3a]">
+                                <SelectTrigger className="w-full md:w-[200px] rounded-xl border-slate-200 focus:ring-2 focus:ring-[#0b69d4]/30 focus:border-[#0b69d4] text-[#0b1d3a]">
                                     <SelectValue placeholder="Filter by status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -103,134 +148,131 @@ export default function MyBorrowedItems() {
                                     : 'You haven\'t borrowed any equipment yet'}
                             </p>
                             {!searchQuery && statusFilter === 'all' && (
-                                <Button onClick={() => navigate('/student/browse')}>
+                                <Button onClick={() => navigate('/student/equipment')}>
                                     Browse Equipment
                                 </Button>
                             )}
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="space-y-4">
-                        {filteredItems.map((item) => {
-                            const daysUntilDue = getDaysUntilDue(item.dueDate);
-                            const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
-
-                            return (
-                                <Card key={item.id} className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_16px_38px_-22px_rgba(8,47,73,0.3)] hover:border-sky-200 hover:shadow-[0_22px_40px_-22px_rgba(8,47,73,0.35)] transition-all duration-300">
-                                    <CardContent className="p-6">
-                                        <div className="flex flex-col lg:flex-row gap-6">
-                                            <div className="flex-1">
-                                                <div className="flex items-start justify-between mb-4">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <CategoryBadge category={item.category} />
-                                                            <StatusBadge status={item.status} />
-                                                        </div>
-                                                        <h3 className="text-xl font-semibold text-black mb-1">
-                                                            {item.equipmentName}
-                                                        </h3>
-                                                        <p className="text-sm text-black">
-                                                            Request ID: {item.requestId} • Equipment ID: {item.equipmentId}
-                                                        </p>
-                                                    </div>
+                    <>
+                        <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)] mb-6">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-xl font-bold text-[#0b1d3a]">Active Checkouts</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {activeItems.length === 0 && (
+                                    <p className="text-sm text-slate-600">No active checkouts.</p>
+                                )}
+                                {activeItems.map((item) => {
+                                    const countdown = getCountdown(item.dueDate);
+                                    const overdue = countdown?.overdue;
+                                    return (
+                                        <div key={item.id} className="flex flex-col lg:flex-row items-start lg:items-center gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50 hover:border-sky-200 hover:bg-sky-50 transition">
+                                            <div className="flex-1 space-y-1">
+                                                <p className="text-sm text-slate-600">{item.category} • ID: {item.equipmentId}</p>
+                                                <h3 className="text-lg font-semibold text-[#0b1d3a]">{item.equipmentName}</h3>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className={`rounded-full px-3 py-1 text-xs font-semibold ${item.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+                                                        {item.status === 'active' ? 'On Time' : 'Overdue'}
+                                                    </Badge>
+                                                    <span className="text-xs text-slate-600">Condition: {item.condition || 'Good'}</span>
                                                 </div>
-
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <Calendar className="h-5 w-5 text-slate-600" />
-                                                        <div>
-                                                            <div className="text-xs text-black">Borrowed Date</div>
-                                                            <div className="font-medium text-black">
-                                                                {item.borrowedDate ? formatDate(item.borrowedDate) : 'Not yet borrowed'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <Calendar className="h-5 w-5 text-slate-600" />
-                                                        <div>
-                                                            <div className="text-xs text-black">Due Date</div>
-                                                            <div className={`font-medium ${isOverdue ? 'text-black' : 'text-black'}`}>
-                                                                {item.dueDate ? formatDate(item.dueDate) : 'N/A'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <Package className="h-5 w-5 text-slate-600" />
-                                                        <div>
-                                                            <div className="text-xs text-black">Location</div>
-                                                            <div className="font-medium text-black">{item.location}</div>
-                                                        </div>
-                                                    </div>
-                                                    {item.approvedBy && (
-                                                        <div className="flex items-center gap-3">
-                                                            <CheckCircle className="h-5 w-5 text-slate-600" />
-                                                            <div>
-                                                                <div className="text-xs text-black">Approved By</div>
-                                                                <div className="font-medium text-black">{item.approvedBy}</div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {isOverdue && (
-                                                    <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg mb-4">
-                                                        <div className="flex items-center gap-2 text-rose-700">
-                                                            <AlertCircle className="h-5 w-5" />
-                                                            <span className="font-semibold">
-                                                                Overdue by {Math.abs(daysUntilDue)} day(s). Please return immediately.
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {daysUntilDue !== null && daysUntilDue > 0 && daysUntilDue <= 3 && !isOverdue && (
-                                                    <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg mb-4">
-                                                        <div className="flex items-center gap-2 text-amber-700">
-                                                            <Clock className="h-5 w-5" />
-                                                            <span className="font-semibold">
-                                                                Due in {daysUntilDue} day(s). Please prepare for return.
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
-
-                                            <div className="lg:w-48 flex flex-col gap-2">
-                                                {(item.status === 'active' || item.status === 'overdue') && (
-                                                    <Button
-                                                        className="w-full bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-bold rounded-xl shadow-sm shadow-sky-200/60 transition-all duration-300"
-                                                        onClick={() => handleReturn(item)}
-                                                    >
-                                                        Return Item
-                                                    </Button>
-                                                )}
-                                                {item.status === 'pending' && (
-                                                    <div className="text-center text-sm text-black py-2">
-                                                        Awaiting approval
-                                                    </div>
-                                                )}
-                                                {item.status === 'returned' && (
-                                                    <div className="text-center text-sm text-black font-bold py-2">
-                                                        ✓ Returned
-                                                    </div>
-                                                )}
+                                            <div className="flex items-center gap-6 text-center">
+                                                <div>
+                                                    <p className="text-xs text-slate-500">HOURS</p>
+                                                    <p className="text-lg font-semibold text-[#0b1d3a]">{countdown ? countdown.hours.toString().padStart(2, '0') : '--'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-slate-500">MIN</p>
+                                                    <p className="text-lg font-semibold text-[#0b1d3a]">{countdown ? countdown.mins.toString().padStart(2, '0') : '--'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col gap-2 w-full lg:w-auto">
                                                 <Button
                                                     variant="outline"
-                                                    className="w-full rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a] transition-all duration-300"
-                                                    onClick={() => navigate(`/student/equipment/${item.equipmentId}`)}
+                                                    className="rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
+                                                    onClick={() => handleExtend(item)}
                                                 >
-                                                    View Details
+                                                    Extend
+                                                </Button>
+                                                <Button
+                                                    className="rounded-xl bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-semibold shadow-sm shadow-sky-200/60"
+                                                    onClick={() => handleReturn(item)}
+                                                >
+                                                    Return Now
                                                 </Button>
                                             </div>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
-                    </div>
+                                    );
+                                })}
+                            </CardContent>
+                        </Card>
+
+                        <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)]">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-xl font-bold text-[#0b1d3a]">Checkout History</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="text-[#0b1d3a]">Equipment</TableHead>
+                                                <TableHead className="text-[#0b1d3a]">Checkout Date</TableHead>
+                                                <TableHead className="text-[#0b1d3a]">Return Date</TableHead>
+                                                <TableHead className="text-[#0b1d3a]">Status</TableHead>
+                                                <TableHead className="text-[#0b1d3a]">Score Impact</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {historyItems.length === 0 && (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} className="text-center text-slate-600 py-6">
+                                                        No history items.
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                            {historyItems.map((item) => (
+                                                <TableRow key={item.id}>
+                                                    <TableCell className="text-[#0b1d3a] font-semibold">{item.equipmentName}</TableCell>
+                                                    <TableCell className="text-slate-700">{formatDate(item.borrowedDate)}</TableCell>
+                                                    <TableCell className="text-slate-700">{item.returnDate ? formatDate(item.returnDate) : "—"}</TableCell>
+                                                    <TableCell>
+                                                        <StatusBadge status={item.status} />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {(() => {
+                                                            const score = scoreImpact(item.status);
+                                                            return (
+                                                                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${score.badge}`}>
+                                                                    {score.value > 0 ? `+${score.value}` : score.value}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </>
                 )}
+
+                {/* Extend Modal */}
+                <ExtendModal
+                    isOpen={extendModalOpen}
+                    onClose={() => {
+                        setExtendModalOpen(false);
+                        setSelectedItemForExtend(null);
+                    }}
+                    item={selectedItemForExtend}
+                    onConfirm={handleExtendConfirm}
+                />
             </PageContainer>
         </MainLayout>
     );
 }
-

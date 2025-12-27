@@ -1,280 +1,151 @@
-import { useState } from 'react';
+import { useMemo, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Grid3x3, List, Package, Eye, QrCode } from "lucide-react";
-import { equipmentData, categories } from "@/components/lib/equipmentData";
 import { PageContainer, PageHeader } from "@/components/common/Page";
-import { CategoryBadge } from "./components/CategoryBadge";
 import BackButton from "./components/BackButton";
-import { useNavigate } from "react-router-dom";
+import { borrowedItems } from "./data/mockData";
+import { Badge } from "@/components/ui/badge";
+import { Package } from "lucide-react";
 
 export default function EquipmentCatalogue() {
-    const navigate = useNavigate();
-    const [viewMode, setViewMode] = useState('grid');
-    const [selectedCategory, setSelectedCategory] = useState('All Categories');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [sortBy, setSortBy] = useState('name');
+    const [availability, setAvailability] = useState("all");
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-    };
+    const equipmentList = useMemo(() => ([
+        { id: "P-001", name: "Projector 1", status: "available", location: "Room A - Library" },
+        { id: "P-002", name: "Projector 2", status: "available", location: "Room B - Main Hall" },
+        { id: "P-003", name: "Projector 3", status: "reserved", location: "Innovation Lab" },
+        { id: "P-004", name: "Projector 4", status: "checked-out", location: "Electrical Lab" },
+        { id: "P-005", name: "Projector 5", status: "available", location: "Auditorium" },
+    ]), []);
 
-    const filteredEquipment = equipmentData
-        .filter(item =>
-            (selectedCategory === 'All Categories' || item.category === selectedCategory) &&
-            (searchQuery === '' ||
-                item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.description.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        )
-        .sort((a, b) => {
-            switch (sortBy) {
-                case 'name':
-                    return a.name.localeCompare(b.name);
-                case 'category':
-                    return a.category.localeCompare(b.category);
-                case 'availability':
-                    return b.available - a.available;
-                default:
-                    return 0;
-            }
-        });
-
-    const handleBorrowRequest = (equipment) => {
-        navigate(`/student/borrow-request?equipmentId=${equipment.id}`);
-    };
-
-    const handleViewDetails = (equipment) => {
-        navigate(`/student/equipment/${equipment.id}`);
-    };
+    const filteredEquipment = equipmentList.filter((item) => {
+        if (availability === "all") return true;
+        if (availability === "available") return item.status === "available";
+        if (availability === "available-now") return item.status === "available";
+        if (availability === "reserved") return item.status === "reserved";
+        if (availability === "checked-out") return item.status === "checked-out";
+        return true;
+    });
 
     return (
         <MainLayout>
             <PageContainer>
                 <BackButton to="/student/dashboard" />
                 <PageHeader
-                    title="Equipment Catalogue"
-                    subtitle="Browse and request available IT equipment for your projects"
+                    title="Available Equipment"
+                    subtitle="Browse and request IT equipment for your class"
                 />
 
                 <Card className="mb-6 border border-slate-200 rounded-2xl shadow-[0_16px_38px_-22px_rgba(8,47,73,0.25)] bg-white/95 backdrop-blur-sm">
                     <CardContent className="pt-6">
-                        <form onSubmit={handleSearch} className="space-y-4">
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <div className="flex-1 relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                                    <Input
-                                        placeholder="Search by name, brand, or description..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-10 bg-white border border-slate-200 rounded-xl focus-visible:ring-2 focus-visible:ring-sky-300 text-[#0b1d3a] placeholder:text-slate-400"
-                                    />
-                                </div>
-                                <Button type="submit" className="rounded-xl bg-[#0b69d4] hover:bg-[#0f7de5] text-white shadow-sm shadow-sky-200/50">
-                                    Search
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
-                                    onClick={() => navigate('/student/borrow-request?scan=true')}
-                                >
-                                    <QrCode className="h-4 w-4 mr-2" />
-                                    Scan QR
-                                </Button>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                                    <SelectTrigger className="w-full sm:w-[200px] rounded-xl border-slate-200 focus:ring-2 focus:ring-sky-200 text-[#0b1d3a]">
-                                        <SelectValue placeholder="Category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map(category => (
-                                            <SelectItem key={category} value={category}>
-                                                {category}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-
-                                <Select value={sortBy} onValueChange={setSortBy}>
-                                    <SelectTrigger className="w-full sm:w-[200px] rounded-xl border-slate-200 focus:ring-2 focus:ring-sky-200 text-[#0b1d3a]">
-                                        <SelectValue placeholder="Sort by" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="name">Name (A-Z)</SelectItem>
-                                        <SelectItem value="category">Category</SelectItem>
-                                        <SelectItem value="availability">Availability</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                <div className="flex gap-2 sm:ml-auto">
-                                    <Button
-                                        variant={viewMode === 'grid' ? 'default' : 'outline'}
-                                        size="icon"
-                                        className={`rounded-xl ${viewMode === 'grid'
-                                            ? "bg-[#0b69d4] text-white shadow-sm shadow-sky-200/50"
-                                            : "border-slate-200 text-[#0b1d3a] hover:border-sky-300 hover:bg-sky-50"
-                                            }`}
-                                        onClick={() => setViewMode('grid')}
-                                    >
-                                        <Grid3x3 className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant={viewMode === 'list' ? 'default' : 'outline'}
-                                        size="icon"
-                                        className={`rounded-xl ${viewMode === 'list'
-                                            ? "bg-[#0b69d4] text-white shadow-sm shadow-sky-200/50"
-                                            : "border-slate-200 text-[#0b1d3a] hover:border-sky-300 hover:bg-sky-50"
-                                            }`}
-                                        onClick={() => setViewMode('list')}
-                                    >
-                                        <List className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </form>
+                        <div className="flex flex-col md:flex-row md:items-center gap-4">
+                            <Select value={availability} onValueChange={setAvailability}>
+                                <SelectTrigger className="w-full md:w-[220px] rounded-xl border-slate-200 focus:ring-2 focus:ring-[#0b69d4]/30 focus:border-[#0b69d4] text-[#0b1d3a]">
+                                    <SelectValue placeholder="Availability" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All</SelectItem>
+                                    <SelectItem value="available">Available</SelectItem>
+                                    <SelectItem value="available-now">Available Now</SelectItem>
+                                    <SelectItem value="reserved">Reserved</SelectItem>
+                                    <SelectItem value="checked-out">Checked Out</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </CardContent>
                 </Card>
 
-                <div className="mb-4 text-sm text-black">
-                    Found {filteredEquipment.length} {filteredEquipment.length === 1 ? 'item' : 'items'}
-                </div>
-
-                {viewMode === 'grid' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredEquipment.map(equipment => (
-                            <Card key={equipment.id} className="flex flex-col rounded-2xl border border-slate-200 bg-white/95 hover:border-sky-200 hover:shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)] transition-all duration-300">
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <CategoryBadge category={equipment.category} />
-                                        <Badge variant="outline" className={`rounded-full px-3 py-1 text-xs font-semibold ${equipment.available > 0
-                                            ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                            : "bg-slate-100 text-slate-500 border-slate-200"
-                                            }`}>
-                                            {equipment.available > 0 ? 'Available' : 'Unavailable'}
+                <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)]">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg font-bold text-[#0b1d3a]">Available Equipment</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {filteredEquipment.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="relative rounded-2xl border border-slate-200 bg-white shadow-[0_14px_32px_-22px_rgba(8,47,73,0.35)] hover:border-sky-200 hover:shadow-[0_18px_36px_-22px_rgba(8,47,73,0.4)] transition p-4"
+                                >
+                                    <div className="absolute top-3 right-3">
+                                        <Badge
+                                            className={`rounded-full px-3 py-1 text-xs font-semibold ${item.status === "available"
+                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                                                : item.status === "reserved"
+                                                    ? "bg-amber-50 text-amber-700 border border-amber-100"
+                                                    : "bg-rose-50 text-rose-700 border border-rose-100"
+                                                }`}
+                                            variant="outline"
+                                        >
+                                            {item.status === "available" ? "Available" : item.status === "reserved" ? "Reserved" : "Checked Out"}
                                         </Badge>
                                     </div>
-                                    <CardTitle className="text-lg font-bold text-black">{equipment.name}</CardTitle>
-                                    <CardDescription className="text-black">{equipment.brand} • {equipment.model}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex-1 flex flex-col">
-                                    <p className="text-sm text-black mb-4 line-clamp-2">
-                                        {equipment.description}
-                                    </p>
-                                    <div className="mt-auto space-y-3">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-black">Available:</span>
-                                            <span className="font-semibold text-black">
-                                                {equipment.available} / {equipment.total}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center text-sm text-black">
-                                            <Package className="h-4 w-4 mr-2" />
-                                            <span>{equipment.location}</span>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                className="flex-1 rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
-                                                onClick={() => handleViewDetails(equipment)}
-                                            >
-                                                <Eye className="h-4 w-4 mr-2" />
-                                                Details
-                                            </Button>
-                                            <Button
-                                                className="flex-1 bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-bold rounded-xl shadow-sm shadow-sky-200/60 transition-all duration-300 disabled:bg-slate-300 disabled:shadow-none"
-                                                disabled={equipment.available === 0}
-                                                onClick={() => handleBorrowRequest(equipment)}
-                                            >
-                                                Borrow
-                                            </Button>
+                                    <div className="space-y-2">
+                                        <div className="text-sm text-slate-600">{item.category || "Projector"}</div>
+                                        <h3 className="text-lg font-semibold text-[#0b1d3a]">{item.name}</h3>
+                                        <p className="text-sm text-slate-600">Location: {item.location}</p>
+                                        <div className="flex items-center gap-1 text-amber-500 text-sm">
+                                            {"★★★★★".slice(0, 4)}
+                                            <span className="text-slate-500 text-xs">(4.0)</span>
                                         </div>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredEquipment.map(equipment => (
-                            <Card key={equipment.id} className="border border-slate-200 rounded-2xl bg-white/95 hover:border-sky-200 hover:bg-sky-50 hover:shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)] transition-all duration-300">
-                                <CardContent className="p-6">
-                                    <div className="flex flex-col sm:flex-row gap-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-start gap-3 mb-3">
-                                                <CategoryBadge category={equipment.category} />
-                                                <Badge variant="outline" className={`rounded-full px-3 py-1 text-xs font-semibold ${equipment.available > 0
-                                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                                    : "bg-slate-100 text-slate-500 border-slate-200"
-                                                    }`}>
-                                                    {equipment.available > 0 ? 'Available' : 'Unavailable'}
-                                                </Badge>
-                                            </div>
-                                            <h3 className="text-lg font-bold text-black mb-1">
-                                                {equipment.name}
-                                            </h3>
-                                            <p className="text-sm text-black mb-2">
-                                                {equipment.brand} • {equipment.model}
-                                            </p>
-                                            <p className="text-sm text-black mb-3">
-                                                {equipment.description}
-                                            </p>
-                                            <div className="flex items-center gap-4 text-sm">
-                                                <div className="flex items-center text-black">
-                                                    <Package className="h-4 w-4 mr-2" />
-                                                    <span>{equipment.location}</span>
-                                                </div>
-                                                <span className="text-black">
-                                                    Available: <span className="font-semibold text-black">{equipment.available} / {equipment.total}</span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="flex sm:flex-col gap-2 sm:w-32">
-                                            <Button
-                                                variant="outline"
-                                                className="flex-1 rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
-                                                onClick={() => handleViewDetails(equipment)}
-                                            >
-                                                <Eye className="h-4 w-4 sm:mr-2" />
-                                                <span className="hidden sm:inline">Details</span>
-                                            </Button>
-                                            <Button
-                                                className="flex-1 bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-bold rounded-xl shadow-sm shadow-sky-200/60 transition-all duration-300 disabled:bg-slate-300 disabled:shadow-none"
-                                                disabled={equipment.available === 0}
-                                                onClick={() => handleBorrowRequest(equipment)}
-                                            >
-                                                Borrow
-                                            </Button>
-                                        </div>
+                                    <div className="mt-4 flex items-center gap-3">
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1 rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
+                                            onClick={() => window.location.assign(`/student/borrow-request?equipmentId=${item.id}`)}
+                                            disabled={item.status !== "available"}
+                                        >
+                                            Request Borrow
+                                        </Button>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
+                                </div>
+                            ))}
+                        </div>
+                        {filteredEquipment.length === 0 && (
+                            <p className="text-slate-600 text-sm text-center py-6">No equipment found for this availability.</p>
+                        )}
+                    </CardContent>
+                </Card>
 
-                {filteredEquipment.length === 0 && (
-                    <Card className="border border-slate-200 rounded-2xl bg-white/95">
-                        <CardContent className="py-12 text-center">
-                            <div className="p-4 rounded-full bg-sky-50 w-20 h-20 mx-auto mb-4 flex items-center justify-center border border-sky-100">
-                                <Package className="h-10 w-10 text-sky-700" />
+                <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)]">
+                    <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg font-bold text-[#0b1d3a]">My Checkouts</CardTitle>
+                            <Button
+                                variant="outline"
+                                className="rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a] text-sm"
+                                onClick={() => window.location.assign("/student/borrowed-items")}
+                            >
+                                View all
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        {borrowedItems.slice(0, 3).map((item) => (
+                            <div key={item.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50">
+                                <div className="space-y-1">
+                                    <p className="font-semibold text-[#0b1d3a]">{item.equipmentName}</p>
+                                    <p className="text-xs text-slate-600">
+                                        Due: {item.dueDate || "TBD"}
+                                    </p>
+                                </div>
+                                <Badge
+                                    className={`rounded-full px-3 py-1 text-xs font-semibold ${item.status === "active"
+                                        ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                                        : item.status === "overdue"
+                                            ? "bg-rose-50 text-rose-700 border border-rose-100"
+                                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                                        }`}
+                                    variant="outline"
+                                >
+                                    {item.status === "active" ? "Active" : item.status === "overdue" ? "Overdue" : "Pending"}
+                                </Badge>
                             </div>
-                            <h3 className="text-lg font-bold text-black mb-2">
-                                No equipment found
-                            </h3>
-                            <p className="text-black">
-                                Try adjusting your search or filter criteria
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
+                        ))}
+                    </CardContent>
+                </Card>
             </PageContainer>
         </MainLayout>
     );

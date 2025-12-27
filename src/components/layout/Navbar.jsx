@@ -2,127 +2,110 @@ import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Button } from "@components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@components/ui/sheet";
-import { Home, PackageSearch, ClipboardList, Clock, Bell, LayoutDashboard, Users, Package, FileText, MonitorSmartphone, Wrench, ClipboardCheck, ShieldCheck, QrCode, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 
-const UserRole = {
-    REGULAR_USER: "REGULAR_USER",
-    ADMIN: "ADMIN",
-    IT_STAFF: "IT_STAFF",
-    SECURITY: "SECURITY",
-};
-
+// Define navigation items based on role (keeping your existing structure)
 const navLinks = {
     student: [
-        { name: "Dashboard", path: "/student/dashboard", icon: Home },
-        { name: "Browse Equipment", path: "/student/browse", icon: PackageSearch },
-        { name: "My Checkouts", path: "/student/current-checkouts", icon: ClipboardList },
-        { name: "History", path: "/student/history", icon: Clock },
-        { name: "Notifications", path: "/student/notifications", icon: Bell },
+        { name: "Dashboard", path: "/student/dashboard" },
+        { name: "Browse Equipment", path: "/student/browse" },
+        { name: "My Checkouts", path: "/student/current-checkouts" },
+        { name: "History", path: "/student/history" },
+        { name: "Notifications", path: "/student/notifications" },
     ],
     admin: [
-        { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
-        { name: "Users", path: "/admin/users", icon: Users },
-        { name: "Equipment", path: "/admin/equipment", icon: Package },
-        { name: "Reports", path: "/admin/reports", icon: FileText },
+        { name: "Dashboard", path: "/admin/dashboard" },
+        { name: "Users", path: "/admin/users" },
+        { name: "Equipment", path: "/admin/equipment" },
+        { name: "Reports", path: "/admin/reports" },
     ],
     itStaff: [
-        { name: "Dashboard", path: "/it-staff/dashboard", icon: MonitorSmartphone },
-        { name: "Maintenance", path: "/it-staff/maintenance", icon: Wrench },
-        { name: "Requests", path: "/it-staff/requests", icon: ClipboardCheck },
+        { name: "Dashboard", path: "/it-staff/dashboard" },
+        { name: "Maintenance", path: "/it-staff/maintenance" },
+        { name: "Requests", path: "/it-staff/requests" },
     ],
     security: [
-        { name: "Dashboard", path: "/security/dashboard", icon: ShieldCheck },
-        { name: "Verify Returns", path: "/security/returns", icon: QrCode },
+        { name: "Dashboard", path: "/security/dashboard" },
+        { name: "Verify Returns", path: "/security/returns" },
     ],
 };
 
-function LinkItem({ to, name, icon: Icon }) {
-    return (
-        <NavLink to={to} className={({ isActive }) => `inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${isActive ? "text-blue-600 bg-blue-50 dark:bg-neutral-900" : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"}`}>
-            <Icon className="h-4 w-4" />
-            <span>{name}</span>
-        </NavLink>
-    );
-}
+// But for your image, we need just these 4 items:
+const imageNavItems = [
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "Equipment", path: "/equipment" },
+    { name: "Borrowed Items", path: "/borrowed" },
+    { name: "Help & Support", path: "/support" },
+];
 
-LinkItem.propTypes = {
-    to: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    icon: PropTypes.elementType.isRequired,
-};
-
-export default function Navbar({ role = UserRole.REGULAR_USER, userInitials = "US" }) {
+export default function Navbar({ role = "REGULAR_USER" }) {
     const [open, setOpen] = useState(false);
-    const links = useMemo(() => {
-        switch (role) {
-            case UserRole.ADMIN:
-                return navLinks.admin;
-            case UserRole.IT_STAFF:
-                return navLinks.itStaff;
-            case UserRole.SECURITY:
-                return navLinks.security;
-            default:
-                return navLinks.student;
-        }
-    }, [role]);
+
+    // Use your existing role logic, but I'll use the imageNavItems for now
+    // You can switch back to role-based if needed
+    const links = imageNavItems; // Use the exact 4 items from your image
 
     return (
-        <nav className="w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-950/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-40">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-xl bg-linear-to-r from-blue-600 to-purple-600" />
-                    <span className="font-semibold">Equipment Tracker</span>
+        <nav className="w-full bg-white sticky top-0 z-40">
+            <div className="max-w-[1920px] mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
+                {/* Left: Brand - Exactly like your image */}
+                <div className="flex items-center">
+                    <span className="text-2xl font-bold text-gray-900">
+                        Tracknity
+                    </span>
                 </div>
 
-                <div className="hidden lg:flex items-center gap-1">
-                    {links.map((l) => (
-                        <LinkItem key={l.path} to={l.path} name={l.name} icon={l.icon} />
+                {/* Right: Navigation Links - Exactly like your image */}
+                <div className="hidden md:flex items-center gap-8">
+                    {links.map((item) => (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            className={({ isActive }) =>
+                                `text-base font-medium ${isActive
+                                    ? "text-black"
+                                    : "text-black hover:text-gray-700"
+                                }`
+                            }
+                        >
+                            {item.name}
+                        </NavLink>
                     ))}
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Mobile Menu Trigger - Hidden on desktop */}
+                <div className="md:hidden">
                     <Sheet open={open} onOpenChange={setOpen}>
                         <SheetTrigger asChild>
-                            <Button size="icon" variant="outline" className="lg:hidden">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10"
+                            >
                                 <Menu className="h-5 w-5" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="left" className="w-80">
-                            <div className="mt-6 flex flex-col gap-1">
-                                {links.map((l) => (
-                                    <NavLink key={l.path} to={l.path} onClick={() => setOpen(false)} className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-lg ${isActive ? "text-blue-600 bg-blue-50" : "hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}>
-                                        <l.icon className="h-4 w-4" />
-                                        <span>{l.name}</span>
+                        <SheetContent side="right" className="w-64">
+                            <div className="mt-8 flex flex-col gap-1">
+                                {links.map((item) => (
+                                    <NavLink
+                                        key={item.path}
+                                        to={item.path}
+                                        onClick={() => setOpen(false)}
+                                        className={({ isActive }) =>
+                                            `px-4 py-3 text-base font-medium ${isActive
+                                                ? "text-black"
+                                                : "text-gray-700 hover:bg-gray-50"
+                                            }`
+                                        }
+                                    >
+                                        {item.name}
                                     </NavLink>
                                 ))}
                             </div>
                         </SheetContent>
                     </Sheet>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="px-2">
-                                <Avatar className="h-7 w-7">
-                                    <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <NavLink to="/student/profile">My Profile</NavLink>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <NavLink to="/settings">Settings</NavLink>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => { /* hook logout */ }}>Logout</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
                 </div>
             </div>
         </nav>
@@ -130,8 +113,5 @@ export default function Navbar({ role = UserRole.REGULAR_USER, userInitials = "U
 }
 
 Navbar.propTypes = {
-    role: PropTypes.oneOf(Object.values(UserRole)),
-    userInitials: PropTypes.string,
+    role: PropTypes.string,
 };
-
-

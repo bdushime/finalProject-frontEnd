@@ -9,14 +9,10 @@ export default function Dashboard() {
     return (
         <MainLayout>
             <div className="space-y-6">
-                {/* Page Header */}
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-[#0b2545] tracking-tight mb-1">
-                        Student Dashboard
-                    </h1>
-                    <p className="text-slate-600 text-sm">
-                        Your IT equipment activity, status, and quick actions in one place
-                    </p>
+                {/* Welcome Header */}
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-2xl font-bold text-[#0b1d3a] tracking-tight">Welcome, Juls</h1>
+                    <p className="text-slate-600 text-sm">Your dashboard overview</p>
                 </div>
 
                 {/* Summary Cards */}
@@ -34,4 +30,3 @@ export default function Dashboard() {
         </MainLayout>
     );
 }
-
