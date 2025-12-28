@@ -38,6 +38,12 @@ import SelectReturnItem from "./pages/IT_Staff/return/SelectReturnItem";
 import ReturnScan from "./pages/IT_Staff/return/ReturnScan";
 import ReturnConfirmation from "./pages/IT_Staff/return/ReturnConfirmation";
 
+// Security pages
+import SecurityDashboard from "./pages/security/SecurityDashboard";
+import Accesslogs from "./pages/security/Accesslogs";
+import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
+import BrowseDevices from "./pages/security/BrowseDevices";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -268,7 +274,39 @@ export default function App() {
           }
         />
 
-        {/* TODO: Admin and Security routes once pages are created */}
+        {/* Security routes - protected */}
+        <Route
+          path="/security/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["security"]}>
+              <SecurityDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/security/logs"
+          element={
+            <ProtectedRoute allowedRoles={["security"]}>
+              <Accesslogs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/security/active-checkouts"
+          element={
+            <ProtectedRoute allowedRoles={["security"]}>
+              <ActiveCheckouts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/security/devices"
+          element={
+            <ProtectedRoute allowedRoles={["security"]}>
+              <BrowseDevices />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />

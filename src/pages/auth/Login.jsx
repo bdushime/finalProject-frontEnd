@@ -25,6 +25,11 @@ export default function Login() {
         password: "password",
         role: "it",
       },
+      "security@umurinzi.edu": {
+        email: "security@umurinzi.edu",
+        password: "password",
+        role: "security",
+      },
     };
 
     const userData = users[email];
@@ -47,6 +52,8 @@ export default function Login() {
 
     if (userData.role === "it") {
       navigate("/it/dashboard");
+    } else if (userData.role === "security") {
+      navigate("/security/dashboard");
     } else {
       navigate("/student/dashboard");
     }

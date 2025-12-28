@@ -17,6 +17,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
         ? "/student/dashboard"
         : user.role === "it"
         ? "/it/dashboard"
+        : user.role === "security"
+        ? "/security/dashboard"
         : "/login";
     return <Navigate to={fallback} replace />;
   }

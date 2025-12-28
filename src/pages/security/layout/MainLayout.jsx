@@ -2,11 +2,11 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 // import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
+import Topbar from "./Topbar";
 
 const DESKTOP_BREAKPOINT = 640; // matches `sm:` in Tailwind config
 
-export default function DashboardLayout({ children }) {
+export default function MainLayout({ children }) {
   // Controls visibility on mobile; on desktop the sidebar is always visible
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     try {
@@ -78,6 +78,6 @@ export default function DashboardLayout({ children }) {
   );
 }
 
-DashboardLayout.propTypes = {
+MainLayout.propTypes = {
   children: PropTypes.node,
 };
