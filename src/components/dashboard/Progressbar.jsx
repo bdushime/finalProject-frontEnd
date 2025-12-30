@@ -1,4 +1,5 @@
 import React from "react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@components/ui/tooltip";
 
 const Progressbar = () => {
   const stages = [
@@ -9,10 +10,10 @@ const Progressbar = () => {
   ];
 
   return (
-    <div className="w-1/2 max-w-3xl">
+    <div className="md:w-1/2 w-full max-w-3xl">
       
-      {/* Labels aligned to segment start */}
-      <div className="flex text-sm text-gray-600">
+      {/* Labels aligned to segment start - hidden on small screens */}
+      <div className="hidden sm:flex text-sm text-gray-600">
         {stages.map((stage, index) => (
           <div
             key={index}
@@ -32,30 +33,36 @@ const Progressbar = () => {
           const isLast = index === stages.length - 1;
 
           return (
-            <div
-              key={index}
-              style={{ width: `${stage.percentage}%` }}
-              className={`relative flex items-center justify-center rounded-full overflow-hidden
-                ${stage.bg || "bg-gray-200"}
-                
-              `}
-            >
-              {/* Striped background */}
-              {stage.striped && (
+            <Tooltip key={index}>
+              <TooltipTrigger asChild>
                 <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(0,0,0,0.08) 6px, rgba(0,0,0,0.08) 12px)",
-                  }}
-                />
-              )}
+                  style={{ width: `${stage.percentage}%` }}
+                  className={`relative flex items-center justify-center rounded-full overflow-hidden cursor-pointer
+                    ${stage.bg || "bg-gray-200"}
+                    
+                  `}
+                >
+                  {/* Striped background */}
+                  {stage.striped && (
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage:
+                          "repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(0,0,0,0.08) 6px, rgba(0,0,0,0.08) 12px)",
+                      }}
+                    />
+                  )}
 
-              {/* Percentage */}
-              <span className={`relative z-10 text-xs font-medium ${isFirst ? "text-white" : "text-gray-700"}`}>
-                {stage.percentage}%
-              </span>
-            </div>
+                  {/* Percentage */}
+                  <span className={`relative z-10 text-xs font-medium ${isFirst ? "text-white" : "text-gray-700"}`}>
+                    {stage.percentage}%
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="sm:hidden">
+                <p>{stage.label}: {stage.percentage}%</p>
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </div>

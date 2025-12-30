@@ -21,7 +21,7 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, selectedCh
 
 				{selectedCheckout && (
 					<div className="space-y-6 mt-4">
-						<Card>
+						<Card className=" border border-gray-300">
 							<CardHeader>
 								<CardTitle className="text-lg">Equipment Information</CardTitle>
 							</CardHeader>

@@ -23,6 +23,9 @@ import {
 } from "recharts";
 import RecentActivity from "./RecentActivity";
 import QuickActions from "./QuickActions";
+import IoTMapView from "@/pages/IT_Staff/components/iot/IoTMapView";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 const COLORS = {
   blue: "#3b82f6",
   green: "#22c55e",
@@ -58,34 +61,73 @@ const deviceTypesData = [
 ];
 
 export default function Charts() {
+  const [trackers, setTrackers] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch("/trackers.json");
+        const json = await res.json();
+        const formatted = json.map((t) => ({
+          ...t,
+          lastSeen: new Date(t.lastSeen),
+        }));
+        setTrackers(formatted);
+      } catch (err) {
+        console.error("Failed to load tracker data:", err);
+      }
+    }
+    loadData();
+  }, []);
+
+  const getChartHeight = () => {
+    if (windowWidth < 640) return 200;
+    if (windowWidth < 1024) return 220;
+    return 180;
+  };
+
+  const getMapHeight = () => {
+    if (windowWidth < 640) return 250;
+    if (windowWidth < 1024) return 300;
+    return 200;
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 grid-col-4 gap-1">
-      <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow relative border-none ">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-1">
+      <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow relative border-none sm:col-span-2 lg:col-span-1 min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
         <img src={image} alt="Profile" className="w-full h-full object-cover" />
 
         <div className="absolute inset-0 bg-linear-to-t from-gray-300/60 via-black/20 to-transparent" />
 
-        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
+        <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex items-center justify-between text-white">
           <div>
-            <h3 className="text-xl font-bold leading-tight">
+            <h3 className="text-base sm:text-xl font-bold leading-tight">
               IT Manager
             </h3>
-            <p className="text-sm opacity-80">Manager</p>
+            <p className="text-xs sm:text-sm opacity-80">Manager</p>
           </div>
-
-          
         </div>
       </Card>
 
       <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
-          <CardTitle className="text-lg font-bold">
+          <CardTitle className="text-base sm:text-lg font-bold">
             Activity Trends
           </CardTitle>
-          <CardDescription>Monthly checkout and return trends</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Monthly checkout and return trends</CardDescription>
         </CardHeader>
         <CardContent className="pb-0">
-          <ResponsiveContainer className="overflow-hidden" width="100%" height={180}>
+          <ResponsiveContainer className="overflow-hidden" width="100%" height={getChartHeight()}>
             <LineChart data={activityTrendsData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
@@ -125,11 +167,11 @@ export default function Charts() {
 
       <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
-          <CardTitle className="text-lg font-bold">Device Types</CardTitle>
-          <CardDescription>Distribution by device category</CardDescription>
+          <CardTitle className="text-base sm:text-lg font-bold">Device Types</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Distribution by device category</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <ResponsiveContainer className="overflow-hidden" width="100%" height={180}>
+          <ResponsiveContainer className="overflow-hidden" width="100%" height={getChartHeight()}>
             <BarChart data={deviceTypesData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
               {/* <CartesianGrid strokeDasharray="3 3" className="stroke-muted" /> */}
               <XAxis
@@ -160,14 +202,20 @@ export default function Charts() {
         </CardContent>
       </Card>
 
-      <Card className="row-span-2 border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
+      <Card className="sm:col-span-2 lg:col-span-1 lg:row-span-2 border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
         <RecentActivity />
       </Card>
 
-      {/* <Card className="border-none"> */}
+      <div className="sm:col-span-2 lg:col-span-1 h-full flex">
         <QuickActions />
-      {/* </Card> */}
-      {/* <IoTTrackerLiveView /> */}
+      </div>
+      <div className="sm:col-span-2 lg:col-span-2 h-full flex">
+        <IoTMapView 
+          filteredTrackers={trackers} 
+          mapHeight={getMapHeight()}
+          onNavigate={() => navigate("/it/iot-tracker")}
+        />
+      </div>
     </div>
   );
 }

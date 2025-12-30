@@ -69,9 +69,9 @@ export default function DashboardLayout({ children }) {
       <div
         className="flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out"
       >
-        <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
+        <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} sidebarOpen={sidebarOpen} />
         {/* <p > Welcome back to this</p> */}
-        <main className="flex-1 max-w-[1920px] mx-auto w-full px-4">
+        <main className="flex-1 max-w-[1920px] mx-auto w-full px-2 sm:px-4 lg:px-6 py-2 sm:py-4">
           {children}
         </main>
       </div>

@@ -146,6 +146,7 @@ export default function Topbar({ onMenuClick }) {
         size="icon"
         className="sm:hidden border-none"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Menu"
       >
         <Menu className="h-5 w-5" />
       </Button>
@@ -181,7 +182,7 @@ export default function Topbar({ onMenuClick }) {
                 : "empty:hidden justify-center items-center"
             }`}
           >
-            <nav className="flex flex-col sm:flex-row items-stretch sm:items-center justify-betweeen gap-1 sm:gap-0">
+            <nav className="flex flex-col sm:flex-row items-stretch justify-betweeen gap-1 sm:gap-0">
               {links.map((link) => {
                 const active = isLinkActive(link.path);
 
@@ -194,7 +195,7 @@ export default function Topbar({ onMenuClick }) {
                         " flex w-full justify-center items-center text-sm font-medium transition-colors px-3 py-2",
                         active || isActive
                           ? "bg-[#1A2240] text-gray-100 shadow-sm rounded-full"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                          : "text-slate-600 hover:bg-[#1A2240]/5 hover:rounded-full hover:text-slate-900",
                       ].join(" ")
                     }
                   >

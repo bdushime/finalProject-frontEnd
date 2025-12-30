@@ -38,56 +38,28 @@ export default function DashboardCards() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
       <Progressbar />
-    <div className="flex justify-end items-center gap-5 ">
+    <div className="flex flex-wrap justify-start sm:justify-end items-center gap-3 sm:gap-5 w-full sm:w-auto">
       {/* the numbers to be used here should be got from the it-equipment.json file or the database */}
       {metrics.map((metric) => {
         const Icon = metric.icon;
         return (
-          <>
-          {/* <Card
-            onClick={() => navigate(`/it/browse`)}
-            key={metric.label}
-            className="bg-card border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between gap-5">
+          <div key={metric.label} className="flex flex-col">
+            <div className="flex items-center gap-2">
               <div
-                  className="p-3 rounded-lg"
-                  style={{ backgroundColor: "#BEBEE0" }}
-                >
-                  <Icon className={`h-6 w-6 text-white`} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium text-muted-foreground mb-1">
-                    {metric.label}
-                  </p>
-                  <p className="text-3xl font-bold text-foreground">
-                    {metric.value.toLocaleString()}
-                  </p>
-                </div>
-                
+                className="p-1 rounded-lg mt-2 sm:mt-4 bg-gray-300/50"
+              >
+                <Icon className={`h-3 w-3 sm:h-4 sm:w-4 text-gray-600`} />
               </div>
-            </CardContent>
-            </Card> */}
-            <div className=" flex flex-col">
-              <div className="flex items-center gap-2 ">
-              <div
-                  className="p-1 rounded-lg mt-4 bg-gray-300/50 "
-                  
-                >
-                  <Icon className={`h-4 w-4 text-gray-600`} />
-                </div>
-                <p className="text-4xl font-semibold text-foreground text-gray-800">
-                    {metric.value.toLocaleString()}
-                </p>
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                    {metric.label}
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground text-gray-800">
+                {metric.value.toLocaleString()}
               </p>
             </div>
-          </>
-          // {/* </div> */}
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              {metric.label}
+            </p>
+          </div>
         );
       })}
       </div>

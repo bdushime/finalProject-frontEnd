@@ -24,7 +24,7 @@ const offlineIcon = L.divIcon({
   iconAnchor: [7, 7],
 });
 
-export default function IoTMapView({ filteredTrackers }) {
+export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNavigate }) {
   const center = useMemo(() => {
     if (!filteredTrackers.length) return DEFAULT_CENTER;
     const avgLat =
@@ -37,15 +37,22 @@ export default function IoTMapView({ filteredTrackers }) {
   }, [filteredTrackers]);
 
   return (
-    <Card className="border-gray-200 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold">Campus Map View</CardTitle>
-        <CardDescription>
+    <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow h-full w-full flex flex-col">
+      <CardHeader 
+        className={`${onNavigate ? "cursor-pointer" : ""} pb-2 sm:pb-4`}
+        onClick={onNavigate}
+      >
+        <CardTitle className="text-base sm:text-lg font-bold">Campus Map View</CardTitle>
+        <CardDescription className="text-[10px] sm:text-xs">
           Trackers are shown on OpenStreetMap. Green = Online, Red = Offline.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="w-full h-[500px] rounded-lg overflow-hidden">
+      <CardContent className="flex-1 pb-0">
+        <div 
+          className="w-full rounded-lg overflow-hidden" 
+          style={{ height: `${mapHeight}px` }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <MapContainer
             center={center}
             zoom={DEFAULT_ZOOM}
