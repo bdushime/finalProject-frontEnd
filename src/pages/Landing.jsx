@@ -1,1205 +1,896 @@
 import { Link } from "react-router-dom";
-import { useTheme } from "next-themes";
-import { Moon, Sun, ArrowRight, BookOpen, Clock, Shield, Users, CheckCircle, TrendingUp, Zap, Star, Twitter, Instagram, Linkedin, Github, Rocket, TrendingDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+    ArrowRight, BookOpen, Clock, Shield, Users,
+    Zap, Star, Rocket, ChevronRight, Play, MapPin,
+    Mail, Phone, Send, Check, Moon, Sun, Menu, X,
+    Laptop, QrCode, Bell, BarChart3, Package, UserCheck
+} from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import logo from "@/assets/images/logo 8cc.jpg";
 
-export default function Landing() {
-    const { theme, setTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-    const [currentSlide, setCurrentSlide] = useState(0);
+// Intersection Observer Hook for animations
+const useInView = (threshold = 0.2) => {
+    const ref = useRef(null);
+    const [inView, setInView] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
-    }, []);
+        const observer = new IntersectionObserver(
+            ([entry]) => entry.isIntersecting && setInView(true),
+            { threshold }
+        );
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, [threshold]);
 
-    const scrollToSection = (id) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return [ref, inView];
+};
+
+// Animated Number Component
+const AnimatedNumber = ({ value, suffix = "" }) => {
+    const [count, setCount] = useState(0);
+    const [ref, inView] = useInView();
+
+    useEffect(() => {
+        if (!inView) return;
+        const duration = 2000;
+        const steps = 60;
+        const increment = value / steps;
+        let current = 0;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= value) {
+                setCount(value);
+                clearInterval(timer);
+            } else {
+                setCount(Math.floor(current));
+            }
+        }, duration / steps);
+        return () => clearInterval(timer);
+    }, [inView, value]);
+
+    return <span ref={ref}>{count}{suffix}</span>;
+};
+
+// Video Modal Component
+const VideoModal = ({ isOpen, onClose }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <div
+                className="relative w-full max-w-4xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                >
+                    <X className="w-6 h-6 text-white" />
+                </button>
+
+                {/* Video Container */}
+                <div className="aspect-video bg-slate-800 flex items-center justify-center">
+                    {/* Replace this with your actual video */}
+                    <div className="text-center p-8">
+                        <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                            <Play className="w-10 h-10 text-white ml-1" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Demo Video Coming Soon</h3>
+                        <p className="text-slate-400 max-w-md mx-auto">
+                            We're creating an awesome demo video to show you how Tracknity works. Stay tuned!
+                        </p>
+
+                        {/* Placeholder for actual video - uncomment and add your video URL */}
+                        {/* 
+                        <video 
+                            controls 
+                            autoPlay 
+                            className="w-full h-full"
+                            src="/path-to-your-demo-video.mp4"
+                        >
+                            Your browser does not support the video tag.
+                        </video>
+                        */}
+
+                        {/* Or use YouTube embed */}
+                        {/*
+                        <iframe
+                            className="w-full h-full"
+                            src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1"
+                            title="Tracknity Demo"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                        */}
+                    </div>
+                </div>
+
+                {/* Video Info */}
+                <div className="p-6 bg-slate-900">
+                    <h4 className="text-lg font-semibold text-white mb-1">How Tracknity Works</h4>
+                    <p className="text-slate-400 text-sm">See how easy it is to manage campus equipment in under 2 minutes.</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Animated Chart Component
+const AnimatedChart = () => {
+    const [animated, setAnimated] = useState(false);
+    const [ref, inView] = useInView(0.5);
+
+    useEffect(() => {
+        if (inView) {
+            setTimeout(() => setAnimated(true), 200);
         }
-    };
+    }, [inView]);
 
-    const whoCanUseItems = [
-        { title: "Students", desc: "Request, track, and return devices with reminders." },
-        { title: "Lecturers", desc: "Reserve lab gear for classes and demos." },
-        { title: "IT Staff", desc: "Approve, audit, and monitor inventory health." },
-        { title: "Researchers", desc: "Schedule specialized equipment for projects." },
-        { title: "Media Teams", desc: "Coordinate cameras, audio, and studio gear." },
-        { title: "Administrators", desc: "View usage trends and ensure accountability." },
-    ];
-
-    const itemsPerSlide = 3;
-    const totalSlides = Math.ceil(whoCanUseItems.length / itemsPerSlide);
-
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    };
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-    };
-
-    const features = [
-        {
-            icon: <BookOpen size={32} color="#1864ab" />,
-            title: "Equipment Catalogue",
-            description: "Browse and search through a comprehensive catalogue of available equipment with advanced filtering options",
-            gradient: "from-blue-50 to-indigo-50"
-        },
-        {
-            icon: <Clock size={32} color="#1864ab" />,
-            title: "Real-time Tracking",
-            description: "Track your borrowed equipment in real-time with IoT integration and instant notifications",
-            gradient: "from-purple-50 to-pink-50"
-        },
-        {
-            icon: <Shield size={32} color="#1864ab" />,
-            title: "Secure Management",
-            description: "Secure checkout and return process with digital signatures and automated verification",
-            gradient: "from-green-50 to-emerald-50"
-        },
-        {
-            icon: <Users size={32} color="#1864ab" />,
-            title: "Easy Collaboration",
-            description: "Streamlined process for students and IT staff to work together seamlessly",
-            gradient: "from-orange-50 to-amber-50"
-        }
-    ];
-
-    const stats = [
-        { value: "500+", label: "Active Users" },
-        { value: "1000+", label: "Equipment Items" },
-        { value: "99%", label: "Uptime" },
-        { value: "24/7", label: "Support" }
+    // Monday to Friday + Sunday (no Saturday)
+    const data = [
+        { day: 'Mon', value: 45, color: 'from-cyan-500 to-cyan-400' },
+        { day: 'Tue', value: 72, color: 'from-cyan-500 to-cyan-400' },
+        { day: 'Wed', value: 58, color: 'from-cyan-500 to-cyan-400' },
+        { day: 'Thu', value: 85, color: 'from-cyan-500 to-cyan-400' },
+        { day: 'Fri', value: 92, color: 'from-cyan-500 to-cyan-400' },
+        { day: 'Sun', value: 35, color: 'from-cyan-400 to-cyan-300' },
     ];
 
     return (
-        <div style={{
-            minHeight: "100vh",
-            fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-            position: "relative",
-            overflow: "hidden",
-            color: "#e9ecf5",
-            backgroundColor: "#080c1c"
-        }}>
-            {/* Hero soft glows */}
-            <div style={{
-                position: "absolute",
-                top: "-20%",
-                right: "-10%",
-                width: "900px",
-                height: "900px",
-                background: "radial-gradient(circle, rgba(88,134,255,0.22) 0%, rgba(8,12,28,0) 60%)",
-                filter: "blur(70px)",
-                zIndex: 0
-            }} />
-            <div style={{
-                position: "absolute",
-                bottom: "-25%",
-                left: "-15%",
-                width: "760px",
-                height: "760px",
-                background: "radial-gradient(circle, rgba(124,92,255,0.2) 0%, rgba(8,12,28,0) 60%)",
-                filter: "blur(80px)",
-                zIndex: 0
-            }} />
-
-            {/* Theme Toggle - Fixed Position */}
-            <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                style={{
-                    position: "fixed",
-                    top: "1.5rem",
-                    right: "1.5rem",
-                    zIndex: 50,
-                    width: "3rem",
-                    height: "3rem",
-                    borderRadius: "9999px",
-                    backgroundColor: "#ffffff",
-                    border: "2px solid #e5e5e5",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "all 0.3s ease"
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                    e.currentTarget.style.transform = "scale(1.1) rotate(15deg)";
-                    e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.15)";
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#ffffff";
-                    e.currentTarget.style.transform = "scale(1) rotate(0deg)";
-                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
-                }}
-                aria-label="Toggle theme"
-            >
-                {mounted && theme === "dark" ? (
-                    <Sun size={20} color="#1864ab" />
-                ) : (
-                    <Moon size={20} color="#1864ab" />
-                )}
-            </button>
-
-            {/* Header */}
-            <header style={{
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
-                backdropFilter: "blur(12px)",
-                backgroundColor: "rgba(10,14,28,0.65)",
-                position: "sticky",
-                top: 0,
-                zIndex: 40
-            }}>
-                <nav style={{
-                    maxWidth: "1280px",
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                    padding: "1.25rem 1.5rem",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    position: "relative",
-                    zIndex: 10
-                }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                        <img
-                            src={logo}
-                            alt="Tracknity logo"
-                            style={{
-                                width: "4rem",
-                                height: "4rem",
-                                objectFit: "contain",
-                                display: "block"
-                            }}
-                        />
-                        <span style={{
-                            fontSize: "1.5rem",
-                            fontWeight: 700,
-                            background: "linear-gradient(135deg, #1864ab 0%, #4f8bff 50%, #7ca0ff 100%)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            backgroundClip: "text",
-                            filter: "drop-shadow(0 2px 4px rgba(24,100,171,0.3))"
-                        }}>
-                            Tracknity
+        <div ref={ref} className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Weekly Activity</p>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">↑ 24%</span>
+            </div>
+            <div className="flex items-end gap-3 h-20">
+                {data.map((item, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <div className="w-full relative h-16 flex items-end">
+                            <div
+                                className={`w-full bg-gradient-to-t ${item.color} rounded-t-lg transition-all duration-1000 ease-out`}
+                                style={{
+                                    height: animated ? `${item.value}%` : '0%',
+                                    transitionDelay: `${i * 100}ms`
+                                }}
+                            />
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-medium">
+                            {item.day}
                         </span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                        <Link
-                            to="/login"
-                            style={{
-                                padding: "0.625rem 1.25rem",
-                                color: "#c4d4ff",
-                                textDecoration: "none",
-                                fontWeight: 600,
-                                fontSize: "0.95rem",
-                                transition: "all 0.3s ease",
-                                borderRadius: "0.5rem"
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.color = "#ffffff";
-                                e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.color = "#c4d4ff";
-                                e.currentTarget.style.backgroundColor = "transparent";
-                            }}
-                        >
-                            Sign In
-                        </Link>
-                        <Link
-                            to="/signup"
-                            style={{
-                                padding: "0.625rem 1.5rem",
-                                background: "#0b69d4",
-                                color: "#ffffff",
-                                textDecoration: "none",
-                                fontWeight: 600,
-                                fontSize: "0.95rem",
-                                borderRadius: "0.5rem",
-                                transition: "all 0.3s ease",
-                                display: "inline-block",
-                                boxShadow: "0 10px 30px rgba(79,139,255,0.35)"
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = "translateY(-2px)";
-                                e.currentTarget.style.boxShadow = "0 12px 32px rgba(79,139,255,0.45)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = "translateY(0)";
-                                e.currentTarget.style.boxShadow = "0 10px 30px rgba(79,139,255,0.35)";
-                            }}
-                        >
-                            Get Started
-                        </Link>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default function Landing() {
+    const [isDark, setIsDark] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [activeTestimonial, setActiveTestimonial] = useState(0);
+    const [videoModalOpen, setVideoModalOpen] = useState(false);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    // Show/hide scroll to top button
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowScrollTop(window.scrollY > 500);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Auto rotate testimonials
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setActiveTestimonial(prev => (prev + 1) % 4);
+        }, 5000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const scrollTo = (id) => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        setMobileMenuOpen(false);
+    };
+
+    const features = [
+        { icon: <Package />, title: "Smart Inventory", desc: "AI-powered cataloguing with automatic categorization and smart search.", color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
+        { icon: <QrCode />, title: "QR Scanning", desc: "Instant check-in/out with QR codes. No manual entry needed.", color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" },
+        { icon: <Bell />, title: "Smart Alerts", desc: "Automated reminders for due dates, maintenance, and availability.", color: "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" },
+        { icon: <BarChart3 />, title: "Analytics", desc: "Track usage patterns, identify trends, and optimize inventory.", color: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" },
+        { icon: <UserCheck />, title: "Role Access", desc: "Custom permissions for students, staff, and administrators.", color: "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400" },
+        { icon: <Laptop />, title: "Multi-Platform", desc: "Access from any device - desktop, tablet, or mobile.", color: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" },
+    ];
+
+    const users = [
+        { emoji: "🎓", title: "Students", desc: "Browse, request, and track equipment with ease" },
+        { emoji: "👨‍🏫", title: "Lecturers", desc: "Reserve gear for classes and research projects" },
+        { emoji: "💼", title: "IT Staff", desc: "Manage inventory, approvals, and maintenance" },
+        { emoji: "🔬", title: "Researchers", desc: "Schedule specialized equipment for experiments" },
+        { emoji: "🎬", title: "Media Teams", desc: "Coordinate cameras, mics, and studio gear" },
+        { emoji: "📊", title: "Admins", desc: "Monitor usage trends and generate reports" },
+    ];
+
+    const testimonials = [
+        { quote: "Tracknity cut our equipment losses by 80%. The QR system is genius!", name: "Sarah M.", role: "CS Graduate Student", avatar: "👩‍💻" },
+        { quote: "Finally, I can see where every laptop and camera is in real-time.", name: "James K.", role: "IT Support Lead", avatar: "👨‍💼" },
+        { quote: "Booking lab equipment is now a 30-second task. Love it!", name: "Dr. Amina R.", role: "Engineering Lecturer", avatar: "👩‍🔬" },
+        { quote: "The analytics helped us justify new equipment purchases to admin.", name: "David T.", role: "Media Lab Coordinator", avatar: "🎬" },
+    ];
+
+    const steps = [
+        { num: "01", title: "Browse", desc: "Search our smart catalogue" },
+        { num: "02", title: "Request", desc: "Submit with one click" },
+        { num: "03", title: "Collect", desc: "Scan QR at pickup" },
+        { num: "04", title: "Return", desc: "Drop off & confirm" },
+    ];
+
+    // Section refs for animations
+    const [heroRef, heroInView] = useInView(0.1);
+    const [featuresRef, featuresInView] = useInView();
+    const [howRef, howInView] = useInView();
+    const [usersRef, usersInView] = useInView();
+    const [testimonialsRef, testimonialsInView] = useInView();
+
+    return (
+        <div className={`${isDark ? 'dark' : ''}`}>
+            <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0D0D0F] text-slate-800 dark:text-slate-200 transition-colors duration-500">
+
+                {/* CSS Styles */}
+                <style>{`
+                    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+                    
+                    * { font-family: 'DM Sans', sans-serif; }
+                    .font-display { font-family: 'Fraunces', serif; }
+                    
+                    .blob {
+                        border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+                        animation: morph 8s ease-in-out infinite;
+                    }
+                    @keyframes morph {
+                        0%, 100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+                        50% { border-radius: 58% 42% 30% 70% / 55% 55% 45% 45%; }
+                    }
+                    
+                    .float { animation: float 6s ease-in-out infinite; }
+                    .float-delayed { animation: float 6s ease-in-out infinite 2s; }
+                    @keyframes float {
+                        0%, 100% { transform: translateY(0px) rotate(0deg); }
+                        50% { transform: translateY(-20px) rotate(3deg); }
+                    }
+                    
+                    .slide-up {
+                        opacity: 0;
+                        transform: translateY(40px);
+                        transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+                    .slide-up.visible {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                    
+                    .card-hover {
+                        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+                    .card-hover:hover {
+                        transform: translateY(-8px);
+                    }
+                    
+                    .gradient-text {
+                        background: linear-gradient(135deg, #0077B6 0%, #00B4D8 50%, #90E0EF 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                    }
+                    
+                    .btn-primary {
+                        background: linear-gradient(135deg, #0077B6 0%, #00B4D8 100%);
+                        box-shadow: 0 4px 20px rgba(0, 119, 182, 0.3);
+                        transition: all 0.3s ease;
+                    }
+                    .btn-primary:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 30px rgba(0, 119, 182, 0.4);
+                    }
+                    
+                    .noise {
+                        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+                        opacity: 0.03;
+                    }
+                    
+                    .testimonial-card {
+                        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+                    .testimonial-card.active {
+                        transform: scale(1.02);
+                    }
+                `}</style>
+
+                {/* Noise Texture Overlay */}
+                <div className="fixed inset-0 pointer-events-none noise z-50" />
+
+                {/* Video Modal */}
+                <VideoModal isOpen={videoModalOpen} onClose={() => setVideoModalOpen(false)} />
+
+                {/* Navigation */}
+                <nav className="fixed top-0 left-0 right-0 z-40 bg-[#FAFAF8]/80 dark:bg-[#0D0D0F]/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50">
+                    <div className="max-w-6xl mx-auto px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            {/* Logo */}
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <img src={logo} alt="Tracknity" className="w-10 h-10 rounded-xl object-cover" />
+                                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+                                </div>
+                                <span className="text-xl font-bold font-display">Tracknity</span>
+                            </div>
+
+                            {/* Desktop Nav */}
+                            <div className="hidden md:flex items-center gap-8">
+                                {['Features', 'How it Works', 'Users', 'Contact'].map((item) => (
+                                    <button
+                                        key={item}
+                                        onClick={() => scrollTo(item.toLowerCase().replace(/\s+/g, '-'))}
+                                        className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                                    >
+                                        {item}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Right Actions */}
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setIsDark(!isDark)}
+                                    className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                    aria-label="Toggle theme"
+                                >
+                                    {isDark ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-slate-600" />}
+                                </button>
+
+                                <Link to="/login" className="hidden sm:block px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                                    Sign In
+                                </Link>
+
+                                <Link to="/signup" className="btn-primary px-5 py-2.5 text-sm font-semibold text-white rounded-xl">
+                                    Get Started
+                                </Link>
+
+                                <button
+                                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                    className="md:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+                                >
+                                    {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Mobile Menu */}
+                        {mobileMenuOpen && (
+                            <div className="md:hidden mt-4 pb-4 border-t border-slate-200 dark:border-slate-800 pt-4">
+                                {['Features', 'How it Works', 'Users', 'Contact'].map((item) => (
+                                    <button
+                                        key={item}
+                                        onClick={() => scrollTo(item.toLowerCase().replace(/\s+/g, '-'))}
+                                        className="block w-full text-left px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                                    >
+                                        {item}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </nav>
-            </header>
 
-            <main style={{
-                maxWidth: "1280px",
-                marginLeft: "auto",
-                marginRight: "auto",
-                padding: "5rem 1.5rem",
-                position: "relative",
-                zIndex: 10
-            }}>
-                {/* Hero */}
-                <section style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                    gap: "3rem",
-                    alignItems: "center",
-                    minHeight: "80vh",
-                    marginBottom: "5rem"
-                }}>
-                    <div style={{ maxWidth: "640px" }}>
-                        <h1 style={{
-                            fontSize: "clamp(2rem, 4vw, 3.2rem)",
-                            fontWeight: 800,
-                            color: "#f5f7ff",
-                            marginBottom: "1.25rem",
-                            lineHeight: 1.1,
-                            letterSpacing: "-0.02em"
-                        }}>
-                            Empower Your Campus with Smart Equipment Management
-                        </h1>
-                        <p style={{
-                            fontSize: "clamp(1.125rem, 2vw, 1.375rem)",
-                            color: "rgba(223,228,246,0.82)",
-                            marginBottom: "2rem",
-                            lineHeight: 1.7
-                        }}>
-                            A seamless, secure platform to streamline borrowing, returns, and real-time visibility.
-                            Built for students and IT teams who need reliability and speed.
-                        </p>
-                        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                            <Link
-                                to="/signup"
-                                style={{
-                                    padding: "1rem 2.5rem",
-                                    background: "linear-gradient(135deg, #0b69d4 0%, #0f7de5 100%)",
-                                    color: "#ffffff",
-                                    textDecoration: "none",
-                                    fontWeight: 600,
-                                    borderRadius: "0.75rem",
-                                    transition: "all 0.3s ease",
-                                    fontSize: "1.0625rem",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "0.5rem",
-                                    boxShadow: "0 8px 24px rgba(11,105,212,0.3)"
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = "translateY(-3px) scale(1.02)";
-                                    e.currentTarget.style.boxShadow = "0 12px 32px rgba(79,139,255,0.4)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = "translateY(0) scale(1)";
-                                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(79,139,255,0.3)";
-                                }}
-                            >
-                                Get Started <ArrowRight size={20} />
-                            </Link>
-                            <Link
-                                to="/login"
-                                style={{
-                                    padding: "1rem 2.5rem",
-                                    border: "2px solid rgba(11,105,212,0.25)",
-                                    color: "#d8e4ff",
-                                    textDecoration: "none",
-                                    fontWeight: 600,
-                                    borderRadius: "0.75rem",
-                                    transition: "all 0.3s ease",
-                                    fontSize: "1.0625rem",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    backgroundColor: "rgba(255,255,255,0.04)"
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-                                    e.currentTarget.style.borderColor = "#7ca0ff";
-                                    e.currentTarget.style.transform = "translateY(-2px)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)";
-                                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                                    e.currentTarget.style.transform = "translateY(0)";
-                                }}
-                            >
-                                Sign In
-                            </Link>
-                        </div>
-                    </div>
+                {/* Hero Section */}
+                <section ref={heroRef} className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+                    {/* Background Elements */}
+                    <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-gradient-to-br from-cyan-200/40 to-blue-300/40 dark:from-cyan-900/20 dark:to-blue-900/20 blob blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-amber-200/30 to-orange-200/30 dark:from-amber-900/10 dark:to-orange-900/10 blob blur-3xl" />
 
-                    {/* Hero Visual Placeholder */}
-                    <div style={{
-                        position: "relative",
-                        width: "100%",
-                        minHeight: "360px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                    }}>
-                        <div style={{
-                            position: "absolute",
-                            inset: 0,
-                            background: "radial-gradient(circle at 30% 30%, rgba(124,160,255,0.12), rgba(8,12,28,0))",
-                            filter: "blur(30px)",
-                            zIndex: 0
-                        }} />
-                        <div style={{
-                            position: "relative",
-                            width: "320px",
-                            padding: "1.5rem",
-                            borderRadius: "1.25rem",
-                            background: "linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
-                            border: "1px solid rgba(255,255,255,0.08)",
-                            boxShadow: "0 25px 60px rgba(0,0,0,0.35)",
-                            backdropFilter: "blur(6px)",
-                            color: "#e9ecf5"
-                        }}>
-                            <div style={{
-                                height: "220px",
-                                borderRadius: "1rem",
-                                background: "radial-gradient(circle at 30% 20%, rgba(124,160,255,0.3), rgba(8,12,28,0.2)), linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03))",
-                                border: "1px solid rgba(255,255,255,0.08)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "#dfe6ff",
-                                fontWeight: 700,
-                                letterSpacing: "0.02em"
-                            }}>
-                                Tracking Illustration Placeholder
+                    {/* Decorative Shapes */}
+                    <div className="absolute top-40 left-20 w-16 h-16 rounded-2xl bg-amber-300/50 dark:bg-amber-700/30 rotate-12 float hidden lg:block" />
+                    <div className="absolute top-60 right-40 w-12 h-12 rounded-full bg-emerald-300/50 dark:bg-emerald-700/30 float-delayed hidden lg:block" />
+                    <div className="absolute bottom-40 left-1/4 w-20 h-20 rounded-3xl bg-rose-300/30 dark:bg-rose-700/20 -rotate-12 float hidden lg:block" />
+
+                    <div className="max-w-6xl mx-auto px-6 py-20">
+                        <div className="grid lg:grid-cols-2 gap-16 items-center">
+                            {/* Left Content */}
+                            <div className={`slide-up ${heroInView ? 'visible' : ''}`}>
+                                {/* Badge */}
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200/50 dark:border-cyan-800/50 mb-6">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                    <span className="text-sm font-medium text-cyan-700 dark:text-cyan-400">Now available for universities</span>
+                                </div>
+
+                                <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold font-display leading-[1.1] mb-6">
+                                    Campus equipment,{' '}
+                                    <span className="relative inline-block">
+                                        <span className="gradient-text">simplified</span>
+                                        <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" fill="none">
+                                            <path d="M2 6C40 2 80 2 100 4C120 6 160 6 198 2" stroke="#00B4D8" strokeWidth="3" strokeLinecap="round" />
+                                        </svg>
+                                    </span>
+                                </h1>
+
+                                <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-lg leading-relaxed">
+                                    The modern way to track, manage, and share equipment across your campus.
+                                    Built by students, for students.
+                                </p>
+
+                                {/* CTA Buttons */}
+                                <div className="flex flex-wrap gap-4 mb-10">
+                                    <Link
+                                        to="/signup"
+                                        className="btn-primary group flex items-center gap-2 px-7 py-4 text-base font-semibold text-white rounded-2xl"
+                                    >
+                                        Start for free
+                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    </Link>
+                                    <button
+                                        onClick={() => setVideoModalOpen(true)}
+                                        className="flex items-center gap-2 px-7 py-4 text-base font-semibold text-slate-700 dark:text-slate-300 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-cyan-400 dark:hover:border-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center">
+                                            <Play className="w-4 h-4 text-cyan-600 dark:text-cyan-400 ml-0.5" />
+                                        </div>
+                                        Watch demo
+                                    </button>
+                                </div>
+
+                                {/* Social Proof */}
+                                <div className="flex items-center gap-6">
+                                    <div className="flex -space-x-3">
+                                        {['🧑‍💻', '👩‍🔬', '👨‍🎓', '👩‍💼'].map((emoji, i) => (
+                                            <div key={i} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-900 flex items-center justify-center text-lg">
+                                                {emoji}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                                            ))}
+                                        </div>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Loved by <strong>500+</strong> campus users</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right - Hero Card */}
+                            <div className={`relative slide-up ${heroInView ? 'visible' : ''}`} style={{ transitionDelay: '0.2s' }}>
+                                <div className="relative z-10 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/30 p-6 border border-slate-100 dark:border-slate-800">
+                                    {/* Card Header */}
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                                <Package className="w-5 h-5 text-white" />
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-slate-800 dark:text-white">Equipment Overview</p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">Real-time dashboard</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-1.5">
+                                            <div className="w-3 h-3 rounded-full bg-rose-400" />
+                                            <div className="w-3 h-3 rounded-full bg-amber-400" />
+                                            <div className="w-3 h-3 rounded-full bg-emerald-400" />
+                                        </div>
+                                    </div>
+
+                                    {/* Stats Grid */}
+                                    <div className="grid grid-cols-3 gap-3 mb-6">
+                                        {[
+                                            { label: "Available", value: "847", color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400" },
+                                            { label: "Borrowed", value: "156", color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" },
+                                            { label: "Overdue", value: "12", color: "bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400" },
+                                        ].map((stat, i) => (
+                                            <div key={i} className={`${stat.color} rounded-2xl p-4 text-center`}>
+                                                <p className="text-2xl font-bold">{stat.value}</p>
+                                                <p className="text-xs font-medium opacity-80">{stat.label}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Animated Chart */}
+                                    <AnimatedChart />
+
+                                    {/* Recent Activity */}
+                                    <div className="space-y-2 mt-4">
+                                        {[
+                                            { action: "Laptop checked out", user: "Sarah M.", time: "2m ago", emoji: "💻" },
+                                            { action: "Camera returned", user: "James K.", time: "15m ago", emoji: "📷" },
+                                        ].map((item, i) => (
+                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/30">
+                                                <span className="text-xl">{item.emoji}</span>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{item.action}</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">{item.user} • {item.time}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Floating Elements */}
+                                <div className="absolute -top-6 -right-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-4 float border border-slate-100 dark:border-slate-700">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                            <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-800 dark:text-white">Return confirmed!</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Score +10 pts</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="absolute -bottom-4 -left-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg px-4 py-3 float-delayed border border-slate-100 dark:border-slate-700">
+                                    <p className="text-sm font-medium text-slate-800 dark:text-white">🎉 99.9% Uptime</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-            </main>
-
-            {/* Light sections after hero */}
-            <div style={{ backgroundColor: "#f7f9fc", color: "#0b1d3a", marginTop: "-2rem", paddingTop: "4rem" }}>
-                <main style={{
-                    maxWidth: "1280px",
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                    padding: "0 1.5rem 4rem 1.5rem",
-                    position: "relative",
-                    zIndex: 5
-                }}>
-                    {/* Key Benefits */}
-                    <div id="benefits" style={{ marginBottom: "4rem", scrollMarginTop: "100px" }}>
-                        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-                            <h2 style={{
-                                fontSize: "clamp(2rem, 4vw, 2.5rem)",
-                                fontWeight: 700,
-                                color: "#0b1d3a",
-                                marginBottom: "0.75rem"
-                            }}>
-                                Key Benefits
-                            </h2>
-                            <p style={{
-                                fontSize: "1.05rem",
-                                color: "#475569",
-                                maxWidth: "680px",
-                                margin: "0 auto"
-                            }}>
-                                Why campuses choose Tracknity for reliable equipment operations.
-                            </p>
-                        </div>
-                        <div style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                            gap: "2rem"
-                        }}>
+                {/* Stats Banner */}
+                <section className="py-16 bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-900 dark:to-blue-900 relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 left-0 w-full h-full" style={{
+                            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                            backgroundSize: '32px 32px'
+                        }} />
+                    </div>
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
                             {[
-                                {
-                                    icon: <Rocket size={28} color="#0b69d4" />,
-                                    title: "Fast Onboarding",
-                                    desc: "Get your team up and running in minutes, not days. Intuitive interface requires minimal training, allowing students and IT staff to start managing equipment immediately.",
-                                    gradient: "linear-gradient(135deg, rgba(11,105,212,0.08) 0%, rgba(124,160,255,0.12) 100%)"
-                                },
-                                {
-                                    icon: <TrendingDown size={28} color="#0b69d4" />,
-                                    title: "Reduced Equipment Losses",
-                                    desc: "Comprehensive tracking and automated reminders ensure equipment accountability. Real-time visibility prevents misplaced items and reduces replacement costs significantly.",
-                                    gradient: "linear-gradient(135deg, rgba(11,105,212,0.08) 0%, rgba(124,160,255,0.12) 100%)"
-                                },
-                                {
-                                    icon: <Zap size={28} color="#0b69d4" />,
-                                    title: "Enterprise-Grade Reliability",
-                                    desc: "Built with uptime and performance in mind. Your equipment management never interrupts classes or projects, ensuring seamless operations 24/7.",
-                                    gradient: "linear-gradient(135deg, rgba(11,105,212,0.08) 0%, rgba(124,160,255,0.12) 100%)"
-                                },
-                            ].map((item, idx) => (
-                                <div
-                                    key={idx}
-                                    style={{
-                                        background: "#ffffff",
-                                        border: "1px solid #e2e8f0",
-                                        borderRadius: "1.25rem",
-                                        padding: "2rem",
-                                        boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
-                                        transition: "all 0.3s ease",
-                                        position: "relative",
-                                        overflow: "hidden"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = "translateY(-4px)";
-                                        e.currentTarget.style.boxShadow = "0 12px 32px rgba(11,105,212,0.15)";
-                                        e.currentTarget.style.borderColor = "#7ca0ff";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = "translateY(0)";
-                                        e.currentTarget.style.boxShadow = "0 8px 22px rgba(15,23,42,0.06)";
-                                        e.currentTarget.style.borderColor = "#e2e8f0";
-                                    }}
-                                >
-                                    <div style={{
-                                        width: "3.5rem",
-                                        height: "3.5rem",
-                                        borderRadius: "1rem",
-                                        background: item.gradient,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginBottom: "1.25rem"
-                                    }}>
-                                        {item.icon}
-                                    </div>
-                                    <h3 style={{
-                                        fontSize: "1.25rem",
-                                        fontWeight: 700,
-                                        color: "#0b1d3a",
-                                        marginBottom: "0.75rem",
-                                        lineHeight: 1.3
-                                    }}>
-                                        {item.title}
-                                    </h3>
-                                    <p style={{
-                                        color: "#475569",
-                                        lineHeight: 1.7,
-                                        fontSize: "0.95rem"
-                                    }}>
-                                        {item.desc}
+                                { value: 500, suffix: "+", label: "Active Users" },
+                                { value: 1000, suffix: "+", label: "Equipment Items" },
+                                { value: 99, suffix: "%", label: "Uptime" },
+                                { value: 24, suffix: "/7", label: "Support" },
+                            ].map((stat, i) => (
+                                <div key={i}>
+                                    <p className="text-4xl md:text-5xl font-bold font-display mb-1">
+                                        <AnimatedNumber value={stat.value} suffix={stat.suffix} />
                                     </p>
+                                    <p className="text-cyan-100 font-medium">{stat.label}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
+                </section>
 
-                    {/* Features Grid */}
-                    <div id="features" style={{ marginBottom: "4rem", scrollMarginTop: "100px" }}>
-                        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-                            <h2 style={{
-                                fontSize: "clamp(2rem, 4vw, 2.75rem)",
-                                fontWeight: 700,
-                                color: "#0b1d3a",
-                                marginBottom: "1rem"
-                            }}>
-                                Powerful Features
+                {/* Features Section */}
+                <section id="features" ref={featuresRef} className="py-24 relative">
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className={`text-center mb-16 slide-up ${featuresInView ? 'visible' : ''}`}>
+                            <h2 className="text-4xl md:text-5xl font-bold font-display mb-4">
+                                Everything you need to{' '}
+                                <span className="gradient-text">manage equipment</span>
                             </h2>
-                            <p style={{
-                                fontSize: "1.125rem",
-                                color: "#475569",
-                                maxWidth: "600px",
-                                margin: "0 auto"
-                            }}>
-                                Everything you need to manage equipment efficiently
+                            <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
+                                Powerful tools designed to make equipment tracking effortless for everyone on campus.
                             </p>
                         </div>
-                        <div style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                            gap: "1.75rem"
-                        }}>
-                            {features.map((feature, index) => (
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {features.map((feature, i) => (
                                 <div
-                                    key={index}
-                                    style={{
-                                        backgroundColor: "#ffffff",
-                                        border: "1px solid #e2e8f0",
-                                        borderRadius: "1.25rem",
-                                        padding: "2.25rem",
-                                        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                                        boxShadow: "0 10px 30px rgba(15,23,42,0.08)",
-                                        position: "relative",
-                                        overflow: "hidden"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.borderColor = "#c7d2fe";
-                                        e.currentTarget.style.boxShadow = "0 14px 38px rgba(79,139,255,0.18)";
-                                        e.currentTarget.style.transform = "translateY(-6px)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.borderColor = "#e2e8f0";
-                                        e.currentTarget.style.boxShadow = "0 10px 30px rgba(15,23,42,0.08)";
-                                        e.currentTarget.style.transform = "translateY(0)";
-                                    }}
+                                    key={i}
+                                    className={`card-hover bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 shadow-sm slide-up ${featuresInView ? 'visible' : ''}`}
+                                    style={{ transitionDelay: `${i * 0.1}s` }}
                                 >
-                                    <div style={{
-                                        width: "4rem",
-                                        height: "4rem",
-                                        borderRadius: "1rem",
-                                        background: "linear-gradient(135deg, rgba(79,139,255,0.14) 0%, rgba(139,107,255,0.16) 100%)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginBottom: "1.25rem"
-                                    }}>
+                                    <div className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mb-5`}>
                                         {feature.icon}
                                     </div>
-                                    <h3 style={{
-                                        fontSize: "1.375rem",
-                                        fontWeight: 700,
-                                        color: "#0b1d3a",
-                                        marginBottom: "0.75rem"
-                                    }}>
-                                        {feature.title}
-                                    </h3>
-                                    <p style={{
-                                        fontSize: "1rem",
-                                        color: "#475569",
-                                        lineHeight: 1.7
-                                    }}>
-                                        {feature.description}
-                                    </p>
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{feature.title}</h3>
+                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{feature.desc}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
+                </section>
 
-                    {/* How It Works */}
-                    <div id="how-it-works" style={{ marginBottom: "4rem", scrollMarginTop: "100px" }}>
-                        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                            <h2 style={{
-                                fontSize: "clamp(2rem, 4vw, 2.5rem)",
-                                fontWeight: 700,
-                                color: "#0b1d3a",
-                                marginBottom: "0.75rem"
-                            }}>
-                                How It Works
+                {/* How It Works */}
+                <section id="how-it-works" ref={howRef} className="py-24 bg-slate-50 dark:bg-slate-900/50">
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className={`text-center mb-16 slide-up ${howInView ? 'visible' : ''}`}>
+                            <h2 className="text-4xl md:text-5xl font-bold font-display mb-4">
+                                Simple as{' '}
+                                <span className="gradient-text">1-2-3-4</span>
                             </h2>
-                            <p style={{
-                                fontSize: "1.05rem",
-                                color: "#475569",
-                                maxWidth: "680px",
-                                margin: "0 auto"
-                            }}>
-                                A simple flow to keep requests, pickups, and returns moving smoothly.
+                            <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
+                                From browsing to returning, the entire process takes just minutes.
                             </p>
                         </div>
-                        <div style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                            gap: "2rem"
-                        }}>
-                            {[
-                                { step: "1", title: "Browse & Request", desc: "Find what you need and submit a quick request." },
-                                { step: "2", title: "Approve & Pick Up", desc: "IT staff approves, you collect, and tracking begins." },
-                                { step: "3", title: "Use & Monitor", desc: "Stay informed with reminders and real-time status." },
-                                { step: "4", title: "Return Smoothly", desc: "Check back in, verify condition, and you're done." },
-                            ].map((item, idx) => (
-                                <div key={idx} style={{
-                                    background: "#ffffff",
-                                    border: "1px solid #e2e8f0",
-                                    borderRadius: "1.25rem",
-                                    padding: "2rem",
-                                    boxShadow: "0 6px 18px rgba(15,23,42,0.05)",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    textAlign: "center",
-                                    transition: "all 0.3s ease"
-                                }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = "translateY(-4px)";
-                                        e.currentTarget.style.boxShadow = "0 12px 28px rgba(11,105,212,0.12)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = "translateY(0)";
-                                        e.currentTarget.style.boxShadow = "0 6px 18px rgba(15,23,42,0.05)";
-                                    }}
-                                >
-                                    <div style={{
-                                        width: "4rem",
-                                        height: "4rem",
-                                        borderRadius: "50%",
-                                        background: "linear-gradient(135deg, #0077b6 0%, #4f8bff 100%)",
-                                        color: "#ffffff",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontWeight: 700,
-                                        fontSize: "1.5rem",
-                                        marginBottom: "1.25rem",
-                                        boxShadow: "0 4px 12px rgba(11,105,212,0.25)"
-                                    }}>
-                                        {item.step}
-                                    </div>
-                                    <h4 style={{
-                                        margin: "0 0 0.5rem 0",
-                                        fontSize: "1.15rem",
-                                        fontWeight: 700,
-                                        color: "#0b1d3a"
-                                    }}>
-                                        {item.title}
-                                    </h4>
-                                    <p style={{
-                                        margin: 0,
-                                        color: "#475569",
-                                        lineHeight: 1.6,
-                                        fontSize: "0.95rem"
-                                    }}>
-                                        {item.desc}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
 
-                    {/* Who Can Use This Platform */}
-                    <div id="who-can-use" style={{ marginBottom: "4rem", scrollMarginTop: "100px" }}>
-                        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                            <h2 style={{
-                                fontSize: "clamp(2rem, 4vw, 2.5rem)",
-                                fontWeight: 700,
-                                color: "#0b1d3a",
-                                marginBottom: "0.75rem"
-                            }}>
-                                Who Can Use This Platform?
-                            </h2>
-                            <p style={{
-                                fontSize: "1.05rem",
-                                color: "#475569",
-                                maxWidth: "720px",
-                                margin: "0 auto"
-                            }}>
-                                Built for everyone involved in borrowing, managing, and supporting equipment across campus.
-                            </p>
-                        </div>
-                        <div style={{ position: "relative", maxWidth: "2000px", margin: "0 auto" }}>
-                            {/* Carousel Container */}
-                            <div style={{
-                                overflow: "hidden",
-                                borderRadius: "1rem",
-                                position: "relative"
-                            }}>
-                                <div style={{
-                                    display: "flex",
-                                    transform: `translateX(-${currentSlide * (100 / itemsPerSlide)}%)`,
-                                    transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                                    gap: "1.5rem"
-                                }}>
-                                    {whoCanUseItems.map((item, idx) => (
-                                        <div
-                                            key={idx}
-                                            style={{
-                                                minWidth: `calc(${100 / itemsPerSlide}% - ${1.5 * (itemsPerSlide - 1) / itemsPerSlide}rem)`,
-                                                background: "#ffffff",
-                                                border: "1px solid #e2e8f0",
-                                                borderRadius: "1.25rem",
-                                                padding: "2rem",
-                                                boxShadow: "0 6px 20px rgba(15,23,42,0.06)",
-                                                transition: "all 0.3s ease",
-                                                flexShrink: 0
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.transform = "translateY(-4px)";
-                                                e.currentTarget.style.boxShadow = "0 12px 32px rgba(11,105,212,0.15)";
-                                                e.currentTarget.style.borderColor = "#7ca0ff";
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.transform = "translateY(0)";
-                                                e.currentTarget.style.boxShadow = "0 6px 20px rgba(15,23,42,0.06)";
-                                                e.currentTarget.style.borderColor = "#e2e8f0";
-                                            }}
-                                        >
-                                            <h4 style={{
-                                                margin: 0,
-                                                fontSize: "1.25rem",
-                                                fontWeight: 700,
-                                                color: "#0b1d3a",
-                                                marginBottom: "0.75rem"
-                                            }}>
-                                                {item.title}
-                                            </h4>
-                                            <p style={{
-                                                margin: 0,
-                                                color: "#475569",
-                                                lineHeight: 1.7,
-                                                fontSize: "0.95rem"
-                                            }}>
-                                                {item.desc}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                        <div className="grid md:grid-cols-4 gap-6 relative">
+                            {/* Connection Line */}
+                            <div className="hidden md:block absolute top-16 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 dark:from-cyan-700 dark:via-blue-600 dark:to-violet-600" />
 
-                            {/* Dots Indicator */}
-                            <div style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                gap: "0.5rem",
-                                marginTop: "2rem"
-                            }}>
-                                {Array.from({ length: totalSlides }).map((_, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setCurrentSlide(idx)}
-                                        style={{
-                                            width: idx === currentSlide ? "2rem" : "0.5rem",
-                                            height: "0.5rem",
-                                            borderRadius: "0.25rem",
-                                            background: idx === currentSlide ? "#0b69d4" : "#cbd5e1",
-                                            border: "none",
-                                            cursor: "pointer",
-                                            transition: "all 0.3s ease",
-                                            padding: 0
-                                        }}
-                                        aria-label={`Go to slide ${idx + 1}`}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Success Stories / Testimonials */}
-                    <div id="success-stories" style={{ marginBottom: "4rem", scrollMarginTop: "100px" }}>
-                        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                            <h2 style={{
-                                fontSize: "clamp(2rem, 4vw, 2.5rem)",
-                                fontWeight: 700,
-                                color: "#0b1d3a",
-                                marginBottom: "0.75rem"
-                            }}>
-                                Success Stories
-                            </h2>
-                            <p style={{
-                                fontSize: "1.05rem",
-                                color: "#475569",
-                                maxWidth: "720px",
-                                margin: "0 auto"
-                            }}>
-                                Real experiences from people using Tracknity across campus.
-                            </p>
-                        </div>
-                        <div style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                            gap: "1.5rem"
-                        }}>
-                            {[
-                                {
-                                    quote: "I used to spend hours trying to find equipment for my research projects. Now I just check the app, see what's available, and request it. The reminders are a lifesaver - I never forget to return things on time anymore.",
-                                    name: "Sarah M.",
-                                    role: "Graduate Student, Computer Science",
-                                    avatar: "SM"
-                                },
-                                {
-                                    quote: "Before Tracknity, I'd have students coming to me asking where cameras or microphones were, and I'd have no idea. Now I can see everything in real-time. It's made my job so much easier, and students get their equipment faster.",
-                                    name: "James K.",
-                                    role: "IT Support Specialist",
-                                    avatar: "JK"
-                                },
-                                {
-                                    quote: "As a lecturer, I need to reserve equipment for my lab sessions ahead of time. The reservation system is straightforward, and I love getting notifications when my equipment is ready. No more last-minute scrambling!",
-                                    name: "Dr. Amina R.",
-                                    role: "Lecturer, Engineering Department",
-                                    avatar: "AR"
-                                },
-                                {
-                                    quote: "I was skeptical at first, but after using it for a semester, I can't imagine going back. The tracking feature helped me locate a missing tablet that would have been lost otherwise. It's really changed how we manage our media lab.",
-                                    name: "David T.",
-                                    role: "Media Lab Coordinator",
-                                    avatar: "DT"
-                                },
-                            ].map((item, idx) => (
+                            {steps.map((step, i) => (
                                 <div
-                                    key={idx}
-                                    style={{
-                                        background: "#ffffff",
-                                        border: "1px solid #e2e8f0",
-                                        borderRadius: "1.25rem",
-                                        padding: "2rem",
-                                        boxShadow: "0 8px 22px rgba(15,23,42,0.07)",
-                                        transition: "all 0.3s ease"
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = "translateY(-4px)";
-                                        e.currentTarget.style.boxShadow = "0 12px 32px rgba(11,105,212,0.12)";
-                                        e.currentTarget.style.borderColor = "#7ca0ff";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = "translateY(0)";
-                                        e.currentTarget.style.boxShadow = "0 8px 22px rgba(15,23,42,0.07)";
-                                        e.currentTarget.style.borderColor = "#e2e8f0";
-                                    }}
+                                    key={i}
+                                    className={`relative text-center slide-up ${howInView ? 'visible' : ''}`}
+                                    style={{ transitionDelay: `${i * 0.15}s` }}
                                 >
-                                    <p style={{
-                                        margin: "0 0 1.5rem 0",
-                                        color: "#0f172a",
-                                        lineHeight: 1.7,
-                                        fontSize: "0.95rem",
-                                        fontStyle: "italic"
-                                    }}>
-                                        "{item.quote}"
-                                    </p>
-                                    <div style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "1rem"
-                                    }}>
-                                        <div style={{
-                                            width: "3rem",
-                                            height: "3rem",
-                                            borderRadius: "50%",
-                                            background: "#caf0f8",
-                                            border: "5px,#caf0f8",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            color: "#0077b6",
-                                            fontWeight: 600,
-                                            fontSize: "0.9rem"
-                                        }}>
-                                            {item.avatar}
+                                    <div className="relative z-10 w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                                        <span className="text-white font-bold text-xl">{step.num}</span>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{step.title}</h3>
+                                    <p className="text-slate-600 dark:text-slate-400">{step.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Who Can Use */}
+                <section id="users" ref={usersRef} className="py-24">
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className={`text-center mb-16 slide-up ${usersInView ? 'visible' : ''}`}>
+                            <h2 className="text-4xl md:text-5xl font-bold font-display mb-4">
+                                Who uses{' '}
+                                <span className="gradient-text">Tracknity</span>?
+                            </h2>
+                            <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
+                                From students to administrators, everyone benefits from streamlined equipment management.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {users.map((user, i) => (
+                                <div
+                                    key={i}
+                                    className={`card-hover flex items-start gap-4 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 slide-up ${usersInView ? 'visible' : ''}`}
+                                    style={{ transitionDelay: `${i * 0.08}s` }}
+                                >
+                                    <span className="text-4xl">{user.emoji}</span>
+                                    <div>
+                                        <h3 className="font-bold text-slate-800 dark:text-white mb-1">{user.title}</h3>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400">{user.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Testimonials */}
+                <section ref={testimonialsRef} className="py-24 bg-gradient-to-br from-slate-50 to-cyan-50/30 dark:from-slate-900 dark:to-cyan-950/30">
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className={`text-center mb-16 slide-up ${testimonialsInView ? 'visible' : ''}`}>
+                            <h2 className="text-4xl md:text-5xl font-bold font-display mb-4">
+                                What people{' '}
+                                <span className="gradient-text">say</span>
+                            </h2>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+                            {testimonials.map((t, i) => (
+                                <div
+                                    key={i}
+                                    className={`testimonial-card bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm ${activeTestimonial === i ? 'active shadow-lg border-cyan-200 dark:border-cyan-800' : ''} slide-up ${testimonialsInView ? 'visible' : ''}`}
+                                    style={{ transitionDelay: `${i * 0.1}s` }}
+                                >
+                                    <div className="flex gap-1 mb-4">
+                                        {[...Array(5)].map((_, j) => (
+                                            <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                                        ))}
+                                    </div>
+                                    <p className="text-slate-700 dark:text-slate-300 mb-6 leading-relaxed">"{t.quote}"</p>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-3xl">{t.avatar}</span>
+                                        <div>
+                                            <p className="font-semibold text-slate-800 dark:text-white">{t.name}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{t.role}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Dots */}
+                        <div className="flex justify-center gap-2 mt-8">
+                            {testimonials.map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setActiveTestimonial(i)}
+                                    className={`w-2 h-2 rounded-full transition-all ${activeTestimonial === i ? 'w-8 bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Contact Section - Redesigned */}
+                <section id="contact" className="py-24">
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className="text-center mb-16">
+                            <h2 className="text-4xl md:text-5xl font-bold font-display mb-4">
+                                Get in{' '}
+                                <span className="gradient-text">touch</span>
+                            </h2>
+                            <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
+                                Have questions? We'd love to hear from you. Send us a message!
+                            </p>
+                        </div>
+
+                        <div className="grid lg:grid-cols-5 gap-8">
+                            {/* Contact Form - Takes 3 columns */}
+                            <div className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 shadow-sm">
+                                <form className="space-y-5">
+                                    <div className="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">First Name</label>
+                                            <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all" placeholder="student" />
                                         </div>
                                         <div>
-                                            <p style={{
-                                                margin: 0,
-                                                color: "#0b1d3a",
-                                                fontWeight: 600,
-                                                fontSize: "0.95rem"
-                                            }}>
-                                                {item.name}
-                                            </p>
-                                            <p style={{
-                                                margin: "0.25rem 0 0 0",
-                                                color: "#64748b",
-                                                fontSize: "0.85rem"
-                                            }}>
-                                                {item.role}
-                                            </p>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Last Name</label>
+                                            <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all" placeholder="j" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
+                                        <input type="email" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all" placeholder="student@example.com" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message</label>
+                                        <textarea rows={4} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all resize-none" placeholder="Your message..." />
+                                    </div>
+                                    <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2 px-6 py-4 text-base font-semibold text-white rounded-xl">
+                                        Send Message
+                                        <Send className="w-5 h-5" />
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Contact Info - Takes 2 columns */}
+                            <div className="lg:col-span-2 space-y-6">
+                                {/* Contact Cards */}
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                                            <MapPin className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">Location</p>
+                                            <p className="font-semibold text-slate-800 dark:text-white">Kigali, Rwanda</p>
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                            <Mail className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">Email</p>
+                                            <p className="font-semibold text-slate-800 dark:text-white">info@tracknity.com</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400">
+                                            <Phone className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">Phone</p>
+                                            <p className="font-semibold text-slate-800 dark:text-white">+250 788 000 000</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Social Links */}
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Follow us</p>
+                                    <div className="flex items-center gap-3">
+                                        {[
+                                            { href: "https://twitter.com", icon: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z", color: "hover:bg-slate-100 dark:hover:bg-slate-800" },
+                                            { href: "https://instagram.com", icon: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z", color: "hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-500" },
+                                            { href: "https://linkedin.com", icon: "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z", color: "hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600" },
+                                            { href: "https://github.com", icon: "M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z", color: "hover:bg-slate-100 dark:hover:bg-slate-800" },
+                                        ].map((social, i) => (
+                                            <a
+                                                key={i}
+                                                href={social.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`p-3 rounded-xl text-slate-500 dark:text-slate-400 transition-all ${social.color}`}
+                                            >
+                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d={social.icon} />
+                                                </svg>
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Map - Full Width, Shorter */}
+                        <div className="mt-8 bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm h-[280px]">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127672.75772082945!2d30.0018954!3d-1.9402881!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca42e29a5b491%3A0x3c05c8ba0c5af308!2sKigali%2C%20Rwanda!5e0!3m2!1sen!2s!4v1699000000000!5m2!1sen!2s"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0, filter: isDark ? 'invert(90%) hue-rotate(180deg)' : 'none' }}
+                                allowFullScreen=""
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                title="Location"
+                            />
                         </div>
                     </div>
+                </section>
 
-                </main>
-
-                {/* Footer */}
-                <footer style={{
-                    marginTop: "4rem",
-                    padding: "3rem 1.5rem 2rem 1.5rem",
-                    position: "relative",
-                    zIndex: 10,
-                    backgroundColor: "#080c1c",
-                    borderTop: "2px solid #0b69d4"
-                }}>
-                    <div style={{
-                        maxWidth: "1280px",
-                        marginLeft: "auto",
-                        marginRight: "auto"
-                    }}>
-                        {/* Top Section */}
-                        <div style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 2fr",
-                            gap: "4rem",
-                            marginBottom: "2.5rem",
-                            alignItems: "flex-start"
-                        }}>
-                            {/* Left: Company Info & Social */}
-                            <div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-                                    <img
-                                        src={logo}
-                                        alt="Tracknity logo"
-                                        style={{
-                                            width: "2.5rem",
-                                            height: "2.5rem",
-                                            objectFit: "contain",
-                                            display: "block"
-                                        }}
-                                    />
-                                    <span style={{
-                                        fontSize: "1.5rem",
-                                        fontWeight: 700,
-                                        background: "linear-gradient(135deg, #1864ab 0%, #4f8bff 50%, #7ca0ff 100%)",
-                                        WebkitBackgroundClip: "text",
-                                        WebkitTextFillColor: "transparent",
-                                        backgroundClip: "text"
-                                    }}>
-                                        Tracknity
-                                    </span>
-                                </div>
-                                <p style={{
-                                    color: "#dcdcdc",
-                                    fontSize: "0.9rem",
-                                    lineHeight: 1.6,
-                                    marginBottom: "1.5rem",
-                                    maxWidth: "300px"
-                                }}>
-                                    Tracknity empowers campuses to transform equipment management into a seamless, secure experience — making borrowing, tracking, and returns easier to manage, monitor, and optimize.
-                                </p>
-                                <div style={{ display: "flex", gap: "1rem" }}>
-                                    <a
-                                        href="#"
-                                        style={{
-                                            color: "#dcdcdc",
-                                            textDecoration: "none",
-                                            transition: "color 0.2s ease"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                        onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                    >
-                                        <Twitter size={20} />
-                                    </a>
-                                    <a
-                                        href="#"
-                                        style={{
-                                            color: "#dcdcdc",
-                                            textDecoration: "none",
-                                            transition: "color 0.2s ease"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                        onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                    >
-                                        <Instagram size={20} />
-                                    </a>
-                                    <a
-                                        href="#"
-                                        style={{
-                                            color: "#dcdcdc",
-                                            textDecoration: "none",
-                                            transition: "color 0.2s ease"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                        onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                    >
-                                        <Linkedin size={20} />
-                                    </a>
-                                    <a
-                                        href="#"
-                                        style={{
-                                            color: "#dcdcdc",
-                                            textDecoration: "none",
-                                            transition: "color 0.2s ease"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                        onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                    >
-                                        <Github size={20} />
-                                    </a>
-                                </div>
-                            </div>
-
-                            {/* Right: Navigation Columns */}
-                            <div style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: "2.5rem"
-                            }}>
-                                {/* Quick Access */}
-                                <div>
-                                    <h4 style={{
-                                        color: "#b0b0d0",
-                                        fontSize: "0.95rem",
-                                        fontWeight: 600,
-                                        marginBottom: "1rem",
-                                        marginTop: 0
-                                    }}>
-                                        Quick Access
-                                    </h4>
-                                    <ul style={{
-                                        listStyle: "none",
-                                        padding: 0,
-                                        margin: 0,
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: "0.75rem"
-                                    }}>
-                                        {[
-                                            { label: "Features", id: "features" },
-                                            { label: "Benefits", id: "benefits" },
-                                            { label: "How It Works", id: "how-it-works" },
-                                            { label: "Who Can Use", id: "who-can-use" },
-                                            { label: "Success Stories", id: "success-stories" }
-                                        ].map((item, idx) => (
-                                            <li key={idx}>
-                                                <button
-                                                    onClick={() => scrollToSection(item.id)}
-                                                    style={{
-                                                        color: "#dcdcdc",
-                                                        textDecoration: "none",
-                                                        fontSize: "0.9rem",
-                                                        transition: "color 0.2s ease",
-                                                        background: "none",
-                                                        border: "none",
-                                                        padding: 0,
-                                                        cursor: "pointer",
-                                                        textAlign: "left"
-                                                    }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                                    onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                                >
-                                                    {item.label}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                {/* Resources */}
-                                <div>
-                                    <h4 style={{
-                                        color: "#b0b0d0",
-                                        fontSize: "0.95rem",
-                                        fontWeight: 600,
-                                        marginBottom: "1rem",
-                                        marginTop: 0
-                                    }}>
-                                        Resources
-                                    </h4>
-                                    <ul style={{
-                                        listStyle: "none",
-                                        padding: 0,
-                                        margin: 0,
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: "0.75rem"
-                                    }}>
-                                        {[
-                                            { label: "Documentation", link: "#" },
-                                            { label: "Tutorials", link: "#" },
-                                            { label: "Help Center", link: "#" },
-                                            { label: "Training", link: "#" }
-                                        ].map((item, idx) => (
-                                            <li key={idx}>
-                                                <Link
-                                                    to={item.link}
-                                                    style={{
-                                                        color: "#dcdcdc",
-                                                        textDecoration: "none",
-                                                        fontSize: "0.9rem",
-                                                        transition: "color 0.2s ease"
-                                                    }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                                    onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                                >
-                                                    {item.label}
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                {/* Company */}
-                                <div>
-                                    <h4 style={{
-                                        color: "#b0b0d0",
-                                        fontSize: "0.95rem",
-                                        fontWeight: 600,
-                                        marginBottom: "1rem",
-                                        marginTop: 0
-                                    }}>
-                                        Company
-                                    </h4>
-                                    <ul style={{
-                                        listStyle: "none",
-                                        padding: 0,
-                                        margin: 0,
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: "0.75rem"
-                                    }}>
-                                        {[
-                                            { label: "About", link: "#" },
-                                            { label: "Contact", link: "#" },
-                                            { label: "Careers", link: "#" },
-                                            { label: "AUCA Partnership", link: "#" }
-                                        ].map((item, idx) => (
-                                            <li key={idx}>
-                                                <Link
-                                                    to={item.link}
-                                                    style={{
-                                                        color: "#dcdcdc",
-                                                        textDecoration: "none",
-                                                        fontSize: "0.9rem",
-                                                        transition: "color 0.2s ease"
-                                                    }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                                    onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                                >
-                                                    {item.label}
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Separator Line */}
-                        <div style={{
-                            height: "1px",
-                            backgroundColor: "rgba(255,255,255,0.1)",
-                            margin: "2rem 0 1.5rem 0"
+                {/* CTA
+                <section className="py-24 bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-900 dark:to-blue-900 relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 left-0 w-full h-full" style={{
+                            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                            backgroundSize: '32px 32px'
                         }} />
-
-                        {/* Bottom Section */}
-                        <div style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            gap: "1rem"
-                        }}>
-                            {/* Copyright */}
-                            <div style={{
-                                color: "#dcdcdc",
-                                fontSize: "0.875rem"
-                            }}>
-                                <p style={{ margin: 0 }}>
-                                    &copy; 2025 Tracknity. All rights reserved.
-                                </p>
-                            </div>
-                            {/* Legal Links */}
-                            <div style={{
-                                display: "flex",
-                                gap: "1.5rem",
-                                flexWrap: "wrap"
-                            }}>
-                                {["Privacy Policy", "Terms of Service", "Cookies Settings"].map((link, idx) => (
-                                    <Link
-                                        key={idx}
-                                        to="#"
-                                        style={{
-                                            color: "#dcdcdc",
-                                            textDecoration: "underline",
-                                            fontSize: "0.875rem",
-                                            transition: "color 0.2s ease"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.color = "#7ca0ff"}
-                                        onMouseLeave={(e) => e.currentTarget.style.color = "#dcdcdc"}
-                                    >
-                                        {link}
-                                    </Link>
-                                ))}
-                            </div>
+                    </div>
+                    <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
+                        <h2 className="text-4xl md:text-5xl font-bold font-display text-white mb-4">
+                            Ready to transform your campus?
+                        </h2>
+                        <p className="text-cyan-100 text-lg mb-8">
+                            Join hundreds of institutions already using Tracknity. Get started in minutes.
+                        </p>
+                        <div className="flex flex-wrap justify-center gap-4">
+                            <Link
+                                to="/signup"
+                                className="group flex items-center gap-2 px-8 py-4 bg-white text-cyan-700 font-semibold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
+                            >
+                                Start Free Trial
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                            <Link
+                                to="/login"
+                                className="px-8 py-4 font-semibold text-white rounded-2xl border-2 border-white/30 hover:bg-white/10 transition-all"
+                            >
+                                Sign In
+                            </Link>
                         </div>
+                    </div>
+                </section> */}
+
+                {/* Scroll to Top Button - Floating Circle */}
+                <button
+                    onClick={scrollToTop}
+                    className={`fixed bottom-24 right-8 z-40 w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-cyan-500 dark:hover:text-cyan-400 hover:border-cyan-300 dark:hover:border-cyan-700 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+                        }`}
+                    aria-label="Scroll to top"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}>
+                        <path d="M18 15l-6-6-6 6" />
+                    </svg>
+                </button>
+
+                {/* Footer - Simple Centered */}
+                <footer className="py-8 border-t border-slate-200 dark:border-slate-800">
+                    <div className="max-w-6xl mx-auto px-6">
+                        <p className="text-center text-slate-500 dark:text-slate-400 text-sm">
+                            © 2025 Tracknity. All rights reserved.
+                        </p>
                     </div>
                 </footer>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }

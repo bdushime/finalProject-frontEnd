@@ -4,10 +4,15 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";
 
 // Auth
-import Login from "./pages/auth/Login";
-import SignUp from "./pages/auth/SignUp";
+import Auth from "./pages/auth/Auth";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import OTPVerify from "./pages/auth/OTPVerify";
+
+// Admin pages
+import AdminDashboard from "./pages/Sys_Admin/Dashboard";
+import UsersList from "./pages/Sys_Admin/UserManagement/UsersList";
+import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
+import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
 
 // Student (User) pages
 import Dashboard from "./pages/User_Student/Dashboard";
@@ -28,8 +33,8 @@ export default function App() {
                 <Route path="/" element={<Landing />} />
 
                 {/* Auth Pages */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<SignUp />} />
+                <Route path="/login" element={<Auth />} />
+                <Route path="/signup" element={<Auth />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/otp-verify" element={<OTPVerify />} />
 
@@ -49,6 +54,17 @@ export default function App() {
                 {/* Other pages */}
                 <Route path="/student/notifications" element={<Notifications />} />
                 <Route path="/student/help" element={<HelpSupport />} />
+
+                {/* Admin Pages */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UsersList />} />
+                <Route path="/admin/config" element={<ConfigPage />} />
+                <Route path="/admin/data" element={<DataPage />} />
+                <Route path="/admin/monitoring" element={<MonitoringPage />} />
+                <Route path="/admin/reports" element={<ReportsPage />} />
+                <Route path="/admin/security" element={<SecurityPage />} />
+                <Route path="/admin/tracking" element={<TrackingPage />} />
+                <Route path="/admin/scan" element={<ScannerPage />} />
 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
