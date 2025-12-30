@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import MainLayout from "./layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -163,6 +163,20 @@ function BrowseDevices() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
+
+  // Listen for custom event from Topbar to open add dialog
+  useEffect(() => {
+    const handleOpenAddDialog = () => {
+      resetForm();
+      setIsAddDialogOpen(true);
+    };
+
+    window.addEventListener("openAddDeviceDialog", handleOpenAddDialog);
+    return () => {
+      window.removeEventListener("openAddDeviceDialog", handleOpenAddDialog);
+    };
+  }, []);
+
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -308,25 +322,6 @@ function BrowseDevices() {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Browse Devices</h1>
-            <p className="text-gray-600 mt-1">
-              Manage and monitor all equipment in the system
-            </p>
-          </div>
-          <Button
-            onClick={() => {
-              resetForm();
-              setIsAddDialogOpen(true);
-            }}
-            className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Device
-          </Button>
-        </div>
 
         <Card className="border border-gray-200 shadow-sm">
           <CardContent className="p-4">

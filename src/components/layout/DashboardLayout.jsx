@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }) {
   const isDesktop = typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-linear-to-br from-white to-yellow-100">
       {sidebarOpen && !isDesktop && (
         <div
           className="fixed inset-0 bg-black/30 sm:hidden z-30"
@@ -70,7 +70,8 @@ export default function DashboardLayout({ children }) {
         className="flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out"
       >
         <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
-        <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-6 py-6">
+        {/* <p > Welcome back to this</p> */}
+        <main className="flex-1 max-w-[1920px] mx-auto w-full px-4">
           {children}
         </main>
       </div>

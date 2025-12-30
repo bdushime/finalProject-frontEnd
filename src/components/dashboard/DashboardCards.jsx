@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@components/ui/card";
 import { Package, Activity, WifiOff, AlertTriangle, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Progressbar from "./Progressbar";
 
 const metrics = [
   {
@@ -18,21 +19,14 @@ const metrics = [
     bgGradient: "from-green-500 to-green-600",
   },
   {
-    label: "Offline Devices",
-    value: 20,
-    icon: WifiOff,
-    color: "text-orange-600 dark:text-orange-400",
-    bgGradient: "from-orange-500 to-orange-600",
-  },
-  {
-    label: "Lost/Stolen",
+    label: "Lost",
     value: 30,
     icon: AlertTriangle,
     color: "text-red-600 dark:text-red-400",
     bgGradient: "from-red-500 to-red-600",
   },
   {
-    label: "Overdue Loans",
+    label: "Overdue date",
     value: 45,
     icon: Clock,
     color: "text-white dark:text-purple-400",
@@ -44,13 +38,15 @@ export default function DashboardCards() {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-
+    <div className="flex justify-between items-center">
+      <Progressbar />
+    <div className="flex justify-end items-center gap-5 ">
       {/* the numbers to be used here should be got from the it-equipment.json file or the database */}
       {metrics.map((metric) => {
         const Icon = metric.icon;
         return (
-          <Card
+          <>
+          {/* <Card
             onClick={() => navigate(`/it/browse`)}
             key={metric.label}
             className="bg-card border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
@@ -73,9 +69,28 @@ export default function DashboardCards() {
                 
               </div>
             </CardContent>
-          </Card>
+            </Card> */}
+            <div className=" flex flex-col">
+              <div className="flex items-center gap-2 ">
+              <div
+                  className="p-1 rounded-lg mt-4 bg-gray-300/50 "
+                  
+                >
+                  <Icon className={`h-4 w-4 text-gray-600`} />
+                </div>
+                <p className="text-4xl font-semibold text-foreground text-gray-800">
+                    {metric.value.toLocaleString()}
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                    {metric.label}
+              </p>
+            </div>
+          </>
+          // {/* </div> */}
         );
       })}
+      </div>
     </div>
   );
 }

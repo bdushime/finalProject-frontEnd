@@ -19,7 +19,7 @@ export default function StatCard({
       "border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-xl",
       className
     )}>
-      <CardContent className="p-2 flex flex-col justify-between">
+      <CardContent className="p-6">
         <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
         {comparison && (
           <p className="text-xs text-gray-500 mb-2">Compared to ({comparison})</p>

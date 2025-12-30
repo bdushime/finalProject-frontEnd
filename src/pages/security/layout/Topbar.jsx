@@ -1,9 +1,8 @@
 import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import smallLogo from "@/assets/logo_small.png";
-import logo from "@/assets/tracknity_logo.jpeg";
-import { Settings, Bell, Calendar, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Menu, Search, Bell, Plus, LayoutGrid, ShieldAlert, Package, ClipboardList } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import {
   DropdownMenu,
@@ -14,134 +13,274 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/pages/auth/AuthContext";
+import logo from "@/assets/tracknity_logo.jpeg";
+import smallLogo from "@/assets/logo_small.png";
+import PropTypes from "prop-types";
+
+const navigationLinks = [
+  { label: "Dashboard", path: "/security/dashboard", icon: LayoutGrid },
+  { label: "Devices", path: "/security/devices", icon: Package },
+  { label: "Active Checkouts", path: "/security/active-checkouts", icon: ClipboardList },
+  { label: "Access Logs", path: "/security/logs", icon: ShieldAlert },
+];
+
+// Page-specific headers
+const getPageHeaders = () => {
+  const hour = new Date().getHours();
+  let timeGreeting = "Good morning";
+  if (hour >= 12 && hour < 18) {
+    timeGreeting = "Good afternoon";
+  } else if (hour >= 18) {
+    timeGreeting = "Good evening";
+  }
+
+  return {
+    "/security/dashboard": {
+      greeting: `${timeGreeting}, Security Officer!`,
+      subtitle: "Welcome back to your security dashboard",
+      actionButton: { label: "New Log Entry", path: "/security/logs", icon: Plus },
+    },
+    "/security/devices": {
+      greeting: "Device Management",
+      subtitle: "Browse, add, and manage all equipment",
+      actionButton: { label: "Add Device", path: "/security/devices", icon: Plus },
+    },
+    "/security/active-checkouts": {
+      greeting: "Active Checkouts",
+      subtitle: "Monitor all currently checked out equipment",
+      actionButton: { label: "New Checkout", path: "/security/active-checkouts", icon: Plus },
+    },
+    "/security/logs": {
+      greeting: "Access Logs",
+      subtitle: "View and monitor all equipment access activities",
+      actionButton: { label: "New Log Entry", path: "/security/logs", icon: Plus },
+    },
+  };
+};
 
 function Topbar({ onMenuClick }) {
-  const links = [
-    { label: "Security Dashboard", path: "/security/dashboard" },
-    { label: "Devices", path: "/security/devices" },
-    { label: "Active Checkouts", path: "/security/active-checkouts" },
-    // { label: "Settings", path: "/security/settings" },
-    // { label: "Notifications", path: "/security/notifications" },
-    // { label: "Profile", path: "/security/profile" },
-    { label: "Access Logs", path: "/security/logs" },
-  ];
-
-  const isLinkActive = (path) => {
-    if (location.pathname === path) return true;
-    return location.pathname.startsWith(path);
-  };
-  const unreadCount = 3;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const unreadCount = 3;
+  const currentPath = location.pathname;
+  const pageHeaders = getPageHeaders();
+  const pageHeader = pageHeaders[currentPath] || pageHeaders["/security/dashboard"];
+
   const formattedDate = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
     month: "long",
     day: "numeric",
     year: "numeric",
   }).format(new Date());
 
+
+  const isLinkActive = (path) => {
+    if (currentPath === path) return true;
+    return currentPath.startsWith(path);
+  };
+
+  const handleActionClick = () => {
+    if (currentPath === "/security/devices") {
+      // For devices page, we'll trigger the add dialog via a custom event
+      window.dispatchEvent(new CustomEvent("openAddDeviceDialog"));
+    } else {
+      navigate(pageHeader.actionButton.path);
+    }
+  };
+
   return (
-    <div className="w-full h-full gap-2 sticky top-0 z-30 transition-all duration-300 bg-[#0A1128] opacity-100 shadow-sm rounded-b-xl p-2">
-      <div className="w-full flex gap-2 justify-between sticky top-0 z-30 transition-all duration-300 ">
-        <Button
-          variant="outline"
-          size="icon"
-          className="sm:hidden border-none"
-          onClick={() => setSidebarOpen(!isSidebarOpen)}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-        <img
-          src={smallLogo}
-          alt="Tracknity"
-          className="block md:hidden w-12 rounded-full"
-        />
-        <img
-          src={logo}
-          alt="Tracknity"
-          className="hidden md:block rounded-full w-32 h-14"
-        />
-        <div className="flex items-center gap-2 px-4">
-          <nav className="flex rounded-full flex-col sm:flex-row items-center sm:items-center justify-betweeen gap-1 sm:gap-0 ">
-            {links.map((link) => {
-              const active = isLinkActive(link.path);
+    <div className="w-full">
+      {/* Top Navigation Bar */}
+      <div className="w-full bg-[#0A1128] text-white px-4 py-3">
+        <div className="flex items-center justify-between">
+          {/* Left: Logo and Navigation */}
+          <div className="flex items-center gap-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="sm:hidden text-white hover:bg-white/10"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            
+            <Link to="/security/dashboard" className="flex items-center gap-2">
+              <img
+                src={smallLogo}
+                alt="Tracknity"
+                className="block md:hidden w-10 h-10 rounded-full"
+              />
+              <img
+                src={logo}
+                alt="Tracknity"
+                className="hidden md:block h-10 w-auto rounded"
+              />
+            </Link>
+            </div>
+            {/* Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1">
+              {navigationLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isLinkActive(link.path);
+                return (
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                        active || isActive
+                          ? "bg-[#1A2240] text-white rounded-full"
+                          : "text-gray-300 hover:bg-white/10 hover:text-white"
+                      }`
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{link.label}</span>
+                  </NavLink>
+                );
+              })}
+            </nav>
+          
 
-              return (
-                <NavLink
-                  key={link.path}
-                  to={link.path}
-                  className={({ isActive }) =>
-                    [
-                      " flex w-full justify-center items-center text-sm font-medium transition-colors px-3 py-2",
-                      active || isActive
-                        ? "bg-[#1A2240] text-gray-100 shadow-sm rounded-full"
-                        : "text-slate-600 hover:bg-[#343264] hover:text-gray-100 rounded-full",
-                    ].join(" ")
-                  }
+          {/* Right: Search, Notifications, User */}
+          <div className="flex items-center gap-4">
+            {/* Search Bar */}
+            {/* <div className="hidden lg:flex relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 w-64 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20"
+              />
+            </div> */}
+
+            {/* Notifications */}
+            <Link
+              to="/security/notifications"
+              className="relative p-2 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell className="h-5 w-5 text-white" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+
+            {/* User Profile */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-white hover:bg-white/10"
                 >
-                  <span className="truncate">{link.label}</span>
-                </NavLink>
-              );
-            })}
-          </nav>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/security/settings"
-            className="p-2 gap-1 rounded-full  flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors shadow-sm"
-            aria-label="Settings"
-          >
-            <Settings className="h-5 w-5" />
-          </Link>
+                  <span className="hidden sm:block text-sm font-medium">
+                    {user?.name || "Security Officer"}
+                  </span>
+                  <Avatar className="h-8 w-8 border-2 border-white/20">
+                    <AvatarFallback className="bg-[#BEBEE0] text-[#1A2240] text-sm font-semibold">
+                      {user?.name?.charAt(0)?.toUpperCase() || "S"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/security/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/security/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          <Link
-            to="/security/notifications"
-            className="relative h-10 w-10 rounded-full  flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors shadow-sm"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center">
-                {unreadCount}
-              </span>
-            )}
-          </Link>
-
-          <Link
-            to="/security/profile"
-            className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-          >
-            <div className="h-8 w-8 rounded-full bg-[#0b69d4] flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">S</span>
-            </div>
-            <div className="text-left leading-tight hidden sm:block">
-              <p className="text-sm font-semibold text-[#0b1d3a]">Promise</p>
-              <p className="text-[11px] text-gray-500">Security</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-2 mt-16 my-5 px-4">
-        <h1 className="text-2xl font-bold text-white">
-          Welcome back, Security officer
-        </h1>
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-sm text-gray-500 flex items-center gap-2">
-            {" "}
-            <Calendar className="h-4 w-4" />{" "}
-            <span className="text-gray-500"> {formattedDate}</span>
-          </p>
-          <Link to="/security/add-device">
-            <button
-              // onClick={() => console.log("Add Device")}
-              className="flex items-center gap-2 text-foreground hover:opacity-70 transition-opacity border border-gray-400 bg-[#BEBEE0] text-gray-700 rounded-2xl py-2 px-4 cursor-pointer"
+            {/* Action Button */}
+            {/* <Button
+              onClick={handleActionClick}
+              className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white gap-2 hidden sm:flex"
             >
               <Plus className="h-4 w-4" />
-              <span className="font-medium">Add Device</span>
-            </button>
-          </Link>
+              {pageHeader.actionButton.label}
+            </Button> */}
+          </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 border-t border-white/20 pt-4">
+            <nav className="flex flex-col gap-2">
+              {navigationLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isLinkActive(link.path);
+                return (
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        active || isActive
+                          ? "bg-[#1A2240] text-white"
+                          : "text-gray-300 hover:bg-white/10 hover:text-white"
+                      }`
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{link.label}</span>
+                  </NavLink>
+                );
+              })}
+            </nav>
+          </div>
+        )}
+      
+
+      {/* Dynamic Page Header */}
+      {/* <div className="w-full bg-gradient-to-r from-[#0A1128] to-[#1A2240] text-white px-4 py-6"> */}
+        <div className="flex flex-col mt-24 sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1">
+              {pageHeader.greeting}
+            </h1>
+            <p className="text-gray-300 text-sm sm:text-base">
+              {formattedDate}
+            </p>
+            {pageHeader.subtitle && (
+              <p className="text-gray-400 text-sm mt-1 hidden sm:block">
+                {pageHeader.subtitle}
+              </p>
+            )}
+          </div>
+          
+          {/* Mobile Action Button */}
+          <Button
+            onClick={handleActionClick}
+            className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white gap-2 sm:hidden w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            {pageHeader.actionButton.label}
+          </Button>
         </div>
       </div>
+      {/* </div> */}
     </div>
   );
 }
+
+Topbar.propTypes = {
+  onMenuClick: PropTypes.func,
+};
 
 export default Topbar;
