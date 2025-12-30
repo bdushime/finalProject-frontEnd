@@ -51,7 +51,7 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, selectedCh
 						</Card>
 
 						{/* User Information */}
-						<Card>
+						<Card className=" border border-gray-300">
 							<CardHeader>
 								<CardTitle className="text-lg">Borrower Information</CardTitle>
 							</CardHeader>
@@ -81,7 +81,7 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, selectedCh
 						</Card>
 
 						{/* Checkout Details */}
-						<Card>
+						<Card className=" border border-gray-300">
 							<CardHeader>
 								<CardTitle className="text-lg">Checkout Details</CardTitle>
 							</CardHeader>
@@ -104,7 +104,7 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, selectedCh
 						</Card>
 
 						{/* Condition Photo */}
-						<Card>
+						<Card className=" border border-gray-300">
 							<CardHeader>
 								<CardTitle className="text-lg flex items-center gap-2">
 									<ImageIcon className="h-5 w-5" />

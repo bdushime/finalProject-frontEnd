@@ -46,7 +46,7 @@ export default function CurrentCheckouts() {
                                         onClick={() => handleRowClick(row)}
                                     >
                                         {/* Item Column with Left Border Accent */}
-                                        <td className="px-0 py-5 font-medium text-gray-900 relative">
+                                        <td className="px-0 font-medium text-gray-900 relative">
                                             <div className="flex items-center h-full">
                                                 <div className="absolute left-0 top-3 bottom-3 w-1 bg-[#0b1d3a] rounded-r"></div>
                                                 <span className="pl-6">{row.equipmentName}</span>
@@ -67,7 +67,7 @@ export default function CurrentCheckouts() {
                                                     e.stopPropagation();
                                                     handleRowClick(row);
                                                 }}
-                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2 font-medium"
+                                                className="text-[#126dd5] hover:bg-blue-50 px-2 font-medium"
                                             >
                                                 <Eye className="h-4 w-4 mr-1.5" />
                                                 View Details

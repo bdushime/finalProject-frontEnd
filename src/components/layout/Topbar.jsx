@@ -56,7 +56,7 @@ const baseItLinks = [
     icon: Radio,
   },
   { label: "Notifications", path: "/it/notifications", icon: Bell },
-  // { label: "Profile", path: "/it/profile", icon: User },
+  { label: "Reports", path: "/it/reports", icon: User },
 ];
 
 const baseAdminLinks = [
@@ -221,7 +221,7 @@ export default function Topbar({ onMenuClick }) {
             ) : (
               <>
                 <Settings className="h-4 w-4" />{" "}
-                <span className="text-sm font-medium ">Settings</span>
+                {/* <span className="text-sm font-medium ">Settings</span> */}
               </>
             )}
           </Button>

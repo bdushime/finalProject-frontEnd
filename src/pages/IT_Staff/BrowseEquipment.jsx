@@ -131,28 +131,28 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
       <PageContainer>
         <PageHeader title="Browse Equipment" subtitle="Discover and borrow equipment for your projects" />
 
-        <Card className="mb-6 border-gray-500">
+        <Card className="mb-6 border-gray-300">
           <CardContent className="pt-6">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search onSubmit={handleSearch} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search by name, brand, or description..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 rounded-full border-gray-300 shadow-sm"
                   />
                 </div>
-                <Button type="submit">Search</Button>
+                <Button type="submit" className="rounded-full border-gray-300 shadow-sm">Search</Button>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
+                <Select className="rounded-full border-gray-300 shadow-sm" value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-none border-gray-300 shadow-sm">
                     {categories.map(category => (
                       <SelectItem key={category} value={category}>
                         {category}
@@ -161,11 +161,11 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                   </SelectContent>
                 </Select>
 
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
+                <Select className="rounded-full border-gray-300 shadow-sm" value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-none border-gray-300 shadow-sm">
                     <SelectItem value="name">Name (A-Z)</SelectItem>
                     <SelectItem value="category">Category</SelectItem>
                     <SelectItem value="availability">Availability</SelectItem>
@@ -177,6 +177,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     variant={viewMode === 'grid' ? 'default' : 'outline'}
                     size="icon"
                     onClick={() => setViewMode('grid')}
+                    className="rounded-full border-gray-300 shadow-sm"
                   >
                     <Grid3x3 className="h-4 w-4" />
                   </Button>
@@ -205,11 +206,11 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
         </div>
 
         {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1">
             {currentEquipment.map(equipment => (
               <Card 
               key={equipment.id} 
-              className="flex flex-col border-gray-400 hover:shadow-lg hover:bg-gray-100 transition-shadow shadow-sm bg-background rounded-lg"
+              className="flex flex-col border-gray-300 hover:shadow-lg hover:bg-gray-100 transition-shadow shadow-sm bg-background rounded-3xl"
               onClick={() => navigate(`/it/equipment/${equipment.id}`)}
               >
                 <CardHeader>
@@ -240,7 +241,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
-                        className="flex-1 bg-[#BEBEE0] text-white"
+                        className="flex-1 bg-[#BEBEE0] text-white rounded-full"
                         onClick={() => {
                           // Prefer router navigation; fall back to callback if provided
                           if (onViewDetails) {
@@ -262,9 +263,9 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
         ) : (
           <div className="space-y-4">
             {currentEquipment.map(equipment => (
-              <Card key={equipment.id} className="p-6 border-none shadow-sm bg-background rounded-lg">
+              <Card key={equipment.id} className="p-6 border-none shadow-lg bg-background rounded-lg">
                 <CardContent className="">
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col justify-between sm:flex-row gap-4">
                     <div className="flex-1">
                       <div className="flex items-start gap-3 mb-3">
                         <CategoryBadge category={equipment.category} />
@@ -273,10 +274,10 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         </Badge>
                       </div>
                       <h3 className="text-gray-900 mb-1">{equipment.name}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{equipment.id}</p>
-                      <p className="text-sm text-gray-600 mb-3">
+                      {/* <p className="text-sm text-gray-600 mb-2">{equipment.id}</p> */}
+                      {/* <p className="text-sm text-gray-600 mb-3">
                         {equipment.description}
-                      </p>
+                      </p> */}
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center">
                           <Package className="h-4 w-4 mr-2 text-gray-400" />
@@ -290,7 +291,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     <div className="flex sm:flex-col gap-2 sm:w-32">
                       <Button
                         variant="outline"
-                        className="flex-1 bg-[#343264] text-white"
+                        className=" bg-[#343264] text-white"
                         onClick={() => {
                           if (onViewDetails) {
                             onViewDetails(equipment);
@@ -302,15 +303,6 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         <Eye className="h-4 w-4 sm:mr-2" />
                         <span className="hidden sm:inline">Details</span>
                       </Button>
-                      {/* <Button
-                        className="flex-1"
-                        disabled={equipment.available === 0}
-                        onClick={() => {
-                          if (onCheckout) onCheckout(equipment);
-                        }}
-                      >
-                        Borrow
-                      </Button> */}
                     </div>
                   </div>
                 </CardContent>

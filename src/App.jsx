@@ -24,6 +24,7 @@ import IoTTrackerLiveView from "./pages/IT_Staff/IoTTrackerLiveView";
 import CurrentCheckouts from "./pages/IT_Staff/CurrentCheckouts";
 import CheckoutHistory from "./pages/IT_Staff/CheckoutHistory";
 import SearchResults from "./pages/IT_Staff/SearchResults";
+import ReportsPage from "./pages/IT_Staff/reports/ReportsPage";
 
 // IT Staff checkout flow
 import SelectEquipment from "./pages/IT_Staff/checkout/SelectEquipment";
@@ -138,6 +139,14 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={["it"]}>
               <BrowseEquipment />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/it/reports"
+          element={
+            <ProtectedRoute allowedRoles={["it"]}>
+            <ReportsPage />
             </ProtectedRoute>
           }
         />
