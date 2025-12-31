@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Menu, Search, Bell, Plus, LayoutGrid, ShieldAlert, Package, ClipboardList } from "lucide-react";
+import { Menu, Bell, Plus, LayoutGrid, ShieldAlert, Package, ClipboardList, FileText } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import {
   DropdownMenu,
@@ -23,6 +22,7 @@ const navigationLinks = [
   { label: "Devices", path: "/security/devices", icon: Package },
   { label: "Active Checkouts", path: "/security/active-checkouts", icon: ClipboardList },
   { label: "Access Logs", path: "/security/logs", icon: ShieldAlert },
+  { label: "Reports", path: "/security/reports", icon: FileText },
 ];
 
 // Page-specific headers with titles and descriptions
@@ -58,8 +58,8 @@ const getPageHeaders = () => {
     },
     "/security/reports": {
       title: "Reports",
-      description: "Generate and view detailed reports on equipment usage, checkouts, returns, and security incidents",
-      actionButton: { label: "Generate Report", path: "/security/reports", icon: Plus },
+      description: "Generate and view detailed reports on equipment inventory, damaged items, lost equipment, and utilization statistics",
+      actionButton: null,
     },
     "/security/settings": {
       title: "Settings",
@@ -84,7 +84,6 @@ function Topbar({ onMenuClick }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   
   const unreadCount = 3;
   const currentPath = location.pathname;
@@ -97,7 +96,6 @@ function Topbar({ onMenuClick }) {
     day: "numeric",
     year: "numeric",
   }).format(new Date());
-
 
   const isLinkActive = (path) => {
     if (currentPath === path) return true;
@@ -114,9 +112,9 @@ function Topbar({ onMenuClick }) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-[#0A1128] rounded-b-3xl">
       {/* Top Navigation Bar */}
-      <div className="w-full bg-[#0A1128] text-white px-4 py-3">
+      <div className="w-full text-white px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Left: Logo and Navigation */}
           <div className="flex items-center gap-6">
@@ -141,7 +139,7 @@ function Topbar({ onMenuClick }) {
                 className="hidden md:block h-10 w-auto rounded"
               />
             </Link>
-
+            </div>
             {/* Navigation Links */}
             <nav className="hidden md:flex items-center gap-1">
               {navigationLinks.map((link) => {
@@ -165,23 +163,10 @@ function Topbar({ onMenuClick }) {
                 );
               })}
             </nav>
-          </div>
+          
 
-          {/* Right: Search, Notifications, User */}
+          {/* Right: Notifications, User */}
           <div className="flex items-center gap-4">
-            {/* Search Bar */}
-            {/* <div className="hidden lg:flex relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-64 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20"
-              />
-            </div> */}
-
-            {/* Notifications */}
             <Link
               to="/security/notifications"
               className="relative p-2 rounded-lg hover:bg-white/10 transition-colors"
@@ -222,18 +207,11 @@ function Topbar({ onMenuClick }) {
                   <Link to="/security/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link to="/login">Logout</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Action Button */}
-            {/* <Button
-              onClick={handleActionClick}
-              className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white gap-2 hidden sm:flex"
-            >
-              <Plus className="h-4 w-4" />
-              {pageHeader.actionButton.label}
-            </Button> */}
           </div>
         </div>
 
@@ -268,13 +246,13 @@ function Topbar({ onMenuClick }) {
       </div>
 
       {/* Dynamic Page Header */}
-      <div className="w-full bg-gradient-to-r from-[#0A1128] to-[#1A2240] text-white px-4 sm:px-6 py-6">
+      <div className="w-full px-4 sm:px-6 py-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-100">
               {pageHeader.title}
             </h1>
-            <p className="text-gray-300 text-sm sm:text-base mb-2">
+            <p className="text-gray-200 text-sm sm:text-base mb-2">
               {formattedDate}
             </p>
             {pageHeader.description && (

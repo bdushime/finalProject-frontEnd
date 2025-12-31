@@ -44,6 +44,7 @@ import SecurityDashboard from "./pages/security/SecurityDashboard";
 import Accesslogs from "./pages/security/Accesslogs";
 import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
 import BrowseDevices from "./pages/security/BrowseDevices";
+import SecurityReports from "./pages/security/Reports";
 
 export default function App() {
   return (
@@ -313,6 +314,14 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={["security"]}>
               <BrowseDevices />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/security/reports"
+          element={
+            <ProtectedRoute allowedRoles={["security"]}>
+              <SecurityReports />
             </ProtectedRoute>
           }
         />

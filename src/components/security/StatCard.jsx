@@ -16,24 +16,24 @@ export default function StatCard({
 
   return (
     <Card className={cn(
-      "border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-xl",
+      "border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-xl h-full",
       className
     )}>
-      <CardContent className="p-6">
+      <CardContent className="p-6 flex flex-col justify-between h-full">
         <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
         {comparison && (
           <p className="text-xs text-gray-500 mb-2">Compared to ({comparison})</p>
         )}
         <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
         {change !== undefined && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 mt-auto">
             {isPositive && <TrendingUp className="h-4 w-4 text-[#BEBEE0]" />}
-            {isNegative && <TrendingDown className="h-4 w-4 text-[#343264]" />}
+            {isNegative && <TrendingDown className="h-4 w-4 text-[#BEBEE0]" />}
             <span
               className={cn(
                 "text-sm font-medium",
                 isPositive && "text-[#BEBEE0]",
-                isNegative && "text-[#343264]",
+                isNegative && "text-[#BEBEE0]",
                 !isPositive && !isNegative && "text-gray-600"
               )}
             >
@@ -54,4 +54,3 @@ StatCard.propTypes = {
   changeType: PropTypes.oneOf(["positive", "negative", "neutral"]),
   className: PropTypes.string,
 };
-
