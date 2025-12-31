@@ -10,7 +10,7 @@ import { Search, Package } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import { StatusBadge } from "./components/StatusBadge";
 import BackButton from "./components/BackButton";
-import ExtendModal from "@/components/ui/extendmodal";
+import ExtendModal from "@/components/ui/ExtendModal";
 import { borrowedItems } from "./data/mockData";
 import { useNavigate } from "react-router-dom";
 

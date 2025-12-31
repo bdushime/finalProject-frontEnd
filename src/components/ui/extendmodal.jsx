@@ -259,3 +259,4 @@ ExtendModal.propTypes = {
     }),
     onConfirm: PropTypes.func,
 };
+
