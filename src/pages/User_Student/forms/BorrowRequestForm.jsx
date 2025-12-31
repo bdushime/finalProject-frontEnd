@@ -23,6 +23,7 @@ import {
     ArrowRight,
     Search,
     ChevronLeft,
+    Camera,
 } from "lucide-react";
 import { equipmentData, getEquipmentById } from "@/components/lib/equipmentData";
 import PropTypes from "prop-types";
@@ -63,7 +64,17 @@ export default function BorrowRequestForm({ onSuccess }) {
     // Flow state: null = choice screen, 'borrow' = borrow wizard, 'reserve' = reserve wizard
     const [flowType, setFlowType] = useState(actionParam || null);
     const [step, setStep] = useState(1);
+    const [scanResult, setScanResult] = useState(null);
+    // Score Check - For demo, using mock score. In real app, fetch from context/API.
+    // CHANGE THIS VALUE TO TEST BLOCKING (e.g. 45)
+    const studentScore = 92;
 
+    useEffect(() => {
+        if (studentScore <= 50) {
+            // Redirect to score page if blocked
+            navigate('/student/score');
+        }
+    }, [studentScore, navigate]);
     const [equipment, setEquipment] = useState(null);
     const [formData, setFormData] = useState({
         equipmentId: equipmentId || "",
@@ -81,6 +92,18 @@ export default function BorrowRequestForm({ onSuccess }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterType, setFilterType] = useState("all");
     const [timeSlots, setTimeSlots] = useState([]);
+    const [conditionPhotos, setConditionPhotos] = useState({ front: null, back: null });
+
+    const handlePhotoUpload = (view, e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setConditionPhotos(prev => ({ ...prev, [view]: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     useEffect(() => {
         if (equipmentId) {
@@ -261,81 +284,57 @@ export default function BorrowRequestForm({ onSuccess }) {
     // ============ CHOICE SCREEN ============
     if (!flowType) {
         return (
-            <div className="space-y-6">
-                <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_16px_38px_-22px_rgba(8,47,73,0.35)]">
-                    <CardHeader className="text-center pb-2">
-                        <CardTitle className="text-2xl font-bold text-[#0b1d3a]">
-                            What would you like to do?
-                        </CardTitle>
-                        <p className="text-slate-600">Choose an option to get started</p>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            {/* Borrow Now Option */}
-                            <button
-                                onClick={() => setFlowType("borrow")}
-                                className="group relative p-6 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 hover:border-[#0b69d4] hover:shadow-[0_12px_28px_-12px_rgba(11,105,212,0.25)] transition-all duration-300 text-left"
-                            >
-                                <div className="flex items-start gap-4">
-                                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#0b69d4] to-[#0f7de5] flex items-center justify-center shadow-lg shadow-sky-200/50 group-hover:scale-110 transition-transform">
-                                        <Scan className="h-7 w-7 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-bold text-[#0b1d3a] mb-1">Borrow Now</h3>
-                                        <p className="text-sm text-slate-600 mb-3">
-                                            I'm at the equipment location and ready to pick up
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            <Badge className="bg-sky-50 text-sky-700 border-sky-100 rounded-full text-xs">
-                                                Scan QR
-                                            </Badge>
-                                            <Badge className="bg-sky-50 text-sky-700 border-sky-100 rounded-full text-xs">
-                                                Instant pickup
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-hover:text-[#0b69d4] group-hover:translate-x-1 transition-all" />
-                            </button>
-
-                            {/* Reserve for Later Option */}
-                            <button
-                                onClick={() => setFlowType("reserve")}
-                                className="group relative p-6 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 hover:border-[#0b69d4] hover:shadow-[0_12px_28px_-12px_rgba(11,105,212,0.25)] transition-all duration-300 text-left"
-                            >
-                                <div className="flex items-start gap-4">
-                                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#0b69d4] to-[#0f7de5] flex items-center justify-center shadow-lg shadow-sky-200/50 group-hover:scale-110 transition-transform">
-                                        <CalendarClock className="h-7 w-7 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-bold text-[#0b1d3a] mb-1">Reserve for Later</h3>
-                                        <p className="text-sm text-slate-600 mb-3">
-                                            I want to schedule equipment for a future date
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            <Badge className="bg-sky-50 text-sky-700 border-sky-100 rounded-full text-xs">
-                                                Browse available
-                                            </Badge>
-                                            <Badge className="bg-sky-50 text-sky-700 border-sky-100 rounded-full text-xs">
-                                                Pick time slot
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                                <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-hover:text-[#0b69d4] group-hover:translate-x-1 transition-all" />
-                            </button>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <div className="flex justify-center">
-                    <Button
-                        variant="outline"
-                        onClick={() => navigate("/student/equipment")}
-                        className="rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
+            <div className="max-w-7xl py-8 px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Borrow Now Option */}
+                    <button
+                        onClick={() => setFlowType("borrow")}
+                        className="group relative bg-white p-8 rounded-3xl border border-slate-200 text-left transition-all hover:border-[#126dd5] hover:shadow-xl hover:shadow-blue-900/5 intro-card-delay"
                     >
-                        Cancel
-                    </Button>
+                        <div className="mb-6 inline-flex p-4 rounded-2xl bg-[#0f7de5]/10 text-[#0f7de5] group-hover:bg-[#0f7de5] group-hover:text-white transition-colors">
+                            <Scan className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-3 group-hover:text-[#0f7de5] transition-colors">Borrow Now</h3>
+                        <p className="text-slate-500 mb-6 leading-relaxed">
+                            For immediate pickup. Scan the QR code on the equipment or select from the list.
+                        </p>
+                        <ul className="space-y-2 text-sm text-slate-600 mb-8">
+                            <li className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-emerald-500" /> Instant verification
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-emerald-500" /> No waiting time
+                            </li>
+                        </ul>
+                        <span className="inline-flex items-center text-[#0f7de5] font-semibold group-hover:gap-2 transition-all">
+                            Start Borrowing <ArrowRight className="ml-2 h-4 w-4" />
+                        </span>
+                    </button>
+
+                    {/* Reserve for Later Option */}
+                    <button
+                        onClick={() => setFlowType("reserve")}
+                        className="group relative bg-white p-8 rounded-3xl border border-slate-200 text-left transition-all hover:border-[#7c3aed] hover:shadow-xl hover:shadow-purple-900/5"
+                    >
+                        <div className="mb-6 inline-flex p-4 rounded-2xl bg-[#7c3aed]/10 text-[#7c3aed] group-hover:bg-[#7c3aed] group-hover:text-white transition-colors">
+                            <CalendarClock className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-3 group-hover:text-[#7c3aed] transition-colors">Reserve for Later</h3>
+                        <p className="text-slate-500 mb-6 leading-relaxed">
+                            Schedule equipment for a future class or event. We'll have it ready for you.
+                        </p>
+                        <ul className="space-y-2 text-sm text-slate-600 mb-8">
+                            <li className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-emerald-500" /> Guaranteed availability
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-emerald-500" /> Plan ahead up to 30 days
+                            </li>
+                        </ul>
+                        <span className="inline-flex items-center text-[#7c3aed] font-semibold group-hover:gap-2 transition-all">
+                            Make Reservation <ArrowRight className="ml-2 h-4 w-4" />
+                        </span>
+                    </button>
                 </div>
             </div>
         );
@@ -343,82 +342,62 @@ export default function BorrowRequestForm({ onSuccess }) {
 
     // ============ WIZARD FLOW ============
     return (
-        <div className="space-y-6">
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             {/* Back to choice + Step Indicators */}
-            <div className="space-y-4">
+            <div className="mb-8">
+                <div className="flex items-center justify-between mb-6">
+                    <button
+                        onClick={handleBack}
+                        className="flex items-center text-sm font-medium text-slate-500 hover:text-[#0b1d3a] transition-colors"
+                    >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        {step === 1 ? "Back to options" : "Previous step"}
+                    </button>
+                    <div className="text-sm font-medium text-slate-500">
+                        Step {step} of 4
+                    </div>
+                </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    {currentSteps.map((s, idx) => {
-                        const Icon = s.icon;
-                        const isActive = step === idx + 1;
-                        const isCompleted = step > idx + 1;
+                <div className="relative">
+                    <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-100 -translate-y-1/2 rounded-full" />
+                    <div
+                        className="absolute top-1/2 left-0 h-1 bg-[#126dd5] -translate-y-1/2 rounded-full transition-all duration-300"
+                        style={{ width: `${((step - 1) / 3) * 100}%` }}
+                    />
+                    <div className="relative flex justify-between">
+                        {currentSteps.map((s, idx) => {
+                            const isActive = step === idx + 1;
+                            const isCompleted = step > idx + 1;
+                            const Icon = s.icon;
 
-                        return (
-                            <button
-                                key={s.label}
-                                type="button"
-                                onClick={() => setStep(idx + 1)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 ${
-                                    isActive
-                                        ? "border-[#0b69d4] bg-sky-50 shadow-[0_12px_28px_-22px_rgba(8,47,73,0.3)]"
-                                        : isCompleted
-                                        ? "border-emerald-200 bg-emerald-50/50"
-                                        : "border-slate-200 bg-white hover:border-sky-200 hover:bg-sky-50"
-                                }`}
-                            >
-                                <div
-                                    className={`h-9 w-9 rounded-full flex items-center justify-center font-semibold text-sm shrink-0 ${
-                                        isActive
-                                            ? "bg-[#0b69d4] text-white"
+                            return (
+                                <div key={s.label} className="flex flex-col items-center gap-2">
+                                    <div
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 bg-white ${isActive
+                                            ? "border-[#126dd5] text-[#126dd5] shadow-lg shadow-blue-500/20 scale-110"
                                             : isCompleted
-                                            ? "bg-emerald-500 text-white"
-                                            : "bg-slate-100 text-slate-600"
-                                    }`}
-                                >
-                                    {isCompleted ? <CheckCircle className="h-5 w-5" /> : idx + 1}
-                                </div>
-                                <div className="text-left min-w-0">
-                                    <p
-                                        className={`text-sm font-semibold truncate ${
-                                            isActive
-                                                ? "text-[#0b1d3a]"
-                                                : isCompleted
-                                                ? "text-emerald-700"
-                                                : "text-slate-700"
-                                        }`}
+                                                ? "border-[#126dd5] bg-[#126dd5] text-white"
+                                                : "border-slate-200 text-slate-300"
+                                            }`}
                                     >
+                                        {isCompleted ? <CheckCircle className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                                    </div>
+                                    <span className={`text-xs font-semibold hidden sm:block transition-colors ${isActive || isCompleted ? "text-[#0b1d3a]" : "text-slate-400"
+                                        }`}>
                                         {s.label}
-                                    </p>
-                                    <p className="text-xs text-slate-500 truncate hidden sm:block">{s.description}</p>
+                                    </span>
                                 </div>
-                            </button>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
-            {/* Main Content Card */}
-            <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_16px_38px_-22px_rgba(8,47,73,0.35)]">
-                <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2">
-                        <Badge
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                flowType === "reserve"
-                                    ? "bg-sky-50 text-sky-700 border border-sky-100"
-                                    : "bg-sky-50 text-sky-700 border border-sky-100"
-                            }`}
-                        >
-                            {flowType === "reserve" ? "Reservation" : "Borrow"}
-                        </Badge>
-                    </div>
-                    <CardTitle className="text-xl font-bold text-[#0b1d3a] flex items-center gap-2 mt-2">
-                        {(() => {
-                            const Icon = currentSteps[step - 1].icon;
-                            return <Icon className="h-5 w-5 text-[#0b69d4]" />;
-                        })()}
-                        {currentSteps[step - 1].label}
-                    </CardTitle>
-                    <p className="text-sm text-slate-600">
+            {/* Main Content - Card styling removed for alignment */}
+            <div className="space-y-6">
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-[#0b1d3a] mb-2">{currentSteps[step - 1].label}</h2>
+                    <p className="text-slate-500">
                         {flowType === "borrow" && step === 1 && "Scan the QR code on the equipment you want to borrow."}
                         {flowType === "borrow" && step === 2 && "Tell us why you need this equipment."}
                         {flowType === "borrow" && step === 3 && "Provide your class details and session time."}
@@ -428,219 +407,211 @@ export default function BorrowRequestForm({ onSuccess }) {
                         {flowType === "reserve" && step === 3 && "Provide your class details and purpose."}
                         {flowType === "reserve" && step === 4 && "Review all details and confirm your reservation."}
                     </p>
-                </CardHeader>
+                </div>
 
-                <CardContent className="space-y-4">
+                <div className="space-y-6">
                     {/* ============ BORROW FLOW STEPS ============ */}
                     {flowType === "borrow" && (
                         <>
                             {/* Borrow Step 1: Scan QR */}
                             {step === 1 && (
-                                <div className="space-y-4">
-                                    <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                        <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                            <QrCode className="h-5 w-5 text-slate-600" />
-                                            <p className="font-semibold text-[#0b1d3a]">Scan QR Code</p>
-                                        </div>
-                                        <div className="p-4 space-y-3">
-                                            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 overflow-hidden">
-                                                {isScanning ? (
-                                                    <video
-                                                        ref={videoRef}
-                                                        className="w-full h-52 object-cover"
-                                                        autoPlay
-                                                        playsInline
-                                                        muted
-                                                    />
-                                                ) : (
-                                                    <div className="h-52 flex flex-col items-center justify-center text-[#0b1d3a] space-y-2">
-                                                        <QrCode className="h-10 w-10 text-slate-400" />
-                                                        <p className="font-semibold">Scan Equipment QR Code</p>
-                                                        <p className="text-sm text-slate-600">
-                                                            Point your camera at the QR code on the equipment
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex gap-3">
-                                                {!isScanning ? (
-                                                    <Button
-                                                        type="button"
-                                                        onClick={handleScanQR}
-                                                        className="bg-[#0b69d4] hover:bg-[#0f7de5] text-white rounded-xl shadow-sm shadow-sky-200/60"
-                                                    >
-                                                        Open Camera
-                                                    </Button>
-                                                ) : (
-                                                    <Button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setIsScanning(false);
-                                                            stopCamera();
-                                                        }}
-                                                        className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
-                                                    >
-                                                        Stop Camera
-                                                    </Button>
-                                                )}
-                                            </div>
-
-                                            {errors.scan && <p className="text-sm text-red-600">{errors.scan}</p>}
-                                        </div>
-                                    </div>
-
-                                    {/* Manual selection dropdown */}
-                                    <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                        <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                            <Package className="h-5 w-5 text-slate-600" />
-                                            <p className="font-semibold text-[#0b1d3a]">Or Select Manually</p>
-                                        </div>
-                                        <div className="p-4 space-y-3">
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-semibold text-[#0b1d3a]">
-                                                    Select Equipment
-                                                </Label>
-                                                <Select
-                                                    value={formData.equipmentId}
-                                                    onValueChange={handleEquipmentSelect}
-                                                >
-                                                    <SelectTrigger className="w-full rounded-xl border-slate-200">
-                                                        <SelectValue placeholder="Choose equipment..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {availableEquipment
-                                                            .filter((eq) => eq.available)
-                                                            .map((eq) => (
-                                                                <SelectItem key={eq.id} value={eq.id}>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="font-medium">{eq.name}</span>
-                                                                        <span className="text-xs text-slate-500">
-                                                                            ({eq.id})
-                                                                        </span>
-                                                                    </div>
-                                                                </SelectItem>
-                                                            ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.equipmentId && (
-                                                    <p className="text-sm text-red-600">{errors.equipmentId}</p>
-                                                )}
-                                            </div>
-
-                                            {formData.equipmentId && equipment && (
-                                                <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-                                                    <Package className="h-5 w-5 text-emerald-600" />
-                                                    <div>
-                                                        <p className="text-sm font-semibold text-emerald-800">
-                                                            Selected: {equipment.name}
-                                                        </p>
-                                                        <p className="text-xs text-emerald-600">
-                                                            {equipment.id} • {equipment.location}
-                                                        </p>
-                                                    </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                                    {/* Left Column: Scanner */}
+                                    <div className="space-y-6">
+                                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                                            <div className="flex flex-col items-start space-y-4">
+                                                <div className="w-full max-w-sm aspect-square bg-white rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden relative">
+                                                    {isScanning ? (
+                                                        <video
+                                                            ref={videoRef}
+                                                            className="w-full h-full object-cover"
+                                                            autoPlay
+                                                            playsInline
+                                                            muted
+                                                        />
+                                                    ) : (
+                                                        <div className="text-center p-6">
+                                                            <QrCode className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                                                            <p className="font-semibold text-[#0b1d3a]">Camera is off</p>
+                                                            <p className="text-sm text-slate-500">Click below to start scanning</p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+
+                                                <Button
+                                                    type="button"
+                                                    onClick={isScanning ? () => { setIsScanning(false); stopCamera(); } : handleScanQR}
+                                                    className={`rounded-xl px-6 text-white ${isScanning ? "bg-rose-500 hover:bg-rose-600" : "bg-[#0b1d3a] hover:bg-[#126dd5]"}`}
+                                                >
+                                                    {isScanning ? "Stop Camera" : "Start Scanning"}
+                                                </Button>
+                                                {errors.scan && <p className="text-sm text-red-600">{errors.scan}</p>}
+                                            </div>
+                                        </div>
+
+                                        <div className="relative">
+                                            <div className="absolute inset-0 flex items-center">
+                                                <span className="w-full border-t border-slate-200" />
+                                            </div>
+                                            <div className="relative flex justify-center text-xs uppercase">
+                                                <span className="bg-white px-2 text-slate-400">Or select manually</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Manual selection */}
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-[#0b1d3a]">Select Equipment</Label>
+                                            <Select value={formData.equipmentId} onValueChange={handleEquipmentSelect}>
+                                                <SelectTrigger className="h-12 rounded-xl border-slate-200 bg-white text-base">
+                                                    <SelectValue placeholder="Choose equipment from list..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {availableEquipment
+                                                        .filter((eq) => eq.available)
+                                                        .map((eq) => (
+                                                            <SelectItem key={eq.id} value={eq.id}>
+                                                                <span className="font-medium mr-2">{eq.name}</span>
+                                                                <span className="text-slate-400 text-xs">({eq.id})</span>
+                                                            </SelectItem>
+                                                        ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.equipmentId && <p className="text-sm text-red-600">{errors.equipmentId}</p>}
                                         </div>
                                     </div>
-                                </div>
-                            )}
 
-                            {/* Borrow Step 2: Request Details */}
-                            {step === 2 && (
-                                <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                    <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                        <ClipboardList className="h-5 w-5 text-slate-600" />
-                                        <p className="font-semibold text-[#0b1d3a]">Request Information</p>
-                                    </div>
-                                    <div className="p-4 space-y-4">
+                                    {/* Right Column: Condition Photos */}
+                                    <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label className="text-sm font-semibold text-[#0b1d3a]">Purpose</Label>
-                                            <Textarea
-                                                value={formData.purpose}
-                                                onChange={(e) => handleInputChange("purpose", e.target.value)}
-                                                placeholder="Why do you need this equipment? (e.g., Presentation for my final project)"
-                                                className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4] min-h-[120px]"
-                                            />
-                                            {errors.purpose && (
-                                                <p className="text-sm text-red-600">{errors.purpose}</p>
-                                            )}
+                                            <Label className="text-lg font-bold text-[#0b1d3a]">Condition Photos</Label>
+                                            <p className="text-slate-500 text-sm">
+                                                Please take photos of the equipment from multiple angles to document its current condition.
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-6">
+                                            {/* Front View */}
+                                            <label className="relative h-48 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center p-6 hover:bg-slate-50 hover:border-[#126dd5]/50 transition-all group cursor-pointer overflow-hidden">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    capture="environment"
+                                                    className="hidden"
+                                                    onChange={(e) => handlePhotoUpload('front', e)}
+                                                />
+                                                {conditionPhotos.front ? (
+                                                    <>
+                                                        <img src={conditionPhotos.front} alt="Front View" className="absolute inset-0 w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <div className="bg-white/90 p-2 rounded-full">
+                                                                <Camera className="h-6 w-6 text-[#0b1d3a]" />
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="mb-3 p-3 rounded-full bg-white shadow-sm text-slate-400 group-hover:text-[#126dd5] transition-colors">
+                                                            <Camera className="h-6 w-6" />
+                                                        </div>
+                                                        <span className="font-semibold text-[#0b1d3a] mb-1">Front View</span>
+                                                        <span className="text-xs text-slate-400">Click to capture photo</span>
+                                                    </>
+                                                )}
+                                            </label>
+
+                                            {/* Back View */}
+                                            <label className="relative h-48 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center p-6 hover:bg-slate-50 hover:border-[#126dd5]/50 transition-all group cursor-pointer overflow-hidden">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    capture="environment"
+                                                    className="hidden"
+                                                    onChange={(e) => handlePhotoUpload('back', e)}
+                                                />
+                                                {conditionPhotos.back ? (
+                                                    <>
+                                                        <img src={conditionPhotos.back} alt="Back View" className="absolute inset-0 w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <div className="bg-white/90 p-2 rounded-full">
+                                                                <Camera className="h-6 w-6 text-[#0b1d3a]" />
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="mb-3 p-3 rounded-full bg-white shadow-sm text-slate-400 group-hover:text-[#126dd5] transition-colors">
+                                                            <Camera className="h-6 w-6" />
+                                                        </div>
+                                                        <span className="font-semibold text-[#0b1d3a] mb-1">Back View</span>
+                                                        <span className="text-xs text-slate-400">Click to capture photo</span>
+                                                    </>
+                                                )}
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Borrow Step 3: Session Info */}
-                            {step === 3 && (
-                                <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                    <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                        <GraduationCap className="h-5 w-5 text-slate-600" />
-                                        <p className="font-semibold text-[#0b1d3a]">Class Information</p>
+                            {/* Borrow Step 2: Details */}
+                            {step === 2 && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-[#0b1d3a]">Purpose</Label>
+                                        <Textarea
+                                            value={formData.purpose}
+                                            onChange={(e) => handleInputChange("purpose", e.target.value)}
+                                            placeholder="Please describe why you need this equipment..."
+                                            className="min-h-[150px] rounded-xl border-slate-200 focus:border-[#126dd5] focus:ring-[#126dd5] resize-none text-base"
+                                        />
+                                        {errors.purpose && <p className="text-sm text-red-600">{errors.purpose}</p>}
                                     </div>
-                                    <div className="p-4 space-y-4">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-semibold text-[#0b1d3a]">Course</Label>
-                                                <Input
-                                                    value={formData.course}
-                                                    onChange={(e) => handleInputChange("course", e.target.value)}
-                                                    placeholder="e.g., CS101"
-                                                    className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                                />
-                                                {errors.course && (
-                                                    <p className="text-sm text-red-600">{errors.course}</p>
-                                                )}
-                                            </div>
+                                </div>
+                            )}
 
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-semibold text-[#0b1d3a]">
-                                                    Lecture / Section
-                                                </Label>
-                                                <Input
-                                                    value={formData.lecture}
-                                                    onChange={(e) => handleInputChange("lecture", e.target.value)}
-                                                    placeholder="e.g., LEC A"
-                                                    className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                                />
-                                                {errors.lecture && (
-                                                    <p className="text-sm text-red-600">{errors.lecture}</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-semibold text-[#0b1d3a]">Classroom</Label>
-                                                <Input
-                                                    value={formData.location}
-                                                    onChange={(e) => handleInputChange("location", e.target.value)}
-                                                    placeholder="e.g., Room 204"
-                                                    className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                                />
-                                                {errors.location && (
-                                                    <p className="text-sm text-red-600">{errors.location}</p>
-                                                )}
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-semibold text-[#0b1d3a]">
-                                                    Session Date & Time
-                                                </Label>
-                                                <Input
-                                                    type="datetime-local"
-                                                    min={minDateTimeStr}
-                                                    max={maxDateTimeStr}
-                                                    value={formData.sessionDateTime}
-                                                    onChange={(e) =>
-                                                        handleInputChange("sessionDateTime", e.target.value)
-                                                    }
-                                                    className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                                />
-                                                {errors.sessionDateTime && (
-                                                    <p className="text-sm text-red-600">{errors.sessionDateTime}</p>
-                                                )}
-                                            </div>
-                                        </div>
+                            {/* Borrow Step 3: Class Info */}
+                            {step === 3 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-[#0b1d3a]">Course Code</Label>
+                                        <Input
+                                            value={formData.course}
+                                            onChange={(e) => handleInputChange("course", e.target.value)}
+                                            placeholder="e.g. CS101"
+                                            className="h-11 rounded-xl border-slate-200"
+                                        />
+                                        {errors.course && <p className="text-sm text-red-600">{errors.course}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-[#0b1d3a]">Lecture/Section</Label>
+                                        <Input
+                                            value={formData.lecture}
+                                            onChange={(e) => handleInputChange("lecture", e.target.value)}
+                                            placeholder="e.g. Section A"
+                                            className="h-11 rounded-xl border-slate-200"
+                                        />
+                                        {errors.lecture && <p className="text-sm text-red-600">{errors.lecture}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-[#0b1d3a]">Classroom</Label>
+                                        <Input
+                                            value={formData.location}
+                                            onChange={(e) => handleInputChange("location", e.target.value)}
+                                            placeholder="e.g. Room 304"
+                                            className="h-11 rounded-xl border-slate-200"
+                                        />
+                                        {errors.location && <p className="text-sm text-red-600">{errors.location}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-[#0b1d3a]">Session Time</Label>
+                                        <Input
+                                            type="datetime-local"
+                                            min={minDateTimeStr}
+                                            max={maxDateTimeStr}
+                                            value={formData.sessionDateTime}
+                                            onChange={(e) => handleInputChange("sessionDateTime", e.target.value)}
+                                            className="h-11 rounded-xl border-slate-200"
+                                        />
+                                        {errors.sessionDateTime && <p className="text-sm text-red-600">{errors.sessionDateTime}</p>}
                                     </div>
                                 </div>
                             )}
@@ -650,245 +621,142 @@ export default function BorrowRequestForm({ onSuccess }) {
                     {/* ============ RESERVE FLOW STEPS ============ */}
                     {flowType === "reserve" && (
                         <>
-                            {/* Reserve Step 1: Browse Equipment */}
+                            {/* Reserve Step 1: Browse */}
                             {step === 1 && (
-                                <div className="space-y-4">
-                                    {/* Search & Filter */}
-                                    <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="space-y-6">
+                                    <div className="flex gap-4">
                                         <div className="relative flex-1">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                             <Input
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                placeholder="Search equipment..."
-                                                className="pl-10 rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
+                                                placeholder="Search by name or ID..."
+                                                className="pl-10 h-11 rounded-xl border-slate-200 bg-slate-50/50"
                                             />
-                                        </div>
-                                        <div className="flex gap-2">
-                                            {["all", "Projector", "Remote", "Audio"].map((type) => (
-                                                <button
-                                                    key={type}
-                                                    onClick={() => setFilterType(type)}
-                                                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                                                        filterType === type
-                                                            ? "bg-[#0b69d4] text-white"
-                                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                                    }`}
-                                                >
-                                                    {type === "all" ? "All" : type}
-                                                </button>
-                                            ))}
                                         </div>
                                     </div>
 
-                                    {/* Equipment Grid */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {filteredEquipment.map((eq) => (
-                                            <button
+                                            <div
                                                 key={eq.id}
                                                 onClick={() => eq.available && selectEquipment(eq)}
-                                                disabled={!eq.available}
-                                                className={`p-4 rounded-xl border text-left transition-all ${
-                                                    formData.equipmentId === eq.id
-                                                        ? "border-[#0b69d4] bg-sky-50 shadow-[0_8px_20px_-12px_rgba(11,105,212,0.3)]"
-                                                        : eq.available
-                                                        ? "border-slate-200 bg-white hover:border-sky-200 hover:bg-sky-50"
+                                                className={`group relative p-4 rounded-xl border-2 transition-all cursor-pointer ${formData.equipmentId === eq.id
+                                                    ? "border-[#126dd5] bg-[#126dd5]/5"
+                                                    : eq.available
+                                                        ? "border-slate-100 hover:border-[#126dd5]/50 hover:shadow-sm"
                                                         : "border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed"
-                                                }`}
+                                                    }`}
                                             >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className={`h-10 w-10 rounded-xl flex items-center justify-center ${
-                                                                formData.equipmentId === eq.id
-                                                                    ? "bg-[#0b69d4] text-white"
-                                                                    : "bg-slate-100 text-slate-600"
-                                                            }`}
-                                                        >
-                                                            <Package className="h-5 w-5" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-semibold text-[#0b1d3a]">{eq.name}</p>
-                                                            <p className="text-xs text-slate-500">
-                                                                {eq.id} • {eq.location}
-                                                            </p>
-                                                        </div>
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 className="font-bold text-[#0b1d3a] group-hover:text-[#126dd5] transition-colors">{eq.name}</h4>
+                                                        <p className="text-xs text-slate-500 mb-2">{eq.id}</p>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${eq.available ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-500"
+                                                            }`}>
+                                                            {eq.available ? "Available" : "Unavailable"}
+                                                        </span>
                                                     </div>
-                                                    <Badge
-                                                        className={`rounded-full text-xs ${
-                                                            eq.available
-                                                                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                                                : "bg-red-50 text-red-700 border-red-100"
-                                                        }`}
-                                                    >
-                                                        {eq.available ? "Available" : "Reserved"}
-                                                    </Badge>
+                                                    {formData.equipmentId === eq.id && (
+                                                        <div className="h-6 w-6 bg-[#126dd5] rounded-full flex items-center justify-center text-white">
+                                                            <CheckCircle className="h-4 w-4" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </button>
+                                            </div>
                                         ))}
                                     </div>
-
-                                    {filteredEquipment.length === 0 && (
-                                        <div className="text-center py-8 text-slate-500">
-                                            No equipment found matching your search.
-                                        </div>
-                                    )}
-
-                                    {errors.equipmentId && (
-                                        <p className="text-sm text-red-600">{errors.equipmentId}</p>
-                                    )}
+                                    {errors.equipmentId && <p className="text-sm text-red-600 font-medium">Please select an equipment to proceed.</p>}
                                 </div>
                             )}
 
-                            {/* Reserve Step 2: Pick Date & Time */}
+                            {/* Reserve Step 2: Date/Time */}
                             {step === 2 && (
-                                <div className="space-y-4">
-                                    {/* Selected Equipment Display */}
-                                    {equipment && (
-                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-sky-50 border border-sky-100">
-                                            <Package className="h-5 w-5 text-[#0b69d4]" />
-                                            <div>
-                                                <p className="text-sm font-semibold text-[#0b1d3a]">{equipment.name}</p>
-                                                <p className="text-xs text-slate-600">{equipment.id}</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Date Selection */}
-                                    <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                        <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                            <Calendar className="h-5 w-5 text-slate-600" />
-                                            <p className="font-semibold text-[#0b1d3a]">Select Date</p>
-                                        </div>
-                                        <div className="p-4">
-                                            <Input
-                                                type="date"
-                                                min={today}
-                                                max={maxReservationDateStr}
-                                                value={formData.reservationDate}
-                                                onChange={(e) => handleInputChange("reservationDate", e.target.value)}
-                                                className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                            />
-                                            {errors.reservationDate && (
-                                                <p className="text-sm text-red-600 mt-2">{errors.reservationDate}</p>
-                                            )}
-                                        </div>
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-[#0b1d3a]">Select Date</Label>
+                                        <Input
+                                            type="date"
+                                            min={today}
+                                            max={maxReservationDateStr}
+                                            value={formData.reservationDate}
+                                            onChange={(e) => handleInputChange("reservationDate", e.target.value)}
+                                            className="h-11 rounded-xl border-slate-200"
+                                        />
+                                        {errors.reservationDate && <p className="text-sm text-red-600">{errors.reservationDate}</p>}
                                     </div>
 
-                                    {/* Time Slot Selection */}
                                     {formData.reservationDate && (
-                                        <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                            <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                                <Clock className="h-5 w-5 text-slate-600" />
-                                                <p className="font-semibold text-[#0b1d3a]">Select Time Slot</p>
-                                            </div>
-                                            <div className="p-4">
-                                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                                                    {timeSlots.map((slot) => (
-                                                        <button
-                                                            key={slot.time}
-                                                            onClick={() =>
-                                                                slot.available &&
-                                                                handleInputChange("reservationTime", slot.time)
-                                                            }
-                                                            disabled={!slot.available}
-                                                            className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
-                                                                formData.reservationTime === slot.time
-                                                                    ? "bg-[#0b69d4] text-white shadow-sm"
-                                                                    : slot.available
-                                                                    ? "bg-slate-50 text-slate-700 hover:bg-sky-50 hover:text-[#0b69d4] border border-slate-200"
-                                                                    : "bg-slate-100 text-slate-400 cursor-not-allowed line-through"
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-[#0b1d3a]">Select Time Slot</Label>
+                                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                                                {timeSlots.map((slot) => (
+                                                    <button
+                                                        key={slot.time}
+                                                        type="button"
+                                                        onClick={() => slot.available && handleInputChange("reservationTime", slot.time)}
+                                                        disabled={!slot.available}
+                                                        className={`py-2 px-1 rounded-lg text-sm font-medium transition-all ${formData.reservationTime === slot.time
+                                                            ? "bg-[#126dd5] text-white shadow-md shadow-blue-500/20"
+                                                            : slot.available
+                                                                ? "bg-slate-50 text-slate-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200"
+                                                                : "bg-slate-100 text-slate-300 cursor-not-allowed line-through"
                                                             }`}
-                                                        >
-                                                            {slot.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                                {errors.reservationTime && (
-                                                    <p className="text-sm text-red-600 mt-2">{errors.reservationTime}</p>
-                                                )}
-                                                <p className="text-xs text-slate-500 mt-3">
-                                                    <span className="inline-block w-3 h-3 bg-slate-100 rounded mr-1"></span>
-                                                    Unavailable slots are crossed out
-                                                </p>
+                                                    >
+                                                        {slot.label}
+                                                    </button>
+                                                ))}
                                             </div>
+                                            {errors.reservationTime && <p className="text-sm text-red-600">{errors.reservationTime}</p>}
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* Reserve Step 3: Session Info */}
+                            {/* Reserve Step 3: Details */}
                             {step === 3 && (
-                                <div className="space-y-4">
-                                    <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                        <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                            <GraduationCap className="h-5 w-5 text-slate-600" />
-                                            <p className="font-semibold text-[#0b1d3a]">Class Information</p>
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-semibold text-[#0b1d3a]">Course Code</Label>
+                                            <Input
+                                                value={formData.course}
+                                                onChange={(e) => handleInputChange("course", e.target.value)}
+                                                placeholder="e.g. CS101"
+                                                className="h-11 rounded-xl border-slate-200"
+                                            />
+                                            {errors.course && <p className="text-sm text-red-600">{errors.course}</p>}
                                         </div>
-                                        <div className="p-4 space-y-4">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-sm font-semibold text-[#0b1d3a]">
-                                                        Course
-                                                    </Label>
-                                                    <Input
-                                                        value={formData.course}
-                                                        onChange={(e) => handleInputChange("course", e.target.value)}
-                                                        placeholder="e.g., CS101"
-                                                        className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                                    />
-                                                    {errors.course && (
-                                                        <p className="text-sm text-red-600">{errors.course}</p>
-                                                    )}
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label className="text-sm font-semibold text-[#0b1d3a]">
-                                                        Lecture / Section
-                                                    </Label>
-                                                    <Input
-                                                        value={formData.lecture}
-                                                        onChange={(e) => handleInputChange("lecture", e.target.value)}
-                                                        placeholder="e.g., LEC A"
-                                                        className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                                    />
-                                                    {errors.lecture && (
-                                                        <p className="text-sm text-red-600">{errors.lecture}</p>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label className="text-sm font-semibold text-[#0b1d3a]">Classroom</Label>
-                                                <Input
-                                                    value={formData.location}
-                                                    onChange={(e) => handleInputChange("location", e.target.value)}
-                                                    placeholder="e.g., Room 204"
-                                                    className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                                />
-                                                {errors.location && (
-                                                    <p className="text-sm text-red-600">{errors.location}</p>
-                                                )}
-                                            </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-semibold text-[#0b1d3a]">Lecture/Section</Label>
+                                            <Input
+                                                value={formData.lecture}
+                                                onChange={(e) => handleInputChange("lecture", e.target.value)}
+                                                placeholder="e.g. Section A"
+                                                className="h-11 rounded-xl border-slate-200"
+                                            />
+                                            {errors.lecture && <p className="text-sm text-red-600">{errors.lecture}</p>}
+                                        </div>
+                                        <div className="col-span-1 md:col-span-2 space-y-2">
+                                            <Label className="text-sm font-semibold text-[#0b1d3a]">Classroom</Label>
+                                            <Input
+                                                value={formData.location}
+                                                onChange={(e) => handleInputChange("location", e.target.value)}
+                                                placeholder="e.g. Room 304"
+                                                className="h-11 rounded-xl border-slate-200"
+                                            />
+                                            {errors.location && <p className="text-sm text-red-600">{errors.location}</p>}
                                         </div>
                                     </div>
-
-                                    <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                        <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                            <ClipboardList className="h-5 w-5 text-slate-600" />
-                                            <p className="font-semibold text-[#0b1d3a]">Purpose</p>
-                                        </div>
-                                        <div className="p-4">
-                                            <Textarea
-                                                value={formData.purpose}
-                                                onChange={(e) => handleInputChange("purpose", e.target.value)}
-                                                placeholder="Why do you need this equipment?"
-                                                className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4] min-h-[100px]"
-                                            />
-                                            {errors.purpose && (
-                                                <p className="text-sm text-red-600 mt-1">{errors.purpose}</p>
-                                            )}
-                                        </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-semibold text-[#0b1d3a]">Purpose</Label>
+                                        <Textarea
+                                            value={formData.purpose}
+                                            onChange={(e) => handleInputChange("purpose", e.target.value)}
+                                            placeholder="Why do you need this equipment?"
+                                            className="min-h-[120px] rounded-xl border-slate-200 focus:border-[#126dd5] focus:ring-[#126dd5] resize-none"
+                                        />
+                                        {errors.purpose && <p className="text-sm text-red-600">{errors.purpose}</p>}
                                     </div>
                                 </div>
                             )}
@@ -897,157 +765,73 @@ export default function BorrowRequestForm({ onSuccess }) {
 
                     {/* ============ SHARED REVIEW STEP (Step 4) ============ */}
                     {step === 4 && (
-                        <div className="space-y-4">
-                            {/* Review Summary */}
-                            <div className="border border-slate-200 rounded-2xl bg-gradient-to-br from-slate-50 to-sky-50/50 shadow-sm overflow-hidden">
-                                <div className="px-4 pt-4 pb-2 flex items-center gap-2 border-b border-slate-100">
-                                    <FileText className="h-5 w-5 text-slate-600" />
-                                    <p className="font-semibold text-[#0b1d3a]">
-                                        {flowType === "reserve" ? "Reservation Summary" : "Request Summary"}
-                                    </p>
+                        <div className="space-y-6">
+                            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm text-[#126dd5]">
+                                        <Package className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-500">Equipment</p>
+                                        <h3 className="text-lg font-bold text-[#0b1d3a]">{equipment?.name || formData.equipmentId}</h3>
+                                        <p className="text-xs text-slate-400">ID: {equipment?.id}</p>
+                                    </div>
                                 </div>
-                                <div className="p-4 space-y-4">
-                                    {/* Equipment */}
-                                    <div className="flex items-start gap-3 pb-3 border-b border-slate-100">
-                                        <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                                            <Package className="h-5 w-5 text-[#0b69d4]" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-500">Equipment</p>
-                                            <p className="font-semibold text-[#0b1d3a]">
-                                                {equipment?.name || formData.equipmentId || "—"}
-                                            </p>
-                                            {equipment && <p className="text-xs text-slate-500">ID: {equipment.id}</p>}
-                                        </div>
-                                        <Badge
-                                            className="ml-auto rounded-full px-3 py-1 text-xs font-semibold shrink-0 bg-sky-50 text-sky-700 border border-sky-100"
-                                        >
-                                            {flowType === "reserve" ? "Reservation" : "Borrow"}
-                                        </Badge>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200/50">
+                                    <div>
+                                        <p className="text-xs text-slate-500 mb-1">Date & Time</p>
+                                        <p className="font-semibold text-[#0b1d3a]">
+                                            {flowType === "reserve"
+                                                ? `${formData.reservationDate} at ${formData.reservationTime}`
+                                                : new Date(formData.sessionDateTime).toLocaleString()
+                                            }
+                                        </p>
                                     </div>
-
-                                    {/* Purpose */}
-                                    <div className="flex items-start gap-3 pb-3 border-b border-slate-100">
-                                        <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                                            <ClipboardList className="h-5 w-5 text-[#0b69d4]" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-500">Purpose</p>
-                                            <p className="font-semibold text-[#0b1d3a]">{formData.purpose || "—"}</p>
-                                        </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 mb-1">Classroom</p>
+                                        <p className="font-semibold text-[#0b1d3a]">{formData.location}</p>
                                     </div>
-
-                                    {/* Session Details */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="flex items-start gap-3">
-                                            <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                                                <BookOpen className="h-5 w-5 text-[#0b69d4]" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-slate-500">Course & Section</p>
-                                                <p className="font-semibold text-[#0b1d3a]">
-                                                    {formData.course || "—"} — {formData.lecture || "—"}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start gap-3">
-                                            <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                                                <MapPin className="h-5 w-5 text-[#0b69d4]" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-slate-500">Classroom</p>
-                                                <p className="font-semibold text-[#0b1d3a]">
-                                                    {formData.location || "—"}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start gap-3 sm:col-span-2">
-                                            <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                                                <Calendar className="h-5 w-5 text-[#0b69d4]" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-slate-500">
-                                                    {flowType === "reserve" ? "Reserved Date & Time" : "Session Date & Time"}
-                                                </p>
-                                                <p className="font-semibold text-[#0b1d3a]">
-                                                    {flowType === "reserve"
-                                                        ? formData.reservationDate && formData.reservationTime
-                                                            ? `${new Date(formData.reservationDate).toLocaleDateString(undefined, {
-                                                                  weekday: "long",
-                                                                  year: "numeric",
-                                                                  month: "long",
-                                                                  day: "numeric",
-                                                              })} at ${
-                                                                  timeSlots.find((s) => s.time === formData.reservationTime)
-                                                                      ?.label || formData.reservationTime
-                                                              }`
-                                                            : "—"
-                                                        : formData.sessionDateTime
-                                                        ? new Date(formData.sessionDateTime).toLocaleString(undefined, {
-                                                              weekday: "long",
-                                                              year: "numeric",
-                                                              month: "long",
-                                                              day: "numeric",
-                                                              hour: "2-digit",
-                                                              minute: "2-digit",
-                                                          })
-                                                        : "—"}
-                                                </p>
-                                            </div>
-                                        </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 mb-1">Course</p>
+                                        <p className="font-semibold text-[#0b1d3a]">{formData.course} ({formData.lecture})</p>
                                     </div>
+                                </div>
+                                <div className="pt-4 border-t border-slate-200/50">
+                                    <p className="text-xs text-slate-500 mb-1">Purpose</p>
+                                    <p className="text-sm text-[#0b1d3a] leading-relaxed">{formData.purpose}</p>
                                 </div>
                             </div>
 
-                            {/* Additional Notes */}
-                            <div className="border border-slate-200 rounded-2xl bg-white/95 shadow-sm">
-                                <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                                    <FileText className="h-5 w-5 text-slate-600" />
-                                    <p className="font-semibold text-[#0b1d3a]">Additional Notes</p>
-                                    <span className="text-xs text-slate-400">(Optional)</span>
-                                </div>
-                                <div className="p-4">
-                                    <Textarea
-                                        value={formData.notes}
-                                        onChange={(e) => handleInputChange("notes", e.target.value)}
-                                        placeholder="Any additional information for the staff..."
-                                        className="rounded-xl border-slate-200 focus:border-[#0b69d4] focus:ring-[#0b69d4]"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-[#0b1d3a]">Additional Notes (Optional)</Label>
+                                <Textarea
+                                    value={formData.notes}
+                                    onChange={(e) => handleInputChange("notes", e.target.value)}
+                                    placeholder="Any other details..."
+                                    className="min-h-[80px] rounded-xl border-slate-200"
+                                />
                             </div>
                         </div>
                     )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
             {/* Navigation Buttons */}
-            <div className="flex justify-end">
-                <div className="flex items-center gap-3">
-                    <Button
-                        variant="outline"
-                        onClick={() => navigate("/student/equipment")}
-                        className="rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
-                    >
-                        Cancel
-                    </Button>
-                    {step < 4 ? (
-                        <Button
-                            onClick={() => setStep((s) => Math.min(4, s + 1))}
-                            className="rounded-xl bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-semibold shadow-sm shadow-sky-200/60"
-                        >
-                            Next
-                        </Button>
-                    ) : (
-                        <Button
-                            onClick={handleSubmit}
-                            className="rounded-xl bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-semibold shadow-sm shadow-sky-200/60"
-                        >
-                            {flowType === "reserve" ? "Confirm Reservation" : "Submit Request"}
-                        </Button>
-                    )}
-                </div>
+            <div className="flex items-center justify-between mt-8">
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate("/student/dashboard")}
+                    className="text-slate-400 hover:text-slate-600"
+                >
+                    Cancel
+                </Button>
+
+                <Button
+                    onClick={step < 4 ? () => setStep(s => s + 1) : handleSubmit}
+                    className="h-12 px-8 rounded-xl bg-[#0b1d3a] hover:bg-[#126dd5] text-white font-semibold shadow-lg shadow-blue-900/10 transition-all hover:scale-[1.02]"
+                >
+                    {step < 4 ? "Continue" : "Confirm Request"}
+                </Button>
             </div>
         </div>
     );

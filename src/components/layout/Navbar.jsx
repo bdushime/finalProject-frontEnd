@@ -33,10 +33,11 @@ const navLinks = {
 
 // But for your image, we need just these 4 items:
 const imageNavItems = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Equipment", path: "/equipment" },
-    { name: "Borrowed Items", path: "/borrowed" },
-    { name: "Help & Support", path: "/support" },
+    { name: "Dashboard", path: "/student/dashboard" },
+    { name: "Equipment", path: "/student/browse" },
+    { name: "Borrowed Items", path: "/student/borrowed-items" },
+    { name: "Report", path: "/student/report" },
+    { name: "Score", path: "/student/score" },
 ];
 
 export default function Navbar({ role = "REGULAR_USER" }) {

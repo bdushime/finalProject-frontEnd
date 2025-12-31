@@ -1,13 +1,15 @@
 import PropTypes from "prop-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { LayoutGrid, Package, ClipboardList, Bell, User, HelpCircle, LogOut } from "lucide-react";
+import { LayoutGrid, Package, ClipboardList, Bell, User, HelpCircle, LogOut, Shield, FileText } from "lucide-react";
 import logo from "@/assets/images/logo8noback.png";
 
 const links = [
     { name: "Dashboard", path: "/student/dashboard", icon: LayoutGrid },
     { name: "Equipment", path: "/student/browse", icon: Package },
     { name: "Borrowed Items", path: "/student/borrowed-items", icon: ClipboardList },
+    { name: "Score", path: "/student/score", icon: Shield },
+    { name: "Report", path: "/student/report", icon: FileText },
     { name: "Notifications", path: "/student/notifications", icon: Bell },
     { name: "Profile", path: "/student/profile", icon: User },
     { name: "Help & Support", path: "/student/help", icon: HelpCircle },

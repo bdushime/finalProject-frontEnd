@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, Settings, Bell } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
+import logo from "@/assets/images/logo8noback.png";
 
 export default function MainLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,7 +19,7 @@ export default function MainLayout({ children }) {
     }, [location.pathname]);
 
     return (
-        <div className="min-h-screen bg-[#f3f6fb]">
+        <div className="min-h-screen bg-white">
             {/* Sidebar for mobile */}
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
             {sidebarOpen && (
@@ -30,7 +31,7 @@ export default function MainLayout({ children }) {
             )}
 
             {/* Header - with top padding and no border */}
-            <header className="sticky top-0 z-40 bg-[#f3f6fb] pt-4 pb-2">
+            <header className="sticky top-0 z-40 bg-white pt-4 pb-2">
                 <div className="max-w-[1920px] mx-auto px-4 sm:px-6 flex items-center justify-between">
                     {/* Left: Mobile menu + Tracknity Logo */}
                     <div className="flex items-center gap-3">
@@ -43,11 +44,14 @@ export default function MainLayout({ children }) {
                         >
                             <Menu className="h-5 w-5" />
                         </Button>
-                        <Link 
-                            to="/student/dashboard" 
-                            className="px-5 py-2.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200 transition-colors"
+                        <Link
+                            to="/student/dashboard"
+                            className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 hover:bg-white/50 transition-all group"
                         >
-                            <span className="text-sm font-bold text-[#0b1d3a]">Tracknity</span>
+                            <img src={logo} alt="Tracknity" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+                            <span className="text-xl font-bold text-[#0b1d3a] font-serif tracking-tight">
+                                Tracknity
+                            </span>
                         </Link>
                     </div>
 
@@ -58,20 +62,21 @@ export default function MainLayout({ children }) {
                     <div className="flex items-center gap-3">
                         <Link
                             to="/student/settings"
-                            className="p-2 gap-1 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors shadow-sm"
+                            className="h-11 px-5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 text-[#0b1d3a] flex items-center gap-2 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-105"
                             aria-label="Settings"
                         >
-                            <Settings className="h-5 w-5" /> <span> Setting</span>
+                            <Settings className="h-5 w-5 text-[#0b1d3a]" />
+                            <span className="font-medium text-sm">Settings</span>
                         </Link>
 
                         <Link
                             to="/student/notifications"
-                            className="relative h-10 w-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors shadow-sm"
+                            className="relative h-11 w-11 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#0b1d3a] hover:bg-white/60 transition-all hover:shadow-sm hover:scale-110"
                             aria-label="Notifications"
                         >
-                            <Bell className="h-5 w-5" />
+                            <Bell className="h-5 w-5 text-[#0b1d3a]" />
                             {unreadCount > 0 && (
-                                <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center">
+                                <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
                                     {unreadCount}
                                 </span>
                             )}
@@ -79,14 +84,14 @@ export default function MainLayout({ children }) {
 
                         <Link
                             to="/student/profile"
-                            className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-gray-200 bg-white hover:bg-gray-50 transition-colors shadow-sm"
+                            className="h-11 pl-1.5 pr-5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center gap-3 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-[1.02]"
                         >
-                            <div className="h-8 w-8 rounded-full bg-[#0b69d4] flex items-center justify-center">
-                                <span className="text-white font-semibold text-sm">J</span>
+                            <div className="h-9 w-9 rounded-full bg-[#126dd5] flex items-center justify-center shadow-sm border border-white/50">
+                                <span className="text-white font-bold text-sm">J</span>
                             </div>
                             <div className="text-left leading-tight hidden sm:block">
-                                <p className="text-sm font-semibold text-[#0b1d3a]">Juls</p>
-                                <p className="text-[11px] text-gray-500">Student</p>
+                                <p className="text-sm font-bold text-[#0b1d3a] group-hover:text-[#126dd5] transition-colors">Juls</p>
+                                <p className="text-[10px] uppercase tracking-wider font-semibold text-[#126dd5]/80">Student</p>
                             </div>
                         </Link>
                     </div>

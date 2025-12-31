@@ -98,169 +98,160 @@ export default function MyBorrowedItems() {
 
     return (
         <MainLayout>
-            <PageContainer>
-                <BackButton to="/student/dashboard" />
-                <PageHeader
-                    title="My Borrowed Items"
-                    subtitle="View and manage your borrowed equipment"
-                />
+            <div className="min-h-screen bg-white p-6 lg:p-8 font-sans text-slate-600">
+                <div className="max-w-6xl mx-auto space-y-8">
+                    {/* Header */}
+                    <div>
+                        <BackButton to="/student/dashboard" className="mb-4" />
+                        <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">My Borrowed Items</h1>
+                        <p className="text-slate-500 mt-1">View and manage your borrowed equipment</p>
+                    </div>
 
-                <Card className="mb-6 border border-slate-200 rounded-2xl shadow-[0_16px_38px_-22px_rgba(8,47,73,0.25)] bg-white/95 backdrop-blur-sm">
-                    <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row gap-4">
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                                <Input
-                                    placeholder="Search by equipment name or ID..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 bg-white border border-slate-200 rounded-xl focus-visible:ring-2 focus-visible:ring-sky-300 text-[#0b1d3a] placeholder:text-slate-400"
-                                />
-                            </div>
-                            <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-full md:w-[200px] rounded-xl border-slate-200 focus:ring-2 focus:ring-[#0b69d4]/30 focus:border-[#0b69d4] text-[#0b1d3a]">
-                                    <SelectValue placeholder="Filter by status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="overdue">Overdue</SelectItem>
-                                    <SelectItem value="returned">Returned</SelectItem>
-                                </SelectContent>
-                            </Select>
+                    {/* Filters & Search - White/Clean */}
+                    <div className="bg-white border border-slate-200 p-1.5 rounded-2xl flex flex-col md:flex-row gap-2 max-w-2xl">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Search equipment..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 h-10 bg-transparent border-none focus-visible:ring-0 text-[#0b1d3a] placeholder:text-slate-400 font-medium"
+                            />
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="w-px bg-slate-200 my-2 hidden md:block"></div>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-full md:w-[180px] h-10 rounded-xl border-none shadow-none focus:ring-0 text-[#0b1d3a] font-medium bg-transparent">
+                                <SelectValue placeholder="Filter status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="overdue">Overdue</SelectItem>
+                                <SelectItem value="returned">Returned</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                {filteredItems.length === 0 ? (
-                    <Card className="border border-slate-200 rounded-2xl bg-white/95">
-                        <CardContent className="py-12 text-center">
-                            <div className="p-4 rounded-full bg-sky-50 w-20 h-20 mx-auto mb-4 flex items-center justify-center border border-sky-100">
-                                <Package className="h-10 w-10 text-sky-700" />
-                            </div>
-                            <h3 className="text-lg font-bold text-black mb-2">
-                                No items found
-                            </h3>
-                            <p className="text-black mb-4">
-                                {searchQuery || statusFilter !== 'all'
-                                    ? 'Try adjusting your search or filter'
-                                    : 'You haven\'t borrowed any equipment yet'}
-                            </p>
-                            {!searchQuery && statusFilter === 'all' && (
-                                <Button onClick={() => navigate('/student/equipment')}>
-                                    Browse Equipment
-                                </Button>
-                            )}
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <>
-                        <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)] mb-6">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-xl font-bold text-[#0b1d3a]">Active Checkouts</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {activeItems.length === 0 && (
-                                    <p className="text-sm text-slate-600">No active checkouts.</p>
-                                )}
+                    {/* Active Loans Section - Compact Cards Grid */}
+                    {activeItems.length > 0 && (
+                        <div className="space-y-4">
+                            <h2 className="text-lg font-bold text-[#0b1d3a]">Active Loans</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {activeItems.map((item) => {
                                     const countdown = getCountdown(item.dueDate);
-                                    const overdue = countdown?.overdue;
                                     return (
-                                        <div key={item.id} className="flex flex-col lg:flex-row items-start lg:items-center gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50 hover:border-sky-200 hover:bg-sky-50 transition">
-                                            <div className="flex-1 space-y-1">
-                                                <p className="text-sm text-slate-600">{item.category} • ID: {item.equipmentId}</p>
-                                                <h3 className="text-lg font-semibold text-[#0b1d3a]">{item.equipmentName}</h3>
-                                                <div className="flex items-center gap-2">
-                                                    <Badge variant="outline" className={`rounded-full px-3 py-1 text-xs font-semibold ${item.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
-                                                        {item.status === 'active' ? 'On Time' : 'Overdue'}
-                                                    </Badge>
-                                                    <span className="text-xs text-slate-600">Condition: {item.condition || 'Good'}</span>
+                                        <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-[#126dd5]/50 transition-colors group">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500">
+                                                        <Package className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-[#0b1d3a] text-base">{item.equipmentName}</h3>
+                                                        <p className="text-xs text-slate-500 uppercase tracking-wide">{item.id}</p>
+                                                    </div>
                                                 </div>
+                                                <Badge variant="outline" className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${item.status === 'active'
+                                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                        : 'bg-rose-50 text-rose-600 border-rose-100'
+                                                    }`}>
+                                                    {item.status === 'active' ? 'Active' : 'Overdue'}
+                                                </Badge>
                                             </div>
-                                            <div className="flex items-center gap-6 text-center">
-                                                <div>
-                                                    <p className="text-xs text-slate-500">HOURS</p>
-                                                    <p className="text-lg font-semibold text-[#0b1d3a]">{countdown ? countdown.hours.toString().padStart(2, '0') : '--'}</p>
+
+                                            {/* Timer/Due Info */}
+                                            <div className="flex items-center justify-between bg-slate-50 rounded-xl p-3 mb-4 border border-slate-100">
+                                                <div className="text-xs text-slate-500">
+                                                    Due: <span className="font-semibold text-slate-700">{new Date(item.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs text-slate-500">MIN</p>
-                                                    <p className="text-lg font-semibold text-[#0b1d3a]">{countdown ? countdown.mins.toString().padStart(2, '0') : '--'}</p>
-                                                </div>
+                                                {countdown && (
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="font-mono font-bold text-[#0b1d3a] text-lg">
+                                                            {countdown.hours.toString().padStart(2, '0')}:{countdown.mins.toString().padStart(2, '0')}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-400 font-bold uppercase">left</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="flex flex-col gap-2 w-full lg:w-auto">
+
+                                            {/* Actions - Subtle */}
+                                            <div className="grid grid-cols-2 gap-3">
                                                 <Button
-                                                    variant="outline"
-                                                    className="rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
+                                                    variant="ghost"
                                                     onClick={() => handleExtend(item)}
+                                                    className="h-9 rounded-lg text-slate-600 hover:text-[#0b1d3a] hover:bg-slate-50 text-xs font-semibold"
                                                 >
-                                                    Extend
+                                                    Extend Time
                                                 </Button>
                                                 <Button
-                                                    className="rounded-xl bg-[#0b69d4] hover:bg-[#0f7de5] text-white font-semibold shadow-sm shadow-sky-200/60"
                                                     onClick={() => handleReturn(item)}
+                                                    className="h-9 rounded-lg bg-[#0b1d3a] hover:bg-[#2c3e50] text-white text-xs font-semibold shadow-sm"
                                                 >
-                                                    Return Now
+                                                    Return Item
                                                 </Button>
                                             </div>
                                         </div>
                                     );
                                 })}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
+                    )}
 
-                        <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_18px_38px_-22px_rgba(8,47,73,0.35)]">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-xl font-bold text-[#0b1d3a]">Checkout History</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="text-[#0b1d3a]">Equipment</TableHead>
-                                                <TableHead className="text-[#0b1d3a]">Checkout Date</TableHead>
-                                                <TableHead className="text-[#0b1d3a]">Return Date</TableHead>
-                                                <TableHead className="text-[#0b1d3a]">Status</TableHead>
-                                                <TableHead className="text-[#0b1d3a]">Score Impact</TableHead>
+                    {/* History Section - Clean Table */}
+                    <div className="space-y-4">
+                        <h2 className="text-lg font-bold text-[#0b1d3a]">History</h2>
+                        <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                            <Table>
+                                <TableHeader className="bg-slate-50">
+                                    <TableRow className="border-b border-slate-200">
+                                        <TableHead className="py-3 pl-6 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Equipment</TableHead>
+                                        <TableHead className="py-3 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Checkout</TableHead>
+                                        <TableHead className="py-3 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Return</TableHead>
+                                        <TableHead className="py-3 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Status</TableHead>
+                                        <TableHead className="py-3 pr-6 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider text-right">Points</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {historyItems.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="py-8 text-center text-slate-500 text-sm">
+                                                No history items found.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        historyItems.map((item) => (
+                                            <TableRow key={item.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                                <TableCell className="py-3 pl-6 font-medium text-[#0b1d3a] text-sm">{item.equipmentName}</TableCell>
+                                                <TableCell className="py-3 text-slate-500 text-sm">{formatDate(item.borrowedDate)}</TableCell>
+                                                <TableCell className="py-3 text-slate-500 text-sm">{item.returnDate ? formatDate(item.returnDate) : "—"}</TableCell>
+                                                <TableCell className="py-3">
+                                                    <StatusBadge status={item.status} />
+                                                </TableCell>
+                                                <TableCell className="py-3 pr-6 text-right">
+                                                    {(() => {
+                                                        const score = scoreImpact(item.status);
+                                                        return (
+                                                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${score.tone} bg-opacity-10`}>
+                                                                {score.value > 0 ? `+${score.value}` : score.value}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </TableCell>
                                             </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {historyItems.length === 0 && (
-                                                <TableRow>
-                                                    <TableCell colSpan={5} className="text-center text-slate-600 py-6">
-                                                        No history items.
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                            {historyItems.map((item) => (
-                                                <TableRow key={item.id}>
-                                                    <TableCell className="text-[#0b1d3a] font-semibold">{item.equipmentName}</TableCell>
-                                                    <TableCell className="text-slate-700">{formatDate(item.borrowedDate)}</TableCell>
-                                                    <TableCell className="text-slate-700">{item.returnDate ? formatDate(item.returnDate) : "—"}</TableCell>
-                                                    <TableCell>
-                                                        <StatusBadge status={item.status} />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {(() => {
-                                                            const score = scoreImpact(item.status);
-                                                            return (
-                                                                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${score.badge}`}>
-                                                                    {score.value > 0 ? `+${score.value}` : score.value}
-                                                                </span>
-                                                            );
-                                                        })()}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </>
-                )}
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {filteredItems.length === 0 && (
+                        <div className="text-center py-12">
+                            <p className="text-slate-500 text-sm">No items found matching your filters.</p>
+                        </div>
+                    )}
+                </div>
 
                 {/* Extend Modal */}
                 <ExtendModal
@@ -272,7 +263,7 @@ export default function MyBorrowedItems() {
                     item={selectedItemForExtend}
                     onConfirm={handleExtendConfirm}
                 />
-            </PageContainer>
+            </div>
         </MainLayout>
     );
 }

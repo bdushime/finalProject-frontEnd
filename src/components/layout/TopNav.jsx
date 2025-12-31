@@ -5,6 +5,8 @@ const links = [
     { name: "Dashboard", path: "/student/dashboard" },
     { name: "Equipment", path: "/student/browse" },
     { name: "Borrowed Items", path: "/student/borrowed-items" },
+    { name: "Score", path: "/student/score" },
+    { name: "Report", path: "/student/report" },
     { name: "Help & Support", path: "/student/help" },
 ];
 
@@ -22,11 +24,10 @@ export default function TopNav() {
                         <NavLink
                             key={link.path}
                             to={link.path}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                                isActive
-                                    ? "bg-[#0b1d3a] text-white"
-                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                            }`}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
+                                ? "bg-[#0b1d3a] text-white"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                }`}
                         >
                             {link.name}
                         </NavLink>

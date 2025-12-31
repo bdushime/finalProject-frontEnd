@@ -24,6 +24,8 @@ import MyBorrowedItems from "./pages/User_Student/MyBorrowedItems";
 import Notifications from "./pages/User_Student/Notifications";
 import HelpSupport from "./pages/User_Student/HelpSupport";
 import ReturnEquipment from "./pages/User_Student/ReturnEquipment";
+import Score from "./pages/User_Student/Score";
+import Report from "./pages/User_Student/Report";
 
 export default function App() {
     return (
@@ -50,6 +52,8 @@ export default function App() {
                 <Route path="/student/borrow-request" element={<BorrowRequest />} />
                 <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
                 <Route path="/student/return" element={<ReturnEquipment />} />
+                <Route path="/student/score" element={<Score />} />
+                <Route path="/student/report" element={<Report />} />
 
                 {/* Other pages */}
                 <Route path="/student/notifications" element={<Notifications />} />
