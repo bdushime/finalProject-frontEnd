@@ -183,4 +183,69 @@ export function listNotifications() {
   ];
 }
 
+export function listGeofenceViolations() {
+  return [
+    { 
+      id: "GF-1", 
+      title: "Geofence Violation Alert", 
+      description: "Equipment 'Projector' (TTGO-001) has left authorized zone 'Computer Lab A'", 
+      time: "5m ago",
+      equipmentId: "TTGO-001",
+      equipmentName: "Projector",
+      currentLocation: "Parking Lot - Building C",
+      authorizedZone: "Computer Lab A",
+      violationType: "exit",
+      severity: "high"
+    },
+    { 
+      id: "GF-2", 
+      title: "Geofence Violation Alert", 
+      description: "Equipment 'TV Remote' (TTGO-002) detected outside designated zone 'Library Zone'", 
+      time: "15m ago",
+      equipmentId: "TTGO-002",
+      equipmentName: "TV Remote",
+      currentLocation: "Unknown Location",
+      authorizedZone: "Library Zone",
+      violationType: "unauthorized_movement",
+      severity: "critical"
+    },
+    { 
+      id: "GF-3", 
+      title: "Geofence Entry Alert", 
+      description: "Equipment 'Extension Cable' (TTGO-003) entered restricted zone 'Admin Building'", 
+      time: "1h ago",
+      equipmentId: "TTGO-003",
+      equipmentName: "Extension Cable",
+      currentLocation: "Admin Building - Floor 2",
+      authorizedZone: "Store Room",
+      violationType: "unauthorized_entry",
+      severity: "high"
+    },
+    { 
+      id: "GF-4", 
+      title: "Geofence Violation Alert", 
+      description: "Equipment 'Apple TV Remote' (TTGO-005) moved beyond 500m radius from authorized location", 
+      time: "2h ago",
+      equipmentId: "TTGO-005",
+      equipmentName: "Apple TV Remote",
+      currentLocation: "Off-Campus - 1.2km away",
+      authorizedZone: "Room 306",
+      violationType: "distance_violation",
+      severity: "critical"
+    },
+  ];
+}
+
+export function listITStaffNotifications() {
+  const regularNotifications = listNotifications();
+  const geofenceViolations = listGeofenceViolations();
+  return [...geofenceViolations, ...regularNotifications];
+}
+
+export function listSecurityNotifications() {
+  const regularNotifications = listNotifications();
+  const geofenceViolations = listGeofenceViolations();
+  return [...geofenceViolations, ...regularNotifications];
+}
+
 

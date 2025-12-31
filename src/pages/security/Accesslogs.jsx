@@ -1,568 +1,654 @@
-import React, { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
-import StatCard from "@/components/security/StatCard";
-import AccessLogsTable from "@/components/security/AccessLogsTable";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Calendar,
+  Search,
   Filter,
+  Download,
+  Calendar,
+  MapPin,
+  User,
+  Package,
+  AlertTriangle,
+  CheckCircle,
+  ArrowRight,
+  Clock,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Phone,
+  FileText,
+  MessageSquare,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { getAllDeviceMovements } from "@/components/lib/movementHistoryData";
+import { format, formatDistanceToNow, isSameDay, parseISO } from "date-fns";
 
-function Accesslogs() {
-  const [view, setView] = useState("month"); // 'day', 'week', 'month'
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 0, 9)); // January 9, 2025
-  const [selectedStatuses, setSelectedStatuses] = useState(["all"]);
+const EVENT_TYPE_COLORS = {
+  checkout: "bg-blue-100 text-blue-700 border-blue-200",
+  return: "bg-green-100 text-green-700 border-green-200",
+  movement: "bg-gray-100 text-gray-700 border-gray-200",
+  geofence_violation: "bg-red-100 text-red-700 border-red-200",
+  maintenance: "bg-yellow-100 text-yellow-700 border-yellow-200",
+};
 
-  // Sample equipment log data with times for day view
-  const equipmentLogs = [
-    {
-      id: 1,
-      equipment: "Laptop HP-001",
-      officer: "Alice Kim",
-      status: "checked-out",
-      startDate: "2025-01-21T09:00:00",
-      endDate: "2025-01-21T17:30:00",
-      color: "bg-purple-500",
-    },
-    {
-      id: 2,
-      equipment: "Camera CN-045",
-      officer: "Annette Black",
-      status: "in-use",
-      startDate: "2025-01-09T08:00:00",
-      endDate: "2025-01-09T16:00:00",
-      color: "bg-orange-500",
-    },
-    {
-      id: 3,
-      equipment: "Radio RT-012",
-      officer: "Jerome Bell",
-      status: "checked-in",
-      startDate: "2025-01-14T10:30:00",
-      endDate: "2025-01-14T18:00:00",
-      color: "bg-green-500",
-    },
-    {
-      id: 4,
-      equipment: "Tablet TB-089",
-      officer: "Kris Black",
-      status: "maintenance",
-      startDate: "2025-01-16T14:00:00",
-      endDate: "2025-01-16T19:00:00",
-      color: "bg-blue-500",
-    },
-    {
-      id: 5,
-      equipment: "Walkie-Talkie WT-034",
-      officer: "Jenny Wilson",
-      status: "checked-in",
-      startDate: "2025-01-10T07:00:00",
-      endDate: "2025-01-10T20:00:00",
-      color: "bg-green-500",
-    },
-    {
-      id: 6,
-      equipment: "Flashlight FL-156",
-      officer: "Kristin Watson",
-      status: "in-use",
-      startDate: "2025-01-09T11:00:00",
-      endDate: "2025-01-09T15:45:00",
-      color: "bg-orange-500",
-    },
-  ];
+const EVENT_TYPE_ICONS = {
+  checkout: Package,
+  return: CheckCircle,
+  movement: ArrowRight,
+  geofence_violation: AlertTriangle,
+  maintenance: Package,
+};
 
-  const statusFilters = [
-    { label: "All", value: "all" },
-    { label: "Checked Out", value: "checked-out", color: "bg-purple-500" },
-    { label: "In Use", value: "in-use", color: "bg-orange-500" },
-    { label: "Checked In", value: "checked-in", color: "bg-green-500" },
-    { label: "Maintenance", value: "maintenance", color: "bg-blue-500" },
-    { label: "Reported Lost", value: "lost", color: "bg-red-500" },
-  ];
+const STATUS_COLORS = {
+  active: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  completed: "bg-blue-100 text-blue-700 border-blue-200", // Changed to match resolved styling
+  violation: "bg-red-100 text-red-700 border-red-200",
+  resolved: "bg-blue-100 text-blue-700 border-blue-200",
+};
 
-  const handleStatusToggle = (status) => {
-    if (status === "all") {
-      setSelectedStatuses(["all"]);
-    } else {
-      setSelectedStatuses((prev) => {
-        const withoutAll = prev.filter((s) => s !== "all");
+export default function Accesslogs() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterDevice, setFilterDevice] = useState(
+    searchParams.get("device") || "all"
+  );
+  const [filterEventType, setFilterEventType] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [allMovements, setAllMovements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState("date-desc");
 
-        // Toggle the clicked status
-        if (withoutAll.includes(status)) {
-          const newStatuses = withoutAll.filter((s) => s !== status);
-          // If no statuses left, select 'all'
-          return newStatuses.length === 0 ? ["all"] : newStatuses;
-        } else {
-          return [...withoutAll, status];
-        }
-      });
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      const filters = {
+        deviceId: filterDevice !== "all" ? filterDevice : undefined,
+        eventType: filterEventType !== "all" ? filterEventType : undefined,
+        status: filterStatus !== "all" ? filterStatus : undefined,
+      };
+
+      if (startDate) filters.startDate = startDate;
+      if (endDate) filters.endDate = endDate;
+
+      const movements = getAllDeviceMovements(filters);
+      setAllMovements(movements);
+      setLoading(false);
+    }, 500);
+  }, [filterDevice, filterEventType, filterStatus, startDate, endDate]);
+
+  const filteredMovements = useMemo(() => {
+    let filtered = allMovements;
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (movement) =>
+          movement.deviceName?.toLowerCase().includes(query) ||
+          movement.deviceId?.toLowerCase().includes(query) ||
+          movement.location?.toLowerCase().includes(query) ||
+          movement.userName?.toLowerCase().includes(query) ||
+          movement.action?.toLowerCase().includes(query)
+      );
     }
-  };
 
-  const isStatusSelected = (status) => {
-    return selectedStatuses.includes(status);
-  };
+    // Sort movements
+    filtered = [...filtered].sort((a, b) => {
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
 
-  const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-
-    return { daysInMonth, startingDayOfWeek, year, month };
-  };
-
-  const getWeekDays = (date) => {
-    const days = [];
-    const currentDay = new Date(date);
-    const dayOfWeek = currentDay.getDay();
-    const monday = new Date(currentDay);
-    monday.setDate(
-      currentDay.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
-    );
-
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(monday);
-      day.setDate(monday.getDate() + i);
-      days.push(day);
-    }
-    return days;
-  };
-
-  const navigateDate = (direction) => {
-    const newDate = new Date(currentDate);
-    if (view === "day") {
-      newDate.setDate(newDate.getDate() + direction);
-    } else if (view === "week") {
-      newDate.setDate(newDate.getDate() + direction * 7);
-    } else {
-      newDate.setMonth(newDate.getMonth() + direction);
-    }
-    setCurrentDate(newDate);
-  };
-
-  const formatDateHeader = () => {
-    if (view === "day") {
-      return currentDate.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } else if (view === "week") {
-      const weekDays = getWeekDays(currentDate);
-      return `${weekDays[0].toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })} - ${weekDays[6].toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })}`;
-    } else {
-      return currentDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-      });
-    }
-  };
-
-  const isLogInRange = (log, date) => {
-    const logStart = new Date(log.startDate);
-    const logEnd = new Date(log.endDate);
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-    logStart.setHours(0, 0, 0, 0);
-    logEnd.setHours(0, 0, 0, 0);
-
-    return checkDate >= logStart && checkDate <= logEnd;
-  };
-
-  const getLogsForDate = (date) => {
-    return equipmentLogs.filter((log) => {
-      const matchesStatus =
-        selectedStatuses.includes("all") ||
-        selectedStatuses.includes(log.status);
-      return matchesStatus && isLogInRange(log, date);
+      if (sortBy === "date-desc") return dateB - dateA;
+      if (sortBy === "date-asc") return dateA - dateB;
+      return 0;
     });
-  };
 
-  const renderMonthView = () => {
-    const { daysInMonth, startingDayOfWeek, year, month } =
-      getDaysInMonth(currentDate);
-    const days = [];
-    const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    return filtered;
+  }, [allMovements, searchQuery, sortBy]);
 
-    for (let i = 0; i < startingDayOfWeek - 1; i++) {
-      days.push(
-        <div
-          key={`empty-${i}`}
-          className="h-24 border-r border-b border-gray-700"
-        ></div>
-      );
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const logsForDay = getLogsForDate(date);
-      const isToday =
-        date.toDateString() === new Date(2025, 0, 9).toDateString();
-
-      days.push(
-        <div
-          key={day}
-          className={`h-24 border-r border-b border-gray-700 p-1 overflow-hidden ${
-            isToday ? "bg-purple-500/20" : ""
-          }`}
-        >
-          <div
-            className={`text-xs font-medium mb-1 ${
-              isToday ? "text-white" : "text-gray-400"
-            }`}
-          >
-            {day}
-          </div>
-          <div className="space-y-0.5">
-            {logsForDay.slice(0, 2).map((log, idx) => (
-              <div
-                key={idx}
-                className={`${log.color} text-white text-xs px-1.5 py-0.5 rounded truncate`}
-              >
-                {log.equipment}
-              </div>
-            ))}
-            {logsForDay.length > 2 && (
-              <div className="text-xs text-gray-400">
-                +{logsForDay.length - 2} more
-              </div>
-            )}
-          </div>
-        </div>
-      );
-      return (
-        <div className="flex-1 overflow-auto">
-          <div className="grid grid-cols-7 border-l border-t border-gray-700">
-            {weekDays.map((day) => (
-              <div
-                key={day}
-                className="bg-gray-800 text-gray-300 text-sm font-medium p-2 border-r border-b border-gray-700 text-center"
-              >
-                {day}
-              </div>
-            ))}
-            {days}
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const renderWeekView = () => {
-    const weekDays = getWeekDays(currentDate);
-    const weekDayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-    return (
-      <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-7 border-l border-t border-gray-700">
-          {weekDays.map((day, idx) => {
-            const logsForDay = getLogsForDate(day);
-            const isToday =
-              day.toDateString() === new Date(2025, 0, 9).toDateString();
-
-            return (
-              <div
-                key={idx}
-                className={`border-r border-b border-gray-700 ${
-                  isToday ? "bg-purple-500/20" : ""
-                }`}
-              >
-                <div className="bg-gray-800 p-2 border-b border-gray-700">
-                  <div className="text-xs text-gray-400">
-                    {weekDayNames[idx]}
-                  </div>
-                  <div
-                    className={`text-lg font-medium ${
-                      isToday ? "text-white" : "text-gray-300"
-                    }`}
-                  >
-                    {day.getDate()}
-                  </div>
-                </div>
-                <div className="p-2 space-y-2 min-h-[300px]">
-                  {logsForDay.map((log, logIdx) => (
-                    <div
-                      key={logIdx}
-                      className={`${log.color} text-white text-sm px-2 py-2 rounded`}
-                    >
-                      <div className="font-medium truncate">
-                        {log.equipment}
-                      </div>
-                      <div className="text-xs opacity-90 truncate">
-                        {log.officer}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+  // Group movements by date
+  const groupedMovements = useMemo(() => {
+    const groups = {};
+    filteredMovements.forEach((movement) => {
+      const dateKey = format(new Date(movement.timestamp), "yyyy-MM-dd");
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(movement);
+    });
+    return Object.entries(groups).sort(
+      (a, b) => new Date(b[0]) - new Date(a[0])
     );
+  }, [filteredMovements]);
+
+  const getEventIcon = (eventType) => {
+    const Icon = EVENT_TYPE_ICONS[eventType] || Package;
+    return <Icon className="h-4 w-4" />;
   };
 
-  const renderDayView = () => {
-    const logsForDay = getLogsForDate(currentDate);
-    const hours = Array.from({ length: 23 }, (_, i) => i);
+  const handleViewDevice = (deviceId) => {
+    navigate(`/security/device-movement/${deviceId}`);
+  };
 
-    // Calculate position and width for timeline bars based on time
-    const getLogPosition = (log) => {
-      let startDate = new Date(log.startDate);
-      let endDate = new Date(log.endDate);
-      
-      // If date string doesn't have time, add default times (9 AM to 5 PM)
-      if (log.startDate && !log.startDate.includes("T")) {
-        startDate = new Date(`${log.startDate}T09:00:00`);
-        endDate = new Date(`${log.endDate}T17:00:00`);
-      }
-      
-      // Check if log is for the current day
-      const logDay = new Date(startDate);
-      logDay.setHours(0, 0, 0, 0);
-      const currentDay = new Date(currentDate);
-      currentDay.setHours(0, 0, 0, 0);
-      
-      if (logDay.getTime() !== currentDay.getTime()) {
-        return null;
-      }
+  const toggleExpand = (movementId) => {
+    setExpandedRow(expandedRow === movementId ? null : movementId);
+  };
 
-      const startHour = startDate.getHours() + startDate.getMinutes() / 60;
-      const endHour = endDate.getHours() + endDate.getMinutes() / 60;
-      
-      const left = (startHour / 24) * 100;
-      const width = ((endHour - startHour) / 24) * 100;
-      
-      return { left: `${left}%`, width: `${Math.max(width, 2)}%` };
+  const stats = useMemo(() => {
+    return {
+      total: filteredMovements.length,
+      checkouts: filteredMovements.filter((m) => m.eventType === "checkout")
+        .length,
+      returns: filteredMovements.filter((m) => m.eventType === "return").length,
+      violations: filteredMovements.filter(
+        (m) => m.eventType === "geofence_violation"
+      ).length,
     };
+  }, [filteredMovements]);
 
+  const formatDuration = (duration) => {
+    if (!duration) return "N/A";
+    return duration;
+  };
+
+  if (loading) {
     return (
-      <div className="flex-1 overflow-auto">
-        <div className="border border-gray-700 rounded-lg">
-          {/* Hour Header */}
-          <div className="flex border-b border-gray-700 bg-gray-800">
-            {/* <div className="w-40 p-2 text-sm font-medium text-gray-300 border-r border-gray-700">
-              Equipment
-            </div> */}
-            <div className="flex-1 flex">
-              {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className="flex-1 p-2 text-xs text-gray-400 border-r border-gray-700 text-center"
-                >
-                  {hour.toString().padStart(2, "0")}:00
-                </div>
-              ))}
+      <MainLayout>
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400 animate-spin" />
+              <p className="text-gray-500">Loading access logs...</p>
             </div>
           </div>
-
-          {/* Timeline Rows */}
-          <div className="relative">
-            {logsForDay.map((log, idx) => {
-              const position = getLogPosition(log);
-              if (!position) return null;
-
-              return (
-                <div
-                  key={idx}
-                  className="flex border-b border-gray-700 min-h-[80px] relative"
-                >
-                  {/* Timeline Bar Area */}
-                  <div className="flex-1 relative p-2">
-                    {/* Hour Grid Lines */}
-                    <div className="absolute inset-0 flex">
-                      {hours.map((hour) => (
-                        <div
-                          key={hour}
-                          className="flex-1 border-r border-gray-700/50 rounded-full"
-                        />
-                      ))}
-                    </div>
-
-                    {/* Timeline Bar */}
-                    <div
-                      className={`group absolute top-2 bottom-2 ${log.color} text-white rounded-full flex items-center shadow-md z-10 cursor-pointer transition-all hover:shadow-lg hover:scale-105`}
-                      style={{
-                        left: position.left,
-                        width: position.width,
-                        minWidth: "80px",
-                      }}
-                    >
-                      {/* Tooltip on Hover */}
-                      <div className="absolute left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-50">
-                        <div className="bg-gray-900 text-white rounded-lg shadow-xl p-3 min-w-[200px] border border-gray-700">
-                          <div className="font-medium text-sm mb-1">
-                            {log.equipment}
-                          </div>
-                          <div className="text-xs text-gray-300 mb-1">
-                            Officer: {log.officer}
-                          </div>
-                          <div className="text-xs text-gray-400 mb-1">
-                            Status: {log.status}
-                          </div>
-                          <div className="text-xs text-gray-400 border-t border-gray-700 pt-1 mt-1">
-                            {new Date(log.startDate).toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}{" "}
-                            -{" "}
-                            {new Date(log.endDate).toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                          {/* Tooltip Arrow */}
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                            <div className="border-4 border-transparent border-t-gray-900"></div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Bar Content (minimal when not hovering) */}
-                      <div className="flex items-center justify-center w-full h-full">
-                        <div className="text-xs font-medium truncate opacity-0 group-hover:opacity-100 transition-opacity">
-                          {log.equipment}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Empty State */}
-            {logsForDay.length === 0 && (
-              <div className="flex items-center justify-center h-64 text-gray-500">
-                <div className="text-center">
-                  <div className="text-lg mb-2">No equipment logs for this day</div>
-                  <div className="text-sm">Try selecting a different date or adjusting filters</div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
-      </div>
+      </MainLayout>
     );
-  };
+  }
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">Equipment Logs</h1>
-            <div className="flex items-center gap-3">
-              <button className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
-                <Plus size={20} />
-                New Log
-              </button>
-              <button className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition">
-                <Calendar size={20} />
-              </button>
-              <button className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition">
-                <Filter size={20} />
-              </button>
-            </div>
-          </div>
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* Header */}
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {statusFilters.map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() => handleStatusToggle(filter.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  isStatusSelected(filter.value)
-                    ? "bg-white text-gray-900"
-                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                } ${filter.color ? "flex items-center gap-2" : ""}`}
-              >
-                {filter.color && (
-                  <span
-                    className={`w-2 h-2 rounded-full ${filter.color}`}
-                  ></span>
-                )}
-                {filter.label}
-              </button>
-            ))}
-            {selectedStatuses.length > 1 &&
-              !selectedStatuses.includes("all") && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg text-sm">
-                  <span className="text-gray-300">
-                    {selectedStatuses.length} filters active
-                  </span>
-                  <button
-                    onClick={() => setSelectedStatuses(["all"])}
-                    className="text-purple-400 hover:text-purple-300 font-medium"
-                  >
-                    Clear all
-                  </button>
+        {/* Filters Section */}
+        <Card className="border border-gray-200">
+          <CardContent className="p-4 space-y-4">
+            {/* Search and Date Filters */}
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search anything..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 border border-gray-300 rounded-lg shadow-sm"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600 font-semibold whitespace-nowrap">
+                    Filter with date:
+                  </label>
+                  <div className="relative">
+                    {/* <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" /> */}
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className=" border border-gray-300 rounded-lg shadow-sm"
+                      placeholder="Start date"
+                    />
+                  </div>
+                  <div className="relative">
+                    {/* <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" /> */}
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className=" border border-gray-300 rounded-lg shadow-sm"
+                      placeholder="End date"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Event Type and Status Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">
+                Event Type:
+              </span>
+              <div className="flex gap-2">
+                {[
+                  { value: "all", label: "All" },
+                  { value: "checkout", label: "Checkouts", icon: Package, color: "green-500" },
+                  { value: "return", label: "Returns", icon: CheckCircle, color: "blue-900" },
+                  { value: "movement", label: "Movements", icon: ArrowRight, color: "yellow-500" },
+                  {
+                    value: "geofence_violation",
+                    label: "Violations",
+                    icon: AlertTriangle,
+                    color: "red-500",
+                  },
+                ].map((type) => {
+                  const Icon = type.icon;
+                  const isActive = filterEventType === type.value;
+                  return (
+                    <Button
+                      key={type.value}
+                      variant={isActive ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setFilterEventType(type.value)}
+                      className={
+                      isActive ? "bg-[#0b1d3a] text-white hover:bg-[#0b1d3a]/90 cursor-pointer border border-gray-300 rounded-lg shadow-sm" : "border border-gray-300 rounded-lg shadow-sm"
+                      }
+                    >
+                      {Icon && <Icon className={`h-5 w-5 bg-${type.color} rounded-lg p-1`} />}
+                      <span >{type.label}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <span className="text-sm font-medium text-gray-700 ml-4">
+                Status:
+              </span>
+              <div className="flex gap-2">
+                {[
+                  { value: "all", label: "All" },
+                  { value: "active", label: "Active" },
+                  { value: "completed", label: "Resolved" },
+                  { value: "violation", label: "Unresolved" },
+                ].map((status) => {
+                  const isActive = filterStatus === status.value;
+                  return (
+                    <Button
+                      key={status.value}
+                      variant={isActive ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setFilterStatus(status.value)}
+                      className={
+                        isActive ? "bg-[#0b1d3a] text-white hover:bg-[#0b1d3a]/90 cursor-pointer border border-gray-300 rounded-lg shadow-sm" : "border border-gray-300 rounded-lg shadow-sm"
+                      }
+                    >
+                      {status.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Results Summary */}
+            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+              <div className="text-sm text-gray-600">
+                <span className="font-semibold text-gray-900">
+                  {filteredMovements.length}
+                </span>{" "}
+                Results
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Sorting by:</span>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date-desc">Date (Newest)</SelectItem>
+                    <SelectItem value="date-asc">Date (Oldest)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Timeline and Logs */}
+        <Card className="border border-gray-200">
+          <CardContent className="p-0">
+            {/* Table Header */}
+            <div className="grid grid-cols-14 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
+              <div className="col-span-1 text-center">Event</div>
+              <div className="col-span-1 text-center">ID</div>
+              <div className="col-span-2 text-center">Date</div>
+              <div className="col-span-1 text-center">Time</div>
+              <div className="col-span-2 text-center">Duration</div>
+              <div className="col-span-2 text-center">User - ID</div>
+              <div className="col-span-3 text-center">Location</div>
+              <div className="col-span-2 text-center">Status</div>
+            </div>
+
+            {/* Timeline and Logs Content */}
+            <div className="relative">
+              {groupedMovements.length === 0 ? (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-gray-500">No logs found</p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Try adjusting your filters or search query
+                  </p>
+                </div>
+              ) : (
+                <div className="relative">
+                  {/* Timeline Line */}
+                  <div className="absolute left-8 top-0 bottom-0 w-0.5 border-l-2 border-dashed border-gray-300" />
+
+                  {/* Logs List */}
+                  <div className="space-y-0">
+                    {groupedMovements.map(([dateKey, movements]) => {
+                      const date = parseISO(dateKey);
+                      const dateFormatted = format(date, "dd.MM.yyyy");
+                      const isToday = isSameDay(date, new Date());
+                      const isFirstOfMonth = date.getDate() === 1;
+
+                      return (
+                        <div key={dateKey} className="relative">
+                          {/* Date Marker */}
+                          <div className="relative flex items-center py-4 px-6 bg-gray-50/50 border-b border-gray-200">
+                            <div className="absolute left-6 transform -translate-x-1/2 z-10">
+                              <div className="w-4 h-4 rounded-full bg-[#0b1d3a] border-2 border-white shadow-md" />
+                            </div>
+                            <div className="ml-12">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-gray-900">
+                                  {isToday ? "Today" : dateFormatted}
+                                </span>
+                                {isFirstOfMonth && (
+                                  <span className="text-xs text-gray-500 font-normal">
+                                    ({format(date, "MMMM yyyy")})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Movements for this date */}
+                          {movements.map((movement, idx) => {
+                            const isExpanded = expandedRow === movement.id;
+                            const Icon =
+                              EVENT_TYPE_ICONS[movement.eventType] || Package;
+                            const timestamp = new Date(movement.timestamp);
+
+                            return (
+                              <div key={movement.id}>
+                                {/* Main Row */}
+                                <div
+                                  className={`grid grid-cols-14 gap-4 px-6 py-4 border-b border-gray-100 hover:bg-blue-50/30 transition-colors cursor-pointer ${
+                                    isExpanded ? "bg-blue-50" : ""
+                                  }`}
+                                  onClick={() => toggleExpand(movement.id)}
+                                >
+                                  {/* Timeline Dot */}
+                                  <div className="absolute left-6 transform -translate-x-1/2 z-10">
+                                    <div className="w-3 h-3 rounded-full bg-gray-400 border-2 border-white" />
+                                  </div>
+
+                                  {/* Event Icon */}
+                                  <div className=" flex items-center">
+                                    <div
+                                      className={`p-2 rounded-lg ${
+                                        EVENT_TYPE_COLORS[movement.eventType] ||
+                                        "bg-gray-100"
+                                      }`}
+                                    >
+                                      <Icon className="h-4 w-4" />
+                                    </div>
+                                  </div>
+
+                                  {/* ID */}
+                                  <div className=" col-span-1 flex items-center justify-center">
+                                    <span className="font-medium text-gray-900">
+                                      {movement.id}
+                                    </span>
+                                  </div>
+
+                                  {/* Date */}
+                                  <div className=" col-span-2 flex items-center justify-center text-sm text-gray-700">
+                                    {format(timestamp, "dd.MMMM yyyy")}
+                                  </div>
+
+                                  {/* Time */}
+                                  <div className=" col-span-1 flex items-center justify-center text-sm text-gray-600">
+                                    {format(timestamp, "h:mm a")}
+                                  </div>
+
+                                  {/* Duration */}
+                                  <div className=" col-span-2 flex items-center justify-center text-sm text-gray-600">
+                                    {formatDuration(movement.duration)}
+                                  </div>
+
+                                  {/* User */}
+                                  <div className=" col-span-2 flex items-center justify-center">
+                                    <div className="flex items-center gap-2">
+                                      <User className="h-4 w-4 text-gray-400" />
+                                      <div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          {movement.userName || "System"}
+                                        </div>
+                                        {movement.userId && (
+                                          <div className="text-xs text-gray-500">
+                                            {movement.userId}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Location */}
+                                  <div className=" col-span-3 flex items-center justify-center">
+                                    <div className="flex items-center gap-2">
+                                      <MapPin className="h-4 w-4 text-gray-400" />
+                                      <span className="text-sm text-gray-700 truncate">
+                                        {movement.location}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Status */}
+                                  <div className=" col-span-2 flex items-center justify-center">
+                                    <Badge
+                                      variant="outline"
+                                      className={`${
+                                        STATUS_COLORS[movement.status] ||
+                                        "bg-gray-100 text-gray-700"
+                                      } flex items-center gap-1`}
+                                    >
+                                      {movement.status === "completed" ||
+                                      movement.status === "resolved"
+                                        ? "Resolved"
+                                        : movement.status === "violation"
+                                        ? "Unresolved"
+                                        : movement.status === "active"
+                                        ? "In use"
+                                        : movement.status
+                                            ?.charAt(0)
+                                            .toUpperCase() +
+                                          movement.status?.slice(1)}
+                                      {isExpanded ? (
+                                        <ChevronUp className="h-3 w-3" />
+                                      ) : (
+                                        <ChevronDown className="h-3 w-3" />
+                                      )}
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                {/* Expanded Details */}
+                                {isExpanded && (
+                                  <div className="bg-blue-50/50 border-b border-gray-200 px-6 py-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                      {/* Movement Details */}
+                                      <div className="space-y-4">
+                                        <h4 className="font-semibold text-gray-900 mb-3">
+                                          Movement Details
+                                        </h4>
+                                        <div className="space-y-2 text-sm">
+                                          <div>
+                                            <span className="text-gray-600">
+                                              Event Type:
+                                            </span>
+                                            <span className="ml-2 font-medium text-gray-900">
+                                              {movement.eventType
+                                                .replace(/_/g, " ")
+                                                .toUpperCase()}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="text-gray-600">
+                                              Action:
+                                            </span>
+                                            <span className="ml-2 font-medium text-gray-900">
+                                              {movement.action}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="text-gray-600">
+                                              Device:
+                                            </span>
+                                            <span className="ml-2 font-medium text-gray-900">
+                                              {movement.deviceName} (
+                                              {movement.deviceId})
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="text-gray-600">
+                                              Start Time:
+                                            </span>
+                                            <span className="ml-2 font-medium text-gray-900">
+                                              {format(
+                                                timestamp,
+                                                "dd.MMMM yyyy, h:mm:ss a"
+                                              )}
+                                            </span>
+                                          </div>
+                                          {movement.duration && (
+                                            <div>
+                                              <span className="text-gray-600">
+                                                Duration:
+                                              </span>
+                                              <span className="ml-2 font-medium text-gray-900">
+                                                {movement.duration}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Location & Coordinates */}
+                                      <div className="space-y-4">
+                                        <h4 className="font-semibold text-gray-900 mb-3">
+                                          Location Information
+                                        </h4>
+                                        <div className="space-y-2 text-sm">
+                                          <div>
+                                            <span className="text-gray-600">
+                                              Current Location:
+                                            </span>
+                                            <span className="ml-2 font-medium text-gray-900">
+                                              {movement.location}
+                                            </span>
+                                          </div>
+                                          {movement.coordinates && (
+                                            <div>
+                                              <span className="text-gray-600">
+                                                Coordinates:
+                                              </span>
+                                              <span className="ml-2 font-medium text-gray-900">
+                                                {movement.coordinates.lat.toFixed(
+                                                  4
+                                                )}
+                                                ,{" "}
+                                                {movement.coordinates.lng.toFixed(
+                                                  4
+                                                )}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {movement.severity && (
+                                            <div>
+                                              <span className="text-gray-600">
+                                                Severity:
+                                              </span>
+                                              <Badge
+                                                variant="outline"
+                                                className={`ml-2 ${
+                                                  movement.severity ===
+                                                  "critical"
+                                                    ? "bg-red-100 text-red-700"
+                                                    : "bg-orange-100 text-orange-700"
+                                                }`}
+                                              >
+                                                {movement.severity.toUpperCase()}
+                                              </Badge>
+                                            </div>
+                                          )}
+                                          <div className="pt-2">
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleViewDevice(
+                                                  movement.deviceId
+                                                );
+                                              }}
+                                              className="flex items-center gap-2"
+                                            >
+                                              <ExternalLink className="h-4 w-4" />
+                                              View Full History
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Notes Section */}
+                                      <div className="space-y-4">
+                                        <h4 className="font-semibold text-gray-900 mb-3">
+                                          Notes
+                                        </h4>
+                                        <Textarea
+                                          placeholder="Add notes about this movement event..."
+                                          className="min-h-[100px] resize-none"
+                                          defaultValue={movement.notes || ""}
+                                        />
+                                        <div className="text-xs text-gray-500">
+                                          Updated:{" "}
+                                          {format(
+                                            new Date(),
+                                            "dd.MMMM yyyy, h:mm:ss a"
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
-          </div>
-
-          {/* Calendar Controls */}
-          <div className="bg-gray-800 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => navigateDate(-1)}
-                  className="bg-gray-700 hover:bg-gray-600 p-2 rounded transition"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <h2 className="text-xl font-semibold min-w-[300px] text-center">
-                  {formatDateHeader()}
-                </h2>
-                <button
-                  onClick={() => navigateDate(1)}
-                  className="bg-gray-700 hover:bg-gray-600 p-2 rounded transition"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-
-              {/* View Selector */}
-              <div className="flex bg-gray-700 rounded-lg p-1">
-                {["day", "week", "month"].map((viewType) => (
-                  <button
-                    key={viewType}
-                    onClick={() => setView(viewType)}
-                    className={`px-4 py-1.5 rounded text-sm font-medium transition ${
-                      view === viewType
-                        ? "bg-purple-600 text-white"
-                        : "text-gray-300 hover:text-white"
-                    }`}
-                  >
-                    {viewType.charAt(0).toUpperCase() + viewType.slice(1)}
-                  </button>
-                ))}
-              </div>
             </div>
-
-            {/* Calendar View */}
-            {view === "month" && renderMonthView()}
-            {view === "week" && renderWeekView()}
-            {view === "day" && renderDayView()}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
 }
-
-export default Accesslogs;

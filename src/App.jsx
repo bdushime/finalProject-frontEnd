@@ -40,15 +40,15 @@ import SearchResults from "./pages/IT_Staff/SearchResults";
 import ITReportsPage from "./pages/IT_Staff/reports/ReportsPage";
 
 // IT Staff checkout flow
-// import SelectEquipment from "./pages/IT_Staff/checkout/SelectEquipment";
-// import ScanQRCode from "./pages/IT_Staff/checkout/ScanQRCode";
-// import CaptureCondition from "./pages/IT_Staff/checkout/CaptureCondition";
-// import CheckoutDetailsDialog from "./pages/IT_Staff/checkout/CheckoutDetailsDialog";
-// import DigitalSignature from "./pages/IT_Staff/checkout/DigitalSignature";
-// import CheckoutConfirmation from "./pages/IT_Staff/checkout/CheckoutConfirmation";
+import SelectEquipment from "./pages/IT_Staff/checkout/SelectEquipment";
+import ScanQRCode from "./pages/IT_Staff/checkout/ScanQRCode";
+import CaptureCondition from "./pages/IT_Staff/checkout/CaptureCondition";
+import CheckoutDetailsDialog from "./pages/IT_Staff/checkout/CheckoutDetailsDialog";
+import DigitalSignature from "./pages/IT_Staff/checkout/DigitalSignature";
+import CheckoutConfirmation from "./pages/IT_Staff/checkout/CheckoutConfirmation";
 
 // IT Staff return flow
-// import SelectReturnItem from "./pages/IT_Staff/return/SelectReturnItem";
+import SelectReturnItem from "./pages/IT_Staff/return/SelectReturnItem";
 import ReturnScan from "./pages/IT_Staff/return/ReturnScan";
 import ReturnConfirmation from "./pages/IT_Staff/return/ReturnConfirmation";
 
@@ -58,6 +58,8 @@ import Accesslogs from "./pages/security/Accesslogs";
 import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
 import BrowseDevices from "./pages/security/BrowseDevices";
 import SecurityReports from "./pages/security/Reports";
+import SecurityNotifications from "./pages/security/Notifications";
+import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
 
 export default function App() {
   return (
@@ -116,6 +118,9 @@ export default function App() {
         <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
         <Route path="/security/devices" element={<BrowseDevices />} />
         <Route path="/security/reports" element={<SecurityReports />} />
+        <Route path="/security/notifications" element={<SecurityNotifications />} />
+        <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
+        <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
 
         {/* Admin Pages */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

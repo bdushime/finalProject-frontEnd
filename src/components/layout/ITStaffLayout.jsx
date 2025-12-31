@@ -8,7 +8,7 @@ export default function ITStaffLayout({ children }) {
             <ITStaffTopbar />
 
             {/* Main content */}
-            <main className="mx-auto w-full sm:px-6 py-4">
+            <main className="w-full sm:px-6 py-4">
                 {children}
             </main>
         </div>

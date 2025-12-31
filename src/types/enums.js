@@ -61,6 +61,7 @@ export const NotificationType = {
   SUCCESS: 'success',
   WARNING: 'warning',
   ERROR: 'error',
+  GEOFENCE_VIOLATION: 'geofence_violation',
 };
 
 export const AlertPriority = {

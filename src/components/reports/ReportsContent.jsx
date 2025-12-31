@@ -46,6 +46,27 @@ const EQUIPMENT_STATUSES = [
   { value: "LOST", label: "Lost" },
 ];
 
+const LOG_STATUSES = [
+  { value: "all", label: "All Statuses" },
+  { value: "active", label: "Active" },
+  { value: "completed", label: "Completed" },
+  { value: "violation", label: "Violation" },
+  { value: "resolved", label: "Resolved" },
+];
+
+const EVENT_TYPES = [
+  { value: "all", label: "All Event Types" },
+  { value: "checkout", label: "Checkout" },
+  { value: "return", label: "Return" },
+  { value: "movement", label: "Movement" },
+  { value: "geofence_violation", label: "Geofence Violation" },
+];
+
+const DEVICE_IDS = [
+  "TTGO-001", "TTGO-002", "TTGO-003", "TTGO-004", "TTGO-005", "TTGO-006",
+  "EQ-001", "EQ-002", "EQ-003", "EQ-004", "EQ-005"
+];
+
 export default function ReportsContent({
   reportTypes,
   defaultReportType,
@@ -59,6 +80,8 @@ export default function ReportsContent({
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
   const [borrower, setBorrower] = useState("");
+  const [eventType, setEventType] = useState("all");
+  const [deviceId, setDeviceId] = useState("");
 
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -116,6 +139,8 @@ export default function ReportsContent({
         category: category !== "all" ? category : undefined,
         status: status !== "all" ? status : undefined,
         borrower: showBorrowerFilter && borrower ? borrower : undefined,
+        eventType: reportType === "logs" && eventType !== "all" ? eventType : undefined,
+        deviceId: reportType === "logs" && deviceId ? deviceId : undefined,
       });
 
       setReportData(data);
@@ -133,6 +158,8 @@ export default function ReportsContent({
     setCategory("all");
     setStatus("all");
     setBorrower("");
+    setEventType("all");
+    setDeviceId("");
     setReportData([]);
     setPage(1);
     setReportGenerated(false);
@@ -199,6 +226,16 @@ export default function ReportsContent({
           "Total Checkouts",
           "Utilization Rate",
           "Current Status",
+        ];
+      case "logs":
+        return [
+          "Device Name",
+          "Device ID",
+          "Event Type",
+          "Location",
+          "User",
+          "Timestamp",
+          "Status",
         ];
       default:
         return [];
@@ -297,6 +334,38 @@ export default function ReportsContent({
             }
           >
             {item.currentStatus}
+          </Badge>,
+        ];
+      case "logs":
+        // Map status to display text and styling to match Accesslogs.jsx
+        const getStatusDisplay = (status) => {
+          if (status === "completed") return "Resolved";
+          if (status === "violation") return "Open";
+          if (status === "active") return "In use";
+          return status?.charAt(0).toUpperCase() + status?.slice(1) || status;
+        };
+
+        const getStatusClassName = (status) => {
+          if (status === "active") return "bg-yellow-100 text-yellow-700 border-yellow-200";
+          if (status === "completed") return "bg-green-100 text-green-700 border-green-200";
+          if (status === "violation") return "bg-red-100 text-red-700 border-red-200";
+          if (status === "resolved") return "bg-blue-100 text-blue-700 border-blue-200";
+          return "bg-gray-100 text-gray-700 border-gray-200";
+        };
+
+        return [
+          item.deviceName,
+          item.deviceId,
+          item.eventType,
+          item.location,
+          item.userName,
+          item.timestamp,
+          <Badge
+            key="status"
+            variant="outline"
+            className={getStatusClassName(item.status)}
+          >
+            {getStatusDisplay(item.status)}
           </Badge>,
         ];
       default:
@@ -442,61 +511,120 @@ export default function ReportsContent({
             )}
 
             {/* Optional Filters */}
-            {/* <div className={`grid grid-cols-1 md:grid-cols-${showBorrowerFilter ? '3' : '2'} gap-4`}> */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Equipment Category <span className="text-red-500">*</span>
-                </label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem
-                        key={cat}
-                        value={cat === "All Categories" ? "all" : cat}
-                      >
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Equipment Status
-                </label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EQUIPMENT_STATUSES.map((stat) => (
-                      <SelectItem key={stat.value} value={stat.value}>
-                        {stat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {showBorrowerFilter && (
+            {reportType === "logs" ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Borrower (Staff/User)
+                    Device ID
                   </label>
-                  <Input
-                    type="text"
-                    placeholder="Search by name or email..."
-                    value={borrower}
-                    onChange={(e) => setBorrower(e.target.value)}
-                    className="border-gray-300 shadow-sm"
-                  />
+                  <Select value={deviceId} onValueChange={setDeviceId}>
+                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                      <SelectValue placeholder="All Devices" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Devices</SelectItem>
+                      {DEVICE_IDS.map((id) => (
+                        <SelectItem key={id} value={id}>
+                          {id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-            {/* </div> */}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Type
+                  </label>
+                  <Select value={eventType} onValueChange={setEventType}>
+                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EVENT_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LOG_STATUSES.map((stat) => (
+                        <SelectItem key={stat.value} value={stat.value}>
+                          {stat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Equipment Category <span className="text-red-500">*</span>
+                  </label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem
+                          key={cat}
+                          value={cat === "All Categories" ? "all" : cat}
+                        >
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Equipment Status
+                  </label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EQUIPMENT_STATUSES.map((stat) => (
+                        <SelectItem key={stat.value} value={stat.value}>
+                          {stat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {showBorrowerFilter && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Borrower (Staff/User)
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Search by name or email..."
+                      value={borrower}
+                      onChange={(e) => setBorrower(e.target.value)}
+                      className="border-gray-300 shadow-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
             </div>
 
             {/* Action Buttons */}

@@ -12,6 +12,7 @@ import ITStaffLayout from '@/components/layout/ITStaffLayout';
 import { useNavigate } from 'react-router-dom';
 import { usePagination } from '@/hooks/usePagination';
 import PaginationControls from '@components/common/PaginationControls';
+import EquipmentDetailsDialog from './components/EquipmentDetailsDialog';
 
 // Simple helper to derive a category from the equipment name
 function deriveCategory(name = '') {
@@ -45,6 +46,8 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
   const [sortBy, setSortBy] = useState('name');
   const [equipment, setEquipment] = useState([]);
   const [page, setPage] = useState(1);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const pageSize = 9;
 
   // Load equipment from trackers JSON so count always matches trackers

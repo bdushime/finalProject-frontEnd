@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import ITStaffLayout from "@/components/layout/ITStaffLayout";
+import MainLayout from "./layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -320,7 +320,7 @@ function BrowseDevices() {
   };
 
   return (
-    <ITStaffLayout>
+    <MainLayout>
       <div className="space-y-6">
 
         <Card className="border border-gray-200 shadow-sm">
@@ -386,8 +386,17 @@ function BrowseDevices() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => navigate(`/security/logs?device=${device.id}`)}
-                      title="View Logs"
+                      onClick={() => navigate(`/security/device-movement/${device.id}`)}
+                      title="View Movement History"
+                    >
+                      <MapPin className="h-4 w-4 text-blue-600" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => navigate(`/security/device-movement/${device.id}`)}
+                      title="View Movement History"
                     >
                       <Eye className="h-4 w-4 text-gray-600" />
                     </Button>
@@ -1025,7 +1034,7 @@ function BrowseDevices() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </ITStaffLayout>
+    </MainLayout>
   );
 }
 

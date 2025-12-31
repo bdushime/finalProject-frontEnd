@@ -30,10 +30,8 @@ export default function MainLayout({ children }) {
                 />
             )}
 
-            {/* Header - with top padding and no border */}
             <header className="sticky top-0 z-40 bg-white pt-4 pb-2">
                 <div className="px-4 sm:px-6 flex items-center justify-between">
-                    {/* Left: Mobile menu + Tracknity Logo */}
                     <div className="flex items-center gap-3">
                         <Button
                             variant="ghost"
@@ -55,10 +53,8 @@ export default function MainLayout({ children }) {
                         </Link>
                     </div>
 
-                    {/* Center: Navigation */}
                     <TopNav />
 
-                    {/* Right: Settings, Notification, Profile */}
                     <div className="flex items-center gap-3">
                         <Link
                             to="/student/settings"

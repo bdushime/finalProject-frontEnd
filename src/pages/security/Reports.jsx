@@ -6,6 +6,7 @@ const SECURITY_REPORT_TYPES = [
   { value: "damaged", label: "Damaged Equipment Report" },
   { value: "lost", label: "Lost Equipment Report" },
   { value: "utilization", label: "Equipment Utilization Report" },
+  { value: "logs", label: "Device Movement Logs Report" },
 ];
 
 export default function SecurityReports() {

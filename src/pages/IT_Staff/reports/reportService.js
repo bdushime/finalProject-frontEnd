@@ -1,6 +1,8 @@
 // Mock data generator for reports
 // In production, this would call actual API endpoints
 
+import { getAllDeviceMovements } from '@/components/lib/movementHistoryData';
+
 const mockEquipment = [
   { id: 'EQ-001', name: 'MacBook Pro 16"', serialNumber: 'SN-MBP-001', category: 'Laptop' },
   { id: 'EQ-002', name: 'Dell XPS 15', serialNumber: 'SN-DELL-002', category: 'Laptop' },
@@ -198,6 +200,62 @@ function generateUtilizationReport(filters) {
   return data;
 }
 
+// Generate logs report data from device movements
+function generateLogsReport(filters) {
+  // Adjust endDate to include the full day (end of day)
+  // Convert "YYYY-MM-DD" to "YYYY-MM-DDTHH:mm:ss" format for end of day
+  let adjustedEndDate = filters.endDate;
+  if (adjustedEndDate && !adjustedEndDate.includes('T')) {
+    adjustedEndDate = adjustedEndDate + 'T23:59:59';
+  }
+
+  // Get all device movements with filters
+  const movements = getAllDeviceMovements({
+    deviceId: filters.deviceId && filters.deviceId !== '' ? filters.deviceId : undefined,
+    eventType: filters.eventType && filters.eventType !== 'all' ? filters.eventType : undefined,
+    startDate: filters.startDate,
+    endDate: adjustedEndDate,
+    status: filters.status && filters.status !== 'all' ? filters.status : undefined,
+  });
+
+  // Format movements for report
+  return movements.map((movement, index) => {
+    const date = new Date(movement.timestamp);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+    const formattedTime = date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // Format event type for display
+    const eventTypeLabels = {
+      checkout: 'Checkout',
+      return: 'Return',
+      movement: 'Movement',
+      geofence_violation: 'Geofence Violation',
+    };
+
+    return {
+      id: movement.id || `LOG-${index + 1}`,
+      deviceName: movement.deviceName || 'Unknown Device',
+      deviceId: movement.deviceId || 'N/A',
+      eventType: eventTypeLabels[movement.eventType] || movement.eventType,
+      location: movement.location || 'Unknown Location',
+      userName: movement.userName || 'Unknown User',
+      timestamp: `${formattedDate} ${formattedTime}`,
+      status: movement.status || 'unknown',
+      action: movement.action || 'N/A',
+      coordinates: movement.coordinates 
+        ? `${movement.coordinates.lat.toFixed(4)}, ${movement.coordinates.lng.toFixed(4)}`
+        : 'N/A',
+    };
+  });
+}
+
 // Main function to generate report data
 export function generateReportData(filters) {
   switch (filters.reportType) {
@@ -211,6 +269,8 @@ export function generateReportData(filters) {
       return generateLostReport(filters);
     case 'utilization':
       return generateUtilizationReport(filters);
+    case 'logs':
+      return generateLogsReport(filters);
     default:
       return [];
   }
