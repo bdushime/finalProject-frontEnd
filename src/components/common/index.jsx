@@ -164,7 +164,6 @@ export const Textarea = forwardRef(function Textarea(
         fontSize: '1rem',
         outline: 'none',
         transition: 'all 0.2s',
-        fontFamily: 'Inter, Arial, Helvetica, sans-serif',
         ...style
     };
 
@@ -220,7 +219,6 @@ export const Select = forwardRef(function Select(
         fontSize: '1rem',
         outline: 'none',
         transition: 'all 0.2s',
-        fontFamily: 'Inter, Arial, Helvetica, sans-serif',
         ...style
     };
 
