@@ -1,16 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Package, MapPin, Calendar, QrCode } from "lucide-react";
 import { getEquipmentById } from "@/components/lib/equipmentData";
-<<<<<<< HEAD
 import CategoryBadge from "./components/CategoryBadge";
-=======
-import { CategoryBadge } from "./components/CategoryBadge";
 import BackButton from "./components/BackButton";
->>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 import { PageContainer } from "@/components/common/Page";
 
 export default function EquipmentDetails() {
@@ -20,7 +16,7 @@ export default function EquipmentDetails() {
 
     if (!equipment) {
         return (
-            <MainLayout>
+            <StudentLayout>
                 <PageContainer>
                     <Card className="border-2 border-[#468faf] rounded-xl">
                         <CardContent className="py-12 text-center">
@@ -36,12 +32,12 @@ export default function EquipmentDetails() {
                         </CardContent>
                     </Card>
                 </PageContainer>
-            </MainLayout>
+            </StudentLayout>
         );
     }
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <PageContainer>
                 <BackButton to="/student/browse" />
 
@@ -154,7 +150,8 @@ export default function EquipmentDetails() {
                     </div>
                 </div>
             </PageContainer>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+
 

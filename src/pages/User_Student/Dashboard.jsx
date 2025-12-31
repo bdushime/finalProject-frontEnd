@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import StatsOverview from "./components/Dashboard/StatsOverview";
 import ActivityChart from "./components/Dashboard/ActivityChart";
 import TimeTracker from "./components/Dashboard/TimeTracker";
@@ -13,7 +13,7 @@ export default function Dashboard() {
     const navigate = useNavigate();
 
     return (
-        <MainLayout>
+        <StudentLayout>
             {/* Background Gradient */}
             <div className="fixed inset-0 bg-gradient-to-br from-white via-white to-[#f0f9ff] -z-10 pointer-events-none" />
 
@@ -157,6 +157,7 @@ export default function Dashboard() {
                     &copy; 2025 University Equipment Tracker. All rights reserved.
                 </div>
             </div>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+

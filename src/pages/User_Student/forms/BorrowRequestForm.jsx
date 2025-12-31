@@ -7,11 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-<<<<<<< HEAD
-import { QrCode, MapPin, Calendar } from "lucide-react";
-import { getEquipmentById } from "@/components/lib/equipmentData";
-import CategoryBadge from "../components/CategoryBadge";
-=======
 import {
     QrCode,
     MapPin,
@@ -31,7 +26,6 @@ import {
     Camera,
 } from "lucide-react";
 import { equipmentData, getEquipmentById } from "@/components/lib/equipmentData";
->>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 import PropTypes from "prop-types";
 
 // Mock available equipment for browsing
@@ -846,3 +840,4 @@ export default function BorrowRequestForm({ onSuccess }) {
 BorrowRequestForm.propTypes = {
     onSuccess: PropTypes.func,
 };
+

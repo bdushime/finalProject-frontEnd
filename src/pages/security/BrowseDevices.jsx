@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import MainLayout from "./layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -320,7 +320,7 @@ function BrowseDevices() {
   };
 
   return (
-    <MainLayout>
+    <ITStaffLayout>
       <div className="space-y-6">
 
         <Card className="border border-gray-200 shadow-sm">
@@ -1025,7 +1025,7 @@ function BrowseDevices() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </MainLayout>
+    </ITStaffLayout>
   );
 }
 

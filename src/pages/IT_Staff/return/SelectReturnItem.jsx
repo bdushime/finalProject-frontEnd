@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { listActiveCheckouts } from "@/components/lib/equipmentData";
@@ -16,7 +16,7 @@ function Progress() {
 export default function SelectReturnItem() {
 	const active = listActiveCheckouts();
 	return (
-		<MainLayout>
+		<ITStaffLayout>
 			<div className="p-4 sm:p-6 lg:p-8">
 				<h2 className="text-lg font-semibold mb-2">Return – Select Item</h2>
 				<Progress />
@@ -38,7 +38,8 @@ export default function SelectReturnItem() {
 					</CardContent>
 				</Card>
 			</div>
-		</MainLayout>
+		</ITStaffLayout>
 	);
 }
+
 

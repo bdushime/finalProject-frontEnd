@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -119,7 +119,7 @@ export default function ReturnEquipment() {
     };
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 {/* Header / Nav */}
                 <div className="mb-8">
@@ -425,6 +425,7 @@ export default function ReturnEquipment() {
                     )}
                 </div>
             </div>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+

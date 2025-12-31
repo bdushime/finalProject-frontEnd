@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import ReportsContent from "@/components/reports/ReportsContent";
 
 const IT_REPORT_TYPES = [
@@ -12,13 +12,14 @@ const IT_REPORT_TYPES = [
 export default function ReportsPage() {
 
   return (
-    <MainLayout>
+    <ITStaffLayout>
       <ReportsContent
         reportTypes={IT_REPORT_TYPES}
         defaultReportType="lending"
         showBorrowerFilter={true}
         exportFilenamePrefix="equipment-report"
       />
-    </MainLayout>
+    </ITStaffLayout>
   );
 }
+

@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion } from "framer-motion";
 import { Bell, Clock } from "lucide-react";
 import { listNotifications } from "@/components/lib/equipmentData";
@@ -7,7 +7,7 @@ export default function ITStaffNotifications() {
 	const items = listNotifications();
 
 	return (
-		<MainLayout>
+		<ITStaffLayout>
 			<div className="p-4 sm:p-6 lg:p-8">
 				<h2 className="text-lg font-semibold">Notifications</h2>
 				<div className="mt-4 rounded-2xl shadow-lg bg-white border border-neutral-200 divide-y divide-neutral-200">
@@ -27,7 +27,8 @@ export default function ITStaffNotifications() {
 					))}
 				</div>
 			</div>
-		</MainLayout>
+		</ITStaffLayout>
 	);
 }
+
 

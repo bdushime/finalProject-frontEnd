@@ -1,18 +1,13 @@
 import { useMemo, useState } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageContainer, PageHeader } from "@/components/common/Page";
-<<<<<<< HEAD
-import CategoryBadge from "./components/CategoryBadge";
-import { useNavigate } from "react-router-dom";
-=======
 import BackButton from "./components/BackButton";
 import { borrowedItems } from "./data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { Package } from "lucide-react";
->>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 
 export default function EquipmentCatalogue() {
     const [availability, setAvailability] = useState("all");
@@ -35,7 +30,7 @@ export default function EquipmentCatalogue() {
     });
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <div className="min-h-screen bg-white p-6 lg:p-8 font-sans text-slate-600">
                 <div className="max-w-7xl mx-auto space-y-8">
                     {/* Header */}
@@ -125,7 +120,8 @@ export default function EquipmentCatalogue() {
                     )}
                 </div>
             </div>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +64,7 @@ export default function Notifications() {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <PageContainer>
                 <BackButton to="/student/dashboard" />
                 <div className="flex items-center justify-between mb-6">
@@ -179,7 +179,8 @@ export default function Notifications() {
                     </div>
                 )}
             </PageContainer>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion } from "framer-motion";
 import { listActiveCheckouts } from "@/components/lib/equipmentData";
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
@@ -18,7 +18,7 @@ export default function CurrentCheckouts() {
     };
 
     return (
-        <MainLayout>
+        <ITStaffLayout>
             <div className="p-4 sm:p-6 lg:p-8">
                 {/* Header Title */}
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Active Checkouts</h2>
@@ -87,6 +87,6 @@ export default function CurrentCheckouts() {
                     selectedCheckout={selectedCheckout}
                 />
             </div>
-        </MainLayout>
+        </ITStaffLayout>
     );
 }

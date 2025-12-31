@@ -20,3 +20,4 @@ CategoryBadge.propTypes = {
   category: PropTypes.oneOf(Object.values(EquipmentCategory)),
 };
 
+

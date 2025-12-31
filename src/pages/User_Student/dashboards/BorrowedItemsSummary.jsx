@@ -116,3 +116,4 @@ BorrowedItemsSummary.propTypes = {
     items: PropTypes.array,
 };
 
+

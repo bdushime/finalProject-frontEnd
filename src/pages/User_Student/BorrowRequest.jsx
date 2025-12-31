@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BorrowRequestForm from "./forms/BorrowRequestForm";
 import BackButton from "./components/BackButton";
@@ -18,7 +18,7 @@ export default function BorrowRequest() {
     };
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <PageContainer>
                 <BackButton to="/student/browse" />
                 <PageHeader
@@ -27,7 +27,8 @@ export default function BorrowRequest() {
                 />
                 <BorrowRequestForm onSuccess={handleSuccess} />
             </PageContainer>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+
 

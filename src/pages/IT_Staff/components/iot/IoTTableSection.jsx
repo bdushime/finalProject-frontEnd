@@ -429,3 +429,4 @@ function TrackerHistoryChart({ data, tracker }) {
     </div>
   );
 }
+

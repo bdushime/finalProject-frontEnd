@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,7 @@ export default function Score() {
     };
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <PageContainer>
                 <BackButton to="/student/dashboard" />
                 <PageHeader
@@ -197,6 +197,7 @@ export default function Score() {
                     </div>
                 </div>
             </PageContainer>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+

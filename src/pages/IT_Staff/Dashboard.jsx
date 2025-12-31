@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import DashboardCards from "@/components/dashboard/DashboardCards";
 import Charts from "@/components/dashboard/Charts";
 import QuickActions from "@/components/dashboard/QuickActions";
@@ -6,7 +6,7 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 
 export function Dashboard() {
 	return (
-		<MainLayout>
+		<ITStaffLayout>
 			<div className="space-y-4 sm:space-y-6">
 				{/* Summary Cards */}
 				<DashboardCards />
@@ -17,7 +17,8 @@ export function Dashboard() {
 					{/* <RecentActivity /> */}
 				</div>
 			</div>
-		</MainLayout>
+		</ITStaffLayout>
 	);
 }
+
 

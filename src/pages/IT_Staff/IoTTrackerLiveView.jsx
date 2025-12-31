@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import IoTHeader from "@/pages/IT_Staff/components/iot/IoTHeader";
 import IoTStatsCards from "@/pages/IT_Staff/components/iot/IoTStatsCards";
 import IoTFiltersBar from "@/pages/IT_Staff/components/iot/IoTFiltersBar";
@@ -189,7 +189,7 @@ export default function IoTTrackerLiveView() {
   const lowBatteryCount = trackers.filter((t) => t.battery < 30).length;
 
   return (
-    <MainLayout>
+    <ITStaffLayout>
       <div className="space-y-6">
         <IoTHeader
           isSimulating={isSimulating}
@@ -234,6 +234,7 @@ export default function IoTTrackerLiveView() {
           historyData={historyData}
         />
       </div>
-    </MainLayout>
+    </ITStaffLayout>
   );
 }
+

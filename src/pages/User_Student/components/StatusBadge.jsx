@@ -43,3 +43,4 @@ StatusBadge.propTypes = {
     status: PropTypes.oneOf(['active', 'pending', 'overdue', 'returned', 'rejected']),
 };
 
+

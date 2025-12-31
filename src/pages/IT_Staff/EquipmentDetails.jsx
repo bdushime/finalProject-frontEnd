@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { QrCode, CircleDot, ArrowLeft } from "lucide-react";
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Button } from "@/components/ui/button";
 import BorrowingHistory from "./components/BorrowingHistory";
 
@@ -42,17 +42,17 @@ export default function EquipmentDetails() {
 
   if (loading) {
     return (
-      <MainLayout>
+      <ITStaffLayout>
         <div className="p-4 sm:p-6 lg:p-8">
           <p className="text-sm text-neutral-500">Loading equipment details...</p>
         </div>
-      </MainLayout>
+      </ITStaffLayout>
     );
   }
 
   if (!equipment) {
     return (
-      <MainLayout>
+      <ITStaffLayout>
         <div className="p-4 sm:p-6 lg:p-8 space-y-4">
           <Button
             variant="ghost"
@@ -64,14 +64,14 @@ export default function EquipmentDetails() {
           </Button>
           <p className="text-sm text-red-600">Equipment not found.</p>
         </div>
-      </MainLayout>
+      </ITStaffLayout>
     );
   }
 
   const statusLabel = equipment.status === "online" ? "Available (online)" : "Offline";
 
   return (
-    <MainLayout>
+    <ITStaffLayout>
       <div className="p-4 sm:p-6 lg:p-8">
         <Button
           variant="ghost"
@@ -82,7 +82,7 @@ export default function EquipmentDetails() {
           <ArrowLeft className="mr-2 h-6 w-6 font-bold" />
         </Button>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="gap-6">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -129,7 +129,7 @@ export default function EquipmentDetails() {
 
           </motion.div>
 
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
@@ -139,9 +139,10 @@ export default function EquipmentDetails() {
             <div className="aspect-square rounded-xl grid place-items-center bg-neutral-50">
               <QrCode className="h-28 w-28 text-neutral-400" />
             </div>
-          </motion.div>
+          </motion.div> */}
         </div>
       </div>
-    </MainLayout>
+    </ITStaffLayout>
   );
 }
+

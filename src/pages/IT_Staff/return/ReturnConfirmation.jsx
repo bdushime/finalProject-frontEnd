@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { CheckCircle2, Printer, Download } from "lucide-react";
@@ -15,7 +15,7 @@ function Progress() {
 
 export default function ReturnConfirmation() {
 	return (
-		<MainLayout>
+		<ITStaffLayout>
 			<div className="p-4 sm:p-6 lg:p-8">
 				<h2 className="text-lg font-semibold mb-2">Return – Confirmation</h2>
 				<Progress />
@@ -38,7 +38,8 @@ export default function ReturnConfirmation() {
 					</CardContent>
 				</Card>
 			</div>
-		</MainLayout>
+		</ITStaffLayout>
 	);
 }
+
 

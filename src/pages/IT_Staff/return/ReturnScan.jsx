@@ -1,4 +1,4 @@
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { QrCode, Camera } from "lucide-react";
@@ -15,7 +15,7 @@ function Progress() {
 
 export default function ReturnScan() {
 	return (
-		<MainLayout>
+		<ITStaffLayout>
 			<div className="p-4 sm:p-6 lg:p-8">
 				<h2 className="text-lg font-semibold mb-2">Return – Scan & Photo</h2>
 				<Progress />
@@ -39,7 +39,8 @@ export default function ReturnScan() {
 					</CardContent>
 				</Card>
 			</div>
-		</MainLayout>
+		</ITStaffLayout>
 	);
 }
+
 

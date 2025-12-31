@@ -85,3 +85,4 @@ RecentActivity.propTypes = {
     notifications: PropTypes.array,
 };
 
+

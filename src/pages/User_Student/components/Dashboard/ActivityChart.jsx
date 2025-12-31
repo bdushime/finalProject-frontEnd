@@ -48,3 +48,4 @@ export default function ActivityChart() {
         </div>
     );
 }
+

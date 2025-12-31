@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
 import { Badge } from "@/components/ui/badge";
@@ -117,7 +117,7 @@ export default function Report() {
     };
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <PageContainer>
                 {/* Header Actions - Hidden on Print */}
                 <div className="print:hidden">
@@ -291,6 +291,7 @@ export default function Report() {
                     }
                 `}</style>
             </PageContainer>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+

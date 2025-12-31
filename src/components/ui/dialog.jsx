@@ -3,11 +3,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-<<<<<<< HEAD
 import { X } from "lucide-react";
-=======
-import { XIcon } from "lucide-react";
->>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 
 import { cn } from "./utils";
 

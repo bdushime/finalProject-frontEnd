@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ export default function HelpSupport() {
     };
 
     return (
-        <MainLayout>
+        <StudentLayout>
             <PageContainer>
                 <div className="flex items-center justify-between mb-2">
                     <BackButton to="/student/dashboard" />
@@ -168,6 +168,7 @@ export default function HelpSupport() {
                     </div>
                 </div>
             </PageContainer>
-        </MainLayout>
+        </StudentLayout>
     );
 }
+

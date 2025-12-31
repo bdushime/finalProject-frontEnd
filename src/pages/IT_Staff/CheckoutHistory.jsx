@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion } from "framer-motion";
 import { Input } from "@/components/common";
 import { listCheckoutHistory } from "@/components/lib/equipmentData";
@@ -10,7 +10,7 @@ export default function CheckoutHistory() {
 	const rows = listCheckoutHistory(q);
 
 	return (
-		<MainLayout>
+		<ITStaffLayout>
 			<div className="p-4 sm:p-6 lg:p-8">
 				<div className="flex items-end justify-between gap-3 flex-wrap">
 					<h2 className="text-lg font-semibold">Checkout History</h2>
@@ -45,7 +45,8 @@ export default function CheckoutHistory() {
 					</div>
 				</div>
 			</div>
-		</MainLayout>
+		</ITStaffLayout>
 	);
 }
+
 
