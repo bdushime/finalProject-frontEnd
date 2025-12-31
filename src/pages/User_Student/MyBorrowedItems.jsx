@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,10 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Calendar, Package, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Search, Package } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import { StatusBadge } from "./components/StatusBadge";
+<<<<<<< HEAD
 import CategoryBadge from "./components/CategoryBadge";
+=======
+import BackButton from "./components/BackButton";
+import ExtendModal from "@/components/ui/ExtendModal";
+>>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 import { borrowedItems } from "./data/mockData";
 import { useNavigate } from "react-router-dom";
 
@@ -18,19 +23,14 @@ export default function MyBorrowedItems() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
+    // Extend modal state
+    const [extendModalOpen, setExtendModalOpen] = useState(false);
+    const [selectedItemForExtend, setSelectedItemForExtend] = useState(null);
+
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    };
-
-    const getDaysUntilDue = (dueDate) => {
-        if (!dueDate) return null;
-        const today = new Date();
-        const due = new Date(dueDate);
-        const diffTime = due - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
     };
 
     const filteredItems = borrowedItems.filter(item => {
@@ -44,189 +44,230 @@ export default function MyBorrowedItems() {
         return matchesSearch && matchesStatus;
     });
 
+    const activeItems = useMemo(
+        () => filteredItems.filter((item) => item.status === 'active' || item.status === 'overdue'),
+        [filteredItems]
+    );
+    const historyItems = useMemo(
+        () => filteredItems.filter((item) => item.status !== 'active' && item.status !== 'overdue'),
+        [filteredItems]
+    );
+
+    const scoreImpact = (status) => {
+        switch (status) {
+            case 'returned':
+            case 'returned-early':
+                return { value: +2, tone: 'text-emerald-700', badge: 'bg-emerald-50 border border-emerald-100 text-emerald-700' };
+            case 'on-time':
+                return { value: +1, tone: 'text-emerald-700', badge: 'bg-emerald-50 border border-emerald-100 text-emerald-700' };
+            case 'pending':
+                return { value: 0, tone: 'text-slate-600', badge: 'bg-slate-100 border border-slate-200 text-slate-600' };
+            case 'overdue':
+            case 'late':
+                return { value: -3, tone: 'text-rose-700', badge: 'bg-rose-50 border border-rose-100 text-rose-700' };
+            default:
+                return { value: 0, tone: 'text-slate-600', badge: 'bg-slate-100 border border-slate-200 text-slate-600' };
+        }
+    };
+
+    const getCountdown = (dueDate) => {
+        if (!dueDate) return null;
+        const now = new Date();
+        const due = new Date(dueDate);
+        const diffMs = due - now;
+        if (diffMs <= 0) return { hours: 0, mins: 0, overdue: true };
+        const totalMinutes = Math.floor(diffMs / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        return { hours, mins, overdue: false };
+    };
+
     const handleReturn = (item) => {
         if (item.status === 'active' || item.status === 'overdue') {
             navigate(`/student/return?itemId=${item.id}`);
         }
     };
 
+    const handleExtend = (item) => {
+        setSelectedItemForExtend(item);
+        setExtendModalOpen(true);
+    };
+
+    const handleExtendConfirm = (extensionData) => {
+        console.log('Extension confirmed:', extensionData);
+        // Here you would call your API to extend the borrowing time
+        // After success, you might want to refresh the items list
+        alert(`Successfully extended ${selectedItemForExtend?.equipmentName} until ${new Date(extensionData.newEndTime).toLocaleTimeString()}`);
+    };
+
     return (
         <MainLayout>
-            <PageContainer>
-                <PageHeader
-                    title="My Borrowed Items"
-                    subtitle="View and manage your borrowed equipment"
-                />
+            <div className="min-h-screen bg-white p-6 lg:p-8 font-sans text-slate-600">
+                <div className="max-w-6xl mx-auto space-y-8">
+                    {/* Header */}
+                    <div>
+                        <BackButton to="/student/dashboard" className="mb-4" />
+                        <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">My Borrowed Items</h1>
+                        <p className="text-slate-500 mt-1">View and manage your borrowed equipment</p>
+                    </div>
 
-                <Card className="mb-6 border-gray-300">
-                    <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row gap-4">
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                <Input
-                                    placeholder="Search by equipment name or ID..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10"
-                                />
-                            </div>
-                            <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-full md:w-[200px]">
-                                    <SelectValue placeholder="Filter by status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="overdue">Overdue</SelectItem>
-                                    <SelectItem value="returned">Returned</SelectItem>
-                                </SelectContent>
-                            </Select>
+                    {/* Filters & Search - White/Clean */}
+                    <div className="bg-white border border-slate-200 p-1.5 rounded-2xl flex flex-col md:flex-row gap-2 max-w-2xl">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Search equipment..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 h-10 bg-transparent border-none focus-visible:ring-0 text-[#0b1d3a] placeholder:text-slate-400 font-medium"
+                            />
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="w-px bg-slate-200 my-2 hidden md:block"></div>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-full md:w-[180px] h-10 rounded-xl border-none shadow-none focus:ring-0 text-[#0b1d3a] font-medium bg-transparent">
+                                <SelectValue placeholder="Filter status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="overdue">Overdue</SelectItem>
+                                <SelectItem value="returned">Returned</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                {filteredItems.length === 0 ? (
-                    <Card className="border-gray-300">
-                        <CardContent className="py-12 text-center">
-                            <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                No items found
-                            </h3>
-                            <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                {searchQuery || statusFilter !== 'all'
-                                    ? 'Try adjusting your search or filter'
-                                    : 'You haven\'t borrowed any equipment yet'}
-                            </p>
-                            {!searchQuery && statusFilter === 'all' && (
-                                <Button onClick={() => navigate('/student/browse')}>
-                                    Browse Equipment
-                                </Button>
-                            )}
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredItems.map((item) => {
-                            const daysUntilDue = getDaysUntilDue(item.dueDate);
-                            const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
-
-                            return (
-                                <Card key={item.id} className="border-gray-300">
-                                    <CardContent className="p-6">
-                                        <div className="flex flex-col lg:flex-row gap-6">
-                                            <div className="flex-1">
-                                                <div className="flex items-start justify-between mb-4">
+                    {/* Active Loans Section - Compact Cards Grid */}
+                    {activeItems.length > 0 && (
+                        <div className="space-y-4">
+                            <h2 className="text-lg font-bold text-[#0b1d3a]">Active Loans</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {activeItems.map((item) => {
+                                    const countdown = getCountdown(item.dueDate);
+                                    return (
+                                        <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-[#126dd5]/50 transition-colors group">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500">
+                                                        <Package className="w-5 h-5" />
+                                                    </div>
                                                     <div>
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <CategoryBadge category={item.category} />
-                                                            <StatusBadge status={item.status} />
-                                                        </div>
-                                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                                                            {item.equipmentName}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                            Request ID: {item.requestId} • Equipment ID: {item.equipmentId}
-                                                        </p>
+                                                        <h3 className="font-bold text-[#0b1d3a] text-base">{item.equipmentName}</h3>
+                                                        <p className="text-xs text-slate-500 uppercase tracking-wide">{item.id}</p>
                                                     </div>
                                                 </div>
+                                                <Badge variant="outline" className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${item.status === 'active'
+                                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                        : 'bg-rose-50 text-rose-600 border-rose-100'
+                                                    }`}>
+                                                    {item.status === 'active' ? 'Active' : 'Overdue'}
+                                                </Badge>
+                                            </div>
 
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <Calendar className="h-5 w-5 text-gray-400" />
-                                                        <div>
-                                                            <div className="text-xs text-gray-500">Borrowed Date</div>
-                                                            <div className="font-medium">
-                                                                {item.borrowedDate ? formatDate(item.borrowedDate) : 'Not yet borrowed'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <Calendar className="h-5 w-5 text-gray-400" />
-                                                        <div>
-                                                            <div className="text-xs text-gray-500">Due Date</div>
-                                                            <div className={`font-medium ${isOverdue ? 'text-red-600 dark:text-red-400' : ''}`}>
-                                                                {item.dueDate ? formatDate(item.dueDate) : 'N/A'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <Package className="h-5 w-5 text-gray-400" />
-                                                        <div>
-                                                            <div className="text-xs text-gray-500">Location</div>
-                                                            <div className="font-medium">{item.location}</div>
-                                                        </div>
-                                                    </div>
-                                                    {item.approvedBy && (
-                                                        <div className="flex items-center gap-3">
-                                                            <CheckCircle className="h-5 w-5 text-gray-400" />
-                                                            <div>
-                                                                <div className="text-xs text-gray-500">Approved By</div>
-                                                                <div className="font-medium">{item.approvedBy}</div>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                            {/* Timer/Due Info */}
+                                            <div className="flex items-center justify-between bg-slate-50 rounded-xl p-3 mb-4 border border-slate-100">
+                                                <div className="text-xs text-slate-500">
+                                                    Due: <span className="font-semibold text-slate-700">{new Date(item.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                 </div>
-
-                                                {isOverdue && (
-                                                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
-                                                        <div className="flex items-center gap-2 text-red-800 dark:text-red-400">
-                                                            <AlertCircle className="h-5 w-5" />
-                                                            <span className="font-semibold">
-                                                                Overdue by {Math.abs(daysUntilDue)} day(s). Please return immediately.
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {daysUntilDue !== null && daysUntilDue > 0 && daysUntilDue <= 3 && !isOverdue && (
-                                                    <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mb-4">
-                                                        <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400">
-                                                            <Clock className="h-5 w-5" />
-                                                            <span className="font-semibold">
-                                                                Due in {daysUntilDue} day(s). Please prepare for return.
-                                                            </span>
-                                                        </div>
+                                                {countdown && (
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="font-mono font-bold text-[#0b1d3a] text-lg">
+                                                            {countdown.hours.toString().padStart(2, '0')}:{countdown.mins.toString().padStart(2, '0')}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-400 font-bold uppercase">left</span>
                                                     </div>
                                                 )}
                                             </div>
 
-                                            <div className="lg:w-48 flex flex-col gap-2">
-                                                {(item.status === 'active' || item.status === 'overdue') && (
-                                                    <Button
-                                                        className="w-full bg-[#343264] hover:bg-[#2a2752] text-white"
-                                                        onClick={() => handleReturn(item)}
-                                                    >
-                                                        Return Item
-                                                    </Button>
-                                                )}
-                                                {item.status === 'pending' && (
-                                                    <div className="text-center text-sm text-gray-600 dark:text-gray-400 py-2">
-                                                        Awaiting approval
-                                                    </div>
-                                                )}
-                                                {item.status === 'returned' && (
-                                                    <div className="text-center text-sm text-green-600 dark:text-green-400 py-2">
-                                                        ✓ Returned
-                                                    </div>
-                                                )}
+                                            {/* Actions - Subtle */}
+                                            <div className="grid grid-cols-2 gap-3">
                                                 <Button
-                                                    variant="outline"
-                                                    className="w-full"
-                                                    onClick={() => navigate(`/student/equipment/${item.equipmentId}`)}
+                                                    variant="ghost"
+                                                    onClick={() => handleExtend(item)}
+                                                    className="h-9 rounded-lg text-slate-600 hover:text-[#0b1d3a] hover:bg-slate-50 text-xs font-semibold"
                                                 >
-                                                    View Details
+                                                    Extend Time
+                                                </Button>
+                                                <Button
+                                                    onClick={() => handleReturn(item)}
+                                                    className="h-9 rounded-lg bg-[#0b1d3a] hover:bg-[#2c3e50] text-white text-xs font-semibold shadow-sm"
+                                                >
+                                                    Return Item
                                                 </Button>
                                             </div>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* History Section - Clean Table */}
+                    <div className="space-y-4">
+                        <h2 className="text-lg font-bold text-[#0b1d3a]">History</h2>
+                        <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                            <Table>
+                                <TableHeader className="bg-slate-50">
+                                    <TableRow className="border-b border-slate-200">
+                                        <TableHead className="py-3 pl-6 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Equipment</TableHead>
+                                        <TableHead className="py-3 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Checkout</TableHead>
+                                        <TableHead className="py-3 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Return</TableHead>
+                                        <TableHead className="py-3 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider">Status</TableHead>
+                                        <TableHead className="py-3 pr-6 font-semibold text-[#0b1d3a] text-xs uppercase tracking-wider text-right">Points</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {historyItems.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="py-8 text-center text-slate-500 text-sm">
+                                                No history items found.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        historyItems.map((item) => (
+                                            <TableRow key={item.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                                <TableCell className="py-3 pl-6 font-medium text-[#0b1d3a] text-sm">{item.equipmentName}</TableCell>
+                                                <TableCell className="py-3 text-slate-500 text-sm">{formatDate(item.borrowedDate)}</TableCell>
+                                                <TableCell className="py-3 text-slate-500 text-sm">{item.returnDate ? formatDate(item.returnDate) : "—"}</TableCell>
+                                                <TableCell className="py-3">
+                                                    <StatusBadge status={item.status} />
+                                                </TableCell>
+                                                <TableCell className="py-3 pr-6 text-right">
+                                                    {(() => {
+                                                        const score = scoreImpact(item.status);
+                                                        return (
+                                                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${score.tone} bg-opacity-10`}>
+                                                                {score.value > 0 ? `+${score.value}` : score.value}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
-                )}
-            </PageContainer>
+
+                    {filteredItems.length === 0 && (
+                        <div className="text-center py-12">
+                            <p className="text-slate-500 text-sm">No items found matching your filters.</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Extend Modal */}
+                <ExtendModal
+                    isOpen={extendModalOpen}
+                    onClose={() => {
+                        setExtendModalOpen(false);
+                        setSelectedItemForExtend(null);
+                    }}
+                    item={selectedItemForExtend}
+                    onConfirm={handleExtendConfirm}
+                />
+            </div>
         </MainLayout>
     );
 }
-

@@ -1,8 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+// Landing
+import Landing from "./pages/Landing";
+
 // Auth
-import Login from "./pages/auth/Login";
+import Auth from "./pages/auth/Auth";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import OTPVerify from "./pages/auth/OTPVerify";
+
+// Admin pages
+import AdminDashboard from "./pages/Sys_Admin/Dashboard";
+import UsersList from "./pages/Sys_Admin/UserManagement/UsersList";
+import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
+import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
 
 // Student (User) pages
 import Dashboard from "./pages/User_Student/Dashboard";
@@ -13,6 +24,9 @@ import BorrowRequest from "./pages/User_Student/BorrowRequest";
 import MyBorrowedItems from "./pages/User_Student/MyBorrowedItems";
 import Notifications from "./pages/User_Student/Notifications";
 import HelpSupport from "./pages/User_Student/HelpSupport";
+import ReturnEquipment from "./pages/User_Student/ReturnEquipment";
+import Score from "./pages/User_Student/Score";
+import Report from "./pages/User_Student/Report";
 
 // IT Staff pages
 import { Dashboard as ITStaffDashboard } from "./pages/IT_Staff/Dashboard";
@@ -47,12 +61,26 @@ import BrowseDevices from "./pages/security/BrowseDevices";
 import SecurityReports from "./pages/security/Reports";
 
 export default function App() {
+<<<<<<< HEAD
   return (
     <BrowserRouter>
       <Routes>
         {/* Auth */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+=======
+    return (
+        <BrowserRouter>
+            <Routes>
+                {/* Landing Page */}
+                <Route path="/" element={<Landing />} />
+
+                {/* Auth Pages */}
+                <Route path="/login" element={<Auth />} />
+                <Route path="/signup" element={<Auth />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/otp-verify" element={<OTPVerify />} />
+>>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 
         {/* Student (User) Pages - protected */}
         <Route
@@ -90,6 +118,7 @@ export default function App() {
           }
         />
 
+<<<<<<< HEAD
         {/* Borrowing */}
         <Route
           path="/student/borrow-request"
@@ -107,6 +136,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+=======
+                {/* Borrowing */}
+                <Route path="/student/borrow-request" element={<BorrowRequest />} />
+                <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
+                <Route path="/student/return" element={<ReturnEquipment />} />
+                <Route path="/student/score" element={<Score />} />
+                <Route path="/student/report" element={<Report />} />
+>>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 
         {/* Other student pages */}
         <Route
@@ -126,6 +163,7 @@ export default function App() {
           }
         />
 
+<<<<<<< HEAD
         {/* IT Staff routes - protected */}
         <Route
           path="/it/dashboard"
@@ -331,4 +369,22 @@ export default function App() {
       </Routes>
     </BrowserRouter>
   );
+=======
+                {/* Admin Pages */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UsersList />} />
+                <Route path="/admin/config" element={<ConfigPage />} />
+                <Route path="/admin/data" element={<DataPage />} />
+                <Route path="/admin/monitoring" element={<MonitoringPage />} />
+                <Route path="/admin/reports" element={<ReportsPage />} />
+                <Route path="/admin/security" element={<SecurityPage />} />
+                <Route path="/admin/tracking" element={<TrackingPage />} />
+                <Route path="/admin/scan" element={<ScannerPage />} />
+
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </BrowserRouter>
+    );
+>>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 }

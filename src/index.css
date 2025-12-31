@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 
+<<<<<<< HEAD
 /* Simple Leaflet marker styling for IoT map */
 .iot-marker {
   border-radius: 9999px;
@@ -13,4 +14,15 @@
 
 .iot-marker-offline {
   background-color: #ef4444; /* red-500 */
+=======
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom Blue Colors for Tailwind v4 */
+@theme {
+    --color-dark-blue-1: #1864ab;
+    --color-dark-blue-2: #183153;
+    --color-light-blue-1: #a5d8ff;
+    --color-light-blue-2: #74c0fc;
+>>>>>>> 0c4a4f5bc760ec1466c44da7987df7c5c93a8776
 }

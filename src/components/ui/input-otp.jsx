@@ -1,4 +1,3 @@
-"use client";
 
 import * as React from "react";
 import PropTypes from "prop-types";
@@ -30,7 +29,7 @@ function InputOTPGroup({ className, ...props }) {
   return (
     <div
       data-slot="input-otp-group"
-      className={cn("flex items-center gap-1", className)}
+      className={cn("flex items-center gap-2 sm:gap-3", className)}
       {...props}
     />
   );
@@ -47,9 +46,28 @@ function InputOTPSlot({ index, className, ...props }) {
       data-slot="input-otp-slot"
       data-active={isActive}
       className={cn(
-        "data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 border-input relative flex h-9 w-9 items-center justify-center border-y border-r text-sm bg-input-background transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]",
+        "relative flex items-center justify-center transition-all outline-none first:rounded-l-xl first:border-l last:rounded-r-xl data-[active=true]:z-10",
         className,
       )}
+      style={{
+        height: '3.5rem',
+        width: '3.5rem',
+        borderTop: '1px solid #e5e5e5',
+        borderBottom: '1px solid #e5e5e5',
+        borderRight: index < 5 ? '1px solid #e5e5e5' : '1px solid #e5e5e5',
+        borderLeft: index > 0 ? 'none' : '1px solid #e5e5e5',
+        borderRadius: index === 0 ? '0.375rem 0 0 0.375rem' : index === 5 ? '0 0.375rem 0.375rem 0' : '0',
+        backgroundColor: 'white',
+        color: '#333',
+        fontSize: '1.5rem',
+        fontWeight: 'bold',
+        fontFamily: 'Inter, Arial, Helvetica, sans-serif',
+        ...(isActive && {
+          borderColor: '#1864ab',
+          boxShadow: '0 0 0 3px rgba(24, 100, 171, 0.1)',
+          zIndex: 10
+        })
+      }}
       {...props}
     >
       {char}

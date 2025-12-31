@@ -289,9 +289,10 @@ export function validateQRCode(qrCode: string): ValidationResult {
     return { isValid: false, error: 'QR code is required' }
   }
   
-  // QR code should match equipment ID format (e.g., EQ-001)
-  if (!/^EQ-\d{3,}$/.test(qrCode)) {
-    return { isValid: false, error: 'Invalid QR code format' }
+  // QR code should match equipment ID patterns (e.g., PRJ-001, REM-001, EQ-PRJ-012)
+  // Accept IDs that have a letter prefix and hyphen-delimited segments with digits/letters
+  if (!/^[A-Z]{2,}(?:-[A-Z0-9]+)+$/i.test(qrCode)) {
+    return { isValid: false, error: 'Invalid QR code format (e.g., PRJ-001 or EQ-PRJ-012)' }
   }
   
   return { isValid: true }

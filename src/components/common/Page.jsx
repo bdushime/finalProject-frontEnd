@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 export const PageContainer = ({ children, className = '' }) => {
     return (
-        <div className={`max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 ${className}`}>
+        <div className={`max-w-7xl mx-auto w-full ${className}`}>
             {children}
         </div>
     );
@@ -15,9 +15,9 @@ PageContainer.propTypes = {
 
 export const PageHeader = ({ title, subtitle, className = '' }) => {
     return (
-        <div className={`mb-8 ${className}`}>
-            <h1 className="text-foreground mb-2 text-3xl font-bold">{title}</h1>
-            {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+        <div className={`mb-6 ${className}`}>
+            <h1 className="text-black mb-2 text-2xl font-semibold">{title}</h1>
+            {subtitle && <p className="text-black text-sm">{subtitle}</p>}
         </div>
     );
 };

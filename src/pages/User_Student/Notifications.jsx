@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, CheckCircle, XCircle, AlertCircle, Clock, Info, Trash2, CheckCheck } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
+import BackButton from "./components/BackButton";
 import { notifications as mockNotifications } from "./data/mockData";
 import { useNavigate } from "react-router-dom";
 
@@ -25,22 +26,6 @@ export default function Notifications() {
                 return Info;
             default:
                 return Bell;
-        }
-    };
-
-    const getIconColor = (type) => {
-        switch (type) {
-            case 'approved':
-                return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30';
-            case 'rejected':
-                return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30';
-            case 'overdue':
-            case 'reminder':
-                return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30';
-            case 'system':
-                return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30';
-            default:
-                return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900/30';
         }
     };
 
@@ -81,13 +66,18 @@ export default function Notifications() {
     return (
         <MainLayout>
             <PageContainer>
+                <BackButton to="/student/dashboard" />
                 <div className="flex items-center justify-between mb-6">
                     <PageHeader
                         title="Notifications"
                         subtitle={`You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`}
                     />
                     {unreadCount > 0 && (
-                        <Button variant="outline" onClick={markAllAsRead}>
+                        <Button
+                            variant="outline"
+                            className="rounded-xl border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
+                            onClick={markAllAsRead}
+                        >
                             <CheckCheck className="h-4 w-4 mr-2" />
                             Mark All Read
                         </Button>
@@ -95,13 +85,15 @@ export default function Notifications() {
                 </div>
 
                 {notifications.length === 0 ? (
-                    <Card className="border-gray-300">
+                    <Card className="border border-slate-200 rounded-2xl bg-white/95 shadow-[0_16px_38px_-22px_rgba(8,47,73,0.25)]">
                         <CardContent className="py-12 text-center">
-                            <Bell className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                            <div className="p-4 rounded-full bg-sky-50 w-20 h-20 mx-auto mb-4 flex items-center justify-center border border-sky-100">
+                                <Bell className="h-10 w-10 text-sky-700" />
+                            </div>
+                            <h3 className="text-lg font-bold text-black mb-2">
                                 No notifications
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400">
+                            <p className="text-black">
                                 You're all caught up! Check back later for updates.
                             </p>
                         </CardContent>
@@ -110,37 +102,33 @@ export default function Notifications() {
                     <div className="space-y-4">
                         {notifications.map((notification) => {
                             const Icon = getIcon(notification.type);
-                            const iconColor = getIconColor(notification.type);
                             const IconComponent = Icon;
 
                             return (
                                 <Card
                                     key={notification.id}
-                                    className={`border-gray-300 transition-all ${!notification.read
-                                            ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
-                                            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                                        }`}
+                                    className={`border border-slate-200 rounded-2xl bg-white/95 shadow-[0_16px_38px_-22px_rgba(8,47,73,0.3)] transition-all duration-300 hover:border-sky-200 hover:shadow-[0_22px_42px_-22px_rgba(8,47,73,0.35)] ${!notification.read ? 'ring-1 ring-sky-200' : ''}`}
                                 >
                                     <CardContent className="p-6">
                                         <div className="flex items-start gap-4">
-                                            <div className={`p-3 rounded-lg ${iconColor} flex-shrink-0`}>
-                                                <IconComponent className="h-6 w-6" />
+                                            <div className="p-3 rounded-xl bg-sky-100 border border-sky-200 flex-shrink-0 shadow-inner shadow-sky-900/10">
+                                                <IconComponent className="h-6 w-6 text-[#0b1d3a]" />
                                             </div>
 
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between mb-2">
                                                     <div className="flex-1">
-                                                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                                                        <h4 className="font-bold text-[#0b1d3a] mb-1">
                                                             {notification.title}
                                                         </h4>
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                                        <p className="text-sm text-slate-700 mb-2">
                                                             {notification.message}
                                                         </p>
-                                                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                                                        <div className="flex items-center gap-3 text-xs text-slate-600">
                                                             <Clock className="h-3 w-3" />
                                                             <span>{formatTime(notification.timestamp)}</span>
                                                             {!notification.read && (
-                                                                <Badge variant="default" className="text-xs">
+                                                                <Badge variant="outline" className="text-xs rounded-full border-sky-300 text-sky-700 bg-sky-50 px-2 py-0.5">
                                                                     New
                                                                 </Badge>
                                                             )}
@@ -153,6 +141,7 @@ export default function Notifications() {
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
+                                                            className="rounded-lg border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
                                                             onClick={() => {
                                                                 if (!notification.read) markAsRead(notification.id);
                                                                 navigate(notification.actionUrl);
@@ -164,6 +153,7 @@ export default function Notifications() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
+                                                                className="text-sky-700 hover:bg-sky-50"
                                                                 onClick={() => markAsRead(notification.id)}
                                                             >
                                                                 Mark as Read
@@ -176,10 +166,10 @@ export default function Notifications() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="flex-shrink-0"
+                                                className="flex-shrink-0 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
                                                 onClick={() => deleteNotification(notification.id)}
                                             >
-                                                <Trash2 className="h-4 w-4 text-gray-400" />
+                                                <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     </CardContent>
