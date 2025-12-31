@@ -1,13 +1,11 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-// import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 
-const DESKTOP_BREAKPOINT = 640; // matches `sm:` in Tailwind config
+const DESKTOP_BREAKPOINT = 640; 
 
 export default function DashboardLayout({ children }) {
-  // Controls visibility on mobile; on desktop the sidebar is always visible
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     try {
       if (typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT) {
@@ -22,17 +20,6 @@ export default function DashboardLayout({ children }) {
       return false;
     }
   });
-
-  // Current sidebar width (0 / 64 / 240) used to offset main content on desktop
-  // const [sidebarWidth, setSidebarWidth] = useState(0);
-
-  // useEffect(() => {
-  //   try {
-  //     localStorage.setItem("sidebarOpen", sidebarOpen ? "1" : "0");
-  //   } catch {
-  //     // ignore storage errors
-  //   }
-  // }, [sidebarOpen]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -57,7 +44,7 @@ export default function DashboardLayout({ children }) {
   const isDesktop = typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-white to-yellow-100">
+    <div className="min-h-screen bg-linear-to-br from-white to-[#0b1d3a]/15">
       {sidebarOpen && !isDesktop && (
         <div
           className="fixed inset-0 bg-black/30 sm:hidden z-30"

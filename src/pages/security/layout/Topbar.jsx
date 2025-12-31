@@ -25,7 +25,7 @@ const navigationLinks = [
   { label: "Access Logs", path: "/security/logs", icon: ShieldAlert },
 ];
 
-// Page-specific headers
+// Page-specific headers with titles and descriptions
 const getPageHeaders = () => {
   const hour = new Date().getHours();
   let timeGreeting = "Good morning";
@@ -37,24 +37,44 @@ const getPageHeaders = () => {
 
   return {
     "/security/dashboard": {
-      greeting: `${timeGreeting}, Security Officer!`,
-      subtitle: "Welcome back to your security dashboard",
+      title: `${timeGreeting}, Security Officer!`,
+      description: "Monitor equipment access, security events, and system activity in real-time",
       actionButton: { label: "New Log Entry", path: "/security/logs", icon: Plus },
     },
     "/security/devices": {
-      greeting: "Device Management",
-      subtitle: "Browse, add, and manage all equipment",
+      title: "Device Management",
+      description: "Browse, add, edit, and manage all equipment in the system. Track device status, location, and availability",
       actionButton: { label: "Add Device", path: "/security/devices", icon: Plus },
     },
     "/security/active-checkouts": {
-      greeting: "Active Checkouts",
-      subtitle: "Monitor all currently checked out equipment",
+      title: "Active Checkouts",
+      description: "View and monitor all currently checked out equipment. Track due dates, borrowers, and checkout status",
       actionButton: { label: "New Checkout", path: "/security/active-checkouts", icon: Plus },
     },
     "/security/logs": {
-      greeting: "Access Logs",
-      subtitle: "View and monitor all equipment access activities",
+      title: "Access Logs",
+      description: "View comprehensive logs of all equipment access activities, security events, and system operations",
       actionButton: { label: "New Log Entry", path: "/security/logs", icon: Plus },
+    },
+    "/security/reports": {
+      title: "Reports",
+      description: "Generate and view detailed reports on equipment usage, checkouts, returns, and security incidents",
+      actionButton: { label: "Generate Report", path: "/security/reports", icon: Plus },
+    },
+    "/security/settings": {
+      title: "Settings",
+      description: "Configure system settings, security preferences, and user account options",
+      actionButton: null,
+    },
+    "/security/profile": {
+      title: "Profile",
+      description: "Manage your security officer profile, update personal information, and view account details",
+      actionButton: null,
+    },
+    "/security/notifications": {
+      title: "Notifications",
+      description: "View and manage all security alerts, system notifications, and important updates",
+      actionButton: null,
     },
   };
 };
@@ -121,7 +141,7 @@ function Topbar({ onMenuClick }) {
                 className="hidden md:block h-10 w-auto rounded"
               />
             </Link>
-            </div>
+
             {/* Navigation Links */}
             <nav className="hidden md:flex items-center gap-1">
               {navigationLinks.map((link) => {
@@ -145,7 +165,7 @@ function Topbar({ onMenuClick }) {
                 );
               })}
             </nav>
-          
+          </div>
 
           {/* Right: Search, Notifications, User */}
           <div className="flex items-center gap-4">
@@ -245,36 +265,37 @@ function Topbar({ onMenuClick }) {
             </nav>
           </div>
         )}
-      
+      </div>
 
       {/* Dynamic Page Header */}
-      {/* <div className="w-full bg-gradient-to-r from-[#0A1128] to-[#1A2240] text-white px-4 py-6"> */}
-        <div className="flex flex-col mt-24 sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1">
-              {pageHeader.greeting}
+      <div className="w-full bg-gradient-to-r from-[#0A1128] to-[#1A2240] text-white px-4 sm:px-6 py-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">
+              {pageHeader.title}
             </h1>
-            <p className="text-gray-300 text-sm sm:text-base">
+            <p className="text-gray-300 text-sm sm:text-base mb-2">
               {formattedDate}
             </p>
-            {pageHeader.subtitle && (
-              <p className="text-gray-400 text-sm mt-1 hidden sm:block">
-                {pageHeader.subtitle}
+            {pageHeader.description && (
+              <p className="text-gray-400 text-sm sm:text-base max-w-2xl">
+                {pageHeader.description}
               </p>
             )}
           </div>
           
-          {/* Mobile Action Button */}
-          <Button
-            onClick={handleActionClick}
-            className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white gap-2 sm:hidden w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4" />
-            {pageHeader.actionButton.label}
-          </Button>
+          {/* Action Button */}
+          {pageHeader.actionButton && (
+            <Button
+              onClick={handleActionClick}
+              className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white gap-2 shrink-0"
+            >
+              <Plus className="h-4 w-4" />
+              {pageHeader.actionButton.label}
+            </Button>
+          )}
         </div>
       </div>
-      {/* </div> */}
     </div>
   );
 }

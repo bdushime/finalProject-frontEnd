@@ -11,8 +11,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   Radio,
+  Plus,
+  FileText,
 } from "lucide-react";
-import { useLocation, Link, NavLink } from "react-router-dom";
+import { useLocation, Link, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
@@ -87,15 +89,60 @@ function getLinksForRole(role) {
   }
 }
 
-const pageTitles = {
-  "/it/dashboard": "Dashboard",
-  "/it/browse": "Devices",
-  "/it/current-checkouts": "Borrowed Items",
-  "/it/history": "Reports",
-  "/it/notifications": "Notifications",
-  // "/it/profile": "Profile",
-  "/settings": "Settings",
+// Page-specific headers with titles and descriptions for IT Staff
+const getItPageHeaders = () => {
+  const hour = new Date().getHours();
+  let timeGreeting = "Good morning";
+  if (hour >= 12 && hour < 18) {
+    timeGreeting = "Good afternoon";
+  } else if (hour >= 18) {
+    timeGreeting = "Good evening";
+  }
+
+  return {
+    "/it/dashboard": {
+      title: `${timeGreeting}, IT Staff!`,
+      description: "Monitor equipment inventory, checkouts, and system activity. Track equipment status and manage checkouts efficiently",
+      actionButton: { label: "New Checkout", path: "/it/checkout/select-equipment", icon: Plus },
+    },
+    "/it/browse": {
+      title: "Browse Equipment",
+      description: "Search, view, and manage all equipment in the system. Check availability, view details, and manage inventory",
+      actionButton: { label: "New Checkout", path: "/it/checkout/select-equipment", icon: Plus },
+    },
+    "/it/current-checkouts": {
+      title: "Current Checkouts",
+      description: "View and manage all currently checked out equipment. Track due dates, borrowers, and checkout status",
+      actionButton: { label: "New Checkout", path: "/it/checkout/select-equipment", icon: Plus },
+    },
+    "/it/reports": {
+      title: "Reports",
+      description: "Generate and view detailed reports on equipment usage, checkouts, returns, and system analytics",
+      actionButton: { label: "Generate Report", path: "/it/reports", icon: FileText },
+    },
+    "/it/iot-tracker": {
+      title: "IoT Live View",
+      description: "Monitor real-time location and status of equipment using IoT tracking. View live updates and track equipment movement",
+      actionButton: null,
+    },
+    "/it/notifications": {
+      title: "Notifications",
+      description: "View and manage all system notifications, alerts, and important updates",
+      actionButton: null,
+    },
+    "/it/profile": {
+      title: "Profile",
+      description: "Manage your IT staff profile, update personal information, and view account details",
+      actionButton: null,
+    },
+    "/it/checkout-history": {
+      title: "Checkout History",
+      description: "View complete history of all equipment checkouts and returns. Track past transactions and usage patterns",
+      actionButton: null,
+    },
+  };
 };
+
 const formattedDate = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
   month: "long",
@@ -105,8 +152,7 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 
 export default function Topbar({ onMenuClick }) {
   const location = useLocation();
-  const pageTitle = pageTitles[location.pathname] || "Dashboard";
-
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
@@ -116,6 +162,18 @@ export default function Topbar({ onMenuClick }) {
   const notificationPath =
     role === "it" ? "/it/notifications" : "/it/notifications";
   const profilePath = role === "it" ? "/it/profile" : "/it/profile";
+
+  // Get page header for IT Staff
+  const itPageHeaders = getItPageHeaders();
+  const currentPath = location.pathname;
+  const itPageHeader = itPageHeaders[currentPath] || 
+    (currentPath.startsWith("/it/") ? itPageHeaders["/it/dashboard"] : null);
+
+  const handleActionClick = () => {
+    if (itPageHeader?.actionButton) {
+      navigate(itPageHeader.actionButton.path);
+    }
+  };
 
   const isLinkActive = (path) => {
     if (location.pathname === path) return true;
@@ -281,27 +339,55 @@ export default function Topbar({ onMenuClick }) {
               <Link to="/settings">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem><Link to="/login">Logout</Link></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* <div className="flex flex-col mt-24 sm:flex-row sm:items-center sm:justify-between gap-4"> */}
-
-      {/* Mobile Action Button */}
-
-      {/* </div> */}
     </div>
-      <div className="flex flex-col justify-center p-4 mt-4 sticky top-0 z-30">
-        <p className="text-gray-900 text-2xl font-bold">Welcome dear User</p>
-        <p className="text-gray-500 text-sm sm:text-base">{formattedDate}</p>
-        {/* {pageHeader.subtitle && (
-              <p className="text-gray-400 text-sm mt-1 hidden sm:block">
-                {pageHeader.subtitle}
+
+      {/* Dynamic Page Header for IT Staff */}
+      {role === "it" && itPageHeader && (
+        <div className="w-full  px-4 sm:px-6 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900">
+                {itPageHeader.title}
+              </h1>
+              <p className="text-gray-600 text-sm sm:text-base mb-2">
+                {formattedDate}
               </p>
-            )} */}
-      </div>
-      </div>
+              {itPageHeader.description && (
+                <p className="text-gray-700 text-sm sm:text-base max-w-2xl">
+                  {itPageHeader.description}
+                </p>
+              )}
+            </div>
+            
+            {/* Action Button */}
+            {itPageHeader.actionButton && (() => {
+              const IconComponent = itPageHeader.actionButton.icon;
+              return (
+                <Button
+                  onClick={handleActionClick}
+                  className="bg-[#0b1d3a] hover:bg-[#0b1d3a]/90 text-white gap-2 shrink-0"
+                >
+                  {IconComponent && <IconComponent className="h-4 w-4" />}
+                  {itPageHeader.actionButton.label}
+                </Button>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Default Header for other roles */}
+      {role !== "it" && (
+        <div className="flex flex-col justify-center p-4 mt-4 sticky top-0 z-30">
+          <p className="text-gray-900 text-2xl font-bold">Welcome dear User</p>
+          <p className="text-gray-500 text-sm sm:text-base">{formattedDate}</p>
+        </div>
+      )}
+    </div>
   );
 }
 

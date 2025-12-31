@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import MainLayout from "@/components/layout/MainLayout";
+import { useAuth } from "@/pages/auth/AuthContext";
 import {
   Card,
   CardContent,
@@ -56,6 +57,9 @@ const EQUIPMENT_STATUSES = [
 ];
 
 export default function ReportsPage() {
+  const { user } = useAuth();
+  const userRole = user?.role || "it"; // Default to "it" if role not available
+  
   const [reportType, setReportType] = useState("lending");
   const [datePreset, setDatePreset] = useState("last30days");
   const [startDate, setStartDate] = useState("");
@@ -70,7 +74,6 @@ export default function ReportsPage() {
   const [reportGenerated, setReportGenerated] = useState(false);
   const pageSize = 10;
 
-  // Calculate date range based on preset
   useEffect(() => {
     const today = new Date();
     const formatDate = (date) => date.toISOString().split("T")[0];
@@ -312,6 +315,9 @@ export default function ReportsPage() {
           filename
         );
       }
+      
+      // Clear filters after successful download
+      handleResetFilters();
     } catch (error) {
       console.error("Export failed:", error);
       alert("Failed to export report. Please try again.");
@@ -632,14 +638,7 @@ export default function ReportsPage() {
                     No records match your current filter criteria. Try adjusting your filters
                     (date range, category, status, or borrower) and generate the report again.
                   </p>
-                  {/* <Button
-                    variant="outline"
-                    onClick={handleResetFilters}
-                    className="mt-2 border-gray-300"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Reset Filters
-                  </Button> */}
+
                 </>
               ) : (
                 <>
