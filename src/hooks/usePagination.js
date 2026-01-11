@@ -9,12 +9,17 @@ import { useMemo } from 'react';
  */
 export function usePagination(items = [], currentPage = 1, pageSize = 10) {
   const pagination = useMemo(() => {
-    const totalItems = items.length;
+    // 👇 1. SAFETY CHECK: Force items to be an array
+    const safeItems = Array.isArray(items) ? items : []; 
+
+    const totalItems = safeItems.length;
     const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
     const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
     const startIndex = (safeCurrentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const paginatedItems = items.slice(startIndex, endIndex);
+    
+    // 👇 2. Use safeItems here
+    const paginatedItems = safeItems.slice(startIndex, endIndex); 
     
     return {
       totalItems,
@@ -32,4 +37,3 @@ export function usePagination(items = [], currentPage = 1, pageSize = 10) {
 
   return pagination;
 }
-

@@ -1,28 +1,48 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-
-const areaData = [
-    { name: 'Mon', usage: 45, returns: 32 },
-    { name: 'Tue', usage: 52, returns: 40 },
-    { name: 'Wed', usage: 38, returns: 28 },
-    { name: 'Thu', usage: 65, returns: 55 },
-    { name: 'Fri', usage: 48, returns: 42 },
-    { name: 'Sat', usage: 15, returns: 10 },
-    { name: 'Sun', usage: 8, returns: 5 },
-];
-
-const pieData = [
-    { name: 'Projectors', value: 35 },
-    { name: 'Laptops', value: 25 },
-    { name: 'Sound', value: 20 },
-    { name: 'Cables', value: 20 },
-];
+import api from '@/utils/api';
+import { Loader2 } from 'lucide-react';
 
 const BRAND_COLOR = '#8D8DC7';
-const COLORS = [BRAND_COLOR, '#1e293b', '#64748b', '#cbd5e1'];
+const COLORS = [BRAND_COLOR, '#1e293b', '#64748b', '#cbd5e1', '#f59e0b', '#10b981'];
 
 const DashboardCharts = () => {
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState({
+        pieData: [],
+        areaData: []
+    });
+
+    useEffect(() => {
+        const fetchChartData = async () => {
+            try {
+                const res = await api.get('/charts');
+                setData(res.data);
+            } catch (err) {
+                console.error("Failed to load chart data", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchChartData();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64 w-full text-gray-400">
+                <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                <p className="text-sm">Loading analytics...</p>
+            </div>
+        );
+    }
+
+    // Fallback if no data
+    const pieData = data.pieData.length > 0 ? data.pieData : [{ name: 'No Data', value: 1 }];
+    const areaData = data.areaData.length > 0 ? data.areaData : [
+        { name: 'Mon', usage: 0 }, { name: 'Tue', usage: 0 }, { name: 'Wed', usage: 0 },
+        { name: 'Thu', usage: 0 }, { name: 'Fri', usage: 0 }, { name: 'Sat', usage: 0 }, { name: 'Sun', usage: 0 }
+    ];
+
     return (
         <div className="flex flex-col gap-8">
             {/* Category Distribution - Pie Chart */}
@@ -71,7 +91,7 @@ const DashboardCharts = () => {
                 <div className="mb-6 flex justify-between items-end">
                     <div>
                         <h4 className="text-sm font-bold text-slate-900">Weekly Usage Trends</h4>
-                        <p className="text-xs text-gray-400">Total Check-outs Processed</p>
+                        <p className="text-xs text-gray-400">Total Check-outs (Last 7 Days)</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-[#8D8DC7]"></div>
@@ -79,7 +99,6 @@ const DashboardCharts = () => {
                     </div>
                 </div>
 
-                {/* Use a fixed height container for the chart itself, letting the parent grow */}
                 <div className="h-80 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={areaData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

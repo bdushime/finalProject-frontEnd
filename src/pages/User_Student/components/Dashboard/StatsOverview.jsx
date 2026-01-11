@@ -2,11 +2,23 @@ import React from 'react';
 import { Package, Clock, AlertTriangle } from 'lucide-react';
 
 export default function StatsOverview({ stats }) {
-    // Map existing stats to the design - Customized for student borrowing
+
     const items = [
-        { label: 'Active Loans', value: 3, icon: Package },
-        { label: 'Pending', value: 1, icon: Clock },
-        { label: 'Overdue', value: 0, icon: AlertTriangle },
+        { 
+            label: 'Active Loans', 
+            value: stats?.activeLoans || 0, 
+            icon: Package 
+        },
+        { 
+            label: 'Pending', 
+            value: stats?.pending || 0, 
+            icon: Clock 
+        },
+        { 
+            label: 'Overdue', 
+            value: stats?.overdue || 0, 
+            icon: AlertTriangle 
+        },
     ];
 
     return (
@@ -23,4 +35,3 @@ export default function StatsOverview({ stats }) {
         </div>
     );
 }
-

@@ -11,7 +11,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import logo from "@/assets/images/logo8noback.png";
 
 const studentLinks = [
@@ -26,7 +25,41 @@ const studentLinks = [
 export default function StudentTopbar({ onMenuClick }) {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const unreadCount = 3; // Replace with actual notification count
+    const unreadCount = 3; 
+
+    // --- NEW: State for Dynamic User Info ---
+    const [user, setUser] = useState({
+        name: "Student",
+        initial: "S",
+        role: "Student"
+    });
+
+    // --- NEW: Load User from Local Storage ---
+    useEffect(() => {
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+            try {
+                const userData = JSON.parse(userStr);
+                
+                // Get Name
+                const displayName = userData.fullName || userData.username || "Student";
+                
+                // Get Initial (First letter of name)
+                const displayInitial = displayName.charAt(0).toUpperCase();
+
+                // Get Role
+                const displayRole = userData.role || "Student";
+
+                setUser({
+                    name: displayName,
+                    initial: displayInitial,
+                    role: displayRole
+                });
+            } catch (e) {
+                console.error("Error parsing user data", e);
+            }
+        }
+    }, []);
 
     // Close mobile menu on route change
     useEffect(() => {
@@ -54,6 +87,12 @@ export default function StudentTopbar({ onMenuClick }) {
         day: "numeric",
         year: "numeric",
     }).format(new Date());
+
+    const handleLogout = () => {
+        // Optional: Clear storage on logout so the next user is fresh
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+    };
 
     return (
         <div className="w-full">
@@ -138,15 +177,18 @@ export default function StudentTopbar({ onMenuClick }) {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="h-11 pl-1.5 pr-5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center gap-3 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-[1.02]">
+                                    {/* DYNAMIC AVATAR INITIAL */}
                                     <div className="h-9 w-9 rounded-full bg-[#126dd5] flex items-center justify-center shadow-sm border border-white/50">
-                                        <span className="text-white font-bold text-sm">J</span>
+                                        <span className="text-white font-bold text-sm">{user.initial}</span>
                                     </div>
                                     <div className="text-left leading-tight hidden sm:block">
+                                        {/* DYNAMIC NAME */}
                                         <p className="text-sm font-bold text-[#0b1d3a] group-hover:text-[#126dd5] transition-colors">
-                                            Juls
+                                            {user.name}
                                         </p>
+                                        {/* DYNAMIC ROLE */}
                                         <p className="text-[10px] uppercase tracking-wider font-semibold text-[#126dd5]/80">
-                                            Student
+                                            {user.role}
                                         </p>
                                     </div>
                                 </button>
@@ -162,7 +204,8 @@ export default function StudentTopbar({ onMenuClick }) {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
-                                    <Link to="/login">Logout</Link>
+                                    {/* Added logout handler to clear storage */}
+                                    <Link to="/login" onClick={handleLogout}>Logout</Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -202,10 +245,10 @@ export default function StudentTopbar({ onMenuClick }) {
                 )}
             </header>
 
-            {/* Welcome Section */}
+            {/* Welcome Section - Also made Dynamic! */}
             <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-4">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {getGreeting()}, Student!
+                    {getGreeting()}, {user.name}!
                 </h1>
                 <p className="text-gray-500 text-sm sm:text-base">{formattedDate}</p>
             </div>

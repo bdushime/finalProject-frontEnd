@@ -3,7 +3,7 @@ import api from "@/utils/api";
 import { Loader2, Download, Search, AlertCircle, FileBarChart } from "lucide-react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout"; 
 
-export default function ReportsPage() {
+export default function SimpleReports() {
     const [transactions, setTransactions] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -48,13 +48,11 @@ export default function ReportsPage() {
         setFilteredData(result);
     }, [search, categoryFilter, transactions]);
 
-    // --- 3. EXPORT CSV (Updated with Score) ---
+    // --- 3. EXPORT CSV (Includes Score) ---
     const handleExport = () => {
         if (filteredData.length === 0) return alert("No data to export!");
 
-        // Added Score and Due Date to CSV headers
         const headers = "Student,Email,Score,Equipment,Category,Date Borrowed,Due Date,Status\n";
-        
         const rows = filteredData.map(t => 
             `${t.user?.username},${t.user?.email},${t.user?.responsibilityScore ?? 100},${t.equipment?.name},${t.equipment?.category || 'N/A'},${new Date(t.createdAt).toLocaleDateString()},${new Date(t.expectedReturnTime).toLocaleDateString()},${t.status}`
         ).join("\n");
@@ -74,11 +72,12 @@ export default function ReportsPage() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div>
+                        {/* CHANGED TITLE so you know it updated */}
                         <h1 className="text-3xl font-bold text-[#0b1d3a] flex items-center gap-2">
-                            <FileBarChart className="w-8 h-8" /> System Reports
+                            <FileBarChart className="w-8 h-8" /> System Reports (V2)
                         </h1>
                         <p className="text-slate-500 mt-1">
-                            Viewing {filteredData.length} records • Real-time Data
+                            Viewing {filteredData.length} records • Includes Student Scores
                         </p>
                     </div>
                     <button 
@@ -89,7 +88,7 @@ export default function ReportsPage() {
                     </button>
                 </div>
 
-                {/* Filters Bar */}
+                {/* Filters */}
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
@@ -117,7 +116,7 @@ export default function ReportsPage() {
                     </div>
                 </div>
 
-                {/* Main Data Table */}
+                {/* Main Table */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
                     {loading ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-[#0b1d3a] gap-3">
@@ -142,7 +141,7 @@ export default function ReportsPage() {
                                 <thead className="bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
                                     <tr>
                                         <th className="p-5">Student</th>
-                                        <th className="p-5 text-center">Score</th> {/* New Column */}
+                                        <th className="p-5 text-center">Score</th> {/* Score Header */}
                                         <th className="p-5">Equipment</th>
                                         <th className="p-5">Dates</th>
                                         <th className="p-5">Status</th>
@@ -152,37 +151,30 @@ export default function ReportsPage() {
                                     {filteredData.map((t) => (
                                         <tr key={t._id} className="hover:bg-slate-50/80 transition-colors">
                                             
-                                            {/* 1. Student Info */}
+                                            {/* Student Name */}
                                             <td className="p-5">
                                                 <div className="font-medium text-[#0b1d3a]">{t.user?.username || "Unknown"}</div>
                                                 <div className="text-xs text-slate-500 mt-0.5">{t.user?.email}</div>
                                             </td>
 
-                                            {/* 2. Score Column (Color Coded) */}
+                                            {/* SCORE COLUMN (New) */}
                                             <td className="p-5 text-center">
-                                                <span className={`inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm
-                                                    ${(t.user?.responsibilityScore ?? 100) >= 80 ? "bg-green-100 text-green-700 border border-green-200" :
-                                                      (t.user?.responsibilityScore ?? 100) >= 50 ? "bg-yellow-100 text-yellow-700 border border-yellow-200" :
-                                                      "bg-red-100 text-red-700 border border-red-200"
+                                                <span className={`inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm border
+                                                    ${(t.user?.responsibilityScore ?? 100) >= 80 ? "bg-green-100 text-green-700 border-green-200" :
+                                                      (t.user?.responsibilityScore ?? 100) >= 50 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+                                                      "bg-red-100 text-red-700 border-red-200"
                                                     }`}>
                                                     {t.user?.responsibilityScore ?? 100}
                                                 </span>
                                             </td>
 
-                                            {/* 3. Equipment Info */}
+                                            {/* Equipment */}
                                             <td className="p-5">
                                                 <div className="font-medium text-slate-900">{t.equipment?.name || "Deleted Item"}</div>
-                                                <div className="flex gap-2 mt-1">
-                                                    <span className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
-                                                        {t.equipment?.serialNumber}
-                                                    </span>
-                                                    <span className="text-xs text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">
-                                                        {t.equipment?.category || "General"}
-                                                    </span>
-                                                </div>
+                                                <div className="text-xs text-slate-500 font-mono mt-0.5">{t.equipment?.serialNumber}</div>
                                             </td>
 
-                                            {/* 4. Dates (Borrowed & Due) */}
+                                            {/* Dates */}
                                             <td className="p-5 text-sm text-slate-600">
                                                 <div className="flex flex-col gap-1">
                                                     <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide">Borrowed</div>
@@ -195,7 +187,7 @@ export default function ReportsPage() {
                                                 </div>
                                             </td>
 
-                                            {/* 5. Status Badge */}
+                                            {/* Status Badge */}
                                             <td className="p-5">
                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize border
                                                     ${t.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' : 

@@ -1,34 +1,60 @@
-import React from 'react';
-import AdminLayout from '../components/AdminLayout';
-import StatsCard from '../components/StatsCard';
-import { Activity, Server, Cpu, Zap, AlertCircle, CheckCircle, Clock, Shield } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-
-// Mock Data for Performance Chart
-const performanceData = [
-    { time: '10:00', cpu: 20, memory: 40 },
-    { time: '10:05', cpu: 35, memory: 42 },
-    { time: '10:10', cpu: 25, memory: 41 },
-    { time: '10:15', cpu: 45, memory: 45 },
-    { time: '10:20', cpu: 60, memory: 48 },
-    { time: '10:25', cpu: 55, memory: 50 },
-    { time: '10:30', cpu: 40, memory: 45 },
-    { time: '10:35', cpu: 30, memory: 42 },
-    { time: '10:40', cpu: 28, memory: 40 },
-    { time: '10:45', cpu: 50, memory: 46 },
-    { time: '10:50', cpu: 70, memory: 55 },
-    { time: '10:55', cpu: 65, memory: 52 },
-];
-
-const errorLogs = [
-    { id: 1, type: "Error", message: "Database connection timeout", source: "Auth Service", time: "10:42 AM", user: "System" },
-    { id: 2, type: "Warning", message: "API rate limit approaching", source: "External API", time: "10:30 AM", user: "N/A" },
-    { id: 3, type: "Error", message: "Failed to generate report PDF", source: "Report Service", time: "10:15 AM", user: "admin@auca.ac.rw" },
-    { id: 4, type: "Warning", message: "High memory usage detected", source: "Server Node 2", time: "09:55 AM", user: "System" },
-    { id: 5, type: "Warning", message: "Invalid login attempt detected", source: "Security", time: "09:40 AM", user: "192.168.1.56" },
-];
+import React, { useState, useEffect } from 'react';
+import AdminLayout from '../components/AdminLayout'; // Check path
+import StatsCard from '../components/StatsCard'; // Check path
+import api from '@/utils/api';
+import { Activity, Server, Cpu, Zap, AlertCircle, Clock, Shield, Loader2 } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const MonitoringPage = () => {
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState({
+        systemStatus: { uptime: "-", cpuLoad: "-", memoryUsage: "-", errorRate: "-" },
+        errorLogs: []
+    });
+
+    // Chart Data State (Live Updating)
+    const [chartData, setChartData] = useState([]);
+
+    // 1. FETCH INITIAL DATA
+    useEffect(() => {
+        const fetchMonitoringData = async () => {
+            try {
+                const res = await api.get('/monitoring');
+                setData(res.data);
+            } catch (err) {
+                console.error("Monitoring Fetch Error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMonitoringData();
+    }, []);
+
+    // 2. SIMULATE LIVE CHART UPDATES
+    useEffect(() => {
+        // Initialize with 10 points
+        const initialData = Array.from({ length: 12 }, (_, i) => ({
+            time: new Date(Date.now() - (11 - i) * 5000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            cpu: Math.floor(Math.random() * 40) + 20, // Random 20-60
+            memory: Math.floor(Math.random() * 20) + 30  // Random 30-50
+        }));
+        setChartData(initialData);
+
+        const interval = setInterval(() => {
+            setChartData(currentData => {
+                const newTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const newPoint = {
+                    time: newTime,
+                    cpu: Math.floor(Math.random() * 40) + 20,
+                    memory: Math.floor(Math.random() * 20) + 30
+                };
+                // Remove first, add new to end (Sliding window)
+                return [...currentData.slice(1), newPoint];
+            });
+        }, 3000); // Update every 3 seconds
+
+        return () => clearInterval(interval);
+    }, []);
 
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10">
@@ -45,6 +71,14 @@ const MonitoringPage = () => {
         </div>
     );
 
+    if (loading) {
+        return (
+            <AdminLayout heroContent={HeroSection}>
+                <div className="flex h-screen items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-[#8D8DC7]" /></div>
+            </AdminLayout>
+        );
+    }
+
     return (
         <AdminLayout heroContent={HeroSection}>
             <div className="space-y-6">
@@ -53,7 +87,7 @@ const MonitoringPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatsCard
                         title="System Uptime"
-                        value="99.98%"
+                        value={data.systemStatus.uptime}
                         change="Stable"
                         trend="positive"
                         subtext="Last downtime: 32 days ago"
@@ -62,7 +96,7 @@ const MonitoringPage = () => {
                     />
                     <StatsCard
                         title="Avg. CPU Load"
-                        value="45%"
+                        value={data.systemStatus.cpuLoad}
                         change="+5%"
                         trend="negative"
                         subtext="4 Cores Active"
@@ -71,7 +105,7 @@ const MonitoringPage = () => {
                     />
                     <StatsCard
                         title="Memory Usage"
-                        value="6.2 GB"
+                        value={data.systemStatus.memoryUsage}
                         change="-2%"
                         trend="positive"
                         subtext="Total: 16 GB Available"
@@ -80,7 +114,7 @@ const MonitoringPage = () => {
                     />
                     <StatsCard
                         title="Error Rate"
-                        value="0.05%"
+                        value={data.systemStatus.errorRate}
                         change="-0.01%"
                         trend="positive"
                         subtext="Last 24 hours"
@@ -111,7 +145,7 @@ const MonitoringPage = () => {
 
                         <div className="h-72 w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={performanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#8D8DC7" stopOpacity={0.3} />
@@ -128,14 +162,14 @@ const MonitoringPage = () => {
                                     <Tooltip
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                     />
-                                    <Area type="monotone" dataKey="cpu" stroke="#8D8DC7" strokeWidth={3} fillOpacity={1} fill="url(#colorCpu)" />
-                                    <Area type="monotone" dataKey="memory" stroke="#818cf8" strokeWidth={3} fillOpacity={1} fill="url(#colorMem)" />
+                                    <Area type="monotone" dataKey="cpu" stroke="#8D8DC7" strokeWidth={3} fillOpacity={1} fill="url(#colorCpu)" isAnimationActive={false} />
+                                    <Area type="monotone" dataKey="memory" stroke="#818cf8" strokeWidth={3} fillOpacity={1} fill="url(#colorMem)" isAnimationActive={false} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
 
-                    {/* Server Status List */}
+                    {/* Server Status List (Static/Mock for visual balance) */}
                     <div className="bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-800 text-white">
                         <h3 className="text-lg font-bold mb-4">Server Node Status</h3>
                         <div className="space-y-4">
@@ -153,30 +187,6 @@ const MonitoringPage = () => {
                                     </span>
                                 </div>
                             ))}
-                        </div>
-
-                        <div className="mt-6 pt-6 border-t border-slate-800">
-                            <h3 className="text-lg font-bold mb-4">Storage health</h3>
-                            <div className="space-y-3">
-                                <div>
-                                    <div className="flex justify-between text-xs mb-1 text-gray-400">
-                                        <span>Primary SSD</span>
-                                        <span>72%</span>
-                                    </div>
-                                    <div className="w-full bg-slate-800 rounded-full h-2">
-                                        <div className="bg-[#8D8DC7] h-2 rounded-full" style={{ width: '72%' }}></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-xs mb-1 text-gray-400">
-                                        <span>Backup Drive</span>
-                                        <span>45%</span>
-                                    </div>
-                                    <div className="w-full bg-slate-800 rounded-full h-2">
-                                        <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '45%' }}></div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -209,11 +219,10 @@ const MonitoringPage = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
-                                {errorLogs.map((log) => (
+                                {data.errorLogs.map((log) => (
                                     <tr key={log.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="p-4 pl-0">
-                                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold ${log.type === 'Error' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'
-                                                }`}>
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold ${log.type === 'Error' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'}`}>
                                                 {log.type === 'Error' ? <AlertCircle className="w-3 h-3 mr-1" /> : <Zap className="w-3 h-3 mr-1" />}
                                                 {log.type}
                                             </span>

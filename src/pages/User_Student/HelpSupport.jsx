@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StudentLayout from "@/components/layout/StudentLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { HelpCircle, Mail, MessageSquare, Send } from "lucide-react";
+import { HelpCircle, Mail, MessageSquare, Send, CheckCircle, Loader2 } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
-import { faqData } from "./data/mockData";
+import { faqData } from "./data/mockData"; // Keep mock FAQs for now
+import api from "@/utils/api";
 
 export default function HelpSupport() {
     const [contactForm, setContactForm] = useState({
@@ -18,21 +18,45 @@ export default function HelpSupport() {
         email: '',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    // Auto-fill email from profile
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get('/users/profile');
+                if (res.data.email) {
+                    setContactForm(prev => ({ ...prev, email: res.data.email }));
+                }
+            } catch (err) {
+                console.error("Failed to load profile email");
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const handleInputChange = (field, value) => {
         setContactForm(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setSuccess(false);
 
-        // Simulate API call
-        setTimeout(() => {
-            alert('Your message has been sent! We will get back to you soon.');
-            setContactForm({ subject: '', message: '', email: '' });
+        try {
+            await api.post('/tickets', contactForm);
+            setSuccess(true);
+            setContactForm(prev => ({ ...prev, subject: '', message: '' })); // Keep email filled
+            
+            // Reset success message after 3 seconds
+            setTimeout(() => setSuccess(false), 3000);
+        } catch (err) {
+            console.error("Failed to send ticket:", err);
+            alert("Failed to send message. Please try again.");
+        } finally {
             setIsSubmitting(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -85,67 +109,87 @@ export default function HelpSupport() {
                                     Contact Support
                                 </h3>
                                 <p className="text-sm text-slate-500 mt-1">
-                                    Send us a message and we'll get back to you.
+                                    Send us a message regarding equipment issues.
                                 </p>
                             </div>
                             <div className="p-6">
-                                <form onSubmit={handleSubmit} className="space-y-5">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Your Email</Label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                {success ? (
+                                    <div className="flex flex-col items-center justify-center py-10 text-center animate-in fade-in zoom-in">
+                                        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                                            <CheckCircle className="w-8 h-8 text-emerald-600" />
+                                        </div>
+                                        <h4 className="text-lg font-bold text-[#0b1d3a] mb-2">Message Sent!</h4>
+                                        <p className="text-slate-500 text-sm">
+                                            We have received your ticket. Support will review it shortly.
+                                        </p>
+                                        <Button 
+                                            onClick={() => setSuccess(false)} 
+                                            variant="outline" 
+                                            className="mt-6"
+                                        >
+                                            Send Another
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={handleSubmit} className="space-y-5">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Your Email</Label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    placeholder="your.email@auca.ac.rw"
+                                                    value={contactForm.email}
+                                                    onChange={(e) => handleInputChange('email', e.target.value)}
+                                                    required
+                                                    className="pl-10 bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="subject" className="text-sm font-semibold text-slate-700">Subject</Label>
                                             <Input
-                                                id="email"
-                                                type="email"
-                                                placeholder="your.email@auca.ac.rw"
-                                                value={contactForm.email}
-                                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                                id="subject"
+                                                placeholder="e.g. Projector overheating"
+                                                value={contactForm.subject}
+                                                onChange={(e) => handleInputChange('subject', e.target.value)}
                                                 required
-                                                className="pl-10 bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
+                                                className="bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
                                             />
                                         </div>
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="subject" className="text-sm font-semibold text-slate-700">Subject</Label>
-                                        <Input
-                                            id="subject"
-                                            placeholder="What can we help you with?"
-                                            value={contactForm.subject}
-                                            onChange={(e) => handleInputChange('subject', e.target.value)}
-                                            required
-                                            className="bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
-                                        />
-                                    </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="message" className="text-sm font-semibold text-slate-700">Message</Label>
+                                            <Textarea
+                                                id="message"
+                                                placeholder="Describe the issue in detail..."
+                                                value={contactForm.message}
+                                                onChange={(e) => handleInputChange('message', e.target.value)}
+                                                rows={5}
+                                                required
+                                                className="bg-white border-slate-200 rounded-xl resize-none focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
+                                            />
+                                        </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="message" className="text-sm font-semibold text-slate-700">Message</Label>
-                                        <Textarea
-                                            id="message"
-                                            placeholder="Describe your issue or question..."
-                                            value={contactForm.message}
-                                            onChange={(e) => handleInputChange('message', e.target.value)}
-                                            rows={5}
-                                            required
-                                            className="bg-white border-slate-200 rounded-xl resize-none focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
-                                        />
-                                    </div>
-
-                                    <Button
-                                        type="submit"
-                                        className="w-full bg-[#0b1d3a] hover:bg-[#126dd5] text-white font-bold rounded-xl h-11 shadow-sm transition-all duration-300 disabled:bg-slate-300 disabled:shadow-none"
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting ? (
-                                            'Sending...'
-                                        ) : (
-                                            <>
-                                                <Send className="h-4 w-4 mr-2" />
-                                                Send Message
-                                            </>
-                                        )}
-                                    </Button>
-                                </form>
+                                        <Button
+                                            type="submit"
+                                            className="w-full bg-[#0b1d3a] hover:bg-[#126dd5] text-white font-bold rounded-xl h-11 shadow-sm transition-all duration-300 disabled:bg-slate-300 disabled:shadow-none"
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Send className="h-4 w-4 mr-2" /> Send Message
+                                                </>
+                                            )}
+                                        </Button>
+                                    </form>
+                                )}
 
                                 <div className="mt-8 p-4 bg-slate-50 border border-slate-200 rounded-xl">
                                     <h4 className="font-bold mb-2 text-[#0b1d3a] text-sm">
@@ -155,12 +199,8 @@ export default function HelpSupport() {
                                         Visit the IT Department office In Room 108
                                     </p>
                                     <div className="space-y-0.5">
-                                        <p className="text-xs font-medium text-slate-700">
-                                            +250 788 123 456
-                                        </p>
-                                        <p className="text-xs font-medium text-slate-700">
-                                            it-support@auca.ac.rw
-                                        </p>
+                                        <p className="text-xs font-medium text-slate-700">+250 788 123 456</p>
+                                        <p className="text-xs font-medium text-slate-700">it-support@auca.ac.rw</p>
                                     </div>
                                 </div>
                             </div>
@@ -171,4 +211,3 @@ export default function HelpSupport() {
         </StudentLayout>
     );
 }
-

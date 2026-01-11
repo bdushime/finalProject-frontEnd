@@ -1,26 +1,57 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom"; 
 import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
-import { Shield, Lock, CheckCircle, History } from "lucide-react";
-import { dashboardStats } from "./data/mockData";
+import { Shield, Lock, CheckCircle, History, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import api from "@/utils/api";
 
 export default function Score() {
-    // For demo purposes, we can toggle score to test the blocked state
-    const [score, setScore] = useState(dashboardStats.score); // Start with mock score (e.g. 92)
+    const [score, setScore] = useState(100);
+    const [stats, setStats] = useState({ total: 0, onTimePercent: 100 });
+    const [loading, setLoading] = useState(true);
     const [isRequestingUnblock, setIsRequestingUnblock] = useState(false);
     const [requestSent, setRequestSent] = useState(false);
 
     const isBlocked = score <= 50;
 
+    // --- FETCH REAL DATA ---
+    useEffect(() => {
+        const fetchScoreData = async () => {
+            try {
+                // 1. Get User Profile (for Score)
+                const userRes = await api.get('/users/profile');
+                setScore(userRes.data.responsibilityScore || 100);
+
+                // 2. Get History (to calc stats)
+                const historyRes = await api.get('/transactions/my-history');
+                const history = historyRes.data;
+                
+                // Calculate simple stats
+                const totalCheckouts = history.length;
+                const onTimeReturns = history.filter(t => t.status === 'Returned').length;
+                
+                const percent = totalCheckouts > 0 
+                    ? Math.round((onTimeReturns / totalCheckouts) * 100) 
+                    : 100;
+
+                setStats({ total: totalCheckouts, onTimePercent: percent });
+
+            } catch (err) {
+                console.error("Error fetching score:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchScoreData();
+    }, []);
+
     const handleRequestUnblock = () => {
         setIsRequestingUnblock(true);
-        // Simulate API call
         setTimeout(() => {
             setIsRequestingUnblock(false);
             setRequestSent(true);
@@ -38,6 +69,16 @@ export default function Score() {
         if (s >= 50) return "Fair";
         return "Critical";
     };
+
+    if (loading) {
+        return (
+            <StudentLayout>
+                <div className="h-screen flex items-center justify-center text-slate-400">
+                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> Loading score...
+                </div>
+            </StudentLayout>
+        );
+    }
 
     return (
         <StudentLayout>
@@ -57,21 +98,13 @@ export default function Score() {
                                     {/* Circular Background */}
                                     <svg className="w-64 h-64 transform -rotate-90">
                                         <circle
-                                            cx="128"
-                                            cy="128"
-                                            r="120"
-                                            stroke="currentColor"
-                                            strokeWidth="12"
-                                            fill="transparent"
+                                            cx="128" cy="128" r="120"
+                                            stroke="currentColor" strokeWidth="12" fill="transparent"
                                             className="text-slate-100"
                                         />
                                         <circle
-                                            cx="128"
-                                            cy="128"
-                                            r="120"
-                                            stroke="currentColor"
-                                            strokeWidth="12"
-                                            fill="transparent"
+                                            cx="128" cy="128" r="120"
+                                            stroke="currentColor" strokeWidth="12" fill="transparent"
                                             strokeDasharray={2 * Math.PI * 120}
                                             strokeDashoffset={2 * Math.PI * 120 * (1 - score / 100)}
                                             className={`${getScoreColor(score)} transition-all duration-1000 ease-out`}
@@ -105,7 +138,6 @@ export default function Score() {
                                             <p className="text-slate-600 mb-6">
                                                 Your reliability score has dropped below 50%. You are currently blocked from borrowing new equipment.
                                             </p>
-
                                             {requestSent ? (
                                                 <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex items-center gap-3 text-emerald-800">
                                                     <CheckCircle className="h-5 w-5" />
@@ -128,22 +160,16 @@ export default function Score() {
                                             </p>
                                             <div className="flex justify-center gap-4">
                                                 <div className="text-center px-6 py-3 bg-slate-50 rounded-xl border border-slate-100">
-                                                    <span className="block text-2xl font-bold text-[#0b1d3a]">24</span>
+                                                    <span className="block text-2xl font-bold text-[#0b1d3a]">{stats.total}</span>
                                                     <span className="text-xs text-slate-400 uppercase font-bold">Checkouts</span>
                                                 </div>
                                                 <div className="text-center px-6 py-3 bg-slate-50 rounded-xl border border-slate-100">
-                                                    <span className="block text-2xl font-bold text-emerald-600">98%</span>
+                                                    <span className="block text-2xl font-bold text-emerald-600">{stats.onTimePercent}%</span>
                                                     <span className="text-xs text-slate-400 uppercase font-bold">On Time</span>
                                                 </div>
                                             </div>
                                         </div>
                                     )}
-                                </div>
-
-                                {/* Demo Toggle - REMOVE IN PROD */}
-                                <div className="mt-8 pt-8 border-t border-slate-100 flex justify-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                                    <Button size="sm" variant="outline" onClick={() => setScore(92)}>Set High (92)</Button>
-                                    <Button size="sm" variant="outline" onClick={() => setScore(45)}>Set Low (45)</Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -151,6 +177,7 @@ export default function Score() {
 
                     {/* Sidebar Info */}
                     <div className="space-y-6">
+                        {/* How it Works Card */}
                         <Card className="border border-slate-200 shadow-sm">
                             <CardHeader>
                                 <CardTitle className="text-lg font-bold text-[#0b1d3a] flex items-center gap-2">
@@ -161,23 +188,20 @@ export default function Score() {
                             <CardContent className="space-y-4 text-sm text-slate-600">
                                 <div className="flex gap-3">
                                     <div className="h-2 w-2 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                                    <p><span className="font-semibold text-[#0b1d3a]">Standard Return:</span> returning items on time implies reliability (+1 point).</p>
-                                </div>
-                                <div className="flex gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                                    <p><span className="font-semibold text-[#0b1d3a]">Early Return:</span> returning items early helps availability (+2 points).</p>
+                                    <p><span className="font-semibold text-[#0b1d3a]">Standard Return:</span> +5 points</p>
                                 </div>
                                 <div className="flex gap-3">
                                     <div className="h-2 w-2 rounded-full bg-rose-500 mt-2 shrink-0" />
-                                    <p><span className="font-semibold text-rose-600">Late Return:</span> keeping items past due affects others (-5 points per day).</p>
+                                    <p><span className="font-semibold text-rose-600">Late Return:</span> -10 points</p>
                                 </div>
                                 <div className="flex gap-3">
                                     <div className="h-2 w-2 rounded-full bg-rose-500 mt-2 shrink-0" />
-                                    <p><span className="font-semibold text-rose-600">Damage/Loss:</span> significant penalty and immediate review (-20+ points).</p>
+                                    <p><span className="font-semibold text-rose-600">Damage/Loss:</span> Immediate review & penalty.</p>
                                 </div>
                             </CardContent>
                         </Card>
 
+                        {/* RESTORED: Need Details Card */}
                         <Card className="border border-slate-200 shadow-sm bg-blue-50/50">
                             <CardContent className="p-6">
                                 <h3 className="font-bold text-[#0b1d3a] mb-2 flex items-center gap-2">
@@ -200,4 +224,3 @@ export default function Score() {
         </StudentLayout>
     );
 }
-

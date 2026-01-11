@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StudentLayout from "@/components/layout/StudentLayout";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
@@ -8,48 +8,82 @@ import { Button } from "@/components/ui/button";
 import {
     Search,
     Download,
-    Calendar,
     ArrowUpRight,
     ArrowDownRight,
     Minus,
-    Clock,
     Filter,
     ChevronDown,
-    FileText
+    FileText,
+    Loader2
 } from "lucide-react";
-import { borrowHistory } from "./data/mockData";
-import logo from "@/assets/images/logo8noback.png"; // Import logo for print header
+import api from "@/utils/api";
+// import logo from "@/assets/images/logo8noback.png"; // Uncomment if you have the logo
 
 const TIME_RANGES = ["View All Time", "Today", "This Week", "This Month", "This Year"];
 
 export default function Report() {
     const [searchTerm, setSearchTerm] = useState("");
     const [timeRange, setTimeRange] = useState("View All Time");
+    const [historyData, setHistoryData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Enhance data
+    // --- 1. FETCH REAL HISTORY ---
+    useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+                // We reuse the existing endpoint. 
+                // Ideally, the backend should support pagination or ?limit=all
+                const res = await api.get('/transactions/my-history');
+                setHistoryData(res.data);
+            } catch (err) {
+                console.error("Failed to load history:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchHistory();
+    }, []);
+
+    // --- 2. ENHANCE DATA (Calculate Impact) ---
     const enhancedData = useMemo(() => {
-        return borrowHistory.map(item => {
+        return historyData.map(item => {
             let impact = 0;
             let impactLabel = "Neutral";
 
-            if (item.status === 'returned') {
-                if (item.conditionReturned === 'excellent' || item.conditionReturned === 'good') {
-                    impact = 2;
-                    impactLabel = "On Time Return";
+            // Calculate Impact based on Status
+            // You can align these numbers with your Backend Logic
+            if (item.status === 'Returned') {
+                impact = 5; 
+                impactLabel = "Standard Return";
+                
+                // Check if late (simple check)
+                if (new Date(item.returnTime) > new Date(item.expectedReturnTime)) {
+                    impact = -10;
+                    impactLabel = "Late Return";
                 }
+            } else if (item.status === 'Overdue') {
+                impact = -10;
+                impactLabel = "Overdue Penalty";
             }
 
-            // Mock logic
-            if (item.equipmentName.includes("Projector") && item.daysBorrowed > 7) {
-                impact = -5;
-                impactLabel = "Late Return (-2 days)";
-            }
+            // Calculate Duration
+            const start = new Date(item.createdAt);
+            const end = item.returnTime ? new Date(item.returnTime) : new Date();
+            const durationMs = end - start;
+            const daysBorrowed = Math.max(1, Math.ceil(durationMs / (1000 * 60 * 60 * 24)));
 
-            return { ...item, impact, impactLabel };
+            return { 
+                ...item, 
+                equipmentName: item.equipment?.name || "Unknown Item",
+                category: item.equipment?.category || "General",
+                daysBorrowed,
+                impact, 
+                impactLabel 
+            };
         });
-    }, []);
+    }, [historyData]);
 
-    // Filter Logic
+    // --- 3. FILTER LOGIC ---
     const filteredData = useMemo(() => {
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -58,7 +92,7 @@ export default function Report() {
         const startOfYear = new Date(now.getFullYear(), 0, 1);
 
         return enhancedData.filter(item => {
-            const dateOut = new Date(item.borrowedDate);
+            const dateOut = new Date(item.createdAt);
 
             // Time Filter
             let matchesTime = true;
@@ -71,7 +105,7 @@ export default function Report() {
             const matchesSearch =
                 item.equipmentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.id.toLowerCase().includes(searchTerm.toLowerCase());
+                item._id.toLowerCase().includes(searchTerm.toLowerCase());
 
             return matchesTime && matchesSearch;
         });
@@ -81,11 +115,11 @@ export default function Report() {
     const handleExportCSV = () => {
         const headers = ["ID", "Equipment", "Category", "Borrowed Date", "Returned Date", "Duration", "Status", "Score Impact"];
         const rows = filteredData.map(item => [
-            item.id,
+            item._id,
             item.equipmentName,
             item.category,
-            new Date(item.borrowedDate).toLocaleDateString(),
-            new Date(item.returnedDate).toLocaleDateString(),
+            new Date(item.createdAt).toLocaleDateString(),
+            item.returnTime ? new Date(item.returnTime).toLocaleDateString() : "Active",
             `${item.daysBorrowed} Days`,
             item.status,
             item.impact
@@ -110,11 +144,15 @@ export default function Report() {
         return "text-slate-500 bg-slate-50 border-slate-100";
     };
 
-    const getImpactIcon = (impact) => {
-        if (impact > 0) return <ArrowUpRight className="h-3 w-3" />;
-        if (impact < 0) return <ArrowDownRight className="h-3 w-3" />;
-        return <Minus className="h-3 w-3" />;
-    };
+    if (loading) {
+        return (
+            <StudentLayout>
+                <div className="h-screen flex items-center justify-center text-slate-400">
+                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> Generating report...
+                </div>
+            </StudentLayout>
+        );
+    }
 
     return (
         <StudentLayout>
@@ -132,7 +170,7 @@ export default function Report() {
                 <div className="hidden print:block print:mb-8 print:border-b print:border-slate-300 print:pb-4">
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                            <img src={logo} alt="Tracknity" className="h-10 w-10 object-contain" />
+                            {/* <img src={logo} alt="Tracknity" className="h-10 w-10 object-contain" /> */}
                             <div>
                                 <h1 className="text-2xl font-bold text-[#0b1d3a]">Tracknity Student Report</h1>
                                 <p className="text-sm text-slate-500">Official Usage Record</p>
@@ -140,18 +178,16 @@ export default function Report() {
                         </div>
                         <div className="text-right">
                             <p className="font-bold text-slate-800">Generated On: {new Date().toLocaleDateString()}</p>
-                            <p className="text-sm text-slate-500">Student: Jols (ID: 2024-ST-05)</p>
+                            <p className="text-sm text-slate-500">Student Report</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Main Content Card - Removed border/shadow for print */}
+                {/* Main Content Card */}
                 <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] print:border-0 print:shadow-none print:rounded-none">
 
-                    {/* Toolbar - COMPACT & Hidden on Print */}
+                    {/* Toolbar - Hidden on Print */}
                     <div className="print:hidden p-4 border-b border-slate-100 flex flex-col lg:flex-row gap-4 items-center justify-between bg-slate-50/50">
-
-                        {/* Search & Filters Group */}
                         <div className="flex flex-1 gap-3 w-full lg:w-auto items-center">
                             <div className="relative flex-grow max-w-sm">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -184,7 +220,6 @@ export default function Report() {
                             )}
                         </div>
 
-                        {/* Actions Group */}
                         <div className="flex gap-2 w-full lg:w-auto justify-end">
                             <Button
                                 onClick={() => window.print()}
@@ -219,32 +254,34 @@ export default function Report() {
                             <tbody className="divide-y divide-slate-50">
                                 {filteredData.length > 0 ? (
                                     filteredData.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors group print:break-inside-avoid">
+                                        <tr key={item._id} className="hover:bg-slate-50 transition-colors group print:break-inside-avoid">
                                             <td className="p-4 pl-6">
                                                 <div className="font-bold text-[#0b1d3a] print:text-black">{item.equipmentName}</div>
-                                                <div className="text-xs text-slate-500 print:text-gray-600">{item.category} • <span className="font-mono">{item.id}</span></div>
+                                                <div className="text-xs text-slate-500 print:text-gray-600">{item.category} • <span className="font-mono text-[10px]">{item._id.slice(-6)}</span></div>
                                             </td>
                                             <td className="p-4">
                                                 <div className="text-slate-700 font-medium text-sm print:text-black">
-                                                    {new Date(item.borrowedDate).toLocaleDateString()}
+                                                    {new Date(item.createdAt).toLocaleDateString()}
                                                 </div>
                                                 <div className="text-[11px] text-slate-400 print:text-gray-500">
-                                                    {new Date(item.borrowedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(item.returnedDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             </td>
                                             <td className="p-4 text-sm text-slate-600 font-medium">
                                                 {item.daysBorrowed} Days
                                             </td>
                                             <td className="p-4">
-                                                <Badge variant="outline" className={`border-0 font-bold print:border print:border-gray-300 print:text-black ${item.status === 'returned' ? 'bg-emerald-50 text-emerald-700' :
-                                                        item.status === 'overdue' ? 'bg-rose-50 text-rose-700' :
-                                                            'bg-blue-50 text-blue-700'
-                                                    }`}>
+                                                <Badge variant="outline" className={`border-0 font-bold print:border print:border-gray-300 print:text-black ${
+                                                    item.status === 'Returned' ? 'bg-emerald-50 text-emerald-700' :
+                                                    item.status === 'Overdue' ? 'bg-rose-50 text-rose-700' :
+                                                    'bg-blue-50 text-blue-700'
+                                                }`}>
                                                     {item.status}
                                                 </Badge>
                                             </td>
                                             <td className="p-4 text-right pr-6">
                                                 <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border print:border-gray-300 print:text-black ${getImpactColor(item.impact)}`}>
+                                                    {item.impact > 0 ? <ArrowUpRight className="h-3 w-3" /> : item.impact < 0 ? <ArrowDownRight className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
                                                     {item.impact > 0 ? `+${item.impact}` : item.impact}
                                                 </div>
                                             </td>
@@ -265,33 +302,19 @@ export default function Report() {
 
                 {/* Print Footer */}
                 <div className="hidden print:block mt-8 pt-4 border-t border-slate-200 text-center text-xs text-slate-400">
-                    <p>Tracknity System • Generated automated report</p>
+                    <p>Tracknity System • Official Student Report</p>
                 </div>
 
-                {/* Print Styles Overlay - Hides everything else ensuring only this content is printed nicely */}
+                {/* Print Styles */}
                 <style>{`
                     @media print {
-                        body * {
-                            visibility: hidden;
-                        }
-                        .page-container, .page-container * {
-                            visibility: visible;
-                        }
-                        .page-container {
-                            position: absolute;
-                            left: 0;
-                            top: 0;
-                            width: 100%;
-                            padding: 20px !important;
-                            margin: 0 !important;
-                        }
-                        nav, aside, header {
-                            display: none !important;
-                        }
+                        body * { visibility: hidden; }
+                        .page-container, .page-container * { visibility: visible; }
+                        .page-container { position: absolute; left: 0; top: 0; width: 100%; padding: 20px !important; margin: 0 !important; }
+                        nav, aside, header { display: none !important; }
                     }
                 `}</style>
             </PageContainer>
         </StudentLayout>
     );
 }
-

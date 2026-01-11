@@ -1,180 +1,217 @@
-
-import React from 'react';
-import AdminLayout from './components/AdminLayout';
-import StatsCard from './components/StatsCard';
-import DashboardCharts from './components/DashboardCharts';
-import RecentActivityTable from './components/RecentActivityTable';
-import QuickActions from './components/QuickActions';
-import SystemSnapshots from './components/SystemSnapshots';
-import { Package, Wifi, Activity, AlertTriangle, QrCode, ShieldAlert, UserX, Clock, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AdminLayout from './components/AdminLayout'; // Your layout file
+import StatsCard from './components/StatsCard';
+import api from '@/utils/api';
+import { 
+    Package, 
+    Wifi, 
+    AlertTriangle, 
+    UserX, 
+    Clock, 
+    ChevronDown, 
+    QrCode, 
+    ShieldAlert, 
+    Activity,
+    Loader2
+} from 'lucide-react';
+
+// // Reusable Stats Card Component (Internal for simplicity)
+// const StatsCard = ({ title, value, change, trend, subtext, icon: Icon, dark, isAlert, onClick }) => (
+//     <div 
+//         onClick={onClick}
+//         className={`p-6 rounded-3xl shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 cursor-pointer ${
+//             dark ? 'bg-[#1e293b] text-white' : 'bg-white text-slate-900'
+//         } ${isAlert ? 'border-2 border-red-500/50' : ''}`}
+//     >
+//         <div className="flex justify-between items-start mb-2">
+//             <p className={`text-sm font-semibold ${dark ? 'text-slate-400' : 'text-gray-500'}`}>{title}</p>
+//             <div className={`p-2 rounded-xl ${dark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+//                 <Icon className={`w-5 h-5 ${isAlert ? 'text-red-500' : 'text-[#8D8DC7]'}`} />
+//             </div>
+//         </div>
+//         <h3 className="text-3xl font-bold mb-1">{value}</h3>
+//         <div className="flex items-center text-xs mt-2 opacity-80">
+//             <span className={`font-medium px-2 py-0.5 rounded mr-2 ${
+//                 trend === 'positive' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+//             }`}>
+//                 {change}
+//             </span>
+//             {subtext}
+//         </div>
+//     </div>
+// );
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState({
+        stats: {
+            activeBorrowed: 0,
+            totalUsers: 0,
+            atRiskItems: 0,
+            systemStatus: "Checking..."
+        },
+        recentActivity: []
+    });
+
+    useEffect(() => {
+        const fetchAdminData = async () => {
+            try {
+                const res = await api.get('/transactions/admin/dashboard-stats');
+                setData(res.data);
+            } catch (err) {
+                console.error("Failed to load admin stats", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAdminData();
+    }, []);
 
     const currentDate = new Date().toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
+
+    if (loading) {
+        return (
+            <div className="h-screen flex items-center justify-center bg-gray-50">
+                <Loader2 className="w-10 h-10 animate-spin text-[#8D8DC7]" />
+            </div>
+        );
+    }
 
     const HeroSection = (
         <div>
-            {/* Welcome Header */}
+            {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 mt-4 relative z-10">
                 <div>
                     <h1 className="text-4xl font-bold text-white mb-2">Welcome Admin,</h1>
                     <p className="text-gray-400 flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
-                        {currentDate} • System Status: Online
+                        {currentDate} • System Status: {data.stats.systemStatus}
                     </p>
                 </div>
-
                 <div className="mt-6 md:mt-0 flex gap-3">
-                    {/* Time Filter */}
                     <button className="bg-slate-800 text-gray-300 font-medium py-3 px-6 rounded-2xl border border-slate-700 hover:bg-slate-700 transition-all flex items-center">
-                        <Clock className="w-4 h-4 mr-2" />
-                        Today
-                        <ChevronDown className="w-4 h-4 ml-2" />
+                        <Clock className="w-4 h-4 mr-2" /> Today <ChevronDown className="w-4 h-4 ml-2" />
                     </button>
-
-                    <button
-                        onClick={() => navigate('/admin/equipment')}
-                        className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-8 rounded-2xl shadow-lg shadow-[#8D8DC7]/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center">
-                        <QrCode className="w-5 h-5 mr-2" />
-                        Scan & Check-out
+                    <button onClick={() => navigate('/admin/equipment')} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-8 rounded-2xl shadow-lg transition-all flex items-center">
+                        <QrCode className="w-5 h-5 mr-2" /> Manage Inventory
                     </button>
                 </div>
             </div>
 
-            {/* Stats Cards Row */}
+            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-                {/* 1. Operations: Active Borrowed */}
                 <StatsCard
                     title="Active Borrowed"
-                    value="124"
-                    change="+12"
+                    value={data.stats.activeBorrowed}
+                    change="+Live"
                     trend="positive"
-                    subtext="Students with equipment"
+                    subtext="Students with items"
                     icon={Package}
                     dark
                     onClick={() => navigate('/admin/reports')}
                 />
-
-                {/* 2. Health: IOT Sensors */}
                 <StatsCard
-                    title="IOT Sensors Online"
-                    value="98.5%"
-                    change="+2%"
+                    title="Total Users"
+                    value={data.stats.totalUsers}
+                    change="Stable"
                     trend="positive"
-                    subtext="Real-time tracking active"
+                    subtext="Registered accounts"
                     icon={Wifi}
                     dark
-                    onClick={() => navigate('/admin/tracking')}
+                    onClick={() => navigate('/admin/users')}
                 />
-
-                {/* 3. Risk: At-Risk Equipment */}
                 <StatsCard
                     title="At-Risk Items"
-                    value="7"
-                    change="+2"
-                    trend="negative"
-                    subtext="Overdue or Out-of-Zone"
+                    value={data.stats.atRiskItems}
+                    change="Action Req"
+                    trend={data.stats.atRiskItems > 0 ? "negative" : "positive"}
+                    subtext="Overdue items"
                     icon={AlertTriangle}
                     dark
-                    isAlert
+                    isAlert={data.stats.atRiskItems > 0}
                     onClick={() => navigate('/admin/reports')}
                 />
-
-                {/* 4. Governance: Low Responsibility */}
-                <div
-                    onClick={() => navigate('/admin/users')}
-                    className="bg-white p-6 rounded-3xl shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-                >
-                    <div className="flex justify-between items-start mb-2">
-                        <p className="text-sm font-semibold text-gray-500">Low Responsibility</p>
-                        <div className="p-2 bg-orange-50 rounded-xl">
-                            <UserX className="w-5 h-5 text-orange-500" />
-                        </div>
-                    </div>
-                    <h3 className="text-3xl font-bold text-slate-900 mb-1">6</h3>
-                    <div className="flex items-center text-xs text-gray-400 mt-2">
-                        <span className="text-orange-500 font-medium bg-orange-50 px-2 py-0.5 rounded mr-2">Review</span>
-                        Users flagged
-                    </div>
-                    {/* Decorative gradient */}
-                    <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-orange-50 rounded-full opacity-50"></div>
-                </div>
-            </div>
-
-            {/* Quick Summary Strip (Optional per feedback for Incident summary) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 relative z-10">
-                <div
-                    onClick={() => navigate('/admin/security')}
-                    className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-4 border border-slate-700 flex items-center justify-between cursor-pointer hover:bg-slate-800/70 transition-colors"
-                >
-                    <div className="flex items-center">
-                        <div className="p-2 bg-slate-700 rounded-lg mr-3">
-                            <ShieldAlert className="w-5 h-5 text-[#8D8DC7]" />
-                        </div>
-                        <div>
-                            <p className="text-gray-300 text-sm font-medium">Security Incidents Today</p>
-                            <p className="text-white font-bold text-lg">0</p>
-                        </div>
-                    </div>
-                    <span className="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">No Issues</span>
-                </div>
-
-                <div
-                    onClick={() => navigate('/admin/monitoring')}
-                    className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-4 border border-slate-700 flex items-center justify-between cursor-pointer hover:bg-slate-800/70 transition-colors"
-                >
-                    <div className="flex items-center">
-                        <div className="p-2 bg-slate-700 rounded-lg mr-3">
-                            <Activity className="w-5 h-5 text-[#8D8DC7]" />
-                        </div>
-                        <div>
-                            <p className="text-gray-300 text-sm font-medium">System Health</p>
-                            <p className="text-white font-bold text-lg">99.9%</p>
-                        </div>
-                    </div>
-                    <span className="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">Optimal</span>
-                </div>
+                <StatsCard
+                    title="Available Equip"
+                    value={data.stats.availableEquipment}
+                    change="Stock"
+                    trend="positive"
+                    subtext="Ready for checkout"
+                    icon={Activity} // Changed icon
+                    onClick={() => navigate('/admin/data')}
+                />
             </div>
         </div>
     );
 
     return (
         <AdminLayout heroContent={HeroSection}>
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-                {/* Left Column (Charts & Tables) */}
+                {/* Left Column: Recent Activity Table */}
                 <div className="xl:col-span-2 space-y-6 h-full">
-                    {/* Live Activity Table */}
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                         <div className="flex justify-between items-center mb-4 px-2">
-                            <h3 className="text-lg font-bold text-slate-900">Live Tracking & Check-outs</h3>
-                            <button
-                                onClick={() => navigate('/admin/reports')}
-                                className="text-sm text-[#8D8DC7] font-medium hover:underline"
-                            >
-                                View All
-                            </button>
+                            <h3 className="text-lg font-bold text-slate-900">Recent Transactions</h3>
+                            <button onClick={() => navigate('/admin/reports')} className="text-sm text-[#8D8DC7] font-medium hover:underline">View All</button>
                         </div>
-                        <RecentActivityTable />
-                    </div>
-
-                    {/* Charts Section - Moved here to balance height */}
-                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                        <DashboardCharts />
+                        
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-gray-600">
+                                <thead className="text-xs text-gray-400 uppercase bg-gray-50/50">
+                                    <tr>
+                                        <th className="px-4 py-3">User</th>
+                                        <th className="px-4 py-3">Equipment</th>
+                                        <th className="px-4 py-3">Date</th>
+                                        <th className="px-4 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.recentActivity.length === 0 ? (
+                                        <tr><td colSpan="4" className="text-center py-4">No recent activity</td></tr>
+                                    ) : (
+                                        data.recentActivity.map((tx) => (
+                                            <tr key={tx._id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                                                <td className="px-4 py-3 font-medium text-slate-900">{tx.user?.username || 'Unknown'}</td>
+                                                <td className="px-4 py-3">{tx.equipment?.name || 'Deleted Item'}</td>
+                                                <td className="px-4 py-3">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                                        tx.status === 'Checked Out' ? 'bg-blue-100 text-blue-700' :
+                                                        tx.status === 'Returned' ? 'bg-green-100 text-green-700' :
+                                                        'bg-red-100 text-red-700'
+                                                    }`}>
+                                                        {tx.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                {/* Right Column (Quick Actions & System Overview) */}
+                {/* Right Column: Quick Actions (Static for now) */}
                 <div className="space-y-6 h-full">
-                    <QuickActions />
-                    <SystemSnapshots />
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <h3 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
+                        <div className="space-y-3">
+                            <button onClick={() => navigate('/admin/users')} className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-700 font-medium transition-colors">
+                                👥 Manage Users
+                            </button>
+                            <button onClick={() => navigate('/admin/config')} className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-700 font-medium transition-colors">
+                                ⚙️ System Config
+                            </button>
+                            <button onClick={() => navigate('/admin/reports')} className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-700 font-medium transition-colors">
+                                📊 Generate Report
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </AdminLayout>

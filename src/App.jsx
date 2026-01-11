@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import SimpleReports from "./pages/IT_Staff/SimpleReports";
 
 // Landing
 import Landing from "./pages/Landing";
@@ -43,7 +44,7 @@ import ITReportsPage from "./pages/IT_Staff/reports/ReportsPage";
 import SelectEquipment from "./pages/IT_Staff/checkout/SelectEquipment";
 import ScanQRCode from "./pages/IT_Staff/checkout/ScanQRCode";
 import CaptureCondition from "./pages/IT_Staff/checkout/CaptureCondition";
-import CheckoutDetailsDialog from "./pages/IT_Staff/checkout/CheckoutDetailsDialog";
+import CheckoutForm from "./pages/IT_Staff/checkout/CheckoutForm"; // <--- CHANGED THIS IMPORT
 import DigitalSignature from "./pages/IT_Staff/checkout/DigitalSignature";
 import CheckoutConfirmation from "./pages/IT_Staff/checkout/CheckoutConfirmation";
 
@@ -90,7 +91,8 @@ export default function App() {
         {/* IT Staff Pages */}
         <Route path="/it/dashboard" element={<ITStaffDashboard />} />
         <Route path="/it/browse" element={<BrowseEquipment />} />
-        <Route path="/it/reports" element={<ITReportsPage />} />
+        {/* <Route path="/it/reports" element={<ITReportsPage />} /> */}
+        <Route path="/it/reports" element={<SimpleReports />} />
         <Route path="/it/profile" element={<ITStaffProfile />} />
         <Route path="/it/notifications" element={<ITStaffNotifications />} />
         <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
@@ -99,12 +101,12 @@ export default function App() {
         <Route path="/it/checkout-history" element={<CheckoutHistory />} />
         <Route path="/it/search-results" element={<SearchResults />} />
 
-        {/* IT Staff Checkout Flow */}
-        <Route path="/it/checkout/select-equipment" element={<SelectEquipment />} />
-        <Route path="/it/checkout/scan-qrcode" element={<ScanQRCode />} />
-        <Route path="/it/checkout/capture-condition" element={<CaptureCondition />} />
-        <Route path="/it/checkout/details" element={<CheckoutDetailsDialog />} />
-        <Route path="/it/checkout/signature" element={<DigitalSignature />} />
+        {/* IT Staff Checkout Flow (UPDATED PATHS) 📦 */}
+        <Route path="/it/checkout/select" element={<SelectEquipment />} />
+        <Route path="/it/checkout/scan" element={<ScanQRCode />} />
+        <Route path="/it/checkout/photo" element={<CaptureCondition />} />
+        <Route path="/it/checkout/details" element={<CheckoutForm />} />
+        <Route path="/it/checkout/sign" element={<DigitalSignature />} />
         <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
 
         {/* IT Staff Return Flow */}

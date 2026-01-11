@@ -1,31 +1,55 @@
-
-import React from 'react';
-import { MoreHorizontal, ArrowUpRight, MapPin, X, User, Calendar, Box } from 'lucide-react';
-
-const activities = [
-    { id: "TRK-2942", user: "Jean Claude", id_num: "23049", item: "Epson Projector X4", location: "Block C - Room 102", status: "Active" },
-    { id: "TRK-2941", user: "Divine U.", id_num: "22910", item: "Dell Latitude 5420", location: "Library Zone A", status: "Checked Out" },
-    { id: "TRK-2940", user: "Patrick M.", id_num: "21004", item: "Sony A7III Kit", location: "Media Lab", status: "Active" },
-    { id: "TRK-2939", user: "Sarah K.", id_num: "24112", item: "HDMI Cable 10m", location: "Block A - Hall", status: "Returned" },
-    { id: "TRK-2938", user: "Eric N.", id_num: "22055", item: "Sound System Set", location: "Unknown (Sensor Off)", status: "Alert" },
-];
+import React, { useState, useEffect } from 'react';
+import { MoreHorizontal, ArrowUpRight, MapPin, X, User, Calendar, Box, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '@/utils/api'; // Ensure this path matches your project
 
 const getStatusStyles = (status) => {
     switch (status) {
-        case 'Active': return 'bg-[#8D8DC7]/10 text-[#8D8DC7]';
         case 'Checked Out': return 'bg-orange-100 text-orange-700';
         case 'Returned': return 'bg-green-100 text-green-700';
-        case 'Alert': return 'bg-red-100 text-red-700';
+        case 'Overdue': return 'bg-red-100 text-red-700';
+        case 'Pending': return 'bg-yellow-100 text-yellow-700';
         default: return 'bg-gray-100 text-gray-700';
     }
 };
 
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-
 const RecentActivityTable = () => {
     const navigate = useNavigate();
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedActivity, setSelectedActivity] = useState(null);
+
+    // FETCH DATA
+    useEffect(() => {
+        const fetchRecentActivity = async () => {
+            try {
+                // Re-using the admin stats endpoint because it already sorts by latest
+                const res = await api.get('/transactions/admin/dashboard-stats');
+                setActivities(res.data.recentActivity);
+            } catch (err) {
+                console.error("Failed to load activities", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRecentActivity();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-10 text-gray-400">
+                <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading live feeds...
+            </div>
+        );
+    }
+
+    if (activities.length === 0) {
+        return (
+            <div className="text-center py-10 text-gray-400">
+                No recent activity found.
+            </div>
+        );
+    }
 
     return (
         <div className="overflow-x-auto relative">
@@ -35,7 +59,7 @@ const RecentActivityTable = () => {
                         <th className="py-3 px-4 pl-0 font-normal">Tracking ID</th>
                         <th className="py-3 px-4 font-normal">Student / Staff</th>
                         <th className="py-3 px-4 font-normal">Equipment</th>
-                        <th className="py-3 px-4 font-normal">IOT Location</th>
+                        <th className="py-3 px-4 font-normal">Location</th>
                         <th className="py-3 px-4 font-normal">Status</th>
                         <th className="py-3 px-4 font-normal text-right">Details</th>
                     </tr>
@@ -43,28 +67,30 @@ const RecentActivityTable = () => {
                 <tbody className="text-sm">
                     {activities.map((activity) => (
                         <tr
-                            key={activity.id}
+                            key={activity._id}
                             className="group hover:bg-gray-50/50 transition-colors border-b border-gray-50 last:border-0"
                         >
-                            <td className="py-4 px-4 pl-0 font-medium text-gray-500">{activity.id}</td>
+                            <td className="py-4 px-4 pl-0 font-medium text-gray-500 font-mono">
+                                #{activity._id.slice(-6).toUpperCase()} {/* Truncate ID for clean look */}
+                            </td>
                             <td className="py-4 px-4">
                                 <div className="flex items-center">
-                                    <img
-                                        src={`https://ui-avatars.com/api/?name=${activity.user}&background=random&color=fff`}
-                                        alt={activity.user}
-                                        className="w-8 h-8 rounded-full mr-3"
-                                    />
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[#8D8DC7] font-bold text-xs mr-3 uppercase">
+                                        {(activity.user?.username || "U").charAt(0)}
+                                    </div>
                                     <div>
-                                        <div className="font-semibold text-slate-800">{activity.user}</div>
-                                        <div className="text-xs text-gray-400">ID: {activity.id_num}</div>
+                                        <div className="font-semibold text-slate-800">{activity.user?.username || "Unknown"}</div>
+                                        <div className="text-xs text-gray-400">{activity.user?.email}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td className="py-4 px-4 text-slate-800 font-medium">{activity.item}</td>
+                            <td className="py-4 px-4 text-slate-800 font-medium">
+                                {activity.equipment?.name || "Deleted Item"}
+                            </td>
                             <td className="py-4 px-4 text-gray-500">
                                 <div className="flex items-center">
                                     <MapPin className="w-3 h-3 mr-1 text-gray-400" />
-                                    {activity.location}
+                                    {activity.destination || "General Use"}
                                 </div>
                             </td>
                             <td className="py-4 px-4">
@@ -91,8 +117,8 @@ const RecentActivityTable = () => {
                     <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-start mb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900">Loan Details</h3>
-                                <p className="text-gray-400 text-sm">ID: {selectedActivity.id}</p>
+                                <h3 className="text-xl font-bold text-slate-900">Transaction Details</h3>
+                                <p className="text-gray-400 text-xs font-mono mt-1">ID: {selectedActivity._id}</p>
                             </div>
                             <button
                                 onClick={() => setSelectedActivity(null)}
@@ -109,8 +135,8 @@ const RecentActivityTable = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-400">Borrower</p>
-                                    <p className="font-bold text-slate-900">{selectedActivity.user}</p>
-                                    <p className="text-xs text-gray-500">ID: {selectedActivity.id_num}</p>
+                                    <p className="font-bold text-slate-900">{selectedActivity.user?.username}</p>
+                                    <p className="text-xs text-gray-500">{selectedActivity.user?.email}</p>
                                 </div>
                             </div>
 
@@ -120,8 +146,8 @@ const RecentActivityTable = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-400">Equipment</p>
-                                    <p className="font-bold text-slate-900">{selectedActivity.item}</p>
-                                    <p className="text-xs text-gray-500">Current Status: {selectedActivity.status}</p>
+                                    <p className="font-bold text-slate-900">{selectedActivity.equipment?.name}</p>
+                                    <p className="text-xs text-gray-500">SN: {selectedActivity.equipment?.serialNumber}</p>
                                 </div>
                             </div>
 
@@ -130,19 +156,21 @@ const RecentActivityTable = () => {
                                     <MapPin className="w-6 h-6 text-[#8D8DC7]" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400">Location</p>
-                                    <p className="font-bold text-slate-900">{selectedActivity.location}</p>
-                                    <p className="text-xs text-green-600 font-bold">Signal Strong</p>
+                                    <p className="text-xs text-gray-400">Destination</p>
+                                    <p className="font-bold text-slate-900">{selectedActivity.destination || "Not specified"}</p>
+                                    <p className="text-xs text-green-600 font-bold">
+                                        {new Date(selectedActivity.createdAt).toLocaleString()}
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex gap-3 mt-6">
-                            <button className="flex-1 bg-[#8D8DC7] text-white py-3 rounded-xl font-bold hover:bg-[#7b7bb5] transition-colors">
+                            <button onClick={() => navigate('/admin/reports')} className="flex-1 bg-[#8D8DC7] text-white py-3 rounded-xl font-bold hover:bg-[#7b7bb5] transition-colors">
                                 View Full History
                             </button>
-                            <button className="flex-1 border border-gray-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition-colors">
-                                Report Issue
+                            <button onClick={() => setSelectedActivity(null)} className="flex-1 border border-gray-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition-colors">
+                                Close
                             </button>
                         </div>
                     </div>
