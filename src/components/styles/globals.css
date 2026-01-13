@@ -1,0 +1,230 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  /* LIGHT THEME: Clean white backgrounds with strategic blue accents */
+  --background: #ffffff;
+  --foreground: #1a1a2e;
+  /* near black for excellent readability */
+  --card: #ffffff;
+  --card-foreground: #1a1a2e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a2e;
+  /* PRIMARY BRAND BLUE - used only on headers, links, buttons, table headers */
+  --primary: #004e98;
+  /* Dark Blue 1 - premium, trustworthy, professional */
+  --primary-foreground: #ffffff;
+  /* Secondary and accent - used sparingly */
+  --secondary: #92ccf9;
+  /* Light Blue 2 - hover states, highlights */
+  --secondary-foreground: #1a1a2e;
+  --muted: #f5f5f5;
+  /* Very light gray for backgrounds, subtle */
+  --muted-foreground: #666666;
+  /* Medium gray for secondary text */
+  --accent: #92ccf9;
+  /* Light Blue 1 - minimal use, only special highlights */
+  --accent-foreground: #1a1a2e;
+  --destructive: #dc2626;
+  /* Error states only */
+  --destructive-foreground: #ffffff;
+  --border: #e5e5e5;
+  /* Subtle gray divider lines */
+  --input: #1a1a2e;
+  /* text color in inputs */
+  --input-background: #ffffff;
+  /* white input fields */
+  --switch-background: #d1d5db;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: rgba(24, 100, 171, 0.2);
+  /* blue focus ring, subtle */
+  --chart-1: #1864ab;
+  --chart-2: #74c0fc;
+  --chart-3: #a5d8ff;
+  --chart-4: #60a5fa;
+  --chart-5: #3b82f6;
+  --radius: 0.5rem;
+  /* Slightly less rounded, more professional */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1a2e;
+  --sidebar-primary: #004e98;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #92ccf9;
+  --sidebar-accent-foreground: #1a1a2e;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: rgba(24, 100, 171, 0.2);
+}
+
+.dark {
+  /* Dark theme - still clean and professional, just inverted */
+  --background: #0f1419;
+  /* very dark gray, not black */
+  --foreground: #e8e8e8;
+  /* off-white, easy on the eyes */
+  --card: #1a1f2e;
+  --card-foreground: #e8e8e8;
+  --popover: #1a1f2e;
+  --popover-foreground: #e8e8e8;
+  --primary: #4a9eff;
+  /* Lighter blue for dark background readability */
+  --primary-foreground: #0f1419;
+  --secondary: #74c0fc;
+  --secondary-foreground: #0f1419;
+  --muted: #2d3748;
+  /* Dark gray for muted elements */
+  --muted-foreground: #a0a0a0;
+  --accent: #92ccf9;
+  --accent-foreground: #0f1419;
+  --destructive: #f87171;
+  --destructive-foreground: #0f1419;
+  --border: #2d3748;
+  /* subtle darker gray lines */
+  --input: #e8e8e8;
+  --input-background: #1a1f2e;
+  --ring: rgba(74, 158, 255, 0.25);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: #4a9eff;
+  --chart-2: #74c0fc;
+  --chart-3: #a5d8ff;
+  --chart-4: #60a5fa;
+  --chart-5: #3b82f6;
+  --sidebar: #1a1f2e;
+  --sidebar-foreground: #e8e8e8;
+  --sidebar-primary: #4a9eff;
+  --sidebar-primary-foreground: #0f1419;
+  --sidebar-accent: #92ccf9;
+  --sidebar-accent-foreground: #e8e8e8;
+  --sidebar-border: #2d3748;
+  --sidebar-ring: rgba(74, 158, 255, 0.2);
+}
+
+/* Professional component utilities */
+@layer components {
+  .btn-primary {
+    @apply h-10 px-5 bg-[color:var(--primary)] text-[color:var(--primary-foreground)] font-medium rounded-md shadow-sm hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] focus-visible:outline-none transition-opacity;
+  }
+
+  .btn-outline {
+    @apply h-10 px-5 border border-[color:var(--border)] text-[color:var(--primary)] font-medium rounded-md hover:bg-[color:var(--muted)] transition-colors;
+  }
+
+  .btn-ghost {
+    @apply h-10 px-5 text-[color:var(--primary)] font-medium rounded-md hover:bg-[color:var(--muted)] transition-colors;
+  }
+
+  .input-field {
+    @apply w-full h-10 bg-[color:var(--input-background)] text-[color:var(--input)] border border-[color:var(--border)] rounded-md px-3 py-2 placeholder:text-[color:var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] transition-all;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}

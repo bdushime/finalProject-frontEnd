@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+/* Simple Leaflet marker styling for IoT map */
+.iot-marker {
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.2);
+}
+
+.iot-marker-online {
+  background-color: #22c55e;
+}
+
+.iot-marker-offline {
+  background-color: #ef4444;
+}
