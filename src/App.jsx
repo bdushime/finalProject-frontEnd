@@ -32,6 +32,7 @@ import Report from "./pages/User_Student/Report";
 import { Dashboard as ITStaffDashboard } from "./pages/IT_Staff/Dashboard";
 import BrowseEquipment from "./pages/IT_Staff/BrowseEquipment";
 import ITStaffProfile from "./pages/IT_Staff/Profile";
+import ITStaffSettings from "./pages/IT_Staff/Settings";
 import ITStaffNotifications from "./pages/IT_Staff/ITStaffNotifications";
 import ITStaffEquipmentDetails from "./pages/IT_Staff/EquipmentDetails";
 import IoTTrackerLiveView from "./pages/IT_Staff/IoTTrackerLiveView";
@@ -102,7 +103,6 @@ export default function App() {
         <Route path="/it/checkout-history" element={<CheckoutHistory />} />
         <Route path="/it/search-results" element={<SearchResults />} />
 
-        {/* IT Staff Checkout Flow (UPDATED PATHS) 📦 */}
         <Route path="/it/checkout/select" element={<SelectEquipment />} />
         <Route path="/it/checkout/scan" element={<ScanQRCode />} />
         <Route path="/it/checkout/photo" element={<CaptureCondition />} />
@@ -110,7 +110,6 @@ export default function App() {
         <Route path="/it/checkout/sign" element={<DigitalSignature />} />
         <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
 
-        {/* IT Staff Return Flow */}
         <Route path="/it/return/select-item" element={<SelectReturnItem />} />
         <Route path="/it/return/scan" element={<ReturnScan />} />
         <Route path="/it/return/confirmation" element={<ReturnConfirmation />} />
