@@ -68,9 +68,9 @@ export default function CurrentCheckouts() {
 
     return (
         <ITStaffLayout>
-            <div className="p-4 sm:p-6 lg:p-8">
+            <div className="p-4 sm:p-6 lg:p-8 min-h-screen">
                 {/* Header with Title and NEW CHECKOUT BUTTON */}
-                <div className="flex items-center justify-between mb-6">
+                {/* <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Active Requests & Loans</h2>
                     <Button 
                         onClick={() => navigate('/it/checkout/select')} 
@@ -79,7 +79,7 @@ export default function CurrentCheckouts() {
                         <Plus className="mr-2 h-4 w-4" /> New Checkout
                     </Button>
                 </div>
-                
+                 */}
                 <div className="rounded-2xl shadow-sm bg-white overflow-hidden border border-gray-100">
                     <div className="overflow-x-auto">
                         <Table className="w-full text-sm">

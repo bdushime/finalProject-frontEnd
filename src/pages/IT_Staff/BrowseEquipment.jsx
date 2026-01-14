@@ -117,7 +117,6 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
     <ITStaffLayout>
       <div className="min-h-screen">
         <PageContainer>
-          <PageHeader title="Browse Equipment" subtitle="Discover and borrow equipment for your projects" />
 
           <Card className="mb-6 border-gray-300">
             <CardContent className="pt-6">

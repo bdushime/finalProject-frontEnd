@@ -113,19 +113,17 @@ const getPageHeaders = () => {
     };
 };
 
-export default function ITStaffTopbar({ onMenuClick }) {
+export default function ITStaffTopbar({ onMenuClick, customHeaderActions }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const unreadCount = 5; 
 
-    // Close mobile menu on route change
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [location.pathname]);
 
-    // Scroll effect
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
@@ -337,20 +335,25 @@ export default function ITStaffTopbar({ onMenuClick }) {
                             )}
                         </div>
 
-                        {/* Action Button */}
-                        {pageHeader.actionButton &&
-                            (() => {
-                                const IconComponent = pageHeader.actionButton.icon;
-                                return (
-                                    <Button
-                                        onClick={handleActionClick}
-                                        className="bg-[#0b1d3a] hover:bg-[#0b1d3a]/90 text-white gap-2 shrink-0"
-                                    >
-                                        {IconComponent && <IconComponent className="h-4 w-4" />}
-                                        {pageHeader.actionButton.label}
-                                    </Button>
-                                );
-                            })()}
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 shrink-0">
+                            {customHeaderActions ? (
+                                customHeaderActions
+                            ) : pageHeader.actionButton ? (
+                                (() => {
+                                    const IconComponent = pageHeader.actionButton.icon;
+                                    return (
+                                        <Button
+                                            onClick={handleActionClick}
+                                            className="bg-[#0b1d3a] hover:bg-[#0b1d3a]/90 text-white gap-2 shrink-0"
+                                        >
+                                            {IconComponent && <IconComponent className="h-4 w-4" />}
+                                            {pageHeader.actionButton.label}
+                                        </Button>
+                                    );
+                                })()
+                            ) : null}
+                        </div>
                     </div>
                 </div>
             )}
@@ -360,4 +363,5 @@ export default function ITStaffTopbar({ onMenuClick }) {
 
 ITStaffTopbar.propTypes = {
     onMenuClick: PropTypes.func,
+    customHeaderActions: PropTypes.node,
 };

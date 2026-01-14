@@ -93,6 +93,7 @@ export default function App() {
         <Route path="/it/browse" element={<BrowseEquipment />} />
         {/* <Route path="/it/reports" element={<ITReportsPage />} /> */}
         <Route path="/it/reports" element={<SimpleReports />} />
+        <Route path="/it/settings" element={<ITStaffSettings />} />
         <Route path="/it/profile" element={<ITStaffProfile />} />
         <Route path="/it/notifications" element={<ITStaffNotifications />} />
         <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />

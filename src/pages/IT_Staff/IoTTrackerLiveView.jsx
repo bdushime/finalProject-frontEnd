@@ -9,6 +9,8 @@ import {
   TrackerHistoryDialog,
 } from "@/pages/IT_Staff/components/iot/IoTTableSection";
 import { CAMPUS_ZONES } from "@/pages/IT_Staff/components/iot/iotUtils";
+import { Button } from "@/components/ui/button";
+import { Activity, RefreshCw } from "lucide-react";
 
 export default function IoTTrackerLiveView() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -188,14 +190,33 @@ export default function IoTTrackerLiveView() {
   const offlineCount = trackers.filter((t) => t.status === "offline").length;
   const lowBatteryCount = trackers.filter((t) => t.battery < 30).length;
 
-  return (
-    <ITStaffLayout>
-      <div className="space-y-6">
-        <IoTHeader
-          isSimulating={isSimulating}
-          onToggleSimulating={() => setIsSimulating((v) => !v)}
-          onSimulateUpdate={handleSimulateUpdate}
+  const headerActions = (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => setIsSimulating((v) => !v)}
+        className="flex items-center gap-2 text-gray-500 border-gray-300"
+      >
+        <Activity
+          className={`h-4 w-4 text-gray-500 ${
+            isSimulating ? "text-green-500 animate-pulse" : ""
+          }`}
         />
+        {isSimulating ? "Pause" : "Resume"}
+      </Button>
+      <Button
+        onClick={handleSimulateUpdate}
+        className="flex items-center gap-2 bg-[#BEBEE0]"
+      >
+        <RefreshCw className="h-4 w-4" />
+        Simulate Update
+      </Button>
+    </>
+  );
+
+  return (
+    <ITStaffLayout customHeaderActions={headerActions}>
+      <div className="space-y-6">
 
         <IoTStatsCards
           totalTrackers={trackers.length}
