@@ -13,6 +13,8 @@ import OTPVerify from "./pages/auth/OTPVerify";
 import AdminDashboard from "./pages/Sys_Admin/Dashboard";
 import UsersList from "./pages/Sys_Admin/UserManagement/UsersList";
 import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
+import AdminProfile from "./pages/Sys_Admin/Profile/AdminProfile";
+import AdminNotifications from "./pages/Sys_Admin/Notifications/AdminNotifications";
 import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
 
 // Student (User) pages
@@ -136,6 +138,8 @@ export default function App() {
         <Route path="/admin/security" element={<SecurityPage />} />
         <Route path="/admin/tracking" element={<TrackingPage />} />
         <Route path="/admin/scan" element={<ScannerPage />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
+        <Route path="/admin/notifications" element={<AdminNotifications />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

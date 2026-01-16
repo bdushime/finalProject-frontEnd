@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield } from 'lucide-react';
+import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../../assets/images/logo8noback.png';
 
 const AdminLayout = ({ children, heroContent }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const brandColor = '#8D8DC7';
+
+  const handleLogout = () => {
+    // Clear any stored user data
+    localStorage.removeItem('user');
+    // Navigate to login
+    navigate('/login');
+  };
 
   const navItems = [
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -65,18 +75,44 @@ const AdminLayout = ({ children, heroContent }) => {
                 />
               </div>
 
-              <button className="relative p-2 hover:bg-slate-800 rounded-full transition-colors">
+              <Link to="/admin/notifications" className="relative p-2 hover:bg-slate-800 rounded-full transition-colors">
                 <Bell className="w-5 h-5 text-gray-300" />
                 <span style={{ backgroundColor: brandColor }} className="absolute top-2 right-2 w-2 h-2 rounded-full ring-2 ring-slate-900"></span>
-              </button>
+              </Link>
 
-              <div className="flex items-center space-x-3 pl-2 sm:border-l border-slate-700">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-white">Admin</p>
+              <div className="relative">
+                <div
+                  className="flex items-center space-x-3 pl-2 sm:border-l border-slate-700 cursor-pointer"
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                >
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-medium text-white">Admin</p>
+                  </div>
+                  <div style={{ backgroundColor: brandColor }} className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold hover:opacity-90 transition-opacity ring-2 ring-slate-800">
+                    <User className="w-5 h-5" />
+                  </div>
                 </div>
-                <div style={{ backgroundColor: brandColor }} className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition-opacity ring-2 ring-slate-800">
-                  <User className="w-5 h-5" />
-                </div>
+
+                {/* Profile Dropdown */}
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-50">
+                    <Link
+                      to="/admin/profile"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                    >
+                      <User className="w-4 h-4" />
+                      My Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-rose-600 hover:bg-rose-50 transition-colors border-t border-slate-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Log Out
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -111,7 +147,7 @@ const AdminLayout = ({ children, heroContent }) => {
 
       {/* Footer */}
       <div className="w-full text-center text-gray-400 text-xs py-4 mt-auto">
-        &copy; 2025 Tracknity Management System. v1.0.0
+        &copy; 2026 Tracknity Management System. v1.0.0
       </div>
     </div>
   );
