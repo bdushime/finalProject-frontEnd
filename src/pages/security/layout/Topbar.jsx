@@ -54,7 +54,7 @@ const getPageHeaders = () => {
     "/security/logs": {
       title: "Access Logs",
       description: "View comprehensive logs of all equipment access activities, security events, and system operations",
-      actionButton: { label: "New Log Entry", path: "/security/logs", icon: Plus },
+      actionButton: null,
     },
     "/security/reports": {
       title: "Reports",
@@ -215,7 +215,6 @@ function Topbar({ onMenuClick }) {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-white/20 pt-4">
             <nav className="flex flex-col gap-2">
@@ -245,7 +244,6 @@ function Topbar({ onMenuClick }) {
         )}
       </div>
 
-      {/* Dynamic Page Header */}
       <div className="w-full px-4 sm:px-6 py-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex-1">
