@@ -25,13 +25,7 @@ const StatsCard = ({
                 {/* Header: Title & Icon */}
                 <div className="flex justify-between items-start mb-4">
                     <p className="text-sm font-bold text-gray-600 tracking-wide">{title}</p>
-                    {Icon && (
-                        <div className={`p-2 rounded-xl transition-colors ${
-                            isAlert ? 'bg-red-50 text-red-500' : 'bg-[#8D8DC7]/10 text-[#8D8DC7] group-hover:bg-[#8D8DC7] group-hover:text-white'
-                        }`}>
-                            <Icon className="w-5 h-5" />
-                        </div>
-                    )}
+                    
                 </div>
 
                 {/* Body: Value & Badge */}
