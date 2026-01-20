@@ -16,7 +16,7 @@ export default function MyBorrowedItems() {
 
     // --- REAL DATA STATE ---
     const [pendingRequests, setPendingRequests] = useState([]);
-    const [activeLoans, setActiveLoans] = useState([]);
+    const [activeBorrows, setActiveBorrows] = useState([]);
     const [reservations, setReservations] = useState([]);
     const [historyList, setHistoryList] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ export default function MyBorrowedItems() {
                 // 1. FILTER PENDING
                 const pending = activeRes.data.filter(t => t.status === 'Pending');
 
-                // 2. FILTER ACTIVE LOANS
+                // 2. FILTER ACTIVE BORROWS
                 const borrowed = activeRes.data.filter(t =>
                     t.status === 'Borrowed' ||
                     t.status === 'Checked Out' ||
@@ -48,14 +48,14 @@ export default function MyBorrowedItems() {
                 const reserved = activeRes.data.filter(t => t.status === 'Reserved');
 
                 setPendingRequests(pending);
-                setActiveLoans(borrowed);
+                setActiveBorrows(borrowed);
                 setReservations(reserved);
 
                 const returnedOnly = historyRes.data.filter(item => item.status === 'Returned');
                 setHistoryList(returnedOnly);
 
             } catch (err) {
-                console.error("Failed to fetch loans:", err);
+                console.error("Failed to fetch borrows:", err);
             } finally {
                 setLoading(false);
             }
@@ -229,12 +229,12 @@ export default function MyBorrowedItems() {
                                 </div>
                             )}
 
-                            {/* --- 3. ACTIVE LOANS SECTION --- */}
+                            {/* --- 3. ACTIVE BORROWS SECTION --- */}
                             <div className="space-y-4">
-                                <h2 className="text-lg font-bold text-[#0b1d3a] mb-4">Active Loans</h2>
-                                {activeLoans.length > 0 ? (
+                                <h2 className="text-lg font-bold text-[#0b1d3a] mb-4">Active Borrows</h2>
+                                {activeBorrows.length > 0 ? (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        {activeLoans.map((item) => {
+                                        {activeBorrows.map((item) => {
                                             const daysLeft = getDaysLeft(item.expectedReturnTime);
                                             const isOverdue = daysLeft < 0;
                                             const isDueSoon = daysLeft <= 1 && daysLeft >= 0;
@@ -371,7 +371,7 @@ export default function MyBorrowedItems() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <p className="text-slate-500">No active loans found.</p>
+                                        <p className="text-slate-500">No active borrows found.</p>
                                         <Button
                                             variant="outline"
                                             className="mt-4"
@@ -389,7 +389,7 @@ export default function MyBorrowedItems() {
                             <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                                 <h3 className="font-bold text-[#0b1d3a] flex items-center gap-2">
                                     <History className="w-5 h-5 text-slate-400" />
-                                    Past Loans
+                                    Past Borrows
                                 </h3>
                             </div>
                             <div className="divide-y divide-slate-100">

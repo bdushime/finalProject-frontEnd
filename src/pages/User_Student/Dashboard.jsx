@@ -13,10 +13,10 @@ export default function Dashboard() {
 
     // --- STATE ---
     const [user, setUser] = useState({ name: "Student", score: 0 });
-    const [loans, setLoans] = useState([]);
+    const [borrows, setBorrows] = useState([]);
     const [history, setHistory] = useState([]);
     const [devices, setDevices] = useState([]);
-    const [stats, setStats] = useState({ activeLoans: 0, pending: 0, overdue: 0 });
+    const [stats, setStats] = useState({ activeBorrows: 0, pending: 0, overdue: 0 });
     const [calendarData, setCalendarData] = useState({ month: "", days: [] });
 
     // --- 1. FETCH DATA ---
@@ -30,9 +30,9 @@ export default function Dashboard() {
                     score: profileRes.data.responsibilityScore || 100,
                 });
 
-                // B. Loans & History
-                const loansRes = await api.get('/transactions/my-borrowed');
-                setLoans(loansRes.data);
+                // B. Borrows & History
+                const borrowsRes = await api.get('/transactions/my-borrowed');
+                setBorrows(borrowsRes.data);
 
                 const historyRes = await api.get('/transactions/my-history');
                 setHistory(historyRes.data);
@@ -44,9 +44,9 @@ export default function Dashboard() {
 
                 // D. Stats
                 setStats({
-                    activeLoans: loansRes.data.length,
-                    pending: loansRes.data.filter(l => l.status === 'Pending').length,
-                    overdue: loansRes.data.filter(l => new Date() > new Date(l.expectedReturnTime)).length
+                    activeBorrows: borrowsRes.data.length,
+                    pending: borrowsRes.data.filter(l => l.status === 'Pending').length,
+                    overdue: borrowsRes.data.filter(l => new Date() > new Date(l.expectedReturnTime)).length
                 });
 
             } catch (err) {
@@ -128,7 +128,7 @@ export default function Dashboard() {
 
                         <div className="flex flex-wrap items-center gap-3 mt-6">
                             <div className="px-6 py-3 bg-[#0b1d3a] text-white rounded-full text-sm font-bold flex items-center gap-8 shadow-lg shadow-[#0b1d3a]/20">
-                                Active Loans <span className="text-[#126dd5] text-xs font-normal">{stats.activeLoans} Items</span>
+                                Active Borrows <span className="text-[#126dd5] text-xs font-normal">{stats.activeBorrows} Items</span>
                             </div>
                             <div className="px-6 py-3 border border-slate-200 text-slate-400 rounded-full text-sm font-medium flex items-center gap-2 bg-white/50 backdrop-blur-sm">
                                 Score
@@ -200,7 +200,7 @@ export default function Dashboard() {
                     {/* Right: Timer & Recent Activity */}
                     <div className="md:col-span-4 xl:col-span-4 flex flex-col gap-6">
                         <div className="h-[270px] cursor-pointer hover:scale-[1.01] transition-transform" onClick={() => navigate('/student/borrowed-items')}>
-                            <TimeTracker activeLoan={loans[0] || null} />
+                            <TimeTracker activeBorrow={borrows[0] || null} />
                         </div>
 
                         {/* RECENT ACTIVITY (Already Dynamic!) */}
