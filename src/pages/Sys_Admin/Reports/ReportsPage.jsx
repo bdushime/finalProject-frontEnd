@@ -5,23 +5,39 @@ import { Search, Filter, Download, FileText, Calendar, ChevronDown, Eye, AlertCi
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 // CONSTANTS
+<<<<<<< HEAD
 const ROLES = ["All Users", "Student", "Staff", "Admin"]; // Updated to "All Users" to match UI text but logic remains role-based or we can treat as user type
 const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Lost", "Maintenance", "Damaged", "Stolen"];
 const TIME_RANGES = ["Last 30 Days", "Today", "This Week", "This Year"];
 const CATEGORIES = ["All Categories", "Laptops", "Cameras", "Audio", "Cables", "Tablets", "Accessories"]; // Mock categories for filter
 
+=======
+const ROLES = ["All Roles", "Student", "IT_Staff", "Security"];
+const TABS = ["Active", "Overdue", "Returned", "Lost/Damaged"];
+const DEPARTMENTS = ["All Departments", "Software Engineering", "IT Services", "Security"];
+const TIME_RANGES = ["View All Time", "Today", "This Week"];
+const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 
 const ReportsPage = () => {
     const [reportMode, setReportMode] = useState('admin');
     const [activeTab, setActiveTab] = useState("Active");
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
+<<<<<<< HEAD
 
     // Filters
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedRole, setSelectedRole] = useState("All Users");
     const [timeRange, setTimeRange] = useState("Last 30 Days");
+=======
+    
+    // Filters
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedRole, setSelectedRole] = useState("All Roles");
+    const [timeRange, setTimeRange] = useState("View All Time");
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 
     // FETCH DATA
     useEffect(() => {
@@ -30,12 +46,20 @@ const ReportsPage = () => {
             try {
                 // Construct Query Params
                 const params = {
+<<<<<<< HEAD
                     status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                     role: selectedRole === "All Users" ? undefined : selectedRole,
                     category: selectedCategory === "All Categories" ? undefined : selectedCategory,
                     timeRange
                 };
 
+=======
+                    status: activeTab === "Active" ? "Active" : activeTab,
+                    role: selectedRole,
+                    timeRange
+                };
+                
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                 const res = await api.get('/reports', { params });
                 setData(res.data);
             } catch (err) {
@@ -45,10 +69,23 @@ const ReportsPage = () => {
             }
         };
         fetchData();
+<<<<<<< HEAD
     }, [selectedStatus, selectedCategory, selectedRole, timeRange]);
 
     // Filtered Data
     const filteredData = data;
+=======
+    }, [activeTab, selectedRole, timeRange]);
+
+    // Local Search Filter
+    const filteredData = useMemo(() => {
+        if (!searchTerm) return data;
+        return data.filter(item => 
+            item.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.user.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [data, searchTerm]);
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 
     // --- CHART DATA GENERATION (Client-Side for now) ---
     const categoryStats = useMemo(() => {
@@ -62,6 +99,7 @@ const ReportsPage = () => {
     // --- RENDERERS ---
 
     const renderTable = () => (
+<<<<<<< HEAD
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -133,12 +171,61 @@ const ReportsPage = () => {
                     <Table className="w-4 h-4" /> Export Excel
                 </button>
             </div>
+=======
+        <div className="overflow-x-auto">
+            <table className="w-full text-left border-separate border-spacing-y-2">
+                <thead>
+                    <tr className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        <th className="p-4 pl-0">ID</th>
+                        <th className="p-4">Item</th>
+                        <th className="p-4">User</th>
+                        <th className="p-4">Role</th>
+                        <th className="p-4">Score</th>
+                        <th className="p-4">Date Out</th>
+                        <th className="p-4">Due Date</th>
+                        <th className="p-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loading ? (
+                        <tr><td colSpan="8" className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#8D8DC7]" /></td></tr>
+                    ) : filteredData.length === 0 ? (
+                        <tr><td colSpan="8" className="p-8 text-center text-gray-400">No records found.</td></tr>
+                    ) : (
+                        filteredData.map((row) => (
+                            <tr key={row.id} className="hover:bg-gray-50 transition-colors group bg-white rounded-xl shadow-sm border border-gray-100">
+                                <td className="p-4 font-mono text-xs text-gray-500">#{row.id.slice(-6).toUpperCase()}</td>
+                                <td className="p-4 font-bold text-slate-800">{row.item}</td>
+                                <td className="p-4 font-medium text-slate-700">{row.user}</td>
+                                <td className="p-4 text-xs text-gray-500 uppercase">{row.role}</td>
+                                <td className="p-4">
+                                    <span className={`text-xs font-bold ${row.responsibilityScore < 50 ? 'text-red-600' : 'text-green-600'}`}>
+                                        {row.responsibilityScore}%
+                                    </span>
+                                </td>
+                                <td className="p-4 text-sm text-gray-500">{new Date(row.dateOut).toLocaleDateString()}</td>
+                                <td className="p-4 text-sm text-gray-500">{new Date(row.dueDate).toLocaleDateString()}</td>
+                                <td className="p-4">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                        row.status === 'Active' ? 'bg-green-100 text-green-700' :
+                                        row.status === 'Overdue' ? 'bg-red-100 text-red-700' : 'bg-gray-100'
+                                    }`}>
+                                        {row.status}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
         </div>
     );
 
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10 w-full">
             <div>
+<<<<<<< HEAD
                 <h1 className="text-3xl font-bold text-white mb-2">System Reports</h1>
                 <p className="text-slate-400">Generate and export detailed system logs and inventories.</p>
             </div>
@@ -148,6 +235,17 @@ const ReportsPage = () => {
                 </button>
                 <button onClick={() => setReportMode('analytics')} className={`px-4 py-2 rounded-lg text-sm font-medium ${reportMode === 'analytics' ? 'bg-[#8D8DC7] text-white' : 'text-gray-400'}`}>
                     <BarChart3 className="w-4 h-4 inline mr-2" />
+=======
+                <h1 className="text-3xl font-bold text-white mb-2">Reports & Analytics</h1>
+                <p className="text-gray-400">Real-time system logs and performance metrics.</p>
+            </div>
+            <div className="bg-slate-800 p-1 rounded-xl flex gap-1 mt-4 md:mt-0">
+                <button onClick={() => setReportMode('admin')} className={`px-4 py-2 rounded-lg text-sm font-medium ${reportMode === 'admin' ? 'bg-[#8D8DC7] text-white' : 'text-gray-400'}`}>
+                    <Table className="w-4 h-4 inline mr-2" /> Data View
+                </button>
+                <button onClick={() => setReportMode('analytics')} className={`px-4 py-2 rounded-lg text-sm font-medium ${reportMode === 'analytics' ? 'bg-[#8D8DC7] text-white' : 'text-gray-400'}`}>
+                    <BarChart3 className="w-4 h-4 inline mr-2" /> Analytics
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                 </button>
             </div>
         </div>
@@ -156,6 +254,7 @@ const ReportsPage = () => {
     return (
         <AdminLayout heroContent={HeroSection}>
             <div className="space-y-6">
+<<<<<<< HEAD
 
                 {/* Mode: Admin Table */}
                 {reportMode === 'admin' && (
@@ -261,6 +360,36 @@ const ReportsPage = () => {
                                 {renderTable()}
                             </>
                         )}
+=======
+                
+                {/* Mode: Admin Table */}
+                {reportMode === 'admin' && (
+                    <>
+                        {/* Tabs */}
+                        <div className="bg-white p-2 rounded-2xl flex flex-wrap gap-2 border border-gray-100 shadow-sm">
+                            {TABS.map(tab => (
+                                <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex-grow md:flex-grow-0 ${activeTab === tab ? 'bg-[#8D8DC7] text-white shadow-lg' : 'text-gray-500 hover:bg-gray-50'}`}>
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Filters */}
+                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
+                            <div className="relative flex-grow">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input type="text" placeholder="Search..." className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                            </div>
+                            <select className="p-3 rounded-xl border border-gray-200 bg-white" value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
+                                {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
+                            </select>
+                            <select className="p-3 rounded-xl border border-gray-200 bg-white" value={timeRange} onChange={e => setTimeRange(e.target.value)}>
+                                {TIME_RANGES.map(range => <option key={range} value={range}>{range}</option>)}
+                            </select>
+                        </div>
+
+                        {renderTable()}
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                     </>
                 )}
 

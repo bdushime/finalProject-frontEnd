@@ -1,15 +1,15 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-const StatsCard = ({ 
-    title, 
-    value, 
-    change, 
-    trend = "positive", 
-    subtext, 
-    icon: Icon, 
-    isAlert = false, 
-    onClick, 
+const StatsCard = ({
+    title,
+    value,
+    change,
+    trend = "positive",
+    subtext,
+    icon: Icon,
+    isAlert = false,
+    onClick,
     loading = false // 👈 New Prop for Dynamic Loading
 }) => {
     const isPositive = trend === "positive";
@@ -21,11 +21,11 @@ const StatsCard = ({
             ${onClick && !loading ? 'cursor-pointer hover:-translate-y-1 hover:shadow-xl' : ''}`}
         >
             <div className="relative z-10">
-                
+
                 {/* Header: Title & Icon */}
                 <div className="flex justify-between items-start mb-4">
                     <p className="text-sm font-bold text-gray-600 tracking-wide">{title}</p>
-                    
+
                 </div>
 
                 {/* Body: Value & Badge */}
@@ -40,15 +40,14 @@ const StatsCard = ({
                         // ✅ REAL DATA
                         <>
                             <h3 className="text-4xl font-extrabold text-slate-900">{value}</h3>
-                            
+
                             {change && (
-                                <div className={`flex items-center px-2 py-1 rounded-lg text-xs font-bold mb-1 border ${
-                                    isPositive 
-                                        ? 'bg-green-50 text-green-700 border-green-100' 
-                                        : isAlert 
-                                            ? 'bg-red-50 text-red-600 border-red-100' 
+                                <div className={`flex items-center px-2 py-1 rounded-lg text-xs font-bold mb-1 border ${isPositive
+                                        ? 'bg-green-50 text-green-700 border-green-100'
+                                        : isAlert
+                                            ? 'bg-red-50 text-red-600 border-red-100'
                                             : 'bg-orange-50 text-orange-600 border-orange-100'
-                                }`}>
+                                    }`}>
                                     {isPositive ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
                                     {change}
                                 </div>
@@ -64,9 +63,8 @@ const StatsCard = ({
             </div>
 
             {/* Decorative Background Blob */}
-            <div className={`absolute -bottom-6 -right-6 w-32 h-32 rounded-full transition-colors duration-500 opacity-20 pointer-events-none ${
-                isAlert ? 'bg-red-200' : 'bg-[#8D8DC7]'
-            }`}></div>
+            <div className={`absolute -bottom-6 -right-6 w-32 h-32 rounded-full transition-colors duration-500 opacity-20 pointer-events-none ${isAlert ? 'bg-red-200' : 'bg-[#8D8DC7]'
+                }`}></div>
         </div>
     );
 };

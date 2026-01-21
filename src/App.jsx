@@ -20,7 +20,10 @@ import Dashboard from "./pages/User_Student/Dashboard";
 import Profile from "./pages/User_Student/Profile";
 import EquipmentCatalogue from "./pages/User_Student/EquipmentCatalogue";
 import EquipmentDetails from "./pages/User_Student/EquipmentDetails";
+<<<<<<< HEAD
 import PackageDetails from "./pages/User_Student/PackageDetails";
+=======
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 import BorrowRequest from "./pages/User_Student/BorrowRequest";
 import MyBorrowedItems from "./pages/User_Student/MyBorrowedItems";
 import Notifications from "./pages/User_Student/Notifications";
@@ -81,7 +84,10 @@ export default function App() {
         <Route path="/student/profile" element={<Profile />} />
         <Route path="/student/browse" element={<EquipmentCatalogue />} />
         <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
+<<<<<<< HEAD
         <Route path="/student/package/:packageId" element={<PackageDetails />} />
+=======
+>>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
         <Route path="/student/borrow-request" element={<BorrowRequest />} />
         <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
         <Route path="/student/return" element={<ReturnEquipment />} />
