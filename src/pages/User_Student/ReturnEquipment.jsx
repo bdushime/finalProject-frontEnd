@@ -29,15 +29,9 @@ export default function ReturnEquipment() {
     const [conditionPhotos, setConditionPhotos] = useState({ front: null, back: null });
     const videoRef = useRef(null);
 
-<<<<<<< HEAD
-    // --- 1. FETCH ACTIVE BORROWS ---
+// --- 1. FETCH ACTIVE BORROWS ---
     useEffect(() => {
         const fetchActiveBorrows = async () => {
-=======
-    // --- 1. FETCH ACTIVE LOANS ---
-    useEffect(() => {
-        const fetchActiveLoans = async () => {
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
             try {
                 const res = await api.get('/transactions/my-borrowed');
                 setActiveItems(res.data);
@@ -51,20 +45,12 @@ export default function ReturnEquipment() {
                     setSelectedId(res.data[0].equipment._id);
                 }
             } catch (err) {
-<<<<<<< HEAD
-                console.error("Failed to load active borrows:", err);
-=======
-                console.error("Failed to load active loans:", err);
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+console.error("Failed to load active borrows:", err);
             } finally {
                 setLoading(false);
             }
         };
-<<<<<<< HEAD
-        fetchActiveBorrows();
-=======
-        fetchActiveLoans();
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+fetchActiveBorrows();
     }, [initialEquipmentId]);
 
     // Cleanup Camera on Unmount

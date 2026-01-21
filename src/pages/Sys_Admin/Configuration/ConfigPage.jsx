@@ -8,9 +8,7 @@ const ConfigPage = () => {
     const [activeSection, setActiveSection] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
     const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
-
-    // Config State
+// Config State
     const [config, setConfig] = useState({
         systemName: 'Tracknity Equipment Tracker',
         timezone: 'Africa/Kigali',
@@ -48,20 +46,6 @@ const ConfigPage = () => {
             { id: 4, name: 'Adapters', code: 'A' },
             { id: 5, name: 'Extension Cords', code: 'E' }
         ]
-=======
-    
-    // Config State
-    const [config, setConfig] = useState({
-        systemName: 'Tracknity',
-        timezone: 'Africa/Kigali',
-        currency: 'RWF',
-        maintenanceMode: false,
-        studentLimit: 3,
-        loanDuration: 3,
-        maxRenewals: 1,
-        latePenalty: 5,
-        damagePenalty: 10
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
     });
 
     // FETCH CONFIG
@@ -69,12 +53,8 @@ const ConfigPage = () => {
         const fetchConfig = async () => {
             try {
                 const res = await api.get('/config');
-<<<<<<< HEAD
-                // Merge fetched config with default lists and new fields if they don't exist in response
+// Merge fetched config with default lists and new fields if they don't exist in response
                 setConfig(prev => ({ ...prev, ...res.data }));
-=======
-                setConfig(res.data);
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
             } catch (err) {
                 console.error("Failed to load config", err);
             } finally {
@@ -114,8 +94,7 @@ const ConfigPage = () => {
         }));
     };
 
-<<<<<<< HEAD
-    // --- Interaction States & Handlers ---
+// --- Interaction States & Handlers ---
     const [emailTab, setEmailTab] = useState('receipt');
     const [isAddingZone, setIsAddingZone] = useState(false);
     const [newZone, setNewZone] = useState({ name: '', type: '' });
@@ -167,22 +146,13 @@ const ConfigPage = () => {
         { id: 'email', title: 'Email Templates', description: 'Customize email notifications for checkouts, returns, and warnings.', icon: Mail, color: 'bg-indigo-50 text-indigo-600' },
         { id: 'qrcode', title: 'QR Code Settings', description: 'Adjust QR code generation formats and label sizes.', icon: QrCode, color: 'bg-slate-50 text-slate-600' },
         { id: 'branding', title: 'System Branding', description: 'Update logos, colors, and portal themes.', icon: PenTool, color: 'bg-pink-50 text-pink-600' }
-=======
-    const configSections = [
-        { id: 'general', title: 'General Settings', description: 'System name, timezone, & maintenance.', icon: Settings, color: 'bg-blue-50 text-blue-600' },
-        { id: 'policies', title: 'Checkout Policies', description: 'Loan durations & limits.', icon: FileText, color: 'bg-orange-50 text-orange-600' },
-        { id: 'responsibility', title: 'Responsibility Score', description: 'Scoring rules & penalties.', icon: Scale, color: 'bg-rose-50 text-rose-600' },
-        // ... (Keep other static sections or implement them similarly)
-        { id: 'locations', title: 'Locations', description: 'Manage storage areas.', icon: MapPin, color: 'bg-emerald-50 text-emerald-600' }
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
     ];
 
     const renderContent = (id) => {
         switch (id) {
             case 'general':
                 return (
-<<<<<<< HEAD
-                    <div className="space-y-8">
+<div className="space-y-8">
                         <div>
                             <h3 className="text-lg font-bold text-slate-900 mb-4">Basic Information</h3>
                             <div className="space-y-6">
@@ -363,43 +333,13 @@ const ConfigPage = () => {
                                     </button>
                                 </div>
                             ))}
-=======
-                    <div className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-slate-700">System Name</label>
-                            <input name="systemName" value={config.systemName} onChange={handleChange} className="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-blue-500" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700">Timezone</label>
-                                <select name="timezone" value={config.timezone} onChange={handleChange} className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-white">
-                                    <option value="Africa/Kigali">Africa/Kigali (GMT+2)</option>
-                                    <option value="UTC">UTC</option>
-                                </select>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700">Currency</label>
-                                <select name="currency" value={config.currency} onChange={handleChange} className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-white">
-                                    <option value="RWF">RWF (Rwandan Franc)</option>
-                                    <option value="USD">USD ($)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex items-center justify-between">
-                            <div>
-                                <h4 className="font-semibold text-blue-800 text-sm">Maintenance Mode</h4>
-                                <p className="text-xs text-blue-600">Prevent non-admin logins.</p>
-                            </div>
-                            <input type="checkbox" name="maintenanceMode" checked={config.maintenanceMode} onChange={handleChange} className="w-5 h-5 accent-blue-600" />
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                         </div>
                     </div>
                 );
             case 'policies':
                 return (
                     <div className="space-y-6">
-<<<<<<< HEAD
-                        {/* Student Policy */}
+{/* Student Policy */}
                         <div className="p-6 border border-slate-200 rounded-3xl bg-white space-y-6 shadow-sm">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -495,25 +435,13 @@ const ConfigPage = () => {
                                         <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 rotate-90 pointer-events-none" />
                                     </div>
                                 </div>
-=======
-                        <div className="p-4 border border-slate-200 rounded-xl space-y-4">
-                            <h3 className="font-bold text-slate-800">Student Limits</h3>
-                            <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                                <span className="text-sm text-slate-600">Max Items</span>
-                                <input type="number" name="studentLimit" value={config.studentLimit} onChange={handleChange} className="w-20 px-2 py-1 border rounded text-center" />
-                            </div>
-                            <div className="flex justify-between items-center py-2">
-                                <span className="text-sm text-slate-600">Loan Duration (Days)</span>
-                                <input type="number" name="loanDuration" value={config.loanDuration} onChange={handleChange} className="w-20 px-2 py-1 border rounded text-center" />
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                             </div>
                         </div>
                     </div>
                 );
             case 'responsibility':
                 return (
-<<<<<<< HEAD
-                    <div className="space-y-8">
+<div className="space-y-8">
                         <div className="p-6 bg-rose-50 border border-rose-100 rounded-3xl flex items-start gap-4">
                             <div className="mt-1 text-rose-600">
                                 <Scale className="w-6 h-6" />
@@ -724,20 +652,6 @@ const ConfigPage = () => {
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 font-medium text-slate-700 font-mono"
                                 />
-=======
-                    <div className="space-y-6">
-                        <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl">
-                            <h3 className="font-bold text-rose-800">Score Logic</h3>
-                            <p className="text-xs text-rose-600">Automatic score deductions.</p>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="flex justify-between text-sm font-medium text-slate-700">
-                                    <span>Late Penalty (per day)</span>
-                                    <span className="text-rose-600 font-bold">-{config.latePenalty} pts</span>
-                                </label>
-                                <input type="range" name="latePenalty" min="1" max="20" value={config.latePenalty} onChange={handleChange} className="w-full accent-rose-500" />
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                             </div>
                         </div>
                     </div>
@@ -746,10 +660,7 @@ const ConfigPage = () => {
                 return <div className="text-center py-10 text-gray-400">Settings for this section coming soon.</div>;
         }
     };
-<<<<<<< HEAD
-=======
 
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10">
             <div>

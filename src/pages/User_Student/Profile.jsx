@@ -1,35 +1,22 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
-=======
-import { useState } from "react";
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-<<<<<<< HEAD
 import { User, Mail, Phone, Calendar, GraduationCap, Camera, Save, Edit2, ArrowRight, Hash } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
 import { Link } from "react-router-dom";
 import { borrowHistory } from "./data/mockData";
-=======
-import { User, Mail, Phone, Calendar, GraduationCap, Camera, Save, Edit2, ArrowRight } from "lucide-react";
-import { PageContainer, PageHeader } from "@/components/common/Page";
-import BackButton from "./components/BackButton";
-import { Link } from "react-router-dom";
-import { studentMockData, borrowHistory } from "./data/mockData";
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "./components/StatusBadge";
 import CategoryBadge from "./components/CategoryBadge";
 
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false);
-<<<<<<< HEAD
-    const [studentData, setStudentData] = useState({
+const [studentData, setStudentData] = useState({
         name: "Student",
         email: "student@auca.ac.rw",
         department: "Information Technology",
@@ -58,17 +45,13 @@ export default function Profile() {
             }
         }
     }, []);
-=======
-    const [studentData, setStudentData] = useState(studentMockData.student);
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 
     const handleInputChange = (field, value) => {
         setStudentData(prev => ({ ...prev, [field]: value }));
     };
 
     const handleSave = () => {
-<<<<<<< HEAD
-        // Here you would typically make an API call to update the user
+// Here you would typically make an API call to update the user
         // await api.put('/users/profile', studentData);
         console.log('Saving student data:', studentData);
 
@@ -82,13 +65,7 @@ export default function Profile() {
 
         setIsEditing(false);
         // Assuming a toast library exists or just alert
-        // alert('Profile updated successfully!'); 
-=======
-        // Simulate saving
-        console.log('Saving student data:', studentData);
-        setIsEditing(false);
-        alert('Profile updated successfully!');
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+        // alert('Profile updated successfully!');
     };
 
     const formatDate = (dateString) => {
@@ -139,11 +116,7 @@ export default function Profile() {
                             <div className="p-6 pt-0 space-y-3">
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-2xl">
                                     <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-sm">
-<<<<<<< HEAD
-                                        <Hash className="h-4 w-4 text-[#0b1d3a]" />
-=======
-                                        <GraduationCap className="h-4 w-4 text-[#0b1d3a]" />
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+<Hash className="h-4 w-4 text-[#0b1d3a]" />
                                     </div>
                                     <div>
                                         <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">Student ID</div>
@@ -152,11 +125,7 @@ export default function Profile() {
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-2xl">
                                     <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-sm">
-<<<<<<< HEAD
-                                        <GraduationCap className="h-4 w-4 text-[#0b1d3a]" />
-=======
-                                        <Calendar className="h-4 w-4 text-[#0b1d3a]" />
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+<GraduationCap className="h-4 w-4 text-[#0b1d3a]" />
                                     </div>
                                     <div>
                                         <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">Year</div>
@@ -199,10 +168,7 @@ export default function Profile() {
                             <div className="p-6">
                                 <div className="space-y-5">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-<<<<<<< HEAD
-                                        {/* Full Name - Read Only */}
-=======
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+{/* Full Name - Read Only */}
                                         <div className="space-y-2">
                                             <Label htmlFor="name" className="text-sm font-semibold text-slate-700">Full Name</Label>
                                             <div className="relative">
@@ -210,8 +176,7 @@ export default function Profile() {
                                                 <Input
                                                     id="name"
                                                     value={studentData.name}
-<<<<<<< HEAD
-                                                    disabled={true}
+disabled={true}
                                                     className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-11 text-slate-500 cursor-not-allowed"
                                                 />
                                             </div>
@@ -232,14 +197,6 @@ export default function Profile() {
                                         </div>
 
                                         {/* Email - Editable */}
-=======
-                                                    onChange={(e) => handleInputChange('name', e.target.value)}
-                                                    disabled={!isEditing}
-                                                    className="pl-10 bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a] disabled:bg-slate-50 disabled:text-slate-500"
-                                                />
-                                            </div>
-                                        </div>
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                                         <div className="space-y-2">
                                             <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Email</Label>
                                             <div className="relative">
@@ -250,19 +207,12 @@ export default function Profile() {
                                                     value={studentData.email}
                                                     onChange={(e) => handleInputChange('email', e.target.value)}
                                                     disabled={!isEditing}
-<<<<<<< HEAD
-                                                    className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
+className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Phone Number - Editable */}
-=======
-                                                    className="pl-10 bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a] disabled:bg-slate-50 disabled:text-slate-500"
-                                                />
-                                            </div>
-                                        </div>
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                                         <div className="space-y-2">
                                             <Label htmlFor="phone" className="text-sm font-semibold text-slate-700">Phone Number</Label>
                                             <div className="relative">
@@ -273,8 +223,7 @@ export default function Profile() {
                                                     value={studentData.phone}
                                                     onChange={(e) => handleInputChange('phone', e.target.value)}
                                                     disabled={!isEditing}
-<<<<<<< HEAD
-                                                    className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
+className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
                                                 />
                                             </div>
                                         </div>
@@ -305,21 +254,6 @@ export default function Profile() {
                                                     className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-11 text-slate-500 cursor-not-allowed"
                                                 />
                                             </div>
-=======
-                                                    className="pl-10 bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a] disabled:bg-slate-50 disabled:text-slate-500"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="department" className="text-sm font-semibold text-slate-700">Department</Label>
-                                            <Input
-                                                id="department"
-                                                value={studentData.department}
-                                                onChange={(e) => handleInputChange('department', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a] disabled:bg-slate-50 disabled:text-slate-500"
-                                            />
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                                         </div>
                                     </div>
 
@@ -330,8 +264,7 @@ export default function Profile() {
                                                 className="rounded-xl text-slate-500 hover:text-slate-700"
                                                 onClick={() => {
                                                     setIsEditing(false);
-<<<<<<< HEAD
-                                                    // Re-load initial data to reset form
+// Re-load initial data to reset form
                                                     const userStr = localStorage.getItem("user");
                                                     if (userStr) {
                                                         const user = JSON.parse(userStr);
@@ -341,9 +274,6 @@ export default function Profile() {
                                                             phone: user.phoneNumber || prev.phone
                                                         }));
                                                     }
-=======
-                                                    setStudentData(studentMockData.student);
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                                                 }}
                                             >
                                                 Cancel
@@ -378,56 +308,10 @@ export default function Profile() {
                                 </Button>
                             </div>
                             <div className="p-0">
-<<<<<<< HEAD
-                                <div className="text-center py-12 text-slate-400">
+<div className="text-center py-12 text-slate-400">
                                     <p>No recent activity.</p>
                                 </div>
                             </div>
-=======
-                                {borrowHistory.length === 0 ? (
-                                    <div className="text-center py-12 text-slate-400">
-                                        <p>No recent activity.</p>
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 border-b border-slate-100">
-                                                    <TableHead className="font-bold text-slate-500 pl-6 h-12">Equipment</TableHead>
-                                                    <TableHead className="font-bold text-slate-500 h-12">Date</TableHead>
-                                                    <TableHead className="font-bold text-slate-500 h-12">Status</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {borrowHistory.slice(0, 3).map((item) => (
-                                                    <TableRow key={item.id} className="hover:bg-slate-50 border-slate-50">
-                                                        <TableCell className="pl-6 py-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <CategoryBadge category={item.category} />
-                                                                <span className="font-medium text-[#0b1d3a]">{item.equipmentName}</span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="text-slate-600 font-medium text-sm">
-                                                            {formatDate(item.borrowedDate)}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <StatusBadge status={item.status} />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                )}
-                            </div>
-                            {borrowHistory.length > 3 && (
-                                <div className="p-3 border-t border-slate-50 bg-slate-50/30 text-center">
-                                    <Link to="/student/report" className="text-xs font-bold text-[#0b1d3a] hover:underline">
-                                        View all {borrowHistory.length} transactions
-                                    </Link>
-                                </div>
-                            )}
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                         </div>
                     </div>
                 </div>
@@ -435,7 +319,4 @@ export default function Profile() {
         </StudentLayout>
     );
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab

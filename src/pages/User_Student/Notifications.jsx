@@ -11,11 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Notifications() {
     const navigate = useNavigate();
-<<<<<<< HEAD
-    const [notifications, setNotifications] = useState([]);
-=======
-    const [notifications, setNotifications] = useState(mockNotifications);
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+const [notifications, setNotifications] = useState([]);
 
     const getIcon = (type) => {
         switch (type) {
@@ -104,86 +100,7 @@ export default function Notifications() {
                     </Card>
                 ) : (
                     <div className="space-y-4">
-<<<<<<< HEAD
-                        {/* Notifications map would go here if we had data, currently empty by default */}
-=======
-                        {notifications.map((notification) => {
-                            const Icon = getIcon(notification.type);
-                            const IconComponent = Icon;
-
-                            return (
-                                <Card
-                                    key={notification.id}
-                                    className={`border border-slate-200 rounded-2xl bg-white/95 shadow-[0_16px_38px_-22px_rgba(8,47,73,0.3)] transition-all duration-300 hover:border-sky-200 hover:shadow-[0_22px_42px_-22px_rgba(8,47,73,0.35)] ${!notification.read ? 'ring-1 ring-sky-200' : ''}`}
-                                >
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start gap-4">
-                                            <div className="p-3 rounded-xl bg-sky-100 border border-sky-200 flex-shrink-0 shadow-inner shadow-sky-900/10">
-                                                <IconComponent className="h-6 w-6 text-[#0b1d3a]" />
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-[#0b1d3a] mb-1">
-                                                            {notification.title}
-                                                        </h4>
-                                                        <p className="text-sm text-slate-700 mb-2">
-                                                            {notification.message}
-                                                        </p>
-                                                        <div className="flex items-center gap-3 text-xs text-slate-600">
-                                                            <Clock className="h-3 w-3" />
-                                                            <span>{formatTime(notification.timestamp)}</span>
-                                                            {!notification.read && (
-                                                                <Badge variant="outline" className="text-xs rounded-full border-sky-300 text-sky-700 bg-sky-50 px-2 py-0.5">
-                                                                    New
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {notification.actionUrl && (
-                                                    <div className="flex items-center gap-2 mt-3">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="rounded-lg border-slate-200 hover:border-sky-300 hover:bg-sky-50 text-[#0b1d3a]"
-                                                            onClick={() => {
-                                                                if (!notification.read) markAsRead(notification.id);
-                                                                navigate(notification.actionUrl);
-                                                            }}
-                                                        >
-                                                            View Details
-                                                        </Button>
-                                                        {!notification.read && (
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="text-sky-700 hover:bg-sky-50"
-                                                                onClick={() => markAsRead(notification.id)}
-                                                            >
-                                                                Mark as Read
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="flex-shrink-0 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-                                                onClick={() => deleteNotification(notification.id)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
+{/* Notifications map would go here if we had data, currently empty by default */}
                     </div>
                 )}
             </PageContainer>

@@ -5,31 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BackButton from "./components/BackButton";
 import { Package, Loader2 } from "lucide-react";
-<<<<<<< HEAD
 import { PageContainer } from "@/components/common/Page";
 import api from "@/utils/api";
 import { mockPackages } from "./data/mockPackages";
-=======
-import api from "@/utils/api"; 
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 
 export default function EquipmentCatalogue() {
     const navigate = useNavigate();
     const [availability, setAvailability] = useState("all");
-<<<<<<< HEAD
-
-    // --- STATE FOR REAL DATA ---
+// --- STATE FOR REAL DATA ---
     const [equipmentList, setEquipmentList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState("single"); // 'single' | 'packages'
 
     // --- MOCK PACKAGES --- (Removed, imported from data)
-=======
-    
-    // --- STATE FOR REAL DATA ---
-    const [equipmentList, setEquipmentList] = useState([]);
-    const [loading, setLoading] = useState(true);
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
 
     // --- FETCH REAL EQUIPMENT ---
     useEffect(() => {
@@ -61,8 +49,7 @@ export default function EquipmentCatalogue() {
 
     return (
         <StudentLayout>
-<<<<<<< HEAD
-            <PageContainer>
+<PageContainer>
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
@@ -125,49 +112,6 @@ export default function EquipmentCatalogue() {
                                 return (
                                     <div
                                         key={item._id}
-=======
-            <div className="min-h-screen bg-white p-6 lg:p-8 font-sans text-slate-600">
-                <div className="max-w-7xl mx-auto space-y-8">
-                    {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <BackButton to="/student/dashboard" className="mb-4" />
-                            <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">Available Equipment</h1>
-                            <p className="text-slate-500 mt-1">Browse and request IT equipment for your class</p>
-                        </div>
-
-                        {/* Filters */}
-                        <div className="w-full md:w-auto">
-                            <Select value={availability} onValueChange={setAvailability}>
-                                <SelectTrigger className="w-full md:w-[220px] h-11 rounded-2xl bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-[#126dd5]/20 text-[#0b1d3a] font-medium">
-                                    <SelectValue placeholder="Availability" />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                                    <SelectItem value="all">All Items</SelectItem>
-                                    <SelectItem value="available">Available Now</SelectItem>
-                                    <SelectItem value="reserved">Reserved</SelectItem>
-                                    <SelectItem value="checked-out">Checked Out</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    {/* LOADING STATE */}
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                            <Loader2 className="w-10 h-10 animate-spin mb-3 text-[#126dd5]" />
-                            <p>Loading catalog...</p>
-                        </div>
-                    ) : (
-                        /* Equipment Grid */
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {filteredEquipment.map((item) => {
-                                const status = item.status?.toLowerCase() || "";
-                                
-                                return (
-                                    <div
-                                        key={item._id} 
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                                         className="group relative bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#126dd5]/30 hover:shadow-md transition-all duration-300"
                                     >
                                         {/* Status Badge */}
@@ -175,22 +119,12 @@ export default function EquipmentCatalogue() {
                                             <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#126dd5] transition-colors">
                                                 <Package className="w-5 h-5" />
                                             </div>
-<<<<<<< HEAD
-                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${status === "available"
+<div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${status === "available"
                                                 ? "bg-[#126dd5]/5 text-[#126dd5] border-[#126dd5]/10"
                                                 : status === "reserved"
                                                     ? "bg-amber-50 text-amber-600 border-amber-100"
                                                     : "bg-rose-50 text-rose-600 border-rose-100"
                                                 }`}>
-=======
-                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${
-                                                status === "available"
-                                                    ? "bg-[#126dd5]/5 text-[#126dd5] border-[#126dd5]/10"
-                                                    : status === "reserved"
-                                                    ? "bg-amber-50 text-amber-600 border-amber-100"
-                                                    : "bg-rose-50 text-rose-600 border-rose-100"
-                                            }`}>
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                                                 {status === "available" ? "Available" : status === "reserved" ? "Reserved" : "Checked Out"}
                                             </div>
                                         </div>
@@ -212,18 +146,10 @@ export default function EquipmentCatalogue() {
                                             <div className="pt-2">
                                                 <Button
                                                     variant={status === "available" ? "default" : "outline"}
-<<<<<<< HEAD
-                                                    className={`w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all ${status === "available"
+className={`w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all ${status === "available"
                                                         ? "bg-[#0b1d3a] hover:bg-[#2c3e50] text-white"
                                                         : "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
                                                         }`}
-=======
-                                                    className={`w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all ${
-                                                        status === "available"
-                                                            ? "bg-[#0b1d3a] hover:bg-[#2c3e50] text-white"
-                                                            : "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
-                                                    }`}
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
                                                     // --- LINK TO DETAILS PAGE ---
                                                     onClick={() => status === "available" && navigate(`/student/equipment/${item._id}`)}
                                                     disabled={status !== "available"}
@@ -236,8 +162,7 @@ export default function EquipmentCatalogue() {
                                 );
                             })}
                         </div>
-<<<<<<< HEAD
-                    ) : (
+) : (
                         /* PACKAGES GRID */
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {mockPackages.map((pkg) => (
@@ -296,22 +221,6 @@ export default function EquipmentCatalogue() {
                     </div>
                 )}
             </PageContainer>
-=======
-                    )}
-
-                    {/* Empty State */}
-                    {!loading && filteredEquipment.length === 0 && (
-                        <div className="text-center py-20">
-                            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4 text-slate-300">
-                                <Package className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-[#0b1d3a]">No equipment found</h3>
-                            <p className="text-slate-500 text-sm">Try adjusting your filters</p>
-                        </div>
-                    )}
-                </div>
-            </div>
->>>>>>> 8d7aaf80a8a982856b2333184c20b98c5b95b4ab
         </StudentLayout>
     );
 }
