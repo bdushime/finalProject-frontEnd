@@ -111,7 +111,7 @@ const AdminLayout = ({ children, heroContent }) => {
 
       {/* Footer */}
       <div className="w-full text-center text-gray-400 text-xs py-4 mt-auto">
-        &copy; 2025 Tracknity Management System. v1.0.0
+        &copy; {new Date().getFullYear()} Tracknity Management System. v1.0.0
       </div>
     </div>
   );

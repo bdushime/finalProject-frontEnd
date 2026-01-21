@@ -8,9 +8,9 @@ const ConfigPage = () => {
     const [activeSection, setActiveSection] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
     const [loading, setLoading] = useState(true);
-// Config State
+    // Config State
     const [config, setConfig] = useState({
-        systemName: 'Tracknity Equipment Tracker',
+        systemName: 'Tracknity Management System',
         timezone: 'Africa/Kigali',
         maintenanceMode: false,
         // Policies
@@ -53,7 +53,7 @@ const ConfigPage = () => {
         const fetchConfig = async () => {
             try {
                 const res = await api.get('/config');
-// Merge fetched config with default lists and new fields if they don't exist in response
+                // Merge fetched config with default lists and new fields if they don't exist in response
                 setConfig(prev => ({ ...prev, ...res.data }));
             } catch (err) {
                 console.error("Failed to load config", err);
@@ -94,7 +94,7 @@ const ConfigPage = () => {
         }));
     };
 
-// --- Interaction States & Handlers ---
+    // --- Interaction States & Handlers ---
     const [emailTab, setEmailTab] = useState('receipt');
     const [isAddingZone, setIsAddingZone] = useState(false);
     const [newZone, setNewZone] = useState({ name: '', type: '' });
@@ -152,7 +152,7 @@ const ConfigPage = () => {
         switch (id) {
             case 'general':
                 return (
-<div className="space-y-8">
+                    <div className="space-y-8">
                         <div>
                             <h3 className="text-lg font-bold text-slate-900 mb-4">Basic Information</h3>
                             <div className="space-y-6">
@@ -339,7 +339,7 @@ const ConfigPage = () => {
             case 'policies':
                 return (
                     <div className="space-y-6">
-{/* Student Policy */}
+                        {/* Student Policy */}
                         <div className="p-6 border border-slate-200 rounded-3xl bg-white space-y-6 shadow-sm">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -441,7 +441,7 @@ const ConfigPage = () => {
                 );
             case 'responsibility':
                 return (
-<div className="space-y-8">
+                    <div className="space-y-8">
                         <div className="p-6 bg-rose-50 border border-rose-100 rounded-3xl flex items-start gap-4">
                             <div className="mt-1 text-rose-600">
                                 <Scale className="w-6 h-6" />
