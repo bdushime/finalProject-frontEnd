@@ -14,6 +14,8 @@ import AdminDashboard from "./pages/Sys_Admin/Dashboard";
 import UsersList from "./pages/Sys_Admin/UserManagement/UsersList";
 import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
 import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
+import AdminNotifications from "./pages/Sys_Admin/AdminNotifications";
+import AdminProfile from "./pages/Sys_Admin/AdminProfile";
 
 // Student (User) pages
 import Dashboard from "./pages/User_Student/Dashboard";
@@ -81,7 +83,7 @@ export default function App() {
         <Route path="/student/profile" element={<Profile />} />
         <Route path="/student/browse" element={<EquipmentCatalogue />} />
         <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
-<Route path="/student/package/:packageId" element={<PackageDetails />} />
+        <Route path="/student/package/:packageId" element={<PackageDetails />} />
         <Route path="/student/borrow-request" element={<BorrowRequest />} />
         <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
         <Route path="/student/return" element={<ReturnEquipment />} />
@@ -136,6 +138,8 @@ export default function App() {
         <Route path="/admin/security" element={<SecurityPage />} />
         <Route path="/admin/tracking" element={<TrackingPage />} />
         <Route path="/admin/scan" element={<ScannerPage />} />
+        <Route path="/admin/notifications" element={<AdminNotifications />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
-import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield } from 'lucide-react';
+import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield, LogOut } from 'lucide-react';
 import logo from '../../../assets/images/logo8noback.png';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AdminLayout = ({ children, heroContent }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const brandColor = '#8D8DC7';
 
   const navItems = [
@@ -15,6 +25,12 @@ const AdminLayout = ({ children, heroContent }) => {
     { label: 'Reports', href: '/admin/reports', icon: FileText },
     { label: 'Security', href: '/admin/security', icon: Shield },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 transition-all duration-300">
@@ -65,18 +81,44 @@ const AdminLayout = ({ children, heroContent }) => {
                 />
               </div>
 
-              <button className="relative p-2 hover:bg-slate-800 rounded-full transition-colors">
-                <Bell className="w-5 h-5 text-gray-300" />
-                <span style={{ backgroundColor: brandColor }} className="absolute top-2 right-2 w-2 h-2 rounded-full ring-2 ring-slate-900"></span>
-              </button>
+              <Link to="/admin/notifications" className="relative p-2 hover:bg-slate-800 rounded-full transition-colors group">
+                <Bell className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
+                <span style={{ backgroundColor: brandColor }} className="absolute top-2 right-2 w-2 h-2 rounded-full ring-2 ring-slate-900 animate-pulse"></span>
+              </Link>
 
               <div className="flex items-center space-x-3 pl-2 sm:border-l border-slate-700">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-white">Admin</p>
-                </div>
-                <div style={{ backgroundColor: brandColor }} className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition-opacity ring-2 ring-slate-800">
-                  <User className="w-5 h-5" />
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-3 hover:bg-slate-800/50 rounded-full p-1 pr-3 transition-colors outline-none group">
+                      <div style={{ backgroundColor: brandColor }} className="h-9 w-9 rounded-full flex items-center justify-center text-white font-bold ring-2 ring-slate-800 shadow-lg shadow-[#8D8DC7]/20 group-hover:scale-105 transition-transform">
+                        <User className="w-5 h-5" />
+                      </div>
+                      <div className="text-right hidden sm:block">
+                        <p className="text-sm font-bold text-white group-hover:text-[#8D8DC7] transition-colors">Admin</p>
+                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">System</p>
+                      </div>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-slate-100 shadow-xl bg-white/95 backdrop-blur-lg mt-2">
+                    <DropdownMenuLabel className="font-normal p-3 bg-slate-50 rounded-xl mb-2">
+                      <div className="flex flex-col gap-1">
+                        <p className="text-sm font-bold text-slate-800">System Administrator</p>
+                        <p className="text-xs text-[#8D8DC7] font-medium">admin@tracknity.com</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#8D8DC7] cursor-pointer p-2.5 transition-colors font-medium text-slate-600">
+                      <Link to="/admin/profile" className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                    <DropdownMenuItem onClick={handleLogout} className="rounded-lg focus:bg-rose-50 focus:text-rose-600 text-rose-500 cursor-pointer p-2.5 transition-colors font-medium flex items-center gap-2">
+                      <LogOut className="w-4 h-4" />
+                      Log Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
