@@ -6,17 +6,17 @@ import StatsOverview from "./components/Dashboard/StatsOverview";
 import ActivityChart from "./components/Dashboard/ActivityChart";
 import TimeTracker from "./components/Dashboard/TimeTracker";
 import NotificationsWidget from "./components/Dashboard/NotificationsWidget";
-import api from "@/utils/api"; 
+import api from "@/utils/api";
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    
+
     // --- STATE ---
     const [user, setUser] = useState({ name: "Student", score: 0 });
-    const [loans, setLoans] = useState([]);
+    const [borrows, setBorrows] = useState([]);
     const [history, setHistory] = useState([]);
     const [devices, setDevices] = useState([]);
-    const [stats, setStats] = useState({ activeLoans: 0, pending: 0, overdue: 0 });
+    const [stats, setStats] = useState({ activeBorrows: 0, pending: 0, overdue: 0 });
     const [calendarData, setCalendarData] = useState({ month: "", days: [] });
 
     // --- 1. FETCH DATA ---
@@ -30,9 +30,9 @@ export default function Dashboard() {
                     score: profileRes.data.responsibilityScore || 100,
                 });
 
-                // B. Loans & History
-                const loansRes = await api.get('/transactions/my-borrowed');
-                setLoans(loansRes.data);
+// B. Borrows & History
+                const borrowsRes = await api.get('/transactions/my-borrowed');
+                setBorrows(borrowsRes.data);
 
                 const historyRes = await api.get('/transactions/my-history');
                 setHistory(historyRes.data);
@@ -44,9 +44,9 @@ export default function Dashboard() {
 
                 // D. Stats
                 setStats({
-                    activeLoans: loansRes.data.length,
-                    pending: loansRes.data.filter(l => l.status === 'Pending').length,
-                    overdue: loansRes.data.filter(l => new Date() > new Date(l.expectedReturnTime)).length
+activeBorrows: borrowsRes.data.length,
+                    pending: borrowsRes.data.filter(l => l.status === 'Pending').length,
+                    overdue: borrowsRes.data.filter(l => new Date() > new Date(l.expectedReturnTime)).length
                 });
 
             } catch (err) {
@@ -60,6 +60,19 @@ export default function Dashboard() {
 
     // --- HELPERS ---
 
+const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Good morning";
+        if (hour < 18) return "Good afternoon";
+        return "Good evening";
+    };
+
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+    }).format(new Date());
     // 1. Chart Data Calculator (Counts items per day: Sun-Sat)
     const getChartData = () => {
         const days = [0, 0, 0, 0, 0, 0, 0]; // Index 0=Sun, 6=Sat
@@ -67,13 +80,13 @@ export default function Dashboard() {
         // Calculate start of this week (Sunday)
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
-        startOfWeek.setHours(0,0,0,0);
+startOfWeek.setHours(0, 0, 0, 0);
 
         history.forEach(item => {
             const d = new Date(item.createdAt);
             // If item is from this week
             if (d >= startOfWeek) {
-                days[d.getDay()]++; 
+days[d.getDay()]++;
             }
         });
         return days;
@@ -83,15 +96,13 @@ export default function Dashboard() {
     const generateCalendar = () => {
         const date = new Date();
         const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-        
-        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // Day index (0-6)
+const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // Day index (0-6)
         const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        
+
         // Create array with empty slots for days before the 1st
         // Note: Our design starts on Monday (M T W T F S S), but JS starts Sunday (0).
         // Let's shift it so Monday is index 0.
-        let emptySlots = firstDay === 0 ? 6 : firstDay - 1; 
-        
+        let emptySlots = firstDay === 0 ? 6 : firstDay - 1;
         const daysArray = [];
         for (let i = 0; i < emptySlots; i++) daysArray.push(null);
         for (let i = 1; i <= daysInMonth; i++) daysArray.push(i);
@@ -108,15 +119,16 @@ export default function Dashboard() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-light text-[#0b1d3a] tracking-tight mb-2">
-                            Welcome, <span className="font-medium">{user.name}</span>
+{getGreeting()}, <span className="font-medium">{user.name}</span>
                         </h1>
+                        <p className="text-slate-500 text-lg font-light">{formattedDate}</p>
 
                         <div className="flex flex-wrap items-center gap-3 mt-6">
                             <div className="px-6 py-3 bg-[#0b1d3a] text-white rounded-full text-sm font-bold flex items-center gap-8 shadow-lg shadow-[#0b1d3a]/20">
-                                Active Loans <span className="text-[#126dd5] text-xs font-normal">{stats.activeLoans} Items</span>
+                                Active Borrows <span className="text-[#126dd5] text-xs font-normal">{stats.activeBorrows} Items</span>
                             </div>
                             <div className="px-6 py-3 border border-slate-200 text-slate-400 rounded-full text-sm font-medium flex items-center gap-2 bg-white/50 backdrop-blur-sm">
-                                Score 
+                                Score
                                 <span className="ml-4 h-1 w-16 bg-slate-200 rounded-full overflow-hidden">
                                     <div className="h-full bg-[#126dd5] transition-all duration-1000" style={{ width: `${user.score}%` }}></div>
                                 </span>
@@ -162,7 +174,7 @@ export default function Dashboard() {
                             {/* DYNAMIC CHART: Passes total count AND daily breakdown */}
                             <ActivityChart count={getChartData().reduce((a, b) => a + b, 0)} weeklyData={getChartData()} />
                         </div>
-                        
+
                         {/* DYNAMIC CALENDAR */}
                         <div className="bg-white rounded-[32px] p-6 shadow-[0_4px_20px_rgba(11,29,58,0.05)] border border-slate-100 flex-1 min-h-[280px]">
                             <div className="flex justify-between items-center mb-6">
@@ -170,7 +182,7 @@ export default function Dashboard() {
                                 <button className="text-xs font-medium px-3 py-1 bg-[#f0f9ff] text-[#126dd5] rounded-full">Today</button>
                             </div>
                             <div className="grid grid-cols-7 text-center gap-y-4">
-                                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => <div key={d} className="text-xs text-slate-400 font-bold">{d}</div>)}
+{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <div key={i} className="text-xs text-slate-400 font-bold">{d}</div>)}
                                 {calendarData.days.map((day, idx) => (
                                     <div key={idx} className={`text-sm flex items-center justify-center h-8 w-8 rounded-full mx-auto 
                                         ${day === new Date().getDate() ? 'bg-[#126dd5] text-white font-bold shadow-md' : 'text-slate-500'}
@@ -185,9 +197,8 @@ export default function Dashboard() {
                     {/* Right: Timer & Recent Activity */}
                     <div className="md:col-span-4 xl:col-span-4 flex flex-col gap-6">
                         <div className="h-[270px] cursor-pointer hover:scale-[1.01] transition-transform" onClick={() => navigate('/student/borrowed-items')}>
-                            <TimeTracker activeLoan={loans[0] || null} />
+<TimeTracker activeBorrow={borrows[0] || null} />
                         </div>
-                        
                         {/* RECENT ACTIVITY (Already Dynamic!) */}
                         <div className="bg-[#0b1d3a] rounded-[32px] p-6 flex-1 min-h-[380px] text-white overflow-hidden flex flex-col">
                             <div className="flex justify-between items-center mb-6">
@@ -199,10 +210,10 @@ export default function Dashboard() {
                                     history.map((item) => (
                                         <div key={item._id} className="flex items-center gap-4">
                                             <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 
-                                                ${item.status === 'Returned' ? 'bg-emerald-500/20 text-emerald-400' : 
-                                                  item.status === 'Borrowed' ? 'bg-[#126dd5]/20 text-[#126dd5]' : 'bg-slate-700 text-slate-400'}`}>
-                                                {item.status === 'Returned' ? <CheckCircle size={18} /> : 
-                                                 item.status === 'Overdue' ? <AlertCircle size={18} /> : <Clock size={18} />}
+${item.status === 'Returned' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                    item.status === 'Borrowed' ? 'bg-[#126dd5]/20 text-[#126dd5]' : 'bg-slate-700 text-slate-400'}`}>
+                                                {item.status === 'Returned' ? <CheckCircle size={18} /> :
+                                                    item.status === 'Overdue' ? <AlertCircle size={18} /> : <Clock size={18} />}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-medium text-sm truncate text-white/90">{item.equipment?.name || "Equipment"}</p>
