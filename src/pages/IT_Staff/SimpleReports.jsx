@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import api from "@/utils/api"; 
 import { Loader2, Download, Search, AlertCircle, FileBarChart } from "lucide-react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout"; 
+// 👇 IMPORT THE NEW GENERATOR
+import { generatePDF } from "@/utils/pdfGenerator";
 
 export default function SimpleReports() {
     const [transactions, setTransactions] = useState([]);
@@ -12,6 +14,9 @@ export default function SimpleReports() {
     // Filter States
     const [search, setSearch] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
+
+    // Get current user for the report header "Prepared By"
+    const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'IT Staff', role: 'Staff' };
 
     // --- 1. FETCH DATA ---
     useEffect(() => {
@@ -48,21 +53,11 @@ export default function SimpleReports() {
         setFilteredData(result);
     }, [search, categoryFilter, transactions]);
 
-    // --- 3. EXPORT CSV (Includes Score) ---
-    const handleExport = () => {
+    // --- 3. HANDLE PDF EXPORT ---
+    const handleExportPDF = () => {
         if (filteredData.length === 0) return alert("No data to export!");
-
-        const headers = "Student,Email,Score,Equipment,Category,Date Borrowed,Due Date,Status\n";
-        const rows = filteredData.map(t => 
-            `${t.user?.username},${t.user?.email},${t.user?.responsibilityScore ?? 100},${t.equipment?.name},${t.equipment?.category || 'N/A'},${new Date(t.createdAt).toLocaleDateString()},${new Date(t.expectedReturnTime).toLocaleDateString()},${t.status}`
-        ).join("\n");
-
-        const blob = new Blob([headers + rows], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "Full_Equipment_Report.csv";
-        a.click();
+        // Call our utility function
+        generatePDF(filteredData, currentUser);
     };
 
     return (
@@ -72,19 +67,20 @@ export default function SimpleReports() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div>
-                        {/* CHANGED TITLE so you know it updated */}
                         <h1 className="text-3xl font-bold text-[#0b1d3a] flex items-center gap-2">
-                            <FileBarChart className="w-8 h-8" /> System Reports (V2)
+                            <FileBarChart className="w-8 h-8" /> System Reports
                         </h1>
                         <p className="text-slate-500 mt-1">
-                            Viewing {filteredData.length} records • Includes Student Scores
+                            Viewing {filteredData.length} records • Professional Report Generation
                         </p>
                     </div>
+                    
+                    {/* BUTTON NOW USES PDF GENERATOR */}
                     <button 
-                        onClick={handleExport}
+                        onClick={handleExportPDF}
                         className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium shadow-sm transition-all"
                     >
-                        <Download className="w-4 h-4" /> Export Full CSV
+                        <Download className="w-4 h-4" /> Download PDF Report
                     </button>
                 </div>
 
@@ -141,7 +137,7 @@ export default function SimpleReports() {
                                 <thead className="bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
                                     <tr>
                                         <th className="p-5">Student</th>
-                                        <th className="p-5 text-center">Score</th> {/* Score Header */}
+                                        <th className="p-5 text-center">Score</th>
                                         <th className="p-5">Equipment</th>
                                         <th className="p-5">Dates</th>
                                         <th className="p-5">Status</th>
@@ -150,14 +146,10 @@ export default function SimpleReports() {
                                 <tbody className="divide-y divide-slate-100">
                                     {filteredData.map((t) => (
                                         <tr key={t._id} className="hover:bg-slate-50/80 transition-colors">
-                                            
-                                            {/* Student Name */}
                                             <td className="p-5">
                                                 <div className="font-medium text-[#0b1d3a]">{t.user?.username || "Unknown"}</div>
                                                 <div className="text-xs text-slate-500 mt-0.5">{t.user?.email}</div>
                                             </td>
-
-                                            {/* SCORE COLUMN (New) */}
                                             <td className="p-5 text-center">
                                                 <span className={`inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm border
                                                     ${(t.user?.responsibilityScore ?? 100) >= 80 ? "bg-green-100 text-green-700 border-green-200" :
@@ -167,27 +159,20 @@ export default function SimpleReports() {
                                                     {t.user?.responsibilityScore ?? 100}
                                                 </span>
                                             </td>
-
-                                            {/* Equipment */}
                                             <td className="p-5">
                                                 <div className="font-medium text-slate-900">{t.equipment?.name || "Deleted Item"}</div>
                                                 <div className="text-xs text-slate-500 font-mono mt-0.5">{t.equipment?.serialNumber}</div>
                                             </td>
-
-                                            {/* Dates */}
                                             <td className="p-5 text-sm text-slate-600">
                                                 <div className="flex flex-col gap-1">
                                                     <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide">Borrowed</div>
                                                     <div>{new Date(t.createdAt).toLocaleDateString()}</div>
-                                                    
                                                     <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide mt-1">Due</div>
                                                     <div className={`${new Date() > new Date(t.expectedReturnTime) && t.status !== 'Returned' ? 'text-red-600 font-medium' : ''}`}>
                                                         {new Date(t.expectedReturnTime).toLocaleDateString()}
                                                     </div>
                                                 </div>
                                             </td>
-
-                                            {/* Status Badge */}
                                             <td className="p-5">
                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize border
                                                     ${t.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' : 

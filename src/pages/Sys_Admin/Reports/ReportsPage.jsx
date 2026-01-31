@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AdminLayout from '../components/AdminLayout'; // Ensure correct path (../components/AdminLayout)
+import AdminLayout from '../components/AdminLayout'; 
 import api from '@/utils/api';
-import { Search, Filter, Download, FileText, Calendar, ChevronDown, Eye, AlertCircle, CheckCircle, XCircle, Wrench, BarChart3, Hammer, Table, Loader2 } from 'lucide-react';
+import { Search, Filter, Download, FileText, BarChart3, Table, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+// 👇 1. IMPORT GENERATOR
+import { generatePDF } from '@/utils/pdfGenerator';
 
 // CONSTANTS
 const ROLES = ["All Roles", "Student", "IT_Staff", "Security"];
 const TABS = ["Active", "Overdue", "Returned", "Lost/Damaged"];
-const DEPARTMENTS = ["All Departments", "Software Engineering", "IT Services", "Security"];
 const TIME_RANGES = ["View All Time", "Today", "This Week"];
 const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -22,18 +23,19 @@ const ReportsPage = () => {
     const [selectedRole, setSelectedRole] = useState("All Roles");
     const [timeRange, setTimeRange] = useState("View All Time");
 
+    // 👇 2. GET CURRENT USER (For "Prepared By")
+    const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'System Admin', role: 'Admin' };
+
     // FETCH DATA
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Construct Query Params
                 const params = {
                     status: activeTab === "Active" ? "Active" : activeTab,
                     role: selectedRole,
                     timeRange
                 };
-                
                 const res = await api.get('/reports', { params });
                 setData(res.data);
             } catch (err) {
@@ -54,7 +56,7 @@ const ReportsPage = () => {
         );
     }, [data, searchTerm]);
 
-    // --- CHART DATA GENERATION (Client-Side for now) ---
+    // Chart Data
     const categoryStats = useMemo(() => {
         const stats = {};
         data.forEach(item => {
@@ -62,6 +64,29 @@ const ReportsPage = () => {
         });
         return Object.keys(stats).map(key => ({ name: key, value: stats[key] }));
     }, [data]);
+
+    // 👇 3. HANDLE PDF GENERATION (Data Mapping)
+    const handleExportPDF = () => {
+        if (filteredData.length === 0) return alert("No data to export!");
+
+        // The Admin API returns flat data (row.item), but PDF Generator expects objects (item.equipment.name)
+        // We map it here to fit the generator's expected format
+        const formattedForPdf = filteredData.map(row => ({
+            createdAt: row.dateOut, // Map Date
+            status: row.status,
+            equipment: {
+                name: row.item,
+                serialNumber: row.id.slice(-6).toUpperCase(), // Use truncated ID as serial
+                category: row.category
+            },
+            user: {
+                username: row.user,
+                email: row.role // Using role as secondary info since email isn't in this specific view
+            }
+        }));
+
+        generatePDF(formattedForPdf, currentUser, "ADMINISTRATIVE EQUIPMENT REPORT");
+    };
 
     // --- RENDERERS ---
 
@@ -148,9 +173,9 @@ const ReportsPage = () => {
                             ))}
                         </div>
 
-                        {/* Filters */}
-                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
-                            <div className="relative flex-grow">
+                        {/* Filters & Actions */}
+                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center">
+                            <div className="relative flex-grow w-full">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                 <input type="text" placeholder="Search..." className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                             </div>
@@ -160,6 +185,14 @@ const ReportsPage = () => {
                             <select className="p-3 rounded-xl border border-gray-200 bg-white" value={timeRange} onChange={e => setTimeRange(e.target.value)}>
                                 {TIME_RANGES.map(range => <option key={range} value={range}>{range}</option>)}
                             </select>
+                            
+                            {/* 👇 4. PDF BUTTON ADDED HERE */}
+                            <button 
+                                onClick={handleExportPDF}
+                                className="bg-green-600 text-white font-medium py-3 px-6 rounded-xl hover:bg-green-700 transition-all flex items-center text-sm shadow-lg shadow-green-500/20 whitespace-nowrap"
+                            >
+                                <FileText className="w-4 h-4 mr-2" /> PDF Report
+                            </button>
                         </div>
 
                         {renderTable()}
@@ -182,7 +215,7 @@ const ReportsPage = () => {
                             </ResponsiveContainer>
                         </div>
                         <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-center text-gray-400">
-                            More charts coming soon...
+                            More analytics coming soon...
                         </div>
                     </div>
                 )}

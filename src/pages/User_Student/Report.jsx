@@ -17,7 +17,7 @@ import {
     Loader2
 } from "lucide-react";
 import api from "@/utils/api";
-// import logo from "@/assets/images/logo8noback.png"; // Uncomment if you have the logo
+import { generatePDF } from "@/utils/pdfGenerator"; // Updated Import
 
 const TIME_RANGES = ["View All Time", "Today", "This Week", "This Month", "This Year"];
 
@@ -27,12 +27,13 @@ export default function Report() {
     const [historyData, setHistoryData] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Get Current Student Info
+    const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'Student', role: 'Student' };
+
     // --- 1. FETCH REAL HISTORY ---
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                // We reuse the existing endpoint. 
-                // Ideally, the backend should support pagination or ?limit=all
                 const res = await api.get('/transactions/my-history');
                 setHistoryData(res.data);
             } catch (err) {
@@ -44,19 +45,15 @@ export default function Report() {
         fetchHistory();
     }, []);
 
-    // --- 2. ENHANCE DATA (Calculate Impact) ---
+    // --- 2. ENHANCE DATA ---
     const enhancedData = useMemo(() => {
         return historyData.map(item => {
             let impact = 0;
             let impactLabel = "Neutral";
 
-            // Calculate Impact based on Status
-            // You can align these numbers with your Backend Logic
             if (item.status === 'Returned') {
                 impact = 5; 
                 impactLabel = "Standard Return";
-                
-                // Check if late (simple check)
                 if (new Date(item.returnTime) > new Date(item.expectedReturnTime)) {
                     impact = -10;
                     impactLabel = "Late Return";
@@ -66,7 +63,6 @@ export default function Report() {
                 impactLabel = "Overdue Penalty";
             }
 
-            // Calculate Duration
             const start = new Date(item.createdAt);
             const end = item.returnTime ? new Date(item.returnTime) : new Date();
             const durationMs = end - start;
@@ -93,15 +89,12 @@ export default function Report() {
 
         return enhancedData.filter(item => {
             const dateOut = new Date(item.createdAt);
-
-            // Time Filter
             let matchesTime = true;
             if (timeRange === "Today") matchesTime = dateOut >= startOfDay;
             else if (timeRange === "This Week") matchesTime = dateOut >= startOfWeek;
             else if (timeRange === "This Month") matchesTime = dateOut >= startOfMonth;
             else if (timeRange === "This Year") matchesTime = dateOut >= startOfYear;
 
-            // Search Filter
             const matchesSearch =
                 item.equipmentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,6 +103,20 @@ export default function Report() {
             return matchesTime && matchesSearch;
         });
     }, [enhancedData, timeRange, searchTerm]);
+
+    // --- 4. HANDLE PDF GENERATION ---
+    const handleExportPDF = () => {
+        if (filteredData.length === 0) return alert("No data to export!");
+
+        // Prepare data: Inject 'user' object so PDF prints student name correctly
+        const pdfData = filteredData.map(item => ({
+            ...item,
+            user: currentUser 
+        }));
+
+        // Call Generator with Custom Title
+        generatePDF(pdfData, currentUser, "OFFICIAL STUDENT RECORD");
+    };
 
     // CSV Export
     const handleExportCSV = () => {
@@ -132,7 +139,7 @@ export default function Report() {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `tracknity_report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute("download", `tracknity_student_report_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -157,7 +164,6 @@ export default function Report() {
     return (
         <StudentLayout>
             <PageContainer>
-                {/* Header Actions - Hidden on Print */}
                 <div className="print:hidden">
                     <BackButton to="/student/score" label="Back to Score" />
                     <PageHeader
@@ -166,28 +172,10 @@ export default function Report() {
                     />
                 </div>
 
-                {/* Print Only Header */}
-                <div className="hidden print:block print:mb-8 print:border-b print:border-slate-300 print:pb-4">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            {/* <img src={logo} alt="Tracknity" className="h-10 w-10 object-contain" /> */}
-                            <div>
-                                <h1 className="text-2xl font-bold text-[#0b1d3a]">Tracknity Student Report</h1>
-                                <p className="text-sm text-slate-500">Official Usage Record</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="font-bold text-slate-800">Generated On: {new Date().toLocaleDateString()}</p>
-                            <p className="text-sm text-slate-500">Student Report</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Main Content Card */}
-                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] print:border-0 print:shadow-none print:rounded-none">
-
-                    {/* Toolbar - Hidden on Print */}
-                    <div className="print:hidden p-4 border-b border-slate-100 flex flex-col lg:flex-row gap-4 items-center justify-between bg-slate-50/50">
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px]">
+                    
+                    {/* Toolbar */}
+                    <div className="p-4 border-b border-slate-100 flex flex-col lg:flex-row gap-4 items-center justify-between bg-slate-50/50">
                         <div className="flex flex-1 gap-3 w-full lg:w-auto items-center">
                             <div className="relative flex-grow max-w-sm">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -221,14 +209,17 @@ export default function Report() {
                         </div>
 
                         <div className="flex gap-2 w-full lg:w-auto justify-end">
+                            {/* PDF Button */}
                             <Button
-                                onClick={() => window.print()}
+                                onClick={handleExportPDF} 
                                 variant="outline"
                                 className="h-10 border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-[#0b1d3a] gap-2"
                             >
                                 <FileText className="h-4 w-4" />
-                                <span className="hidden sm:inline">PDF</span>
+                                <span className="hidden sm:inline">Official PDF</span>
                             </Button>
+                            
+                            {/* CSV Button */}
                             <Button
                                 onClick={handleExportCSV}
                                 className="h-10 bg-[#0b1d3a] hover:bg-[#126dd5] text-white gap-2 shadow-sm"
@@ -240,10 +231,10 @@ export default function Report() {
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-x-auto p-0 print:overflow-visible">
+                    <div className="overflow-x-auto p-0">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-100 print:bg-gray-100 print:text-black">
+                                <tr className="text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50/50 border-b border-slate-100">
                                     <th className="p-4 pl-6">Equipment</th>
                                     <th className="p-4">Period</th>
                                     <th className="p-4">Duration</th>
@@ -254,16 +245,16 @@ export default function Report() {
                             <tbody className="divide-y divide-slate-50">
                                 {filteredData.length > 0 ? (
                                     filteredData.map((item) => (
-                                        <tr key={item._id} className="hover:bg-slate-50 transition-colors group print:break-inside-avoid">
+                                        <tr key={item._id} className="hover:bg-slate-50 transition-colors group">
                                             <td className="p-4 pl-6">
-                                                <div className="font-bold text-[#0b1d3a] print:text-black">{item.equipmentName}</div>
-                                                <div className="text-xs text-slate-500 print:text-gray-600">{item.category} • <span className="font-mono text-[10px]">{item._id.slice(-6)}</span></div>
+                                                <div className="font-bold text-[#0b1d3a]">{item.equipmentName}</div>
+                                                <div className="text-xs text-slate-500">{item.category} • <span className="font-mono text-[10px]">{item._id.slice(-6)}</span></div>
                                             </td>
                                             <td className="p-4">
-                                                <div className="text-slate-700 font-medium text-sm print:text-black">
+                                                <div className="text-slate-700 font-medium text-sm">
                                                     {new Date(item.createdAt).toLocaleDateString()}
                                                 </div>
-                                                <div className="text-[11px] text-slate-400 print:text-gray-500">
+                                                <div className="text-[11px] text-slate-400">
                                                     {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             </td>
@@ -271,7 +262,7 @@ export default function Report() {
                                                 {item.daysBorrowed} Days
                                             </td>
                                             <td className="p-4">
-                                                <Badge variant="outline" className={`border-0 font-bold print:border print:border-gray-300 print:text-black ${
+                                                <Badge variant="outline" className={`border-0 font-bold ${
                                                     item.status === 'Returned' ? 'bg-emerald-50 text-emerald-700' :
                                                     item.status === 'Overdue' ? 'bg-rose-50 text-rose-700' :
                                                     'bg-blue-50 text-blue-700'
@@ -280,7 +271,7 @@ export default function Report() {
                                                 </Badge>
                                             </td>
                                             <td className="p-4 text-right pr-6">
-                                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border print:border-gray-300 print:text-black ${getImpactColor(item.impact)}`}>
+                                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${getImpactColor(item.impact)}`}>
                                                     {item.impact > 0 ? <ArrowUpRight className="h-3 w-3" /> : item.impact < 0 ? <ArrowDownRight className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
                                                     {item.impact > 0 ? `+${item.impact}` : item.impact}
                                                 </div>
@@ -299,21 +290,6 @@ export default function Report() {
                         </table>
                     </div>
                 </div>
-
-                {/* Print Footer */}
-                <div className="hidden print:block mt-8 pt-4 border-t border-slate-200 text-center text-xs text-slate-400">
-                    <p>Tracknity System • Official Student Report</p>
-                </div>
-
-                {/* Print Styles */}
-                <style>{`
-                    @media print {
-                        body * { visibility: hidden; }
-                        .page-container, .page-container * { visibility: visible; }
-                        .page-container { position: absolute; left: 0; top: 0; width: 100%; padding: 20px !important; margin: 0 !important; }
-                        nav, aside, header { display: none !important; }
-                    }
-                `}</style>
             </PageContainer>
         </StudentLayout>
     );
