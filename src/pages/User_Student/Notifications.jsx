@@ -12,26 +12,8 @@ import { toast } from "sonner";
 
 export default function Notifications() {
     const navigate = useNavigate();
-    const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(true);
+const [notifications, setNotifications] = useState([]);
 
-    // --- 1. FETCH REAL NOTIFICATIONS ---
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                const res = await api.get('/notifications'); // Backend endpoint
-                setNotifications(res.data);
-            } catch (err) {
-                console.error("Failed to load notifications", err);
-                toast.error("Could not load notifications");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchNotifications();
-    }, []);
-
-    // --- 2. ICON LOGIC ---
     const getIcon = (type) => {
         switch (type) {
             case 'success': return CheckCircle;
@@ -138,75 +120,7 @@ export default function Notifications() {
                     </Card>
                 ) : (
                     <div className="space-y-4">
-                        {notifications.map((notification) => {
-                            const Icon = getIcon(notification.type);
-                            
-                            return (
-                                <Card
-                                    key={notification._id}
-                                    className={`border border-slate-200 rounded-2xl bg-white/95 shadow-sm transition-all duration-300 hover:border-sky-200 hover:shadow-md ${!notification.read ? 'ring-1 ring-sky-200 bg-sky-50/30' : ''}`}
-                                >
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start gap-4">
-                                            <div className={`p-3 rounded-xl flex-shrink-0 shadow-inner 
-                                                ${notification.type === 'error' ? 'bg-red-50 border-red-100' : 
-                                                  notification.type === 'success' ? 'bg-green-50 border-green-100' : 
-                                                  'bg-sky-100 border-sky-200'}`}>
-                                                <Icon className={`h-6 w-6 
-                                                    ${notification.type === 'error' ? 'text-red-600' : 
-                                                      notification.type === 'success' ? 'text-green-600' : 
-                                                      'text-[#0b1d3a]'}`} />
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-[#0b1d3a] mb-1">
-                                                            {notification.title}
-                                                        </h4>
-                                                        <p className="text-sm text-slate-700 mb-2">
-                                                            {notification.message}
-                                                        </p>
-                                                        <div className="flex items-center gap-3 text-xs text-slate-600">
-                                                            <Clock className="h-3 w-3" />
-                                                            <span>{formatTime(notification.createdAt)}</span>
-                                                            {!notification.read && (
-                                                                <Badge variant="outline" className="text-xs rounded-full border-sky-300 text-sky-700 bg-sky-50 px-2 py-0.5">
-                                                                    New
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                {/* Action Button (e.g., View Request) */}
-                                                {!notification.read && (
-                                                    <div className="flex items-center gap-2 mt-3">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-sky-700 hover:bg-sky-50 -ml-2"
-                                                            onClick={() => markAsRead(notification._id)}
-                                                        >
-                                                            Mark as Read
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="flex-shrink-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-                                                onClick={() => deleteNotification(notification._id)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
+{/* Notifications map would go here if we had data, currently empty by default */}
                     </div>
                 )}
             </PageContainer>

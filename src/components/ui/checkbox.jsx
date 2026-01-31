@@ -3,7 +3,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import { CheckIcon } from "lucide-react@0.487.0";
+import { CheckIcon } from "lucide-react";
 
 import { cn } from "./utils";
 
