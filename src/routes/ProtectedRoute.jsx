@@ -1,34 +1,44 @@
 import PropTypes from "prop-types";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../pages/auth/AuthContext";
+import { Navigate, useLocation, Outlet } from "react-router-dom"; // 👈 1. Import Outlet
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const { user } = useAuth();
+  const user = JSON.parse(localStorage.getItem('user'));
   const location = useLocation();
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // If user is logged in but not allowed to access this route, send them to their home
-    const fallback =
-      user.role === "student"
-        ? "/student/dashboard"
-        : user.role === "it"
-        ? "/it/dashboard"
-        : user.role === "security"
-        ? "/security/dashboard"
-        : "/login";
+  // Normalize roles to ensure "Student" matches "student"
+  const userRole = user.role; 
+  
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    let fallback = "/login";
+    
+    // Simple fallback logic
+    switch(userRole) {
+        case "Student": fallback = "/student/dashboard"; break;
+        case "IT":
+        case "IT_Staff": fallback = "/it/dashboard"; break;
+        case "Security": fallback = "/security/dashboard"; break;
+        case "Admin": fallback = "/admin/dashboard"; break;
+        default: fallback = "/login";
+    }
+    
+    // Prevent infinite redirect loops if we are already at the fallback
+    if (location.pathname.startsWith(fallback)) {
+       return <Navigate to="/login" replace />; 
+    }
+
     return <Navigate to={fallback} replace />;
   }
 
-  return children;
+  // 👇 2. THE FIX: Return children OR the Outlet
+  // If used as a wrapper <Route element={...}>, 'children' is null, so we render <Outlet/>
+  return children ? children : <Outlet />;
 }
 
 ProtectedRoute.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
   allowedRoles: PropTypes.arrayOf(PropTypes.string),
 };
-
-

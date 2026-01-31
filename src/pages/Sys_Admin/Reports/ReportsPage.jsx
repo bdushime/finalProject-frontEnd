@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AdminLayout from '../components/AdminLayout'; // Ensure correct path (../components/AdminLayout)
+import AdminLayout from '../components/AdminLayout'; 
 import api from '@/utils/api';
-import { Search, Filter, Download, FileText, Calendar, ChevronDown, Eye, AlertCircle, CheckCircle, XCircle, Wrench, BarChart3, Hammer, Table, Loader2 } from 'lucide-react';
+import { Search, Filter, Download, FileText, BarChart3, Table, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+// 👇 1. IMPORT GENERATOR
+import { generatePDF } from '@/utils/pdfGenerator';
 
 // CONSTANTS
 const ROLES = ["All Users", "Student", "Staff", "Admin"]; // Updated to "All Users" to match UI text but logic remains role-based or we can treat as user type
 const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Lost", "Maintenance", "Damaged", "Stolen"];
 const TIME_RANGES = ["Last 30 Days", "Today", "This Week", "This Year"];
 const CATEGORIES = ["All Categories", "Laptops", "Cameras", "Audio", "Cables", "Tablets", "Accessories"]; // Mock categories for filter
+const ROLES = ["All Roles", "Student", "IT_Staff", "Security"];
+const TABS = ["Active", "Overdue", "Returned", "Lost/Damaged"];
+const TIME_RANGES = ["View All Time", "Today", "This Week"];
+const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
 const ReportsPage = () => {
     const [reportMode, setReportMode] = useState('admin');
@@ -21,12 +27,14 @@ const ReportsPage = () => {
     const [selectedRole, setSelectedRole] = useState("All Users");
     const [timeRange, setTimeRange] = useState("Last 30 Days");
 
+    // 👇 2. GET CURRENT USER (For "Prepared By")
+    const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'System Admin', role: 'Admin' };
+
     // FETCH DATA
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Construct Query Params
                 const params = {
 status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                     role: selectedRole === "All Users" ? undefined : selectedRole,
@@ -47,7 +55,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
     // Filtered Data
     const filteredData = data;
 
-    // --- CHART DATA GENERATION (Client-Side for now) ---
+    // Chart Data
     const categoryStats = useMemo(() => {
         const stats = {};
         data.forEach(item => {
@@ -55,6 +63,29 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
         });
         return Object.keys(stats).map(key => ({ name: key, value: stats[key] }));
     }, [data]);
+
+    // 👇 3. HANDLE PDF GENERATION (Data Mapping)
+    const handleExportPDF = () => {
+        if (filteredData.length === 0) return alert("No data to export!");
+
+        // The Admin API returns flat data (row.item), but PDF Generator expects objects (item.equipment.name)
+        // We map it here to fit the generator's expected format
+        const formattedForPdf = filteredData.map(row => ({
+            createdAt: row.dateOut, // Map Date
+            status: row.status,
+            equipment: {
+                name: row.item,
+                serialNumber: row.id.slice(-6).toUpperCase(), // Use truncated ID as serial
+                category: row.category
+            },
+            user: {
+                username: row.user,
+                email: row.role // Using role as secondary info since email isn't in this specific view
+            }
+        }));
+
+        generatePDF(formattedForPdf, currentUser, "ADMINISTRATIVE EQUIPMENT REPORT");
+    };
 
     // --- RENDERERS ---
 
@@ -276,7 +307,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                             </ResponsiveContainer>
                         </div>
                         <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-center text-gray-400">
-                            More charts coming soon...
+                            More analytics coming soon...
                         </div>
                     </div>
                 )}

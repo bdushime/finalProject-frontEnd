@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StudentLayout from "@/components/layout/StudentLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, CheckCircle, XCircle, AlertCircle, Clock, Info, Trash2, CheckCheck } from "lucide-react";
+import { Bell, CheckCircle, XCircle, AlertCircle, Clock, Info, Trash2, CheckCheck, Loader2 } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
-import { notifications as mockNotifications } from "./data/mockData";
 import { useNavigate } from "react-router-dom";
+import api from "@/utils/api"; // Ensure this imports your axios instance
+import { toast } from "sonner";
 
 export default function Notifications() {
     const navigate = useNavigate();
@@ -15,20 +16,15 @@ const [notifications, setNotifications] = useState([]);
 
     const getIcon = (type) => {
         switch (type) {
-            case 'approved':
-                return CheckCircle;
-            case 'rejected':
-                return XCircle;
-            case 'overdue':
-            case 'reminder':
-                return AlertCircle;
-            case 'system':
-                return Info;
-            default:
-                return Bell;
+            case 'success': return CheckCircle;
+            case 'error': return XCircle;
+            case 'warning': return AlertCircle;
+            case 'info': return Info;
+            default: return Bell;
         }
     };
 
+    // --- 3. TIME FORMATTER ---
     const formatTime = (timestamp) => {
         const date = new Date(timestamp);
         const now = new Date();
@@ -43,25 +39,49 @@ const [notifications, setNotifications] = useState([]);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
 
-    const markAsRead = (id) => {
-        setNotifications(prev =>
-            prev.map(notif =>
-                notif.id === id ? { ...notif, read: true } : notif
-            )
-        );
+    // --- 4. ACTIONS ---
+    const markAsRead = async (id) => {
+        try {
+            await api.put(`/notifications/${id}/read`);
+            setNotifications(prev =>
+                prev.map(notif =>
+                    notif._id === id ? { ...notif, read: true } : notif
+                )
+            );
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    const markAllAsRead = () => {
-        setNotifications(prev =>
-            prev.map(notif => ({ ...notif, read: true }))
-        );
+    const markAllAsRead = async () => {
+        try {
+            await api.put('/notifications/mark-all-read');
+            setNotifications(prev =>
+                prev.map(notif => ({ ...notif, read: true }))
+            );
+            toast.success("All marked as read");
+        } catch (err) {
+            toast.error("Failed to update");
+        }
     };
 
+    // Note: If you want 'delete', you need a backend endpoint for it. 
+    // For now, we can just hide it locally or remove the button.
     const deleteNotification = (id) => {
-        setNotifications(prev => prev.filter(notif => notif.id !== id));
+        setNotifications(prev => prev.filter(notif => notif._id !== id));
     };
 
     const unreadCount = notifications.filter(n => !n.read).length;
+
+    if (loading) {
+        return (
+            <StudentLayout>
+                <div className="h-screen flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                </div>
+            </StudentLayout>
+        );
+    }
 
     return (
         <StudentLayout>
@@ -107,5 +127,3 @@ const [notifications, setNotifications] = useState([]);
         </StudentLayout>
     );
 }
-
-

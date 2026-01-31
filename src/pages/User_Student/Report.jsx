@@ -398,6 +398,8 @@ if (loading) return <StudentLayout><div className="h-screen flex items-center ju
                             >
                                 <FileText className="w-4 h-4 mr-2" /> Generate PDF Report
                             </Button>
+                            
+                            {/* CSV Button */}
                             <Button
                                 onClick={handleExportCSV}
                                 variant="outline"
