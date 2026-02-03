@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { NavLink, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, Settings, Bell, X } from "lucide-react";
+import { Menu, Bell, X } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -25,7 +25,7 @@ const studentLinks = [
 export default function StudentTopbar({ onMenuClick }) {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const unreadCount = 3; 
+const unreadCount = 0;
 
     // --- NEW: State for Dynamic User Info ---
     const [user, setUser] = useState({
@@ -40,10 +40,8 @@ export default function StudentTopbar({ onMenuClick }) {
         if (userStr) {
             try {
                 const userData = JSON.parse(userStr);
-                
-                // Get Name
+// Get Name
                 const displayName = userData.fullName || userData.username || "Student";
-                
                 // Get Initial (First letter of name)
                 const displayInitial = displayName.charAt(0).toUpperCase();
 
@@ -139,8 +137,8 @@ export default function StudentTopbar({ onMenuClick }) {
                                         key={link.path}
                                         to={link.path}
                                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
-                                                ? "bg-[#0b1d3a] text-white"
-                                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+? "bg-[#0b1d3a] text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                                             }`}
                                     >
                                         {link.name}
@@ -153,15 +151,7 @@ export default function StudentTopbar({ onMenuClick }) {
                     {/* Right: Settings, Notification, Profile */}
                     <div className="flex items-center gap-3">
                         <Link
-                            to="/student/settings"
-                            className="hidden sm:flex h-11 px-5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 text-[#0b1d3a] items-center gap-2 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-105"
-                            aria-label="Settings"
-                        >
-                            <Settings className="h-5 w-5 text-[#0b1d3a]" />
-                            <span className="font-medium text-sm">Settings</span>
-                        </Link>
 
-                        <Link
                             to="/student/notifications"
                             className="relative h-11 w-11 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#0b1d3a] hover:bg-white/60 transition-all hover:shadow-sm hover:scale-110"
                             aria-label="Notifications"
@@ -193,19 +183,23 @@ export default function StudentTopbar({ onMenuClick }) {
                                     </div>
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem asChild>
-                                    <Link to="/student/profile">Profile</Link>
+<DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl border-slate-100 shadow-xl bg-white/90 backdrop-blur-lg">
+                                <DropdownMenuLabel className="font-normal p-3 bg-slate-50 rounded-xl mb-2">
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm font-bold text-[#0b1d3a]">{user.name}</p>
+                                        <p className="text-xs text-[#126dd5] font-medium uppercase tracking-wider">{user.role}</p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
+                                    <Link to="/student/profile" className="flex items-center gap-2 font-medium">
+                                        My Profile
+                                    </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link to="/student/settings">Settings</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem asChild>
-                                    {/* Added logout handler to clear storage */}
-                                    <Link to="/login" onClick={handleLogout}>Logout</Link>
+                                <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-rose-50 focus:text-rose-600 text-rose-500 cursor-pointer p-3 transition-colors">
+                                    <Link to="/login" onClick={handleLogout} className="flex items-center gap-2 font-medium">
+                                        Log Out
+                                    </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -223,35 +217,21 @@ export default function StudentTopbar({ onMenuClick }) {
                                         key={link.path}
                                         to={link.path}
                                         className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-                                                ? "bg-[#0b1d3a] text-white"
-                                                : "text-gray-600 hover:bg-gray-100"
+? "bg-[#0b1d3a] text-white"
+                                            : "text-gray-600 hover:bg-gray-100"
                                             }`}
                                     >
                                         {link.name}
                                     </NavLink>
                                 );
                             })}
-                            <div className="border-t pt-2 mt-2">
-                                <Link
-                                    to="/student/settings"
-                                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100"
-                                >
-                                    <Settings className="h-4 w-4" />
-                                    Settings
-                                </Link>
-                            </div>
+
                         </nav>
                     </div>
                 )}
             </header>
 
-            {/* Welcome Section - Also made Dynamic! */}
-            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-4">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {getGreeting()}, {user.name}!
-                </h1>
-                <p className="text-gray-500 text-sm sm:text-base">{formattedDate}</p>
-            </div>
+
         </div>
     );
 }

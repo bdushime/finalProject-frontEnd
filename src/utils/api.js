@@ -3,7 +3,7 @@ import axios from 'axios';
 // 1. Create the Axios instance
 const api = axios.create({
     // This points to your LIVE Render Backend
-    baseURL: 'https://equipment-tracker-backend-dfso.onrender.com/api',
+    baseURL: 'https://localhost:5001/api',
     headers: {
         'Content-Type': 'application/json',
     },
