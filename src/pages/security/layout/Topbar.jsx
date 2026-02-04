@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, Bell, Plus, LayoutGrid, ShieldAlert, Package, ClipboardList, FileText } from "lucide-react";
+import { Menu, Bell, Plus, LayoutGrid, ShieldAlert, Package, ClipboardList, FileText, Shield } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ const navigationLinks = [
   { label: "Devices", path: "/security/devices", icon: Package },
   { label: "Active Checkouts", path: "/security/active-checkouts", icon: ClipboardList },
   { label: "Access Logs", path: "/security/logs", icon: ShieldAlert },
+  { label: "Gate keeper", path: "/gate-verification", icon: Shield },
   { label: "Reports", path: "/security/reports", icon: FileText },
 ];
 
@@ -84,7 +85,7 @@ function Topbar({ onMenuClick }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   const unreadCount = 3;
   const currentPath = location.pathname;
   const pageHeaders = getPageHeaders();
@@ -126,7 +127,7 @@ function Topbar({ onMenuClick }) {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            
+
             <Link to="/security/dashboard" className="flex items-center gap-2">
               <img
                 src={smallLogo}
@@ -139,31 +140,30 @@ function Topbar({ onMenuClick }) {
                 className="hidden md:block h-10 w-auto rounded"
               />
             </Link>
-            </div>
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navigationLinks.map((link) => {
-                const Icon = link.icon;
-                const active = isLinkActive(link.path);
-                return (
-                  <NavLink
-                    key={link.path}
-                    to={link.path}
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                        active || isActive
-                          ? "bg-[#1A2240] text-white rounded-full"
-                          : "text-gray-300 hover:bg-white/10 hover:text-white"
-                      }`
-                    }
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{link.label}</span>
-                  </NavLink>
-                );
-              })}
-            </nav>
-          
+          </div>
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navigationLinks.map((link) => {
+              const Icon = link.icon;
+              const active = isLinkActive(link.path);
+              return (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${active || isActive
+                      ? "bg-[#1A2240] text-white rounded-full"
+                      : "text-gray-300 hover:bg-white/10 hover:text-white"
+                    }`
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{link.label}</span>
+                </NavLink>
+              );
+            })}
+          </nav>
+
 
           {/* Right: Notifications, User */}
           <div className="flex items-center gap-4">
@@ -227,10 +227,9 @@ function Topbar({ onMenuClick }) {
                     to={link.path}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        active || isActive
-                          ? "bg-[#1A2240] text-white"
-                          : "text-gray-300 hover:bg-white/10 hover:text-white"
+                      `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active || isActive
+                        ? "bg-[#1A2240] text-white"
+                        : "text-gray-300 hover:bg-white/10 hover:text-white"
                       }`
                     }
                   >
@@ -259,7 +258,7 @@ function Topbar({ onMenuClick }) {
               </p>
             )}
           </div>
-          
+
           {/* Action Button */}
           {pageHeader.actionButton && (
             <Button

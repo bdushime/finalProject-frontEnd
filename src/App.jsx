@@ -46,7 +46,7 @@ import SearchResults from "./pages/IT_Staff/SearchResults";
 import SelectEquipment from "./pages/IT_Staff/checkout/SelectEquipment";
 import ScanQRCode from "./pages/IT_Staff/checkout/ScanQRCode";
 import CaptureCondition from "./pages/IT_Staff/checkout/CaptureCondition";
-import CheckoutForm from "./pages/IT_Staff/checkout/CheckoutForm"; 
+import CheckoutForm from "./pages/IT_Staff/checkout/CheckoutForm";
 import DigitalSignature from "./pages/IT_Staff/checkout/DigitalSignature";
 import CheckoutConfirmation from "./pages/IT_Staff/checkout/CheckoutConfirmation";
 
@@ -63,161 +63,163 @@ import BrowseDevices from "./pages/security/BrowseDevices";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
+import GateVerification from "./pages/Gate_security_officer/GateVerification";
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* ==========================
+    return (
+        <BrowserRouter>
+            <Routes>
+                {/* ==========================
             PUBLIC ROUTES
         =========================== */}
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Auth />} />
-        <Route path="/signup" element={<Auth />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/otp-verify" element={<OTPVerify />} />
+                <Route path="/" element={<Landing />} />
+                <Route path="/login" element={<Auth />} />
+                <Route path="/signup" element={<Auth />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/otp-verify" element={<OTPVerify />} />
 
-        {/* Student (User) Pages */}
-        <Route path="/student/dashboard" element={<Dashboard />} />
-        <Route path="/student/profile" element={<Profile />} />
-        <Route path="/student/browse" element={<EquipmentCatalogue />} />
-        <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
-        <Route path="/student/package/:packageId" element={<PackageDetails />} />
-        <Route path="/student/borrow-request" element={<BorrowRequest />} />
-        <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
-        <Route path="/student/return" element={<ReturnEquipment />} />
-        <Route path="/student/score" element={<Score />} />
-        <Route path="/student/report" element={<Report />} />
-        <Route path="/student/notifications" element={<Notifications />} />
-        <Route path="/student/help" element={<HelpSupport />} />
+                {/* Student (User) Pages */}
+                <Route path="/student/dashboard" element={<Dashboard />} />
+                <Route path="/student/profile" element={<Profile />} />
+                <Route path="/student/browse" element={<EquipmentCatalogue />} />
+                <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
+                <Route path="/student/package/:packageId" element={<PackageDetails />} />
+                <Route path="/student/borrow-request" element={<BorrowRequest />} />
+                <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
+                <Route path="/student/return" element={<ReturnEquipment />} />
+                <Route path="/student/score" element={<Score />} />
+                <Route path="/student/report" element={<Report />} />
+                <Route path="/student/notifications" element={<Notifications />} />
+                <Route path="/student/help" element={<HelpSupport />} />
 
-        {/* IT Staff Pages */}
-        <Route path="/it/dashboard" element={<ITStaffDashboard />} />
-        <Route path="/it/browse" element={<BrowseEquipment />} />
-        {/* <Route path="/it/reports" element={<ITReportsPage />} /> */}
-        <Route path="/it/reports" element={<SimpleReports />} />
-        <Route path="/it/settings" element={<ITStaffSettings />} />
-        <Route path="/it/profile" element={<ITStaffProfile />} />
-        <Route path="/it/notifications" element={<ITStaffNotifications />} />
-        <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
-        <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} />
-        <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
-        <Route path="/it/checkout-history" element={<CheckoutHistory />} />
-        <Route path="/it/search-results" element={<SearchResults />} />
+                {/* IT Staff Pages */}
+                <Route path="/it/dashboard" element={<ITStaffDashboard />} />
+                <Route path="/it/browse" element={<BrowseEquipment />} />
+                {/* <Route path="/it/reports" element={<ITReportsPage />} /> */}
+                <Route path="/it/reports" element={<SimpleReports />} />
+                <Route path="/it/settings" element={<ITStaffSettings />} />
+                <Route path="/it/profile" element={<ITStaffProfile />} />
+                <Route path="/it/notifications" element={<ITStaffNotifications />} />
+                <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
+                <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} />
+                <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
+                <Route path="/it/checkout-history" element={<CheckoutHistory />} />
+                <Route path="/it/search-results" element={<SearchResults />} />
 
-        <Route path="/it/checkout/select" element={<SelectEquipment />} />
-        <Route path="/it/checkout/scan" element={<ScanQRCode />} />
-        <Route path="/it/checkout/photo" element={<CaptureCondition />} />
-        <Route path="/it/checkout/details" element={<CheckoutForm />} />
-        <Route path="/it/checkout/sign" element={<DigitalSignature />} />
-        <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
+                <Route path="/it/checkout/select" element={<SelectEquipment />} />
+                <Route path="/it/checkout/scan" element={<ScanQRCode />} />
+                <Route path="/it/checkout/photo" element={<CaptureCondition />} />
+                <Route path="/it/checkout/details" element={<CheckoutForm />} />
+                <Route path="/it/checkout/sign" element={<DigitalSignature />} />
+                <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
 
-        <Route path="/it/return/select-item" element={<SelectReturnItem />} />
-        <Route path="/it/return/scan" element={<ReturnScan />} />
-        <Route path="/it/return/confirmation" element={<ReturnConfirmation />} />
+                <Route path="/it/return/select-item" element={<SelectReturnItem />} />
+                <Route path="/it/return/scan" element={<ReturnScan />} />
+                <Route path="/it/return/confirmation" element={<ReturnConfirmation />} />
 
-        {/* Security Pages */}
-        <Route path="/security/dashboard" element={<SecurityDashboard />} />
-        <Route path="/security/logs" element={<Accesslogs />} />
-        <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
-        <Route path="/security/devices" element={<BrowseDevices />} />
-        <Route path="/security/reports" element={<SecurityReports />} />
-        <Route path="/security/notifications" element={<SecurityNotifications />} />
-        <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
-        <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
+                {/* Security Pages */}
+                <Route path="/security/dashboard" element={<SecurityDashboard />} />
+                <Route path="/security/logs" element={<Accesslogs />} />
+                <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
+                <Route path="/security/devices" element={<BrowseDevices />} />
+                <Route path="/security/reports" element={<SecurityReports />} />
+                <Route path="/security/notifications" element={<SecurityNotifications />} />
+                <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
+                <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
 
-        {/* Admin Pages */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<UsersList />} />
-        <Route path="/admin/config" element={<ConfigPage />} />
-        <Route path="/admin/data" element={<DataPage />} />
-        <Route path="/admin/monitoring" element={<MonitoringPage />} />
-        <Route path="/admin/reports" element={<ReportsPage />} />
-        <Route path="/admin/security" element={<SecurityPage />} />
-        <Route path="/admin/tracking" element={<TrackingPage />} />
-        <Route path="/admin/scan" element={<ScannerPage />} />
-        <Route path="/admin/notifications" element={<AdminNotifications />} />
-        <Route path="/admin/profile" element={<AdminProfile />} />
+                {/* Admin Pages */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UsersList />} />
+                <Route path="/admin/config" element={<ConfigPage />} />
+                <Route path="/admin/data" element={<DataPage />} />
+                <Route path="/admin/monitoring" element={<MonitoringPage />} />
+                <Route path="/admin/reports" element={<ReportsPage />} />
+                <Route path="/admin/security" element={<SecurityPage />} />
+                <Route path="/admin/tracking" element={<TrackingPage />} />
+                <Route path="/admin/scan" element={<ScannerPage />} />
+                <Route path="/admin/notifications" element={<AdminNotifications />} />
+                <Route path="/admin/profile" element={<AdminProfile />} />
 
-        {/* Fallback */}
-        {/* ==========================
+                {/* Fallback */}
+                {/* ==========================
             🔒 STUDENT ROUTES
         =========================== */}
-        <Route element={<ProtectedRoute allowedRoles={['Student']} />}>
-            <Route path="/student/dashboard" element={<Dashboard />} />
-            <Route path="/student/profile" element={<Profile />} />
-            <Route path="/student/browse" element={<EquipmentCatalogue />} />
-            <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
-            <Route path="/student/borrow-request" element={<BorrowRequest />} />
-            <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
-            <Route path="/student/return" element={<ReturnEquipment />} />
-            <Route path="/student/score" element={<Score />} />
-            <Route path="/student/report" element={<Report />} />
-            <Route path="/student/notifications" element={<Notifications />} />
-            <Route path="/student/help" element={<HelpSupport />} />
-        </Route>
+                <Route element={<ProtectedRoute allowedRoles={['Student']} />}>
+                    <Route path="/student/dashboard" element={<Dashboard />} />
+                    <Route path="/student/profile" element={<Profile />} />
+                    <Route path="/student/browse" element={<EquipmentCatalogue />} />
+                    <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
+                    <Route path="/student/borrow-request" element={<BorrowRequest />} />
+                    <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
+                    <Route path="/student/return" element={<ReturnEquipment />} />
+                    <Route path="/student/score" element={<Score />} />
+                    <Route path="/student/report" element={<Report />} />
+                    <Route path="/student/notifications" element={<Notifications />} />
+                    <Route path="/student/help" element={<HelpSupport />} />
+                </Route>
 
-        {/* ==========================
+                {/* ==========================
             🔒 IT STAFF ROUTES
         =========================== */}
-        <Route element={<ProtectedRoute allowedRoles={['IT', 'IT_Staff']} />}>
-            <Route path="/it/dashboard" element={<ITStaffDashboard />} />
-            <Route path="/it/browse" element={<BrowseEquipment />} />
-            <Route path="/it/reports" element={<SimpleReports />} />
-            <Route path="/it/profile" element={<ITStaffProfile />} />
-            <Route path="/it/notifications" element={<ITStaffNotifications />} />
-            <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
-            <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} />
-            <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
-            <Route path="/it/checkout-history" element={<CheckoutHistory />} />
-            <Route path="/it/search-results" element={<SearchResults />} />
+                <Route element={<ProtectedRoute allowedRoles={['IT', 'IT_Staff']} />}>
+                    <Route path="/it/dashboard" element={<ITStaffDashboard />} />
+                    <Route path="/it/browse" element={<BrowseEquipment />} />
+                    <Route path="/it/reports" element={<SimpleReports />} />
+                    <Route path="/it/profile" element={<ITStaffProfile />} />
+                    <Route path="/it/notifications" element={<ITStaffNotifications />} />
+                    <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
+                    <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} />
+                    <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
+                    <Route path="/it/checkout-history" element={<CheckoutHistory />} />
+                    <Route path="/it/search-results" element={<SearchResults />} />
 
-            {/* Checkout Flow */}
-            <Route path="/it/checkout/select" element={<SelectEquipment />} />
-            <Route path="/it/checkout/scan" element={<ScanQRCode />} />
-            <Route path="/it/checkout/photo" element={<CaptureCondition />} />
-            <Route path="/it/checkout/details" element={<CheckoutForm />} />
-            <Route path="/it/checkout/sign" element={<DigitalSignature />} />
-            <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
+                    {/* Checkout Flow */}
+                    <Route path="/it/checkout/select" element={<SelectEquipment />} />
+                    <Route path="/it/checkout/scan" element={<ScanQRCode />} />
+                    <Route path="/it/checkout/photo" element={<CaptureCondition />} />
+                    <Route path="/it/checkout/details" element={<CheckoutForm />} />
+                    <Route path="/it/checkout/sign" element={<DigitalSignature />} />
+                    <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
 
-            {/* Return Flow */}
-            <Route path="/it/return/select-item" element={<SelectReturnItem />} />
-            <Route path="/it/return/scan" element={<ReturnScan />} />
-            <Route path="/it/return/confirmation" element={<ReturnConfirmation />} />
-        </Route>
+                    {/* Return Flow */}
+                    <Route path="/it/return/select-item" element={<SelectReturnItem />} />
+                    <Route path="/it/return/scan" element={<ReturnScan />} />
+                    <Route path="/it/return/confirmation" element={<ReturnConfirmation />} />
+                </Route>
 
-        {/* ==========================
+                {/* ==========================
             🔒 SECURITY ROUTES
         =========================== */}
-        <Route element={<ProtectedRoute allowedRoles={['Security']} />}>
-            <Route path="/security/dashboard" element={<SecurityDashboard />} />
-            <Route path="/security/logs" element={<Accesslogs />} />
-            <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
-            <Route path="/security/devices" element={<BrowseDevices />} />
-            <Route path="/security/reports" element={<SecurityReports />} />
-            <Route path="/security/notifications" element={<SecurityNotifications />} />
-            <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
-            <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
-        </Route>
+                <Route element={<ProtectedRoute allowedRoles={['Security', 'Admin']} />}>
+                    <Route path="/security/dashboard" element={<SecurityDashboard />} />
+                    <Route path="/security/logs" element={<Accesslogs />} />
+                    <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
+                    <Route path="/security/devices" element={<BrowseDevices />} />
+                    <Route path="/security/reports" element={<SecurityReports />} />
+                    <Route path="/security/notifications" element={<SecurityNotifications />} />
+                    <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
+                    <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
+                    <Route path="/gate-verification" element={<GateVerification />} />
+                </Route>
 
-        {/* ==========================
+                {/* ==========================
             🔒 ADMIN ROUTES
         =========================== */}
-        <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<UsersList />} />
-            <Route path="/admin/config" element={<ConfigPage />} />
-            <Route path="/admin/data" element={<DataPage />} />
-            <Route path="/admin/monitoring" element={<MonitoringPage />} />
-            <Route path="/admin/reports" element={<ReportsPage />} />
-            <Route path="/admin/security" element={<SecurityPage />} />
-            <Route path="/admin/tracking" element={<TrackingPage />} />
-            <Route path="/admin/scan" element={<ScannerPage />} />
-        </Route>
+                <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/users" element={<UsersList />} />
+                    <Route path="/admin/config" element={<ConfigPage />} />
+                    <Route path="/admin/data" element={<DataPage />} />
+                    <Route path="/admin/monitoring" element={<MonitoringPage />} />
+                    <Route path="/admin/reports" element={<ReportsPage />} />
+                    <Route path="/admin/security" element={<SecurityPage />} />
+                    <Route path="/admin/tracking" element={<TrackingPage />} />
+                    <Route path="/admin/scan" element={<ScannerPage />} />
+                </Route>
 
-        {/* Fallback Route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
-  );
+                {/* Fallback Route */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }

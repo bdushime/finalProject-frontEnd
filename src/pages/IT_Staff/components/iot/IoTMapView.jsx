@@ -25,20 +25,26 @@ const offlineIcon = L.divIcon({
 });
 
 export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNavigate }) {
+  // Filter trackers to only include those with valid coordinates
+  const trackersWithCoords = useMemo(() =>
+    filteredTrackers.filter(t => t.coords && typeof t.coords.lat === 'number' && typeof t.coords.lng === 'number'),
+    [filteredTrackers]
+  );
+
   const center = useMemo(() => {
-    if (!filteredTrackers.length) return DEFAULT_CENTER;
+    if (!trackersWithCoords.length) return DEFAULT_CENTER;
     const avgLat =
-      filteredTrackers.reduce((sum, t) => sum + t.coords.lat, 0) /
-      filteredTrackers.length;
+      trackersWithCoords.reduce((sum, t) => sum + t.coords.lat, 0) /
+      trackersWithCoords.length;
     const avgLng =
-      filteredTrackers.reduce((sum, t) => sum + t.coords.lng, 0) /
-      filteredTrackers.length;
+      trackersWithCoords.reduce((sum, t) => sum + t.coords.lng, 0) /
+      trackersWithCoords.length;
     return { lat: avgLat, lng: avgLng };
-  }, [filteredTrackers]);
+  }, [trackersWithCoords]);
 
   return (
     <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow h-full w-full flex flex-col">
-      <CardHeader 
+      <CardHeader
         className={`${onNavigate ? "cursor-pointer" : ""} pb-2 sm:pb-4`}
         onClick={onNavigate}
       >
@@ -48,8 +54,8 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <div 
-          className="w-full rounded-lg overflow-hidden" 
+        <div
+          className="w-full rounded-lg overflow-hidden"
           style={{ height: `${mapHeight}px` }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -64,7 +70,7 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {filteredTrackers.map((tracker) => (
+            {trackersWithCoords.map((tracker) => (
               <Marker
                 key={tracker.id}
                 position={tracker.coords}
