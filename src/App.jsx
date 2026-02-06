@@ -40,6 +40,7 @@ import IoTTrackerLiveView from "./pages/IT_Staff/IoTTrackerLiveView";
 import CurrentCheckouts from "./pages/IT_Staff/CurrentCheckouts";
 import CheckoutHistory from "./pages/IT_Staff/CheckoutHistory";
 import SearchResults from "./pages/IT_Staff/SearchResults";
+import ClassroomManagement from "./pages/IT_Staff/ClassroomManagement";
 
 // IT Staff checkout flow
 
@@ -102,6 +103,7 @@ export default function App() {
                 <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
                 <Route path="/it/checkout-history" element={<CheckoutHistory />} />
                 <Route path="/it/search-results" element={<SearchResults />} />
+                <Route path="/it/classrooms" element={<ClassroomManagement />} />
 
                 {/* IT Staff Checkout Flow (UPDATED PATHS) 📦 */}
 
@@ -171,6 +173,7 @@ export default function App() {
                     <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
                     <Route path="/it/checkout-history" element={<CheckoutHistory />} />
                     <Route path="/it/search-results" element={<SearchResults />} />
+                    <Route path="/it/classrooms" element={<ClassroomManagement />} />
 
                     {/* Checkout Flow */}
 

@@ -18,6 +18,7 @@ const itStaffLinks = [
     { name: "Browse Equipment", path: "/it/browse" },
     { name: "Current Checkouts", path: "/it/current-checkouts" },
     { name: "IoT Live View", path: "/it/iot-tracker" },
+    { name: "Classrooms", path: "/it/classrooms" },
     { name: "Notifications", path: "/it/notifications" },
     { name: "Reports", path: "/it/reports" },
 ];
