@@ -21,7 +21,7 @@ function Progress() {
 export default function CheckoutForm() {
     const navigate = useNavigate();
     const { state } = useLocation();
-    
+
     const [form, setForm] = useState({
         userId: "", // In real app, maybe search user by name
         destination: "",
@@ -32,15 +32,15 @@ export default function CheckoutForm() {
 
     const handleNext = () => {
         // Validate
-        if(!form.userId || !form.returnDate) return alert("Please fill required fields");
+        if (!form.userId || !form.returnDate) return alert("Please fill required fields");
 
         const expectedReturnTime = `${form.returnDate}T${form.returnTime}:00`;
 
-        navigate('/it/checkout/sign', { 
-            state: { 
-                ...state, 
-                formData: { ...form, expectedReturnTime } 
-            } 
+        navigate('/it/checkout/sign', {
+            state: {
+                ...state,
+                formData: { ...form, expectedReturnTime }
+            }
         });
     };
 
@@ -51,49 +51,49 @@ export default function CheckoutForm() {
                 <Progress />
                 <Card>
                     <CardHeader>
-                        <CardTitle>Loan Details</CardTitle>
+                        <CardTitle>Borrow Details</CardTitle>
                         <CardDescription>Enter borrower and return info</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-2">
                             <Label>Student ID / User ID</Label>
-                            <Input 
-                                placeholder="Enter User ID (from MongoDB)" 
+                            <Input
+                                placeholder="Enter User ID (from MongoDB)"
                                 value={form.userId}
-                                onChange={e => setForm({...form, userId: e.target.value})}
+                                onChange={e => setForm({ ...form, userId: e.target.value })}
                             />
                         </div>
                         <div className="grid gap-2">
                             <Label>Destination / Class</Label>
-                            <Input 
-                                placeholder="e.g. Media Lab, Room 304" 
+                            <Input
+                                placeholder="e.g. Media Lab, Room 304"
                                 value={form.destination}
-                                onChange={e => setForm({...form, destination: e.target.value})}
+                                onChange={e => setForm({ ...form, destination: e.target.value })}
                             />
                         </div>
-                         <div className="grid gap-2">
+                        <div className="grid gap-2">
                             <Label>Purpose</Label>
-                            <Input 
-                                placeholder="e.g. Class Project" 
+                            <Input
+                                placeholder="e.g. Class Project"
                                 value={form.purpose}
-                                onChange={e => setForm({...form, purpose: e.target.value})}
+                                onChange={e => setForm({ ...form, purpose: e.target.value })}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
                                 <Label>Return Date</Label>
-                                <Input 
-                                    type="date" 
+                                <Input
+                                    type="date"
                                     value={form.returnDate}
-                                    onChange={e => setForm({...form, returnDate: e.target.value})}
+                                    onChange={e => setForm({ ...form, returnDate: e.target.value })}
                                 />
                             </div>
                             <div className="grid gap-2">
                                 <Label>Return Time</Label>
-                                <Input 
-                                    type="time" 
+                                <Input
+                                    type="time"
                                     value={form.returnTime}
-                                    onChange={e => setForm({...form, returnTime: e.target.value})}
+                                    onChange={e => setForm({ ...form, returnTime: e.target.value })}
                                 />
                             </div>
                         </div>

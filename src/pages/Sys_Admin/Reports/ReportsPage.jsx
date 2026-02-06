@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AdminLayout from '../components/AdminLayout'; 
+import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
 import { Search, Filter, Download, FileText, BarChart3, Table, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -11,9 +11,7 @@ const ROLES = ["All Users", "Student", "Staff", "Admin"]; // Updated to "All Use
 const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Lost", "Maintenance", "Damaged", "Stolen"];
 const TIME_RANGES = ["Last 30 Days", "Today", "This Week", "This Year"];
 const CATEGORIES = ["All Categories", "Laptops", "Cameras", "Audio", "Cables", "Tablets", "Accessories"]; // Mock categories for filter
-const ROLES = ["All Roles", "Student", "IT_Staff", "Security"];
 const TABS = ["Active", "Overdue", "Returned", "Lost/Damaged"];
-const TIME_RANGES = ["View All Time", "Today", "This Week"];
 const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
 const ReportsPage = () => {
@@ -21,7 +19,7 @@ const ReportsPage = () => {
     const [activeTab, setActiveTab] = useState("Active");
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
-// Filters
+    // Filters
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedRole, setSelectedRole] = useState("All Users");
@@ -36,7 +34,7 @@ const ReportsPage = () => {
             setLoading(true);
             try {
                 const params = {
-status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
+                    status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                     role: selectedRole === "All Users" ? undefined : selectedRole,
                     category: selectedCategory === "All Categories" ? undefined : selectedCategory,
                     timeRange
@@ -50,7 +48,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
             }
         };
         fetchData();
-}, [selectedStatus, selectedCategory, selectedRole, timeRange]);
+    }, [selectedStatus, selectedCategory, selectedRole, timeRange]);
 
     // Filtered Data
     const filteredData = data;
@@ -90,7 +88,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
     // --- RENDERERS ---
 
     const renderTable = () => (
-<div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
@@ -167,7 +165,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10 w-full">
             <div>
-<h1 className="text-3xl font-bold text-white mb-2">System Reports</h1>
+                <h1 className="text-3xl font-bold text-white mb-2">System Reports</h1>
                 <p className="text-slate-400">Generate and export detailed system logs and inventories.</p>
             </div>
             <div className="bg-slate-800 p-1 rounded-xl flex gap-1 mt-4 md:mt-0">
@@ -184,7 +182,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
     return (
         <AdminLayout heroContent={HeroSection}>
             <div className="space-y-6">
-{/* Mode: Admin Table */}
+                {/* Mode: Admin Table */}
                 {reportMode === 'admin' && (
                     <>
                         {/* Mode: Admin Table */}

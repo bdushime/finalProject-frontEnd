@@ -40,14 +40,14 @@ export default function SelectReturnItem() {
     const handleSelect = (transaction) => {
         // Navigate to the scan page, passing ALL necessary IDs for the return
         // We need equipmentId and userId for the backend 'checkin' route
-        navigate('/it/return/scan', { 
-            state: { 
+        navigate('/it/return/scan', {
+            state: {
                 transactionId: transaction._id,
-                equipmentId: transaction.equipment?._id, 
-                userId: transaction.user?._id,           
+                equipmentId: transaction.equipment?._id,
+                userId: transaction.user?._id,
                 equipmentName: transaction.equipment?.name,
                 studentName: transaction.user?.username
-            } 
+            }
         });
     };
 
@@ -56,10 +56,10 @@ export default function SelectReturnItem() {
             <div className="p-4 sm:p-6 lg:p-8">
                 <h2 className="text-lg font-semibold mb-2">Return – Select Item</h2>
                 <Progress />
-                
+
                 <Card>
                     <CardHeader>
-                        <CardTitle>Items on loan ({activeTransactions.length})</CardTitle>
+                        <CardTitle>Borrowed Items ({activeTransactions.length})</CardTitle>
                         <CardDescription>Choose the item being returned by the student.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -70,7 +70,7 @@ export default function SelectReturnItem() {
                         ) : activeTransactions.length === 0 ? (
                             <div className="text-center py-12 text-slate-500 border-2 border-dashed rounded-xl">
                                 <Package className="w-12 h-12 mx-auto mb-2 text-slate-300" />
-                                <p>No active loans found.</p>
+                                <p>No active borrows found.</p>
                                 <p className="text-xs text-slate-400">All equipment is currently in stock.</p>
                             </div>
                         ) : (
@@ -102,17 +102,16 @@ export default function SelectReturnItem() {
                                             </div>
 
                                             {/* Due Date */}
-                                            <div className={`flex items-center gap-2 text-xs ${
-                                                tx.status === 'Overdue' ? 'text-red-500 font-medium' : 'text-slate-500'
-                                            }`}>
+                                            <div className={`flex items-center gap-2 text-xs ${tx.status === 'Overdue' ? 'text-red-500 font-medium' : 'text-slate-500'
+                                                }`}>
                                                 <CalendarClock className="w-3 h-3" />
                                                 <span>
                                                     Due: {tx.expectedReturnTime ? format(new Date(tx.expectedReturnTime), 'MMM dd, HH:mm') : 'N/A'}
                                                 </span>
                                             </div>
 
-                                            <Button 
-                                                className="w-full mt-2 group-hover:bg-blue-600" 
+                                            <Button
+                                                className="w-full mt-2 group-hover:bg-blue-600"
                                                 onClick={() => handleSelect(tx)}
                                             >
                                                 Select for Return

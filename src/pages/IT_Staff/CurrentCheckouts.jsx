@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Eye, Loader2, Plus, Check, X, Calendar, Clock } from "lucide-react"; // Added Icons
-import CheckoutDetailsDialog from "../IT_Staff/checkout/CheckoutDetailsDialog"; 
+import CheckoutDetailsDialog from "../IT_Staff/checkout/CheckoutDetailsDialog";
+import { PageHeader } from "@/components/common/Page";
 import api from "@/utils/api";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -17,9 +18,9 @@ export default function CurrentCheckouts() {
     const [loading, setLoading] = useState(true);
     const [selectedCheckout, setSelectedCheckout] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    
+
     // Tabs state: 'requests' | 'reservations' | 'active'
-    const [currentTab, setCurrentTab] = useState('requests'); 
+    const [currentTab, setCurrentTab] = useState('requests');
 
     // --- 1. FETCH TRANSACTIONS ---
     const fetchActive = async () => {
@@ -27,18 +28,18 @@ export default function CurrentCheckouts() {
         try {
             // This endpoint now returns Pending, Checked Out, AND Reserved items
             const res = await api.get('/transactions/active');
-            
+
             const mappedData = res.data.map(tx => ({
                 checkoutId: tx._id,
                 equipmentName: tx.equipment?.name || "Unknown Item",
                 // Show Start Time for Reservations, CreatedAt for others
-                dateDisplay: tx.status === 'Reserved' 
-                    ? format(new Date(tx.startTime), 'MMM dd, HH:mm') 
+                dateDisplay: tx.status === 'Reserved'
+                    ? format(new Date(tx.startTime), 'MMM dd, HH:mm')
                     : format(new Date(tx.createdAt), 'MMM dd, HH:mm'),
                 status: tx.status,
                 startTime: tx.startTime, // Needed for reservation logic
-                fullData: { 
-                    ...tx, 
+                fullData: {
+                    ...tx,
                     studentScore: tx.user?.responsibilityScore ?? 100
                 }
             }));
@@ -81,8 +82,8 @@ export default function CurrentCheckouts() {
 
     // Approve / Deny / Check Out (Reservation)
     const handleResponse = async (e, id, action) => {
-        e.stopPropagation(); 
-        
+        e.stopPropagation();
+
         // Custom message based on action
         const actionText = action === 'Approve' ? "approve/check-out" : "deny";
         if (!confirm(`Are you sure you want to ${actionText} this item?`)) return;
@@ -91,7 +92,7 @@ export default function CurrentCheckouts() {
             // 'Approve' on a Reservation converts it to 'Checked Out'
             await api.put(`/transactions/${id}/respond`, { action });
             toast.success("Status updated successfully");
-            fetchActive(); 
+            fetchActive();
         } catch (err) {
             console.error("Action failed", err);
             toast.error("Failed to update status.");
@@ -118,21 +119,18 @@ export default function CurrentCheckouts() {
         const start = new Date(startTimeString);
         const now = new Date();
         const diffMinutes = (start - now) / 1000 / 60;
-        return diffMinutes <= 30; 
+        return diffMinutes <= 30;
     };
 
     return (
         <ITStaffLayout>
-            <div className="p-4 sm:p-6 lg:p-8">
-                
+            <div>
+
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900">Manage Transactions</h2>
-                        <p className="text-gray-500 text-sm">Handle requests, upcoming reservations, and active loans.</p>
-                    </div>
-                    <Button 
-                        onClick={() => navigate('/it/checkout/select')} 
+                    <PageHeader title="Manage Transactions" className="mb-0" />
+                    <Button
+                        onClick={() => navigate('/it/checkout/select')}
                         className="bg-[#0b1d3a] hover:bg-[#1a2f55]"
                     >
                         <Plus className="mr-2 h-4 w-4" /> New Manual Checkout
@@ -141,32 +139,32 @@ export default function CurrentCheckouts() {
 
                 {/* TABS */}
                 <div className="flex gap-2 mb-6 border-b border-gray-200">
-                    <button 
+                    <button
                         onClick={() => setCurrentTab('requests')}
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'requests' ? 'border-[#0b1d3a] text-[#0b1d3a]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
                         Requests
-                        {allTransactions.filter(t => t.status === 'Pending').length > 0 && 
+                        {allTransactions.filter(t => t.status === 'Pending').length > 0 &&
                             <span className="ml-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full">{allTransactions.filter(t => t.status === 'Pending').length}</span>
                         }
                     </button>
-                    <button 
+                    <button
                         onClick={() => setCurrentTab('reservations')}
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'reservations' ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
                         Reservations
-                        {allTransactions.filter(t => t.status === 'Reserved').length > 0 && 
+                        {allTransactions.filter(t => t.status === 'Reserved').length > 0 &&
                             <span className="ml-2 bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">{allTransactions.filter(t => t.status === 'Reserved').length}</span>
                         }
                     </button>
-                    <button 
+                    <button
                         onClick={() => setCurrentTab('active')}
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'active' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
-                        Active Loans
+                        Active Borrows
                     </button>
                 </div>
-                
+
                 {/* Table */}
                 <div className="rounded-2xl shadow-sm bg-white overflow-hidden border border-gray-100 min-h-[400px]">
                     <div className="overflow-x-auto">
@@ -199,22 +197,21 @@ export default function CurrentCheckouts() {
                                     </tr>
                                 ) : (
                                     filteredData.map((row) => (
-                                        <motion.tr 
-                                            key={row.checkoutId} 
-                                            initial={{ opacity: 0 }} 
-                                            animate={{ opacity: 1 }} 
+                                        <motion.tr
+                                            key={row.checkoutId}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
                                             className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
                                             onClick={() => handleRowClick(row)}
                                         >
                                             {/* ITEM NAME */}
                                             <td className="px-0 font-medium text-gray-900 relative">
                                                 <div className="flex items-center h-full">
-                                                    <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${
-                                                        row.status === 'Pending' ? 'bg-yellow-500' : 
+                                                    <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${row.status === 'Pending' ? 'bg-yellow-500' :
                                                         row.status === 'Reserved' ? 'bg-purple-600' :
-                                                        row.status === 'Overdue' ? 'bg-red-600' :
-                                                        'bg-[#0b1d3a]'
-                                                    }`}></div>
+                                                            row.status === 'Overdue' ? 'bg-red-600' :
+                                                                'bg-[#0b1d3a]'
+                                                        }`}></div>
                                                     <span className="pl-6">{row.equipmentName}</span>
                                                 </div>
                                             </td>
@@ -222,19 +219,18 @@ export default function CurrentCheckouts() {
                                             {/* DATE */}
                                             <td className="px-6 py-5 text-gray-600">
                                                 <div className="flex items-center gap-2">
-                                                    {currentTab === 'reservations' ? <Calendar className="w-4 h-4 text-purple-400"/> : <Clock className="w-4 h-4 text-gray-400"/>}
+                                                    {currentTab === 'reservations' ? <Calendar className="w-4 h-4 text-purple-400" /> : <Clock className="w-4 h-4 text-gray-400" />}
                                                     {row.dateDisplay}
                                                 </div>
                                             </td>
 
                                             {/* STATUS BADGE */}
                                             <td className="px-6 py-5">
-                                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
-                                                    row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
                                                     row.status === 'Reserved' ? 'bg-purple-100 text-purple-700' :
-                                                    row.status === 'Overdue' ? 'bg-red-100 text-red-700' : 
-                                                    'bg-blue-100 text-blue-700'
-                                                }`}>
+                                                        row.status === 'Overdue' ? 'bg-red-100 text-red-700' :
+                                                            'bg-blue-100 text-blue-700'
+                                                    }`}>
                                                     {row.status}
                                                 </span>
                                             </td>
@@ -242,7 +238,7 @@ export default function CurrentCheckouts() {
                                             {/* ACTIONS */}
                                             <td className="px-6 py-5">
                                                 <div className="flex gap-2">
-                                                    
+
                                                     {/* 1. Pending Request Actions */}
                                                     {row.status === 'Pending' && (
                                                         <>
@@ -296,11 +292,11 @@ export default function CurrentCheckouts() {
                     <CheckoutDetailsDialog
                         isOpen={isDialogOpen}
                         onOpenChange={setIsDialogOpen}
-                        selectedCheckout={selectedCheckout} 
+                        selectedCheckout={selectedCheckout}
                     />
                 )}
             </div>
-            
+
         </ITStaffLayout>
     );
 }
