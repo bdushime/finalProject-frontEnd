@@ -2,18 +2,7 @@ import PropTypes from "prop-types";
 import { NavLink, useLocation, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-    Menu,
-    Settings,
-    Bell,
-    X,
-    Plus,
-    FileText,
-    LayoutGrid,
-    Package,
-    ClipboardList,
-    Radio,
-} from "lucide-react";
+import { Menu, Bell, X } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,113 +11,55 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import logo from "@/assets/tracknity_logo.jpeg";
-import smallLogo from "@/assets/logo_small.png";
-import api from "@/utils/api"; // ✅ Import API
+import logo from "@/assets/images/logo8noback.png"; // Using Student logo as requested
 
 const itStaffLinks = [
-    { name: "Dashboard", path: "/it/dashboard", icon: LayoutGrid },
-    { name: "Browse Equipment", path: "/it/browse", icon: Package },
-    { name: "Current Checkouts", path: "/it/current-checkouts", icon: ClipboardList },
-    { name: "IoT Live View", path: "/it/iot-tracker", icon: Radio },
-    { name: "Notifications", path: "/it/notifications", icon: Bell },
-    { name: "Reports", path: "/it/reports", icon: FileText },
+    { name: "Dashboard", path: "/it/dashboard" },
+    { name: "Browse Equipment", path: "/it/browse" },
+    { name: "Current Checkouts", path: "/it/current-checkouts" },
+    { name: "IoT Live View", path: "/it/iot-tracker" },
+    { name: "Classrooms", path: "/it/classrooms" },
+    { name: "Notifications", path: "/it/notifications" },
+    { name: "Reports", path: "/it/reports" },
 ];
-
-const getPageHeaders = () => {
-    const hour = new Date().getHours();
-    let timeGreeting = "Good morning";
-    if (hour >= 12 && hour < 18) {
-        timeGreeting = "Good afternoon";
-    } else if (hour >= 18) {
-        timeGreeting = "Good evening";
-    }
-
-    return {
-        "/it/dashboard": {
-            title: `${timeGreeting}, IT Staff!`,
-            description: "Monitor equipment inventory, checkouts, and system activity.",
-            actionButton: { label: "New Checkout", path: "/it/checkout/select-equipment", icon: Plus },
-        },
-        "/it/browse": {
-            title: "Browse Equipment",
-            description: "Search, view, and manage all equipment in the system.",
-            actionButton: { label: "New Checkout", path: "/it/checkout/select-equipment", icon: Plus },
-        },
-        "/it/current-checkouts": {
-            title: "Current Checkouts",
-            description: "View and manage all currently checked out equipment.",
-            actionButton: { label: "New Checkout", path: "/it/checkout/select-equipment", icon: Plus },
-        },
-        "/it/reports": {
-            title: "Reports",
-            description: "Generate and view detailed reports on equipment usage.",
-            actionButton: { label: "Generate Report", path: "/it/reports", icon: FileText },
-        },
-        "/it/iot-tracker": {
-            title: "IoT Live View",
-            description: "Monitor real-time location and status of equipment using IoT tracking.",
-            actionButton: null,
-        },
-        "/it/notifications": {
-            title: "Notifications",
-            description: "View and manage all system notifications and alerts.",
-            actionButton: null,
-        },
-        "/it/profile": {
-            title: "Profile",
-            description: "Manage your IT staff profile and account details.",
-            actionButton: null,
-        },
-        "/it/checkout-history": {
-            title: "Checkout History",
-            description: "View complete history of all equipment checkouts and returns.",
-            actionButton: null,
-        },
-    };
-};
 
 export default function ITStaffTopbar({ onMenuClick }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
-    
-    // 👇 STATE FOR DYNAMIC BADGE
-    const [unreadCount, setUnreadCount] = useState(0);
+    const unreadCount = 5; // Hardcoded for now, or match existing logic
 
-    // 👇 FETCH NOTIFICATIONS LOGIC
-    const fetchUnreadCount = async () => {
-        try {
-            const res = await api.get('/notifications');
-            // Filter only unread messages
-            const count = res.data.filter(n => !n.read).length;
-            setUnreadCount(count);
-        } catch (err) {
-            console.error("Failed to fetch notification count", err);
-        }
-    };
+    // --- State for User Info ---
+    const [user, setUser] = useState({
+        name: "IT Staff",
+        initial: "I",
+        role: "IT Staff"
+    });
 
+    // --- Load User from Local Storage ---
     useEffect(() => {
-        fetchUnreadCount(); // Fetch immediately on mount
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+            try {
+                const userData = JSON.parse(userStr);
+                const displayName = userData.fullName || userData.username || "IT Staff";
+                const displayInitial = displayName.charAt(0).toUpperCase();
+                const displayRole = userData.role || "IT Staff";
 
-        // Auto-refresh every 15 seconds so badge stays updated
-        const interval = setInterval(fetchUnreadCount, 15000);
-        return () => clearInterval(interval);
-    }, [location.pathname]); // Also refresh when changing pages
+                setUser({
+                    name: displayName,
+                    initial: displayInitial,
+                    role: displayRole
+                });
+            } catch (e) {
+                console.error("Error parsing user data", e);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [location.pathname]);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 10);
-        };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
 
     const isLinkActive = (path) => {
         if (path === "/it/dashboard") {
@@ -137,122 +68,144 @@ export default function ITStaffTopbar({ onMenuClick }) {
         return location.pathname === path || location.pathname.startsWith(path);
     };
 
-    const pageHeaders = getPageHeaders();
-    const currentPath = location.pathname;
-    const pageHeader = pageHeaders[currentPath] || (currentPath.startsWith("/it/") ? pageHeaders["/it/dashboard"] : null);
-
-    const formattedDate = new Intl.DateTimeFormat("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    }).format(new Date());
-
-    const handleActionClick = () => {
-        if (pageHeader?.actionButton) {
-            navigate(pageHeader.actionButton.path);
-        }
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
     };
 
     return (
         <div className="w-full">
             {/* Main Navbar */}
-            <div className={`w-full px-1 py-1 flex items-center gap-2 justify-between transition-all duration-300 ${isScrolled ? "rounded-b-lg bg-white/80 backdrop-blur-md shadow-sm" : "bg-transparent"}`}>
-                
-                {/* Mobile menu button */}
-                <Button variant="outline" size="icon" className="sm:hidden border-none" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                    {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </Button>
-
-                {/* Logos */}
-                <img src={smallLogo} alt="Tracknity" className="block md:hidden w-12 rounded-full" />
-                <img src={logo} alt="Tracknity" className="hidden md:block rounded-full w-32 h-14" />
-
-                {/* Desktop Navigation + Mobile Menu */}
-                <div className={`${isMobileMenuOpen ? "flex flex-col justify-center items-center absolute top-full left-0 right-0 rounded-b-lg bg-yellow-50 shadow-lg p-4 gap-3 z-50 w-2/3" : "hidden"} sm:flex sm:flex-row sm:relative sm:shadow-none sm:p-0 items-center gap-1`}>
-                    
-                    <header className={`${!isMobileMenuOpen ? "rounded-full border border-gray-300 shadow-sm w-full sm:w-auto bg-white/50" : "empty:hidden"}`}>
-                        <div className={`${!isMobileMenuOpen ? "flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-1" : "empty:hidden justify-center items-center"}`}>
-                            <nav className="flex flex-col sm:flex-row items-stretch justify-between gap-1 sm:gap-0">
-                                {itStaffLinks.map((link) => {
-                                    const active = isLinkActive(link.path);
-                                    return (
-                                        <NavLink
-                                            key={link.path}
-                                            to={link.path}
-                                            className={({ isActive }) =>
-                                                ["flex w-full justify-center items-center text-sm font-medium transition-colors px-3 py-2",
-                                                    active || isActive ? "bg-[#1A2240] text-gray-100 shadow-sm rounded-full" : "text-slate-600 hover:bg-[#1A2240]/5 hover:rounded-full hover:text-slate-900"
-                                                ].join(" ")
-                                            }
-                                        >
-                                            <span className="truncate">{link.name}</span>
-                                        </NavLink>
-                                    );
-                                })}
-                            </nav>
-                        </div>
-                    </header>
-
-                    {/* Settings button */}
-                    <Link to="/it/settings" className="w-full sm:w-auto">
-                        <Button variant="outline" className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto bg-white ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""}`}>
-                            {isMobileMenuOpen ? <span>Settings</span> : <Settings className="h-4 w-4" />}
+            <header className="sticky top-0 z-40 bg-white/30 backdrop-blur-md pt-4 pb-2">
+                <div className="max-w-[1920px] mx-auto px-4 sm:px-6 flex items-center justify-between">
+                    {/* Left: Mobile menu + Logo */}
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="lg:hidden h-10 w-10"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            aria-label="Toggle menu"
+                        >
+                            {isMobileMenuOpen ? (
+                                <X className="h-5 w-5" />
+                            ) : (
+                                <Menu className="h-5 w-5" />
+                            )}
                         </Button>
-                    </Link>
-
-                    {/* Notifications button (desktop only) */}
-                    {!isMobileMenuOpen && (
-                        <Link to="/it/notifications" className="w-full sm:w-auto">
-                            <Button variant="outline" size="icon" className="relative border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto bg-white">
-                                <Bell className="h-4 w-4" />
-                                {/* 👇 DYNAMIC BADGE */}
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-in zoom-in duration-200">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </Button>
+                        <Link
+                            to="/it/dashboard"
+                            className="flex items-center gap-2 bg-white/40 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 hover:bg-white/50 transition-all group"
+                        >
+                            <img
+                                src={logo}
+                                alt="Tracknity"
+                                className="w-12 h-12 object-contain group-hover:scale-110 transition-transform"
+                            />
+                            <span className="text-xl font-bold text-[#0b1d3a] font-serif tracking-tight hidden sm:block">
+                                Tracknity
+                            </span>
                         </Link>
-                    )}
+                    </div>
 
-                    {/* Profile dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto bg-white ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""}`}>
-                                {isMobileMenuOpen ? <span>My Account</span> : <Avatar><AvatarFallback className="text-md font-bold bg-[#1A2240] text-white">IT</AvatarFallback></Avatar>}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="border-none bg-[#f0f0f5] shadow-xl rounded-lg">
-                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild className="cursor-pointer"><Link to="/it/profile">Profile</Link></DropdownMenuItem>
-                            <DropdownMenuItem asChild className="cursor-pointer"><Link to="/it/settings">Settings</Link></DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-700"><Link to="/login">Logout</Link></DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </div>
-
-            {/* Page Header Section */}
-            {pageHeader && (
-                <div className="w-full px-4 sm:px-6 py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                        <div className="flex-1">
-                            <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900">{pageHeader.title}</h1>
-                            <p className="text-gray-600 text-sm sm:text-base mb-2">{formattedDate}</p>
-                            {pageHeader.description && <p className="text-gray-700 text-sm sm:text-base max-w-2xl">{pageHeader.description}</p>}
+                    {/* Center: Navigation (Desktop only) */}
+                    <nav className="hidden lg:flex items-center">
+                        <div className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white shadow-[0_2px_8px_-2px_rgba(0,0,0,0.12)]">
+                            {itStaffLinks.map((link) => {
+                                const isActive = isLinkActive(link.path);
+                                return (
+                                    <NavLink
+                                        key={link.path}
+                                        to={link.path}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
+                                            ? "bg-[#0b1d3a] text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                            }`}
+                                    >
+                                        {link.name}
+                                    </NavLink>
+                                );
+                            })}
                         </div>
-                        {pageHeader.actionButton && (
-                            <Button onClick={handleActionClick} className="bg-[#0b1d3a] hover:bg-[#0b1d3a]/90 text-white gap-2 shrink-0 rounded-full px-6">
-                                {pageHeader.actionButton.icon && <pageHeader.actionButton.icon className="h-4 w-4" />}
-                                {pageHeader.actionButton.label}
-                            </Button>
-                        )}
+                    </nav>
+
+                    {/* Right: Notification, Profile */}
+                    <div className="flex items-center gap-3">
+                        <Link
+                            to="/it/notifications"
+                            className="relative h-11 w-11 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#0b1d3a] hover:bg-white/60 transition-all hover:shadow-sm hover:scale-110"
+                            aria-label="Notifications"
+                        >
+                            <Bell className="h-5 w-5 text-[#0b1d3a]" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </Link>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="h-11 pl-1.5 pr-5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center gap-3 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-[1.02]">
+                                    <div className="h-9 w-9 rounded-full bg-[#126dd5] flex items-center justify-center shadow-sm border border-white/50">
+                                        <span className="text-white font-bold text-sm">{user.initial}</span>
+                                    </div>
+                                    <div className="text-left leading-tight hidden sm:block">
+                                        <p className="text-sm font-bold text-[#0b1d3a] group-hover:text-[#126dd5] transition-colors">
+                                            {user.name}
+                                        </p>
+                                        <p className="text-[10px] uppercase tracking-wider font-semibold text-[#126dd5]/80">
+                                            {user.role}
+                                        </p>
+                                    </div>
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl border-slate-100 shadow-xl bg-white/90 backdrop-blur-lg">
+                                <DropdownMenuLabel className="font-normal p-3 bg-slate-50 rounded-xl mb-2">
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm font-bold text-[#0b1d3a]">{user.name}</p>
+                                        <p className="text-xs text-[#126dd5] font-medium uppercase tracking-wider">{user.role}</p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
+                                    <Link to="/it/profile" className="flex items-center gap-2 font-medium">
+                                        My Profile
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-rose-50 focus:text-rose-600 text-rose-500 cursor-pointer p-3 transition-colors">
+                                    <Link to="/login" onClick={handleLogout} className="flex items-center gap-2 font-medium">
+                                        Log Out
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
-            )}
+
+                {/* Mobile Navigation Menu */}
+                {isMobileMenuOpen && (
+                    <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-lg border-t z-50">
+                        <nav className="flex flex-col p-4 gap-2">
+                            {itStaffLinks.map((link) => {
+                                const isActive = isLinkActive(link.path);
+                                return (
+                                    <NavLink
+                                        key={link.path}
+                                        to={link.path}
+                                        className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                                            ? "bg-[#0b1d3a] text-white"
+                                            : "text-gray-600 hover:bg-gray-100"
+                                            }`}
+                                    >
+                                        {link.name}
+                                    </NavLink>
+                                );
+                            })}
+                        </nav>
+                    </div>
+                )}
+            </header>
         </div>
     );
 }

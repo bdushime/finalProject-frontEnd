@@ -3,9 +3,10 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
     Bell, Clock, AlertTriangle, CheckCircle, 
-    ExternalLink, Check, CheckCheck, Loader2 
+    ExternalLink, CheckCheck, Loader2 
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+// Removed PageHeader import
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
@@ -36,6 +37,30 @@ export default function ITStaffNotifications() {
     }, []);
 
     // --- 2. HELPERS ---
+
+    // Map backend 'type' to UI severity styles
+    const getSeverity = (type) => {
+        if (type === 'error') return 'critical';
+        if (type === 'warning') return 'high';
+        return 'normal';
+    };
+
+    const getSeverityColor = (severity) => {
+        switch (severity) {
+            case "critical": return "bg-red-50 text-red-700 border-red-200";
+            case "high": return "bg-orange-50 text-orange-700 border-orange-200";
+            default: return "bg-blue-50 text-blue-700 border-blue-200";
+        }
+    };
+
+    // 👇 ADDED MISSING FUNCTION HERE
+    const getIconBgColor = (type) => {
+        if (type === 'error') return 'bg-red-100';
+        if (type === 'warning') return 'bg-orange-100';
+        if (type === 'success') return 'bg-green-100';
+        return 'bg-blue-100';
+    };
+
     const getIcon = (type) => {
         if (type === 'error') return <AlertTriangle className="h-5 w-5 text-red-600" />;
         if (type === 'warning') return <AlertTriangle className="h-5 w-5 text-orange-600" />;
@@ -43,30 +68,17 @@ export default function ITStaffNotifications() {
         return <Bell className="h-5 w-5 text-blue-600" />;
     };
 
-    const getStyles = (type, read) => {
-        const base = "border rounded-xl p-4 transition-all duration-200 flex gap-4";
-        if (read) return `${base} bg-white border-gray-100 opacity-60 hover:opacity-100`;
-        
-        // Unread Styles
-        if (type === 'error') return `${base} bg-red-50/50 border-red-100 shadow-sm`;
-        if (type === 'warning') return `${base} bg-orange-50/50 border-orange-100 shadow-sm`;
-        if (type === 'success') return `${base} bg-green-50/50 border-green-100 shadow-sm`;
-        return `${base} bg-blue-50/50 border-blue-100 shadow-sm`;
-    };
-
     // --- 3. ACTIONS ---
     const handleMarkRead = async (e, id, relatedId = null) => {
         if (e) e.stopPropagation();
         try {
-            // Optimistic Update (Update UI immediately)
+            // Optimistic Update
             setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
             
             await api.put(`/notifications/${id}/read`);
-            
+
             if (relatedId) {
-                // Determine where to redirect based on context
-                // For now, we default to current checkouts, but you can make this dynamic
-                navigate('/it/current-checkouts'); 
+                navigate('/it/current-checkouts');
             }
         } catch (err) {
             console.error(err);
@@ -85,7 +97,7 @@ export default function ITStaffNotifications() {
         } catch (err) {
             console.error(err);
             toast.error("Failed to mark all as read");
-            fetchNotifications(); // Revert on failure
+            fetchNotifications(); 
         } finally {
             setMarkingAll(false);
         }
@@ -106,28 +118,26 @@ export default function ITStaffNotifications() {
 
     return (
         <ITStaffLayout>
-            <div className="max-w-4xl mx-auto">
-                {/* Header Section */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+                {/* FIXED HEADER: Replaced PageHeader with standard HTML */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
                             Notifications
                             {unreadCount > 0 && (
-                                <Badge className="bg-rose-500 hover:bg-rose-600 text-white border-none h-6 px-2">
-                                    {unreadCount} New
+                                <Badge className="bg-red-600 hover:bg-red-700 text-sm">
+                                    {unreadCount} Unread
                                 </Badge>
                             )}
                         </h1>
-                        <p className="text-gray-500 mt-1">Manage your alerts and system updates</p>
+                        <p className="text-gray-500 text-sm mt-1">Stay updated with alerts and requests.</p>
                     </div>
-
-                    {/* 👇 THIS IS THE BUTTON YOU ARE MISSING */}
                     {unreadCount > 0 && (
                         <Button 
                             variant="outline" 
-                            onClick={handleMarkAllRead}
+                            onClick={handleMarkAllRead} 
                             disabled={markingAll}
-                            className="shrink-0 gap-2 border-gray-300 hover:bg-gray-50 bg-white"
+                            className="gap-2"
                         >
                             {markingAll ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCheck className="w-4 h-4" />}
                             Mark all as read
@@ -135,35 +145,30 @@ export default function ITStaffNotifications() {
                     )}
                 </div>
 
-                {/* Notification List */}
-                <div className="space-y-3">
-                    <AnimatePresence initial={false}>
-                        {notifications.length === 0 ? (
-                            <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-center py-20 bg-white rounded-2xl border border-gray-100 border-dashed"
-                            >
-                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Bell className="h-8 w-8 text-gray-300" />
-                                </div>
-                                <h3 className="text-lg font-medium text-gray-900">All caught up!</h3>
-                                <p className="text-gray-500 mt-1">You have no new notifications.</p>
-                            </motion.div>
-                        ) : (
-                            notifications.map((n) => (
+                <div className="mt-4 rounded-2xl shadow-sm bg-white border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+                    {notifications.length === 0 ? (
+                        <div className="p-12 text-center text-gray-500">
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Bell className="h-8 w-8 text-gray-300" />
+                            </div>
+                            <p className="font-medium">No notifications yet</p>
+                            <p className="text-sm mt-1">We'll alert you when important events happen.</p>
+                        </div>
+                    ) : (
+                        notifications.map((n) => {
+                            const severity = getSeverity(n.type);
+                            const isCritical = severity === 'critical';
+
+                            return (
                                 <motion.div
                                     key={n._id}
-                                    layout
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className={getStyles(n.type, n.read)}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className={`p-5 flex items-start gap-4 transition-colors hover:bg-gray-50 ${!n.read ? "bg-blue-50/30" : ""}`}
                                 >
-                                    {/* Icon Column */}
-                                    <div className="shrink-0 pt-1">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${n.read ? 'bg-gray-100' : 'bg-white shadow-sm'}`}>
-                                            {getIcon(n.type)}
-                                        </div>
+                                    {/* Icon Box - NOW WORKS because getIconBgColor exists */}
+                                    <div className={`mt-1 rounded-xl p-2.5 flex-shrink-0 ${getIconBgColor(n.type)}`}>
+                                        {getIcon(n.type)}
                                     </div>
 
                                     {/* Content Column */}
@@ -176,48 +181,40 @@ export default function ITStaffNotifications() {
                                                 <p className="text-sm text-gray-600 mt-1 leading-relaxed">
                                                     {n.message}
                                                 </p>
+
+                                                {/* Meta Info */}
                                                 <div className="flex items-center gap-3 mt-3">
                                                     <span className="text-xs text-gray-400 flex items-center gap-1">
                                                         <Clock className="w-3 h-3" />
                                                         {n.createdAt ? format(new Date(n.createdAt), "MMM d, h:mm a") : 'Just now'}
                                                     </span>
+
+                                                    {isCritical && (
+                                                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-5 ${getSeverityColor(severity)}`}>
+                                                            CRITICAL
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* Action Buttons */}
-                                            <div className="flex flex-col gap-2 shrink-0">
-                                                {/* 1. Quick Mark Read Button (Checkmark) */}
-                                                {!n.read && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full"
-                                                        title="Mark as read"
-                                                        onClick={(e) => handleMarkRead(e, n._id)}
-                                                    >
-                                                        <Check className="w-4 h-4" />
-                                                    </Button>
-                                                )}
-
-                                                {/* 2. View Details Button */}
-                                                {n.relatedId && (
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="h-8 text-xs gap-1.5 border-gray-200 bg-white"
-                                                        onClick={(e) => handleMarkRead(e, n._id, n.relatedId)}
-                                                    >
-                                                        Details
-                                                        <ExternalLink className="w-3 h-3" />
-                                                    </Button>
-                                                )}
-                                            </div>
+                                            {/* Action Button */}
+                                            {n.relatedId && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="shrink-0 mt-2 sm:mt-0 text-xs h-8 border-gray-200 text-gray-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
+                                                    onClick={() => handleMarkRead(n._id, n.relatedId)}
+                                                >
+                                                    <ExternalLink className="h-3 w-3 mr-1.5" />
+                                                    View Details
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
                                 </motion.div>
-                            ))
-                        )}
-                    </AnimatePresence>
+                            );
+                        })
+                    )}
                 </div>
             </div>
         </ITStaffLayout>

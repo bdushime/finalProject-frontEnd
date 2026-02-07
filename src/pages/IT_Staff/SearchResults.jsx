@@ -5,6 +5,7 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Input, Select, Button } from "@/components/common";
 import { EquipmentStatus } from "@/types/enums";
 import { searchEquipment } from "@/components/lib/equipmentData";
+import { PageHeader } from "@/components/common/Page";
 
 export default function SearchResults() {
 	const [query, setQuery] = useState("");
@@ -13,7 +14,8 @@ export default function SearchResults() {
 
 	return (
 		<ITStaffLayout>
-			<div className="p-4 sm:p-6 lg:p-8">
+			<div>
+				<PageHeader title="Search Results" />
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 					<div className="flex-1 grid sm:grid-cols-3 gap-3">
 						<Input
