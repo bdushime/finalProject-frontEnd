@@ -149,6 +149,7 @@ export default function App() {
                     <Route path="/student/dashboard" element={<Dashboard />} />
                     <Route path="/student/profile" element={<Profile />} />
                     <Route path="/student/browse" element={<EquipmentCatalogue />} />
+                    <Route path="/student/package/:packageId" element={<PackageDetails />} />
                     <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
                     <Route path="/student/borrow-request" element={<BorrowRequest />} />
                     <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
