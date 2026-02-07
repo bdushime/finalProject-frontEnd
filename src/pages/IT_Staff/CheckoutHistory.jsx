@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components
 import api from "@/utils/api";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/common/Page";
 
 export default function CheckoutHistory() {
     const [q, setQ] = useState("");
@@ -33,23 +34,23 @@ export default function CheckoutHistory() {
         const itemName = item.equipment?.name?.toLowerCase() || "";
         const userName = item.user?.username?.toLowerCase() || "";
         const status = item.status?.toLowerCase() || "";
-        
-        return itemName.includes(searchLower) || 
-               userName.includes(searchLower) || 
-               status.includes(searchLower);
+
+        return itemName.includes(searchLower) ||
+            userName.includes(searchLower) ||
+            status.includes(searchLower);
     });
 
     return (
         <ITStaffLayout>
-            <div className="p-4 sm:p-6 lg:p-8">
+            <div>
                 <div className="flex items-end justify-between gap-3 flex-wrap mb-4">
-                    <h2 className="text-lg font-semibold">Checkout History</h2>
+                    <PageHeader title="Checkout History" className="mb-0 pt-0" />
                     <div className="w-full sm:max-w-xs">
-                        <Input 
-                            label="Search" 
-                            value={q} 
-                            onChange={(e) => setQ(e.target.value)} 
-                            placeholder="Search item, student, or status..." 
+                        <Input
+                            label="Search"
+                            value={q}
+                            onChange={(e) => setQ(e.target.value)}
+                            placeholder="Search item, student, or status..."
                             className="bg-white"
                         />
                     </div>
@@ -84,9 +85,9 @@ export default function CheckoutHistory() {
                                     </TableRow>
                                 ) : (
                                     filteredRows.map((r) => (
-                                        <motion.tr 
-                                            key={r._id} 
-                                            initial={{ opacity: 0 }} 
+                                        <motion.tr
+                                            key={r._id}
+                                            initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             className="bg-gray-50/50 hover:bg-blue-50/50 transition-colors"
                                         >
@@ -104,9 +105,9 @@ export default function CheckoutHistory() {
                                             </TableCell>
                                             <TableCell className="px-4 py-3">
                                                 <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold
-                                                    ${r.status === 'Returned' ? 'bg-green-100 text-green-700' : 
-                                                      r.status === 'Overdue' ? 'bg-red-100 text-red-700' : 
-                                                      'bg-blue-100 text-blue-700'}`}>
+                                                    ${r.status === 'Returned' ? 'bg-green-100 text-green-700' :
+                                                        r.status === 'Overdue' ? 'bg-red-100 text-red-700' :
+                                                            'bg-blue-100 text-blue-700'}`}>
                                                     {r.status}
                                                 </span>
                                             </TableCell>

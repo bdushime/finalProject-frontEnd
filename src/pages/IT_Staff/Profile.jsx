@@ -1,4 +1,5 @@
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
+import { PageHeader } from "@/components/common/Page";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
@@ -8,8 +9,8 @@ import { Avatar, AvatarFallback } from "@components/ui/avatar";
 export default function Profile() {
 	return (
 		<ITStaffLayout>
-			<div className="p-4 sm:p-6 lg:p-8">
-				<h2 className="font-bold mb-4 text-3xl text-gray-800 tracking-tight leading-tight">My Profile</h2>
+			<div>
+				<PageHeader title="My Profile" />
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					<Card>
 						<CardHeader>

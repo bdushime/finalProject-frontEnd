@@ -3,6 +3,7 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion } from "framer-motion";
 import { Bell, Clock, AlertTriangle, MapPin, ExternalLink, CheckCircle, Info, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/common/Page";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
@@ -32,7 +33,7 @@ export default function ITStaffNotifications() {
     }, []);
 
     // --- 2. HELPERS ---
-    
+
     // Map backend 'type' to UI severity styles
     const getSeverity = (type) => {
         if (type === 'error') return 'critical';
@@ -66,12 +67,12 @@ export default function ITStaffNotifications() {
     const handleMarkRead = async (id, relatedId) => {
         try {
             await api.put(`/notifications/${id}/read`);
-            
+
             // If there is a related item (e.g., Transaction/Equipment ID), go there
             if (relatedId) {
                 // Determine where to go based on ID format or context (Optional logic)
                 // For now, assume relatedId is a Transaction ID and go to checkouts
-                navigate('/it/current-checkouts'); 
+                navigate('/it/current-checkouts');
             } else {
                 // Just refresh list locally
                 setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
@@ -93,17 +94,19 @@ export default function ITStaffNotifications() {
 
     return (
         <ITStaffLayout>
-            <div className="p-4 sm:p-6 lg:p-8">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
-                        {notifications.filter(n => !n.read).length > 0 && (
-                            <Badge className="bg-red-600 hover:bg-red-700">
-                                {notifications.filter(n => !n.read).length} Unread
-                            </Badge>
-                        )}
-                    </div>
-                </div>
+            <div>
+                <PageHeader
+                    title={
+                        <span className="flex items-center gap-3">
+                            Notifications
+                            {notifications.filter(n => !n.read).length > 0 && (
+                                <Badge className="bg-red-600 hover:bg-red-700 text-sm">
+                                    {notifications.filter(n => !n.read).length} Unread
+                                </Badge>
+                            )}
+                        </span>
+                    }
+                />
 
                 <div className="mt-4 rounded-2xl shadow-sm bg-white border border-gray-200 divide-y divide-gray-100 overflow-hidden">
                     {notifications.length === 0 ? (
@@ -120,13 +123,12 @@ export default function ITStaffNotifications() {
                             const isCritical = severity === 'critical';
 
                             return (
-                                <motion.div 
-                                    key={n._id} 
-                                    initial={{ opacity: 0 }} 
-                                    animate={{ opacity: 1 }} 
-                                    className={`p-5 flex items-start gap-4 transition-colors hover:bg-gray-50 ${
-                                        !n.read ? "bg-blue-50/30" : ""
-                                    }`}
+                                <motion.div
+                                    key={n._id}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className={`p-5 flex items-start gap-4 transition-colors hover:bg-gray-50 ${!n.read ? "bg-blue-50/30" : ""
+                                        }`}
                                 >
                                     {/* Icon Box */}
                                     <div className={`mt-1 rounded-xl p-2.5 flex-shrink-0 ${getIconBgColor(n.type)}`}>
@@ -148,14 +150,14 @@ export default function ITStaffNotifications() {
                                                 <p className="text-sm text-gray-600 leading-relaxed">
                                                     {n.message}
                                                 </p>
-                                                
+
                                                 {/* Meta Info */}
                                                 <div className="flex items-center gap-3 mt-3">
                                                     <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
                                                         <Clock className="h-3.5 w-3.5" />
                                                         {n.createdAt ? format(new Date(n.createdAt), "MMM d, h:mm a") : 'Just now'}
                                                     </div>
-                                                    
+
                                                     {isCritical && (
                                                         <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-5 ${getSeverityColor(severity)}`}>
                                                             CRITICAL
@@ -166,9 +168,9 @@ export default function ITStaffNotifications() {
 
                                             {/* Action Button */}
                                             {n.relatedId && (
-                                                <Button 
-                                                    size="sm" 
-                                                    variant="outline" 
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
                                                     className="shrink-0 mt-2 sm:mt-0 text-xs h-8 border-gray-200 text-gray-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
                                                     onClick={() => handleMarkRead(n._id, n.relatedId)}
                                                 >

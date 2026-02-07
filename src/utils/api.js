@@ -2,8 +2,11 @@ import axios from 'axios';
 
 // 1. Create the Axios instance
 const api = axios.create({
+    // This points to your LOCAL LAN Backend (IoT Device)
+
     // This points to your LIVE Render Backend
     baseURL: 'https://equipment-tracker-backend-dfso.onrender.com/api',
+
     headers: {
         'Content-Type': 'application/json',
     },
