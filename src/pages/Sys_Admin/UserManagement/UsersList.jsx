@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout'; 
 import api from '@/utils/api';
-import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle } from 'lucide-react';
+// Added CreditCard icon for Student ID
+import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Define roles and statuses
@@ -16,16 +17,23 @@ const UsersList = () => {
     
     // Modals State
     const [showAddUserModal, setShowAddUserModal] = useState(false);
-    const [showScoreModal, setShowScoreModal] = useState(false); // <--- NEW MODAL STATE
-    const [selectedUser, setSelectedUser] = useState(null); // <--- USER TO EDIT SCORE
-    const [newScore, setNewScore] = useState(100); // <--- SCORE INPUT STATE
+    const [showScoreModal, setShowScoreModal] = useState(false); 
+    const [selectedUser, setSelectedUser] = useState(null); 
+    const [newScore, setNewScore] = useState(100); 
 
     // Dynamic Data
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Form Data (Add User)
-    const [newUser, setNewUser] = useState({ firstName: '', lastName: '', email: '', role: 'Student', department: '' });
+    // Form Data (Add User) - UPDATED with studentId
+    const [newUser, setNewUser] = useState({ 
+        firstName: '', 
+        lastName: '', 
+        email: '', 
+        role: 'Student', 
+        department: '',
+        studentId: '' // <--- Added this field
+    });
     const [creating, setCreating] = useState(false);
 
     // 1. FETCH USERS
@@ -49,14 +57,23 @@ const UsersList = () => {
     const handleAddUser = async () => {
         setCreating(true);
         try {
-            await api.post('/users', newUser);
+            // Combine names for backend compatibility if needed, or send separately if backend supports it
+            // Assuming backend expects fullName, or constructs it
+            const payload = {
+                ...newUser,
+                // Only send studentId if role is student, or send anyway (backend ignores if unneeded)
+                studentId: newUser.role === 'Student' ? newUser.studentId : undefined 
+            };
+
+            await api.post('/users', payload);
             toast.success("User created successfully!");
             setShowAddUserModal(false);
-            setNewUser({ firstName: '', lastName: '', email: '', role: 'Student', department: '' });
+            // Reset form
+            setNewUser({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '' });
             fetchUsers(); 
         } catch (err) {
             console.error(err);
-            toast.error("Failed to create user. Email may exist.");
+            toast.error("Failed to create user. Email or ID may exist.");
         } finally {
             setCreating(false);
         }
@@ -74,18 +91,17 @@ const UsersList = () => {
         }
     };
 
-    // 4. OPEN SCORE MODAL (NEW)
+    // 4. OPEN SCORE MODAL
     const openScoreModal = (user) => {
         setSelectedUser(user);
-        setNewScore(user.responsibilityScore || 100); // Default to current score or 100
+        setNewScore(user.responsibilityScore || 100); 
         setShowScoreModal(true);
     };
 
-    // 5. SAVE NEW SCORE (NEW)
+    // 5. SAVE NEW SCORE
     const handleSaveScore = async () => {
         if (!selectedUser) return;
         
-        // Optimistic UI Update (Update table immediately before server responds)
         const updatedUsers = users.map(u => 
             u._id === selectedUser._id ? { ...u, responsibilityScore: newScore } : u
         );
@@ -93,13 +109,12 @@ const UsersList = () => {
         setShowScoreModal(false);
 
         try {
-            // API Call to update DB
             await api.put(`/users/${selectedUser._id}`, { responsibilityScore: newScore });
             toast.success(`Score updated for ${selectedUser.fullName || selectedUser.username}`);
         } catch (err) {
             console.error("Score update failed:", err);
             toast.error("Failed to update score in database");
-            fetchUsers(); // Revert on error
+            fetchUsers(); 
         }
     };
 
@@ -107,7 +122,8 @@ const UsersList = () => {
     const filteredUsers = users.filter(user => {
         const fullName = user.fullName || user.username || "";
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase());
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (user.studentId && user.studentId.toLowerCase().includes(searchTerm.toLowerCase())); // Search by ID too
         
         const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
         const userStatus = user.status || 'Active'; 
@@ -127,7 +143,6 @@ const UsersList = () => {
         }
     };
 
-    // Helper for Score Color
     const getScoreColor = (score) => {
         if (score >= 80) return 'text-green-600 bg-green-50 border-green-100';
         if (score >= 50) return 'text-yellow-600 bg-yellow-50 border-yellow-100';
@@ -155,11 +170,11 @@ const UsersList = () => {
         <AdminLayout heroContent={HeroSection}>
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[600px]">
 
-                {/* Filters ... (Keep existing code) */}
+                {/* Filters */}
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <input type="text" placeholder="Search by name or email..." className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <input type="text" placeholder="Search by name, email or ID..." className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                     {showFilters && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
@@ -181,7 +196,6 @@ const UsersList = () => {
                                 <th className="p-4 pl-0">User Identity</th>
                                 <th className="p-4">Assigned Role</th>
                                 <th className="p-4">Department</th>
-                                {/* NEW SCORE COLUMN */}
                                 <th className="p-4">Resp. Score</th>
                                 <th className="p-4">Last Login</th>
                                 <th className="p-4 text-right">Actions</th>
@@ -200,7 +214,15 @@ const UsersList = () => {
                                                 </div>
                                                 <div>
                                                     <div className="font-semibold text-slate-800">{user.fullName || user.username}</div>
-                                                    <div className="text-xs text-gray-500">{user.email}</div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {user.email} 
+                                                        {/* SHOW ID IF STUDENT */}
+                                                        {user.role === 'Student' && user.studentId && (
+                                                            <span className="ml-2 bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-mono">
+                                                                #{user.studentId}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -212,7 +234,6 @@ const UsersList = () => {
                                         </td>
                                         <td className="p-4 text-sm text-gray-600 font-medium">{user.department || "General"}</td>
                                         
-                                        {/* SCORE DATA CELL */}
                                         <td className="p-4">
                                             <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-sm font-bold border ${getScoreColor(user.responsibilityScore || 100)}`}>
                                                 {user.responsibilityScore ?? 100}
@@ -228,12 +249,10 @@ const UsersList = () => {
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
                                                 
-                                                {/* NEW: Edit Score Button */}
                                                 <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
                                                     <Gavel className="w-4 h-4" />
                                                 </button>
 
-                                                {/* Edit User Button */}
                                                 <button className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Edit User">
                                                     <Edit className="w-4 h-4" />
                                                 </button>
@@ -255,28 +274,49 @@ const UsersList = () => {
                 </div>
             </div>
 
-            {/* --- ADD USER MODAL (Existing) --- */}
+            {/* --- ADD USER MODAL (UPDATED) --- */}
             {showAddUserModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
                         <button onClick={() => setShowAddUserModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
                         <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">New User Profile</h2><p className="text-gray-500">Default password: <strong>password123</strong></p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleAddUser(); }}>
-                            {/* ... (Existing form inputs for First Name, Last Name, Email, Role, Dept) ... */}
-                            {/* I'll abbreviate to save space, assuming you keep your existing form inputs here */}
+                            
                             <div className="grid grid-cols-2 gap-5">
                                 <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.firstName} onChange={e => setNewUser({...newUser, firstName: e.target.value})} required />
                                 <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.lastName} onChange={e => setNewUser({...newUser, lastName: e.target.value})} required />
                             </div>
+                            
                             <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} required />
+                            
                             <div className="grid grid-cols-2 gap-5">
                                 <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
-                                    <option value="Student">Student</option><option value="IT_Staff">IT Staff</option><option value="Security">Security</option><option value="Admin">Admin</option>
+                                    <option value="Student">Student</option>
+                                    <option value="IT_Staff">IT Staff</option>
+                                    <option value="Security">Security</option>
+                                    <option value="Admin">Admin</option>
                                 </select>
                                 <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})}>
-                                    <option value="">Select Dept...</option><option value="Software Engineering">Software Engineering</option><option value="IT Services">IT Services</option>
+                                    <option value="">Select Dept...</option>
+                                    <option value="Software Engineering">Software Engineering</option>
+                                    <option value="IT Services">IT Services</option>
                                 </select>
                             </div>
+
+                            {/* 👇 NEW: STUDENT ID FIELD (Only shows if role is Student) */}
+                            {newUser.role === 'Student' && (
+                                <div className="relative">
+                                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Student ID (e.g. 2024001)" 
+                                        className="w-full pl-10 p-3 rounded-xl border border-gray-200" 
+                                        value={newUser.studentId} 
+                                        onChange={e => setNewUser({...newUser, studentId: e.target.value})} 
+                                    />
+                                </div>
+                            )}
+
                             <div className="pt-6 flex gap-3">
                                 <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">Cancel</button>
                                 <button type="submit" disabled={creating} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800">{creating ? "Creating..." : "Create User"}</button>
@@ -286,7 +326,7 @@ const UsersList = () => {
                 </div>
             )}
 
-            {/* --- NEW: SCORE MANAGEMENT MODAL --- */}
+            {/* --- SCORE MANAGEMENT MODAL --- */}
             {showScoreModal && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative text-center">

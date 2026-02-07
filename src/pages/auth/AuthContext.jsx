@@ -4,28 +4,37 @@ import PropTypes from "prop-types";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { role: "student" | "it" | "admin" | "security", ... }
+  const [user, setUser] = useState(null); // { role: "Student" | "IT" | "Admin" | "Security", ... }
 
-  // Load auth state from localStorage on mount
+  // 1. Load auth state from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("et_auth_user");
+    // 👇 CHANGED: Key must match what you used in Auth.jsx ('user')
+    const storedUser = localStorage.getItem("user"); 
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch {
-        localStorage.removeItem("et_auth_user");
+        // If JSON is broken, clear everything
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
       }
     }
   }, []);
 
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem("et_auth_user", JSON.stringify(userData));
+    // 👇 CHANGED: Save to 'user' to match Auth.jsx
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("et_auth_user");
+    // 👇 CHANGED: Clear 'user' AND 'token' so you are fully logged out
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    
+    // Optional: Redirect to login immediately if needed
+    window.location.href = "/"; 
   };
 
   return (
@@ -46,28 +55,3 @@ export function useAuth() {
   }
   return ctx;
 }
-
-
-// import { createContext, useContext, useState } from "react";
-
-// const AuthContext = createContext(null);
-
-// export function AuthProvider({ children }) {
-//   const [user, setUser] = useState(null);
-
-//   const login = (data) => {
-//     setUser(data);
-//   };
-
-//   const logout = () => {
-//     setUser(null);
-//   };
-
-//   return (
-//     <AuthContext.Provider value={{ user, login, logout }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// }
-
-// export const useAuth = () => useContext(AuthContext);

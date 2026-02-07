@@ -3,12 +3,21 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion } from "framer-motion";
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Loader2, Plus, Check, X, Calendar, Clock } from "lucide-react"; // Added Icons
+import { Eye, Loader2, Plus, Check, X, Calendar, Clock } from "lucide-react";
 import CheckoutDetailsDialog from "../IT_Staff/checkout/CheckoutDetailsDialog"; 
 import api from "@/utils/api";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner"; // For notifications
+import { toast } from "sonner";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CurrentCheckouts() {
     const navigate = useNavigate();
@@ -21,22 +30,26 @@ export default function CurrentCheckouts() {
     // Tabs state: 'requests' | 'reservations' | 'active'
     const [currentTab, setCurrentTab] = useState('requests'); 
 
+    // --- REJECTION LOGIC STATE ---
+    const [isRejectOpen, setIsRejectOpen] = useState(false);
+    const [rejectId, setRejectId] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState("");
+    const [processing, setProcessing] = useState(false);
+
     // --- 1. FETCH TRANSACTIONS ---
     const fetchActive = async () => {
         setLoading(true);
         try {
-            // This endpoint now returns Pending, Checked Out, AND Reserved items
             const res = await api.get('/transactions/active');
             
             const mappedData = res.data.map(tx => ({
                 checkoutId: tx._id,
                 equipmentName: tx.equipment?.name || "Unknown Item",
-                // Show Start Time for Reservations, CreatedAt for others
                 dateDisplay: tx.status === 'Reserved' 
                     ? format(new Date(tx.startTime), 'MMM dd, HH:mm') 
                     : format(new Date(tx.createdAt), 'MMM dd, HH:mm'),
                 status: tx.status,
-                startTime: tx.startTime, // Needed for reservation logic
+                startTime: tx.startTime,
                 fullData: { 
                     ...tx, 
                     studentScore: tx.user?.responsibilityScore ?? 100
@@ -79,22 +92,52 @@ export default function CurrentCheckouts() {
         setIsDialogOpen(true);
     };
 
-    // Approve / Deny / Check Out (Reservation)
+    // Approve / Deny Logic
     const handleResponse = async (e, id, action) => {
-        e.stopPropagation(); 
+        if (e) e.stopPropagation();
         
-        // Custom message based on action
-        const actionText = action === 'Approve' ? "approve/check-out" : "deny";
-        if (!confirm(`Are you sure you want to ${actionText} this item?`)) return;
+        // If Deny, Open Dialog instead of calling API immediately
+        if (action === 'Deny') {
+            setRejectId(id);
+            setRejectionReason("");
+            setIsRejectOpen(true);
+            return;
+        }
+
+        // For Approve, proceed as normal
+        if (!confirm(`Are you sure you want to approve this item?`)) return;
 
         try {
-            // 'Approve' on a Reservation converts it to 'Checked Out'
-            await api.put(`/transactions/${id}/respond`, { action });
-            toast.success("Status updated successfully");
+            await api.put(`/transactions/${id}/respond`, { action: 'Approve' });
+            toast.success("Request Approved");
             fetchActive(); 
         } catch (err) {
             console.error("Action failed", err);
             toast.error("Failed to update status.");
+        }
+    };
+
+    // Submit Rejection Reason
+    const handleRejectSubmit = async () => {
+        if (!rejectionReason.trim()) {
+            toast.error("Please provide a reason.");
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            await api.put(`/transactions/${rejectId}/respond`, { 
+                action: 'Deny', 
+                reason: rejectionReason 
+            });
+            toast.success("Request Denied");
+            setIsRejectOpen(false);
+            fetchActive();
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to deny request");
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -299,6 +342,40 @@ export default function CurrentCheckouts() {
                         selectedCheckout={selectedCheckout} 
                     />
                 )}
+
+                {/* 4. REJECTION REASON DIALOG - FIXED BACKGROUND */}
+                <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
+                    <DialogContent className="bg-white sm:max-w-md border border-gray-200 shadow-lg">
+                        <DialogHeader>
+                            <DialogTitle>Deny Request</DialogTitle>
+                            <DialogDescription className="text-gray-500">
+                                Please enter the reason why you are denying this request. This will be sent to the student.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <Textarea
+                                placeholder="e.g., Item is under maintenance, Low responsibility score..."
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                className="min-h-[100px] bg-white border-gray-300 focus:border-blue-500"
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsRejectOpen(false)} disabled={processing}>
+                                Cancel
+                            </Button>
+                            <Button 
+                                className="bg-red-600 hover:bg-red-700 text-white" 
+                                onClick={handleRejectSubmit} 
+                                disabled={processing}
+                            >
+                                {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                Confirm Denial
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
             </div>
             
         </ITStaffLayout>
