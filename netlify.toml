@@ -1,11 +1,7 @@
 [build]
-  # No base directory needed because your code is at the root of the repo
   command = "npm run build"
-  
-  # The dist folder is created in the root
   publish = "dist"
 
-# This handles the React Router "Page Not Found" issue
 [[redirects]]
   from = "/*"
   to = "/index.html"
