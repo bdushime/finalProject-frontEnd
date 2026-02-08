@@ -7,7 +7,7 @@ import { Package, Loader2, CalendarClock, Clock, AlertCircle, CheckCircle, Arrow
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PageContainer } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
-import ExtendModal from "@/components/ui/ExtendModal";
+import ExtendModal from "@/components/ui/extendModal";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 
