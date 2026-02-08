@@ -1,0 +1,15 @@
+[build]
+  # This tells Netlify to go into your project folder
+  base = "equipment_tracker"
+  
+  # This runs the build command inside that folder
+  command = "npm run build"
+  
+  # This is the folder Vite creates (relative to the base)
+  publish = "dist"
+
+# This handles the React Router "Page Not Found" issue
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
