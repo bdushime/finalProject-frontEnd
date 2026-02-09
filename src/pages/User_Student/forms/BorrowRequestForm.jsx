@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import api from "@/utils/api";
 import PropTypes from "prop-types";
+import { getClassrooms } from "@/utils/classroomStorage";
 
 export default function BorrowRequestForm({ onSuccess }) {
     const navigate = useNavigate();
@@ -34,11 +35,11 @@ export default function BorrowRequestForm({ onSuccess }) {
     // Flow: null = choice screen, 'borrow' = borrow wizard, 'reserve' = reserve wizard
     const [flowType, setFlowType] = useState(actionParam || null);
     const [step, setStep] = useState(1);
-    
+
     // Data States
     const [equipmentList, setEquipmentList] = useState([]); // For dropdown
     const [equipment, setEquipment] = useState(null);       // Selected item
-    
+
     // Form Data
     const [formData, setFormData] = useState({
         equipmentId: equipmentIdParam || "",
@@ -60,6 +61,7 @@ export default function BorrowRequestForm({ onSuccess }) {
     const [timeSlots, setTimeSlots] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
+    const [roomSuccess, setRoomSuccess] = useState(null);
 
     // --- 1. INITIAL DATA FETCHING ---
     useEffect(() => {
@@ -152,10 +154,10 @@ export default function BorrowRequestForm({ onSuccess }) {
     // --- VALIDATION LOGIC ---
     const validateForm = () => {
         const newErrors = {};
-        
+
         // Step 1: Equipment Selection
         if (!formData.equipmentId) newErrors.equipmentId = "Please select equipment";
-        
+
         // Step 2 Logic
         if (step === 2) {
             if (flowType === 'borrow') {
@@ -169,19 +171,75 @@ export default function BorrowRequestForm({ onSuccess }) {
         // Step 3 Logic
         if (step === 3) {
             if (!formData.course.trim()) newErrors.course = "Course is required";
-            if (!formData.location.trim()) newErrors.location = "Location is required";
-
             if (flowType === 'borrow') {
                 if (!formData.sessionDateTime) newErrors.sessionDateTime = "Return time is required";
             } else if (flowType === 'reserve') {
                 // For reserve, purpose is asked in step 3
                 if (!formData.purpose.trim()) newErrors.purpose = "Purpose is required";
             }
+
+            // --- Blocking Validation for Room ---
+            // If there's an existing screen error, block progress
+            if (errors.location && errors.location.includes("already has a TV")) {
+                newErrors.location = errors.location;
+            } else if (equipment && formData.location) {
+                // Re-run check to be safe (in case they typed fast)
+                const check = checkRoomSafety(formData.location);
+                if (check.error) newErrors.location = check.error;
+            }
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+    // --- REAL-TIME ROOM CHECK ---
+    const checkRoomSafety = (locationInput) => {
+        if (!equipment || !locationInput) return { error: null, success: null };
+
+        const screenKeywords = ['tv', 'screen', 'projector', 'display', 'monitor'];
+        const isScreenDevice = screenKeywords.some(k =>
+            equipment.name.toLowerCase().includes(k) ||
+            (equipment.category && equipment.category.toLowerCase().includes(k))
+        );
+
+        if (!isScreenDevice) return { error: null, success: null };
+
+        const classrooms = getClassrooms();
+        const normalize = (str) => str.toLowerCase().replace(/\s+/g, '').replace(/room/g, '');
+        const inputLoc = normalize(locationInput);
+
+        const targetClassroom = classrooms.find(c => normalize(c.name) === inputLoc);
+
+        if (targetClassroom) {
+            if (targetClassroom.hasScreen) {
+                return { error: `Room ${targetClassroom.name} already has a TV/Screen. You don't need to borrow one.`, success: null };
+            } else {
+                return { error: null, success: `Great! Room ${targetClassroom.name} does not have a screen, so you need this.` };
+            }
+        }
+        return { error: null, success: null };
+    };
+
+    useEffect(() => {
+        if (step === 3 && formData.location) {
+            const timeoutId = setTimeout(() => {
+                const result = checkRoomSafety(formData.location);
+                if (result.error) {
+                    setErrors(prev => ({ ...prev, location: result.error }));
+                    setRoomSuccess(null);
+                } else if (result.success) {
+                    setErrors(prev => ({ ...prev, location: null }));
+                    setRoomSuccess(result.success);
+                } else {
+                    // Reset if no match or safe
+                    setErrors(prev => ({ ...prev, location: null }));
+                    setRoomSuccess(null);
+                }
+            }, 500); // Debounce
+            return () => clearTimeout(timeoutId);
+        }
+    }, [formData.location, equipment, step]);
 
     // --- 5. SUBMIT HANDLER (UPDATED) ---
     const handleSubmit = async () => {
@@ -197,9 +255,9 @@ export default function BorrowRequestForm({ onSuccess }) {
                     destination: `${formData.location} (${formData.course})`,
                     purpose: formData.purpose,
                 };
-                
+
                 await api.post('/transactions/checkout', payload);
-                
+
                 // 👇 UPDATED: Inform user about pending approval
                 alert("Request submitted successfully! Please wait for IT approval.");
                 navigate('/student/borrowed-items');
@@ -216,7 +274,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                 };
 
                 await api.post('/transactions/reserve', payload);
-                
+
                 alert("Reservation confirmed successfully!");
                 navigate('/student/dashboard');
             }
@@ -231,9 +289,9 @@ export default function BorrowRequestForm({ onSuccess }) {
     };
 
     // --- 6. RENDER HELPERS ---
-    const currentSteps = flowType === "borrow" 
-        ? [ { label: "Scan / Select", icon: Scan }, { label: "Details", icon: ClipboardList }, { label: "Time & Place", icon: GraduationCap }, { label: "Confirm", icon: CheckCircle } ]
-        : [ { label: "Select Item", icon: Package }, { label: "Date & Time", icon: CalendarClock }, { label: "Class Details", icon: GraduationCap }, { label: "Confirm", icon: CheckCircle } ];
+    const currentSteps = flowType === "borrow"
+        ? [{ label: "Scan / Select", icon: Scan }, { label: "Details", icon: ClipboardList }, { label: "Time & Place", icon: GraduationCap }, { label: "Confirm", icon: CheckCircle }]
+        : [{ label: "Select Item", icon: Package }, { label: "Date & Time", icon: CalendarClock }, { label: "Class Details", icon: GraduationCap }, { label: "Confirm", icon: CheckCircle }];
 
     // --- RENDER: CHOICE SCREEN ---
     if (!flowType) {
@@ -273,7 +331,7 @@ export default function BorrowRequestForm({ onSuccess }) {
         <div className="max-w-4xl mx-auto py-8 px-4">
             {/* Header / Nav */}
             <div className="mb-8 flex items-center justify-between">
-                <button onClick={() => step > 1 ? setStep(s => s-1) : setFlowType(null)} className="flex items-center text-slate-500 hover:text-[#0b1d3a]">
+                <button onClick={() => step > 1 ? setStep(s => s - 1) : setFlowType(null)} className="flex items-center text-slate-500 hover:text-[#0b1d3a]">
                     <ChevronLeft className="h-4 w-4 mr-1" /> Back
                 </button>
                 <div className="text-sm font-medium text-slate-500">Step {step} of 4</div>
@@ -281,7 +339,7 @@ export default function BorrowRequestForm({ onSuccess }) {
 
             {/* Progress Bar */}
             <div className="mb-8 relative h-1 bg-slate-100 rounded-full">
-                <div className="absolute h-full bg-[#126dd5] transition-all duration-300" style={{ width: `${(step/4)*100}%` }} />
+                <div className="absolute h-full bg-[#126dd5] transition-all duration-300" style={{ width: `${(step / 4) * 100}%` }} />
             </div>
 
             {/* STEP 1: SELECT / SCAN */}
@@ -289,8 +347,8 @@ export default function BorrowRequestForm({ onSuccess }) {
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                     {flowType === 'borrow' && (
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
-                             {/* FAKE CAMERA UI - Does not block submission */}
-                             <div className="w-full max-w-sm mx-auto aspect-video bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                            {/* FAKE CAMERA UI - Does not block submission */}
+                            <div className="w-full max-w-sm mx-auto aspect-video bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                                 {isScanning ? (
                                     <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
                                 ) : (
@@ -299,13 +357,13 @@ export default function BorrowRequestForm({ onSuccess }) {
                                         <span className="text-sm">Camera Off</span>
                                     </div>
                                 )}
-                             </div>
-                             <Button onClick={isScanning ? () => {setIsScanning(false); stopCamera();} : handleScanQR} variant="outline">
+                            </div>
+                            <Button onClick={isScanning ? () => { setIsScanning(false); stopCamera(); } : handleScanQR} variant="outline">
                                 {isScanning ? "Stop Camera" : "Scan QR Code"}
-                             </Button>
+                            </Button>
                         </div>
                     )}
-                    
+
                     <div className="space-y-3">
                         <Label>Select Equipment manually</Label>
                         <Select value={formData.equipmentId} onValueChange={handleEquipmentSelect}>
@@ -332,15 +390,15 @@ export default function BorrowRequestForm({ onSuccess }) {
                         <>
                             <div className="space-y-2">
                                 <Label>Purpose</Label>
-                                <Textarea 
-                                    value={formData.purpose} 
-                                    onChange={(e) => handleInputChange("purpose", e.target.value)} 
-                                    placeholder="Why do you need this?" 
-                                    className="h-32" 
+                                <Textarea
+                                    value={formData.purpose}
+                                    onChange={(e) => handleInputChange("purpose", e.target.value)}
+                                    placeholder="Why do you need this?"
+                                    className="h-32"
                                 />
                                 {errors.purpose && <p className="text-sm text-red-500">{errors.purpose}</p>}
                             </div>
-                            
+
                             {/* FAKE PHOTO UPLOAD UI */}
                             <div className="space-y-2">
                                 <Label>Condition Photos (Optional)</Label>
@@ -371,8 +429,8 @@ export default function BorrowRequestForm({ onSuccess }) {
                             {formData.reservationDate && (
                                 <div className="grid grid-cols-4 gap-2">
                                     {timeSlots.map(slot => (
-                                        <button 
-                                            key={slot.time} 
+                                        <button
+                                            key={slot.time}
                                             onClick={() => handleInputChange("reservationTime", slot.time)}
                                             className={`p-2 text-sm rounded border ${formData.reservationTime === slot.time ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:border-blue-300'}`}
                                         >
@@ -440,7 +498,7 @@ export default function BorrowRequestForm({ onSuccess }) {
             {/* FOOTER ACTIONS */}
             <div className="mt-8 flex justify-end">
                 {step < 4 ? (
-                    <Button onClick={() => validateForm() && setStep(s => s+1)} className="bg-[#0b1d3a] h-12 px-8 rounded-xl">Continue</Button>
+                    <Button onClick={() => validateForm() && setStep(s => s + 1)} className="bg-[#0b1d3a] h-12 px-8 rounded-xl">Continue</Button>
                 ) : (
                     <Button onClick={handleSubmit} disabled={submitting} className="bg-[#126dd5] h-12 px-8 rounded-xl">
                         {submitting ? <Loader2 className="animate-spin" /> : "Confirm & Submit"}

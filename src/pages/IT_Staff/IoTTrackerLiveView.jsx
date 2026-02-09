@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import IoTHeader from "@/pages/IT_Staff/components/iot/IoTHeader";
 import IoTStatsCards from "@/pages/IT_Staff/components/iot/IoTStatsCards";
@@ -8,18 +8,16 @@ import {
   IoTTableSection,
   TrackerHistoryDialog,
 } from "@/pages/IT_Staff/components/iot/IoTTableSection";
-import api from "@/utils/api"; 
+import api from "@/utils/api";
 import { toast } from "sonner"; // Assuming you have sonner installed, optional
-import { Button } from "@/components/ui/button";
-import { Activity, RefreshCw } from "lucide-react";
 
 export default function IoTTrackerLiveView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [viewMode, setViewMode] = useState("map"); 
-  
-  const [isSimulating, setIsSimulating] = useState(false);
-  
+  const [viewMode, setViewMode] = useState("map");
+
+
+
   const [selectedTracker, setSelectedTracker] = useState(null);
   const [historyData, setHistoryData] = useState({});
   const [trackers, setTrackers] = useState([]);
@@ -28,45 +26,93 @@ export default function IoTTrackerLiveView() {
   // =========================================================
   // 1. FETCH REAL DATA (From Monitoring Route)
   // =========================================================
+  /* 
+     STRICT LIVE LOGIC: 
+     Backend might be slow to timeout (e.g. 1 min). 
+     We enforce a 15-second "Heartbeat Check".
+     If 'online' but no data for >15s, force to 'offline'.
+  */
+  const processTrackers = (rawTrackers) => {
+    const now = new Date().getTime();
+    const TIMEOUT_MS = 15000; // 15 seconds allowed silence
+
+    return rawTrackers.map(t => {
+      // Create a copy to avoid mutating state directly if using objects
+      const tracker = { ...t };
+
+      if (tracker.status === 'online' && tracker.lastSeen) {
+        const lastSeenTime = new Date(tracker.lastSeen).getTime();
+        const diff = now - lastSeenTime;
+
+        // If silent for too long, FORCE offline
+        if (diff > TIMEOUT_MS) {
+          tracker.status = 'offline';
+        }
+      }
+      return tracker;
+    });
+  };
+
   const fetchRealData = async () => {
     try {
-      // 👇 Use the specific monitoring endpoint
-      const res = await api.get('/monitoring/live'); 
+      // 👇 Use the specific monitoring endpoint, add cache busting
+      const res = await api.get(`/monitoring/live?nocache=${new Date().getTime()}`);
 
       if (res.data && res.data.trackers) {
-          setTrackers(res.data.trackers);
+        // Apply our strict frontend timeout rule
+        const processedData = processTrackers(res.data.trackers);
+        setTrackers(processedData);
       }
     } catch (err) {
       console.error("Failed to load IoT data:", err);
     }
   };
 
+  // Track previous states to detect changes
+  const prevStatuses = useRef({});
+
   useEffect(() => {
-    fetchRealData(); 
-    const interval = setInterval(fetchRealData, 5000); // Polling every 5s
+    fetchRealData();
+    const interval = setInterval(fetchRealData, 2000); // Polling every 2s for live feel
     return () => clearInterval(interval);
   }, []);
+
+  // --- 3. NOTIFICATION LOGIC ---
+  useEffect(() => {
+    trackers.forEach(t => {
+      const prev = prevStatuses.current[t.id];
+      const isNowOffline = t.status === 'offline';
+
+      // If was online (or unknown) and NOW is offline, trigger alert
+      // We only alert if we specifically knew it was 'online' before to avoid spam on load
+      if (prev === 'online' && isNowOffline) {
+        const message = `Device ${t.equipment} (${t.id}) went OFFLINE!`;
+
+        // 1. Show Visual Toast
+        toast.error(`ALERT: ${message}`, {
+          duration: 5000,
+          icon: '🚨'
+        });
+
+        // 2. Persist to Backend (Fire and Forget)
+        api.post('/notifications', {
+          title: "Device Offline Alert",
+          message: message,
+          type: "error", // red icon in list
+          role: "it_staff",
+          relatedId: t.id
+        }).catch(err => console.error("Failed to save notification:", err));
+      }
+
+      // Update ref
+      prevStatuses.current[t.id] = t.status;
+    });
+  }, [trackers]);
 
   // =========================================================
   // 2. SIMULATE BUTTON LOGIC (Fixed)
   // =========================================================
-  const handleSimulateUpdate = async () => {
-    setIsSimulating(true);
-    try {
-        // 👇 Triggers backend update
-        await api.post('/monitoring/simulate');
-        
-        toast.success("Tracker Ping Received!");
-        
-        // 👇 Fetches updated status immediately
-        await fetchRealData(); 
-    } catch (err) {
-        console.error("Simulation Failed", err);
-        toast.error("Simulation Failed");
-    } finally {
-        setIsSimulating(false);
-    }
-  };
+
 
   // ... (History Logic - Visual Only) ...
   useEffect(() => {
@@ -74,7 +120,7 @@ export default function IoTTrackerLiveView() {
       const data = [];
       const now = new Date();
       for (let i = 19; i >= 0; i--) {
-        const time = new Date(now.getTime() - i * 3 * 60 * 1000); 
+        const time = new Date(now.getTime() - i * 3 * 60 * 1000);
         const tracker = trackers.find((t) => t.id === trackerId);
         if (tracker) {
           data.push({
@@ -101,7 +147,9 @@ export default function IoTTrackerLiveView() {
         tracker.equipment.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tracker.location.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus =
-        statusFilter === "all" || tracker.status === statusFilter;
+        statusFilter === "all" ||
+        (statusFilter === "online" && tracker.status === "online") ||
+        (statusFilter === "offline" && tracker.status !== "online");
       return matchesSearch && matchesStatus;
     });
   }, [trackers, searchQuery, statusFilter]);
@@ -109,36 +157,14 @@ export default function IoTTrackerLiveView() {
   useEffect(() => { setPage(1); }, [searchQuery, statusFilter, viewMode]);
 
   const onlineCount = trackers.filter((t) => t.status === "online").length;
-  const offlineCount = trackers.filter((t) => t.status === "offline").length;
+  // ROBUST: Treat anything not "online" (e.g. "lost", "maintenance", "offline") as Offline
+  const offlineCount = trackers.length - onlineCount;
   const lowBatteryCount = trackers.filter((t) => t.battery < 30).length;
 
-  const headerActions = (
-    <>
-      <Button
-        variant="outline"
-        onClick={() => setIsSimulating((v) => !v)}
-        className="flex items-center gap-2 text-gray-500 border-gray-300"
-      >
-        <Activity
-          className={`h-4 w-4 text-gray-500 ${
-            isSimulating ? "text-green-500 animate-pulse" : ""
-          }`}
-        />
-        {isSimulating ? "Pause" : "Resume"}
-      </Button>
-      <Button
-        onClick={handleSimulateUpdate}
-        className="flex items-center gap-2 bg-[#BEBEE0]"
-      >
-        <RefreshCw className="h-4 w-4" />
-        Simulate Update
-      </Button>
-    </>
-  );
-
   return (
-    <ITStaffLayout customHeaderActions={headerActions}>
-      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <ITStaffLayout>
+      <div className="space-y-6">
+        <IoTHeader />
 
         <IoTStatsCards
           totalTrackers={trackers.length}

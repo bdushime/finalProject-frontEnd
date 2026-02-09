@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePagination } from '@/hooks/usePagination';
 import PaginationControls from '@/components/common/PaginationControls';
 import EquipmentDetailsDialog from './components/EquipmentDetailsDialog';
-import api from '@/utils/api'; 
+import api from '@/utils/api';
 
 // Schema-defined categories to ensure dropdown always has options
 const STATIC_CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
@@ -30,13 +30,13 @@ function deriveCategory(name = '') {
 export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('grid');
-  
+
   // Filter States
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [searchQuery, setSearchQuery] = useState('');     // What user types
   const [activeSearch, setActiveSearch] = useState('');   // What we actually search for (on button click)
   const [sortBy, setSortBy] = useState('name');
-  
+
   // Data States
   const [equipment, setEquipment] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -53,14 +53,14 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
       try {
         // Build Query Parameters
         const params = {
-            search: activeSearch, // Only search when button is clicked (or enter pressed)
-            category: selectedCategory !== 'All Categories' ? selectedCategory : undefined,
-            // You can add sort params here if your backend supports it, 
-            // otherwise we sort client-side below
+          search: activeSearch, // Only search when button is clicked (or enter pressed)
+          category: selectedCategory !== 'All Categories' ? selectedCategory : undefined,
+          // You can add sort params here if your backend supports it, 
+          // otherwise we sort client-side below
         };
 
         const res = await api.get('/equipment/browse', { params });
-        
+
         // Normalize Data
         let normalized = res.data.map((item) => ({
           id: item._id,
@@ -77,10 +77,10 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
 
         // Client-side Sort (optional, if backend doesn't handle sort)
         normalized.sort((a, b) => {
-            if (sortBy === 'name') return a.name.localeCompare(b.name);
-            if (sortBy === 'category') return a.category.localeCompare(b.category);
-            if (sortBy === 'availability') return b.available - a.available;
-            return 0;
+          if (sortBy === 'name') return a.name.localeCompare(b.name);
+          if (sortBy === 'category') return a.category.localeCompare(b.category);
+          if (sortBy === 'availability') return b.available - a.available;
+          return 0;
         });
 
         setEquipment(normalized);
@@ -116,196 +116,195 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
   return (
     <ITStaffLayout>
       <div className="min-h-screen">
-        <PageContainer>
+        <PageHeader title="Browse Equipment" />
 
-          <Card className="mb-6 border-gray-300">
-            <CardContent className="pt-6">
-              <form onSubmit={handleSearchSubmit} className="space-y-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search by name, brand, or description..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 rounded-full border-gray-300 shadow-sm"
-                    />
-                  </div>
-                  <Button type="submit" className="rounded-full border-gray-300 shadow-sm">
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+        <Card className="mb-6 border-gray-300">
+          <CardContent className="pt-6">
+            <form onSubmit={handleSearchSubmit} className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, brand, or description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 rounded-full border-gray-300 shadow-sm"
+                  />
+                </div>
+                <Button type="submit" className="rounded-full border-gray-300 shadow-sm">
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+                </Button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200">
+                    {STATIC_CATEGORIES.map(category => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200">
+                    <SelectItem value="name">Name (A-Z)</SelectItem>
+                    <SelectItem value="category">Category</SelectItem>
+                    <SelectItem value="availability">Availability</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="flex gap-2 sm:ml-auto">
+                  <Button
+                    type="button"
+                    variant={viewMode === 'grid' ? 'default' : 'outline'}
+                    size="icon"
+                    onClick={() => setViewMode('grid')}
+                    className="rounded-full border-gray-300 shadow-sm"
+                  >
+                    <Grid3x3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    size="icon"
+                    onClick={() => setViewMode('list')}
+                  >
+                    <List className="h-4 w-4" />
                   </Button>
                 </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      {STATIC_CATEGORIES.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        {/* Results Info */}
+        <div className="mb-4 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <span>
+            {loading ? "Searching..." : `Showing ${equipment.length} items`}
+          </span>
+          {totalPages > 1 && (
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          )}
+        </div>
 
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      <SelectItem value="name">Name (A-Z)</SelectItem>
-                      <SelectItem value="category">Category</SelectItem>
-                      <SelectItem value="availability">Availability</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="flex gap-2 sm:ml-auto">
+        {/* LOADING STATE */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {currentEquipment.map(item => (
+              <Card
+                key={item.id}
+                className="flex flex-col border-gray-300 hover:shadow-lg hover:bg-gray-50 transition-all shadow-sm bg-background rounded-3xl cursor-pointer"
+                onClick={() => {
+                  setSelectedEquipment(item);
+                  setDialogOpen(true);
+                }}
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <CategoryBadge category={item.category} />
+                    <Badge className={item.available > 0 ? 'bg-yellow-400 text-yellow-900 rounded-full' : 'bg-gray-200 text-gray-600 rounded-full'}>
+                      {item.available > 0 ? 'Available' : 'Unavailable'}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
+                  <CardDescription className="text-xs font-mono">SN: {item.serialNumber || item.id.substring(0, 8)}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col">
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {item.description}
+                  </p>
+                  <div className="mt-auto space-y-3">
+                    <div className="flex items-center text-sm">
+                      <Package className="h-4 w-4 mr-2 text-gray-400" />
+                      <span className="text-gray-600 truncate">{item.location}</span>
+                    </div>
                     <Button
-                      type="button"
-                      variant={viewMode === 'grid' ? 'default' : 'outline'}
-                      size="icon"
-                      onClick={() => setViewMode('grid')}
-                      className="rounded-full border-gray-300 shadow-sm"
+                      variant="outline"
+                      className="w-full bg-[#0b1d3a] text-white rounded-full hover:bg-[#1a2f55]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedEquipment(item);
+                        setDialogOpen(true);
+                      }}
                     >
-                      <Grid3x3 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={viewMode === 'list' ? 'default' : 'outline'}
-                      size="icon"
-                      onClick={() => setViewMode('list')}
-                    >
-                      <List className="h-4 w-4" />
+                      <Eye className="h-4 w-4 mr-2" />
+                      Details
                     </Button>
                   </div>
-                </div>
-              </form>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {currentEquipment.map(item => (
+              <Card key={item.id} className="p-6 border-none shadow-md bg-background rounded-xl">
+                <CardContent className="p-0">
+                  <div className="flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-start gap-3 mb-3">
+                        <CategoryBadge category={item.category} />
+                        <Badge className={item.available > 0 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-gray-600'}>
+                          {item.available > 0 ? 'Available' : 'Unavailable'}
+                        </Badge>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h3>
+                      <p className="text-sm text-gray-500 mb-2">SN: {item.serialNumber || item.id}</p>
+                      <div className="flex items-center gap-4 text-sm mt-2">
+                        <div className="flex items-center">
+                          <Package className="h-4 w-4 mr-2 text-gray-400" />
+                          <span className="text-gray-600">{item.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Button
+                        variant="outline"
+                        className="bg-[#343264] text-white hover:bg-[#2a2850]"
+                        onClick={() => {
+                          setSelectedEquipment(item);
+                          setDialogOpen(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Details</span>
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && equipment.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-gray-900 mb-2">No equipment found</h3>
+              <p className="text-gray-600">
+                Try adjusting your search filters.
+              </p>
             </CardContent>
           </Card>
-
-          {/* Results Info */}
-          <div className="mb-4 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-            <span>
-              {loading ? "Searching..." : `Showing ${equipment.length} items`}
-            </span>
-            {totalPages > 1 && (
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-            )}
-          </div>
-
-          {/* LOADING STATE */}
-          {loading ? (
-             <div className="flex justify-center items-center py-20">
-                <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-             </div>
-          ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {currentEquipment.map(item => (
-                <Card
-                  key={item.id}
-                  className="flex flex-col border-gray-300 hover:shadow-lg hover:bg-gray-50 transition-all shadow-sm bg-background rounded-3xl cursor-pointer"
-                  onClick={() => {
-                    setSelectedEquipment(item);
-                    setDialogOpen(true);
-                  }}
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-2">
-                      <CategoryBadge category={item.category} />
-                      <Badge className={item.available > 0 ? 'bg-yellow-400 text-yellow-900 rounded-full' : 'bg-gray-200 text-gray-600 rounded-full'}>
-                        {item.available > 0 ? 'Available' : 'Unavailable'}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
-                    <CardDescription className="text-xs font-mono">SN: {item.serialNumber || item.id.substring(0,8)}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {item.description}
-                    </p>
-                    <div className="mt-auto space-y-3">
-                      <div className="flex items-center text-sm">
-                        <Package className="h-4 w-4 mr-2 text-gray-400" />
-                        <span className="text-gray-600 truncate">{item.location}</span>
-                      </div>
-                      <Button
-                          variant="outline"
-                          className="w-full bg-[#0b1d3a] text-white rounded-full hover:bg-[#1a2f55]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedEquipment(item);
-                            setDialogOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Details
-                        </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {currentEquipment.map(item => (
-                <Card key={item.id} className="p-6 border-none shadow-md bg-background rounded-xl">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col sm:flex-row justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-start gap-3 mb-3">
-                          <CategoryBadge category={item.category} />
-                          <Badge className={item.available > 0 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-gray-600'}>
-                            {item.available > 0 ? 'Available' : 'Unavailable'}
-                          </Badge>
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h3>
-                        <p className="text-sm text-gray-500 mb-2">SN: {item.serialNumber || item.id}</p>
-                        <div className="flex items-center gap-4 text-sm mt-2">
-                          <div className="flex items-center">
-                            <Package className="h-4 w-4 mr-2 text-gray-400" />
-                            <span className="text-gray-600">{item.location}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <Button
-                          variant="outline"
-                          className="bg-[#343264] text-white hover:bg-[#2a2850]"
-                          onClick={() => {
-                            setSelectedEquipment(item);
-                            setDialogOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4 sm:mr-2" />
-                          <span className="hidden sm:inline">Details</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!loading && equipment.length === 0 && (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-gray-900 mb-2">No equipment found</h3>
-                <p className="text-gray-600">
-                  Try adjusting your search filters.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </PageContainer>
+        )}
 
         {/* Equipment Details Dialog */}
         <EquipmentDetailsDialog

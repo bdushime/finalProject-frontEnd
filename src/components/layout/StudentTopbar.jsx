@@ -12,6 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/images/logo8noback.png";
+import api from "@/utils/api"; // ✅ Import API
 
 const studentLinks = [
     { name: "Dashboard", path: "/student/dashboard" },
@@ -34,7 +35,25 @@ const unreadCount = 0;
         role: "Student"
     });
 
-    // --- NEW: Load User from Local Storage ---
+    // --- 1. FETCH NOTIFICATIONS LOGIC ---
+    const fetchUnreadCount = async () => {
+        try {
+            const res = await api.get('/notifications');
+            // Filter only unread messages
+            const count = res.data.filter(n => !n.read).length;
+            setUnreadCount(count);
+        } catch (err) {
+            console.error("Failed to fetch notification count", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchUnreadCount(); // Fetch immediately
+        const interval = setInterval(fetchUnreadCount, 15000); // Poll every 15s
+        return () => clearInterval(interval);
+    }, [location.pathname]); // Refresh on navigation too
+
+    // --- 2. Load User from Local Storage ---
     useEffect(() => {
         const userStr = localStorage.getItem("user");
         if (userStr) {
@@ -44,8 +63,6 @@ const unreadCount = 0;
                 const displayName = userData.fullName || userData.username || "Student";
                 // Get Initial (First letter of name)
                 const displayInitial = displayName.charAt(0).toUpperCase();
-
-                // Get Role
                 const displayRole = userData.role || "Student";
 
                 setUser({
@@ -71,7 +88,6 @@ const unreadCount = 0;
         return location.pathname === path || location.pathname.startsWith(path);
     };
 
-    // Get greeting based on time
     const getGreeting = () => {
         const hour = new Date().getHours();
         if (hour < 12) return "Good morning";
@@ -87,7 +103,6 @@ const unreadCount = 0;
     }).format(new Date());
 
     const handleLogout = () => {
-        // Optional: Clear storage on logout so the next user is fresh
         localStorage.removeItem("token");
         localStorage.removeItem("user");
     };
@@ -157,8 +172,9 @@ const unreadCount = 0;
                             aria-label="Notifications"
                         >
                             <Bell className="h-5 w-5 text-[#0b1d3a]" />
+                            {/* 👇 DYNAMIC BADGE */}
                             {unreadCount > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-in zoom-in duration-200">
                                     {unreadCount}
                                 </span>
                             )}
@@ -167,16 +183,13 @@ const unreadCount = 0;
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="h-11 pl-1.5 pr-5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center gap-3 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-[1.02]">
-                                    {/* DYNAMIC AVATAR INITIAL */}
                                     <div className="h-9 w-9 rounded-full bg-[#126dd5] flex items-center justify-center shadow-sm border border-white/50">
                                         <span className="text-white font-bold text-sm">{user.initial}</span>
                                     </div>
                                     <div className="text-left leading-tight hidden sm:block">
-                                        {/* DYNAMIC NAME */}
                                         <p className="text-sm font-bold text-[#0b1d3a] group-hover:text-[#126dd5] transition-colors">
                                             {user.name}
                                         </p>
-                                        {/* DYNAMIC ROLE */}
                                         <p className="text-[10px] uppercase tracking-wider font-semibold text-[#126dd5]/80">
                                             {user.role}
                                         </p>

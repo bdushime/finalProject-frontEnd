@@ -1,33 +1,29 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AdminLayout from '../components/AdminLayout'; 
+import AdminLayout from "../components/AdminLayout";
 import api from '@/utils/api';
-import { Search, Filter, Download, FileText, BarChart3, Table, Loader2 } from 'lucide-react';
+// 👇 FIXED: Added ChevronDown and AlertCircle to imports
+import { Search, Filter, Download, FileText, BarChart3, Table, Loader2, ChevronDown, AlertCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-// 👇 1. IMPORT GENERATOR
 import { generatePDF } from '@/utils/pdfGenerator';
 
 // CONSTANTS
-const ROLES = ["All Users", "Student", "Staff", "Admin"]; // Updated to "All Users" to match UI text but logic remains role-based or we can treat as user type
+const ROLES = ["All Users", "Student", "Staff", "Admin"];
 const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Lost", "Maintenance", "Damaged", "Stolen"];
 const TIME_RANGES = ["Last 30 Days", "Today", "This Week", "This Year"];
-const CATEGORIES = ["All Categories", "Laptops", "Cameras", "Audio", "Cables", "Tablets", "Accessories"]; // Mock categories for filter
-// const ROLES = ["All Roles", "Student", "IT_Staff", "Security"];
-const TABS = ["Active", "Overdue", "Returned", "Lost/Damaged"];
-// const TIME_RANGES = ["View All Time", "Today", "This Week"];
+const CATEGORIES = ["All Categories", "Laptops", "Cameras", "Audio", "Cables", "Tablets", "Accessories"];
 const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
 const ReportsPage = () => {
     const [reportMode, setReportMode] = useState('admin');
-    const [activeTab, setActiveTab] = useState("Active");
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
-// Filters
+    
+    // Filters
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedRole, setSelectedRole] = useState("All Users");
     const [timeRange, setTimeRange] = useState("Last 30 Days");
 
-    // 👇 2. GET CURRENT USER (For "Prepared By")
     const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'System Admin', role: 'Admin' };
 
     // FETCH DATA
@@ -36,7 +32,7 @@ const ReportsPage = () => {
             setLoading(true);
             try {
                 const params = {
-status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
+                    status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                     role: selectedRole === "All Users" ? undefined : selectedRole,
                     category: selectedCategory === "All Categories" ? undefined : selectedCategory,
                     timeRange
@@ -50,10 +46,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
             }
         };
         fetchData();
-}, [selectedStatus, selectedCategory, selectedRole, timeRange]);
-
-    // Filtered Data
-    const filteredData = data;
+    }, [selectedStatus, selectedCategory, selectedRole, timeRange]);
 
     // Chart Data
     const categoryStats = useMemo(() => {
@@ -64,23 +57,21 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
         return Object.keys(stats).map(key => ({ name: key, value: stats[key] }));
     }, [data]);
 
-    // 👇 3. HANDLE PDF GENERATION (Data Mapping)
+    // HANDLE PDF GENERATION
     const handleExportPDF = () => {
-        if (filteredData.length === 0) return alert("No data to export!");
+        if (data.length === 0) return alert("No data to export!");
 
-        // The Admin API returns flat data (row.item), but PDF Generator expects objects (item.equipment.name)
-        // We map it here to fit the generator's expected format
-        const formattedForPdf = filteredData.map(row => ({
-            createdAt: row.dateOut, // Map Date
+        const formattedForPdf = data.map(row => ({
+            createdAt: row.dateOut,
             status: row.status,
             equipment: {
                 name: row.item,
-                serialNumber: row.id.slice(-6).toUpperCase(), // Use truncated ID as serial
+                serialNumber: row.id.slice(-6).toUpperCase(),
                 category: row.category
             },
             user: {
                 username: row.user,
-                email: row.role // Using role as secondary info since email isn't in this specific view
+                email: row.role
             }
         }));
 
@@ -90,7 +81,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
     // --- RENDERERS ---
 
     const renderTable = () => (
-<div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
@@ -100,7 +91,9 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                             <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">ITEM NAME</th>
                             <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">CATEGORY</th>
                             <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">ASSIGNED TO</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">DATE BORROWED <AlertCircle className="w-3 h-3 inline text-slate-300 ml-1" /></th>
+                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                DATE BORROWED <AlertCircle className="w-3 h-3 inline text-slate-300 ml-1" />
+                            </th>
                             <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">STATUS</th>
                             <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">RISK</th>
                             <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">SCORE</th>
@@ -109,10 +102,10 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                     <tbody className="divide-y divide-slate-50">
                         {loading ? (
                             <tr><td colSpan="9" className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#8D8DC7]" /></td></tr>
-                        ) : filteredData.length === 0 ? (
+                        ) : data.length === 0 ? (
                             <tr><td colSpan="9" className="p-12 text-center text-slate-400">No records found matching your filters.</td></tr>
                         ) : (
-                            filteredData.map((row, index) => {
+                            data.map((row, index) => {
                                 const riskLevel = row.responsibilityScore < 50 ? 'High' : row.responsibilityScore < 80 ? 'Medium' : 'Low';
                                 const statusColor =
                                     row.status === 'Overdue' ? 'text-red-500 font-bold' :
@@ -154,10 +147,14 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
                 </table>
             </div>
             <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-end gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors text-rose-500 hover:border-rose-200 hover:bg-rose-50">
+                {/* 👇 FIXED: Added onClick handler to actually generate PDF */}
+                <button 
+                    onClick={handleExportPDF}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors text-rose-500 hover:border-rose-200 hover:bg-rose-50"
+                >
                     <FileText className="w-4 h-4" /> Export PDF
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50">
+                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50">
                     <Table className="w-4 h-4" /> Export Excel
                 </button>
             </div>
@@ -167,7 +164,7 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10 w-full">
             <div>
-<h1 className="text-3xl font-bold text-white mb-2">System Reports</h1>
+                <h1 className="text-3xl font-bold text-white mb-2">System Reports</h1>
                 <p className="text-slate-400">Generate and export detailed system logs and inventories.</p>
             </div>
             <div className="bg-slate-800 p-1 rounded-xl flex gap-1 mt-4 md:mt-0">
@@ -184,106 +181,103 @@ status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
     return (
         <AdminLayout heroContent={HeroSection}>
             <div className="space-y-6">
-{/* Mode: Admin Table */}
+                {/* Mode: Admin Table */}
                 {reportMode === 'admin' && (
                     <>
-                        {/* Mode: Admin Table */}
-                        {reportMode === 'admin' && (
-                            <>
-                                {/* Filters Card */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-6">
-                                    <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
-                                        <Filter className="w-5 h-5 text-slate-400" />
-                                        <div>
-                                            <h3 className="font-bold text-slate-800 text-sm">Report Filters</h3>
-                                            <p className="text-xs text-gray-400">Customize your report by selecting filters below</p>
-                                        </div>
-                                    </div>
+                        {/* Filters Card */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-6">
+                            <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
+                                <Filter className="w-5 h-5 text-slate-400" />
+                                <div>
+                                    <h3 className="font-bold text-slate-800 text-sm">Report Filters</h3>
+                                    <p className="text-xs text-gray-400">Customize your report by selecting filters below</p>
+                                </div>
+                            </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                        {/* Date Range */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                                Date Range <span className="text-red-500">*</span>
-                                            </label>
-                                            <div className="relative">
-                                                <select
-                                                    value={timeRange}
-                                                    onChange={e => setTimeRange(e.target.value)}
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                                >
-                                                    {TIME_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                            </div>
-                                        </div>
-
-                                        {/* Category */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                                Equipment Category <span className="text-red-500">*</span>
-                                            </label>
-                                            <div className="relative">
-                                                <select
-                                                    value={selectedCategory}
-                                                    onChange={e => setSelectedCategory(e.target.value)}
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                                >
-                                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                            </div>
-                                        </div>
-
-                                        {/* Condition / Status */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                                Equipment & Condition
-                                            </label>
-                                            <div className="relative">
-                                                <select
-                                                    value={selectedStatus}
-                                                    onChange={e => setSelectedStatus(e.target.value)}
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                                >
-                                                    {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                            </div>
-                                        </div>
-
-                                        {/* User Filter */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                                User Filter
-                                            </label>
-                                            <div className="relative">
-                                                <select
-                                                    value={selectedRole}
-                                                    onChange={e => setSelectedRole(e.target.value)}
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                                >
-                                                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-end gap-3 pt-2">
-                                        <button onClick={() => {
-                                            setSelectedStatus("All Statuses");
-                                            setSelectedCategory("All Categories");
-                                            setSelectedRole("All Users");
-                                            setTimeRange("Last 30 Days");
-                                        }} className="px-6 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                                            <Filter className="w-4 h-4" /> Reset Filters
-                                        </button>
-                                        <button className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 flex items-center gap-2 shadow-lg shadow-slate-900/10">
-                                            <Filter className="w-4 h-4" /> Generate Report
-                                        </button>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                {/* Date Range */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                        Date Range <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            value={timeRange}
+                                            onChange={e => setTimeRange(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
+                                        >
+                                            {TIME_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                                     </div>
                                 </div>
+
+                                {/* Category */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                        Equipment Category <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedCategory}
+                                            onChange={e => setSelectedCategory(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
+                                        >
+                                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                {/* Condition / Status */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                        Equipment & Condition
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedStatus}
+                                            onChange={e => setSelectedStatus(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
+                                        >
+                                            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                {/* User Filter */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                        User Filter
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedRole}
+                                            onChange={e => setSelectedRole(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
+                                        >
+                                            {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button onClick={() => {
+                                    setSelectedStatus("All Statuses");
+                                    setSelectedCategory("All Categories");
+                                    setSelectedRole("All Users");
+                                    setTimeRange("Last 30 Days");
+                                }} className="px-6 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                                    <Filter className="w-4 h-4" /> Reset Filters
+                                </button>
+                                <button className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 flex items-center gap-2 shadow-lg shadow-slate-900/10">
+                                    <Filter className="w-4 h-4" /> Generate Report
+                                </button>
+                            </div>
+                        </div>
 
                                 {renderTable()}
                             </>
