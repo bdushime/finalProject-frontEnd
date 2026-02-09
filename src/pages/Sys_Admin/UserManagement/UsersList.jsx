@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout'; 
 import api from '@/utils/api';
-// Added CreditCard icon for Student ID
-import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard } from 'lucide-react';
+import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Define roles and statuses
+// Define roles
 const ROLES = ['All Roles', 'Student', 'IT_Staff', 'Security', 'Admin'];
 const STATUSES = ['All Status', 'Active', 'Inactive'];
 
@@ -17,6 +16,7 @@ const UsersList = () => {
     
     // Modals State
     const [showAddUserModal, setShowAddUserModal] = useState(false);
+    const [showEditUserModal, setShowEditUserModal] = useState(false); // <--- NEW: Edit Modal State
     const [showScoreModal, setShowScoreModal] = useState(false); 
     const [selectedUser, setSelectedUser] = useState(null); 
     const [newScore, setNewScore] = useState(100); 
@@ -25,16 +25,16 @@ const UsersList = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Form Data (Add User) - UPDATED with studentId
-    const [newUser, setNewUser] = useState({ 
+    // Form Data (Add/Edit User)
+    const [formData, setFormData] = useState({ 
         firstName: '', 
         lastName: '', 
         email: '', 
         role: 'Student', 
         department: '',
-        studentId: '' // <--- Added this field
+        studentId: '' 
     });
-    const [creating, setCreating] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     // 1. FETCH USERS
     const fetchUsers = async () => {
@@ -55,31 +55,69 @@ const UsersList = () => {
 
     // 2. HANDLE ADD USER
     const handleAddUser = async () => {
-        setCreating(true);
+        setSubmitting(true);
         try {
-            // Combine names for backend compatibility if needed, or send separately if backend supports it
-            // Assuming backend expects fullName, or constructs it
             const payload = {
-                ...newUser,
-                // Only send studentId if role is student, or send anyway (backend ignores if unneeded)
-                studentId: newUser.role === 'Student' ? newUser.studentId : undefined 
+                ...formData,
+                studentId: formData.role === 'Student' ? formData.studentId : undefined 
             };
 
             await api.post('/users', payload);
             toast.success("User created successfully!");
             setShowAddUserModal(false);
-            // Reset form
-            setNewUser({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '' });
+            setFormData({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '' });
             fetchUsers(); 
         } catch (err) {
             console.error(err);
             toast.error("Failed to create user. Email or ID may exist.");
         } finally {
-            setCreating(false);
+            setSubmitting(false);
         }
     };
 
-    // 3. HANDLE DELETE USER
+    // 3. OPEN EDIT MODAL
+    const openEditModal = (user) => {
+        setSelectedUser(user);
+        // Split full name if needed, or just use what we have. 
+        // Assuming user object has firstName/lastName or we parse fullName
+        const names = (user.fullName || user.username || "").split(' ');
+        const firstName = user.firstName || names[0] || "";
+        const lastName = user.lastName || names.slice(1).join(' ') || "";
+
+        setFormData({
+            firstName,
+            lastName,
+            email: user.email || "",
+            role: user.role || "Student",
+            department: user.department || "",
+            studentId: user.studentId || ""
+        });
+        setShowEditUserModal(true);
+    };
+
+    // 4. HANDLE UPDATE USER
+    const handleUpdateUser = async () => {
+        if (!selectedUser) return;
+        setSubmitting(true);
+        try {
+            const payload = {
+                ...formData,
+                studentId: formData.role === 'Student' ? formData.studentId : undefined 
+            };
+
+            await api.put(`/users/${selectedUser._id}`, payload);
+            toast.success("User updated successfully!");
+            setShowEditUserModal(false);
+            fetchUsers();
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update user.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // 5. HANDLE DELETE USER
     const handleDeleteUser = async (id) => {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
         try {
@@ -91,17 +129,18 @@ const UsersList = () => {
         }
     };
 
-    // 4. OPEN SCORE MODAL
+    // 6. OPEN SCORE MODAL
     const openScoreModal = (user) => {
         setSelectedUser(user);
         setNewScore(user.responsibilityScore || 100); 
         setShowScoreModal(true);
     };
 
-    // 5. SAVE NEW SCORE
+    // 7. SAVE NEW SCORE
     const handleSaveScore = async () => {
         if (!selectedUser) return;
         
+        // Optimistic UI Update
         const updatedUsers = users.map(u => 
             u._id === selectedUser._id ? { ...u, responsibilityScore: newScore } : u
         );
@@ -114,7 +153,7 @@ const UsersList = () => {
         } catch (err) {
             console.error("Score update failed:", err);
             toast.error("Failed to update score in database");
-            fetchUsers(); 
+            fetchUsers(); // Revert on failure
         }
     };
 
@@ -123,9 +162,10 @@ const UsersList = () => {
         const fullName = user.fullName || user.username || "";
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.studentId && user.studentId.toLowerCase().includes(searchTerm.toLowerCase())); // Search by ID too
+            (user.studentId && user.studentId.toLowerCase().includes(searchTerm.toLowerCase())); 
         
         const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
+        // Mock status logic if not in backend yet
         const userStatus = user.status || 'Active'; 
         const matchesStatus = statusFilter === 'All Status' || userStatus === statusFilter;
 
@@ -159,7 +199,10 @@ const UsersList = () => {
                 <button onClick={() => setShowFilters(!showFilters)} className={`font-medium py-3 px-6 rounded-2xl shadow-lg border transition-all flex items-center ${showFilters ? 'bg-[#8D8DC7] text-white border-[#8D8DC7]' : 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700'}`}>
                     <Filter className="w-4 h-4 mr-2" /> Filters
                 </button>
-                <button onClick={() => setShowAddUserModal(true)} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-6 rounded-2xl shadow-lg shadow-[#8D8DC7]/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center">
+                <button onClick={() => {
+                    setFormData({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '' });
+                    setShowAddUserModal(true);
+                }} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-6 rounded-2xl shadow-lg shadow-[#8D8DC7]/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center">
                     <Plus className="w-5 h-5 mr-2" /> Add User
                 </button>
             </div>
@@ -216,7 +259,6 @@ const UsersList = () => {
                                                     <div className="font-semibold text-slate-800">{user.fullName || user.username}</div>
                                                     <div className="text-xs text-gray-500">
                                                         {user.email} 
-                                                        {/* SHOW ID IF STUDENT */}
                                                         {user.role === 'Student' && user.studentId && (
                                                             <span className="ml-2 bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-mono">
                                                                 #{user.studentId}
@@ -233,13 +275,11 @@ const UsersList = () => {
                                             </span>
                                         </td>
                                         <td className="p-4 text-sm text-gray-600 font-medium">{user.department || "General"}</td>
-                                        
                                         <td className="p-4">
                                             <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-sm font-bold border ${getScoreColor(user.responsibilityScore || 100)}`}>
                                                 {user.responsibilityScore ?? 100}
                                             </span>
                                         </td>
-
                                         <td className="p-4">
                                             <div className="flex items-center text-xs text-gray-500">
                                                 <Clock className="w-3 h-3 mr-1.5" />
@@ -248,15 +288,13 @@ const UsersList = () => {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                
                                                 <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
                                                     <Gavel className="w-4 h-4" />
                                                 </button>
-
-                                                <button className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Edit User">
+                                                {/* 👇 UPDATED: Attached onClick handler here */}
+                                                <button onClick={() => openEditModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Edit User">
                                                     <Edit className="w-4 h-4" />
                                                 </button>
-
                                                 {user.role !== 'Admin' && (
                                                     <button onClick={() => handleDeleteUser(user._id)} className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Delete User">
                                                         <Trash2 className="w-4 h-4" />
@@ -274,59 +312,91 @@ const UsersList = () => {
                 </div>
             </div>
 
-            {/* --- ADD USER MODAL (UPDATED) --- */}
+            {/* --- ADD USER MODAL --- */}
             {showAddUserModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
                         <button onClick={() => setShowAddUserModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
                         <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">New User Profile</h2><p className="text-gray-500">Default password: <strong>password123</strong></p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleAddUser(); }}>
-                            
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.firstName} onChange={e => setNewUser({...newUser, firstName: e.target.value})} required />
-                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.lastName} onChange={e => setNewUser({...newUser, lastName: e.target.value})} required />
+                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
+                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
                             </div>
-                            
-                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} required />
-                            
+                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
                                     <option value="Student">Student</option>
                                     <option value="IT_Staff">IT Staff</option>
                                     <option value="Security">Security</option>
                                     <option value="Admin">Admin</option>
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})}>
                                     <option value="">Select Dept...</option>
                                     <option value="Software Engineering">Software Engineering</option>
                                     <option value="IT Services">IT Services</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="Networking">Networking</option>
                                 </select>
                             </div>
-
-                            {/* 👇 NEW: STUDENT ID FIELD (Only shows if role is Student) */}
-                            {newUser.role === 'Student' && (
+                            {formData.role === 'Student' && (
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input 
-                                        type="text" 
-                                        placeholder="Student ID (e.g. 2024001)" 
-                                        className="w-full pl-10 p-3 rounded-xl border border-gray-200" 
-                                        value={newUser.studentId} 
-                                        onChange={e => setNewUser({...newUser, studentId: e.target.value})} 
-                                    />
+                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} />
                                 </div>
                             )}
-
                             <div className="pt-6 flex gap-3">
                                 <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">Cancel</button>
-                                <button type="submit" disabled={creating} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800">{creating ? "Creating..." : "Create User"}</button>
+                                <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800">{submitting ? "Creating..." : "Create User"}</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* --- SCORE MANAGEMENT MODAL --- */}
+            {/* --- EDIT USER MODAL (NEW) --- */}
+            {showEditUserModal && selectedUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
+                        <button onClick={() => setShowEditUserModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
+                        <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">Edit User Profile</h2><p className="text-gray-500">Updating details for <strong>{selectedUser.fullName || selectedUser.username}</strong></p></div>
+                        <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleUpdateUser(); }}>
+                            <div className="grid grid-cols-2 gap-5">
+                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
+                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
+                            </div>
+                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                            <div className="grid grid-cols-2 gap-5">
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                                    <option value="Student">Student</option>
+                                    <option value="IT_Staff">IT Staff</option>
+                                    <option value="Security">Security</option>
+                                    <option value="Admin">Admin</option>
+                                </select>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})}>
+                                    <option value="">Select Dept...</option>
+                                    <option value="Software Engineering">Software Engineering</option>
+                                    <option value="IT Services">IT Services</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="Networking">Networking</option>
+                                </select>
+                            </div>
+                            {formData.role === 'Student' && (
+                                <div className="relative">
+                                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} />
+                                </div>
+                            )}
+                            <div className="pt-6 flex gap-3">
+                                <button type="button" onClick={() => setShowEditUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">Cancel</button>
+                                <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-[#8D8DC7] hover:bg-[#7b7bb5]">{submitting ? "Saving..." : "Save Changes"}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* --- SCORE MODAL (UNCHANGED) --- */}
             {showScoreModal && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative text-center">
@@ -340,10 +410,7 @@ const UsersList = () => {
                         <p className="text-gray-500 text-sm mt-1">Adjust score for <span className="font-semibold text-slate-700">{selectedUser.fullName || selectedUser.username}</span></p>
 
                         <div className="flex items-center justify-center gap-6 my-8">
-                            <button 
-                                onClick={() => setNewScore(prev => Math.max(0, prev - 10))}
-                                className="w-12 h-12 rounded-full border-2 border-red-100 text-red-500 hover:bg-red-50 flex items-center justify-center transition-all active:scale-95"
-                            >
+                            <button onClick={() => setNewScore(prev => Math.max(0, prev - 10))} className="w-12 h-12 rounded-full border-2 border-red-100 text-red-500 hover:bg-red-50 flex items-center justify-center transition-all active:scale-95">
                                 <MinusCircle className="w-6 h-6" />
                             </button>
                             
@@ -354,10 +421,7 @@ const UsersList = () => {
                                 <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">Current Score</span>
                             </div>
 
-                            <button 
-                                onClick={() => setNewScore(prev => Math.min(100, prev + 10))}
-                                className="w-12 h-12 rounded-full border-2 border-green-100 text-green-500 hover:bg-green-50 flex items-center justify-center transition-all active:scale-95"
-                            >
+                            <button onClick={() => setNewScore(prev => Math.min(100, prev + 10))} className="w-12 h-12 rounded-full border-2 border-green-100 text-green-500 hover:bg-green-50 flex items-center justify-center transition-all active:scale-95">
                                 <PlusCircle className="w-6 h-6" />
                             </button>
                         </div>
@@ -373,7 +437,6 @@ const UsersList = () => {
                     </div>
                 </div>
             )}
-
         </AdminLayout>
     );
 };
