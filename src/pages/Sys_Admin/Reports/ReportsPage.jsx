@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import AdminLayout from "../components/AdminLayout";
 import api from '@/utils/api';
-// 👇 FIXED: Added ChevronDown and AlertCircle to imports
-import { Search, Filter, Download, FileText, BarChart3, Table, Loader2, ChevronDown, AlertCircle } from 'lucide-react';
+import { Search, Filter, Download, FileText, BarChart3, Table, Loader2, ChevronDown, AlertCircle, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { generatePDF } from '@/utils/pdfGenerator';
 
@@ -17,6 +16,7 @@ const ReportsPage = () => {
     const [reportMode, setReportMode] = useState('admin');
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
+    const [showExportMenu, setShowExportMenu] = useState(false); // <--- NEW: Toggle for export menu
     
     // Filters
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
@@ -57,11 +57,31 @@ const ReportsPage = () => {
         return Object.keys(stats).map(key => ({ name: key, value: stats[key] }));
     }, [data]);
 
-    // HANDLE PDF GENERATION
-    const handleExportPDF = () => {
+    // 👇 IMPROVED: HANDLE PDF GENERATION WITH TYPES
+    const handleExportPDF = (type = 'full') => {
         if (data.length === 0) return alert("No data to export!");
 
-        const formattedForPdf = data.map(row => ({
+        let filteredData = [...data];
+        let reportTitle = "ADMINISTRATIVE EQUIPMENT REPORT";
+
+        // Logic to filter data based on Report Type
+        if (type === 'risk') {
+            filteredData = data.filter(row => 
+                row.responsibilityScore < 60 || 
+                ['Overdue', 'Lost', 'Stolen', 'Damaged'].includes(row.status)
+            );
+            reportTitle = "HIGH RISK & INCIDENT REPORT";
+        } else if (type === 'active') {
+            filteredData = data.filter(row => row.status === 'Active' || row.status === 'Overdue');
+            reportTitle = "ACTIVE LOANS REPORT";
+        } else if (type === 'returned') {
+            filteredData = data.filter(row => row.status === 'Returned');
+            reportTitle = "RETURN HISTORY REPORT";
+        }
+
+        if (filteredData.length === 0) return alert(`No records found for ${reportTitle}`);
+
+        const formattedForPdf = filteredData.map(row => ({
             createdAt: row.dateOut,
             status: row.status,
             equipment: {
@@ -75,7 +95,8 @@ const ReportsPage = () => {
             }
         }));
 
-        generatePDF(formattedForPdf, currentUser, "ADMINISTRATIVE EQUIPMENT REPORT");
+        generatePDF(formattedForPdf, currentUser, reportTitle);
+        setShowExportMenu(false); // Close menu after click
     };
 
     // --- RENDERERS ---
@@ -146,14 +167,34 @@ const ReportsPage = () => {
                     </tbody>
                 </table>
             </div>
-            <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-end gap-3">
-                {/* 👇 FIXED: Added onClick handler to actually generate PDF */}
+            
+            {/* Footer with Smart Export */}
+            <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-end gap-3 relative">
+                
+                {/* 👇 NEW: Dropdown Menu */}
+                {showExportMenu && (
+                    <div className="absolute bottom-16 right-4 w-64 bg-white rounded-xl shadow-xl border border-slate-100 p-2 z-50 animate-in slide-in-from-bottom-2">
+                        <div className="text-xs font-bold text-slate-400 px-3 py-2 uppercase">Select Report Type</div>
+                        <button onClick={() => handleExportPDF('full')} className="w-full text-left px-3 py-2.5 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-slate-400" /> Full Detailed Report
+                        </button>
+                        <button onClick={() => handleExportPDF('active')} className="w-full text-left px-3 py-2.5 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700 flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Active Loans Only
+                        </button>
+                        <button onClick={() => handleExportPDF('risk')} className="w-full text-left px-3 py-2.5 hover:bg-red-50 rounded-lg text-sm font-medium text-red-600 flex items-center gap-2">
+                            <ShieldAlert className="w-4 h-4 text-red-500" /> High Risk & Overdue
+                        </button>
+                    </div>
+                )}
+
+                {/* Export Button toggles menu */}
                 <button 
-                    onClick={handleExportPDF}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors text-rose-500 hover:border-rose-200 hover:bg-rose-50"
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors text-slate-700 shadow-sm"
                 >
-                    <FileText className="w-4 h-4" /> Export PDF
+                    <Download className="w-4 h-4" /> Download Report <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
                 </button>
+
                 <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50">
                     <Table className="w-4 h-4" /> Export Excel
                 </button>

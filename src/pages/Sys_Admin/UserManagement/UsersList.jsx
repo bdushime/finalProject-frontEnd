@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout'; 
 import api from '@/utils/api';
-import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle } from 'lucide-react';
+// 👇 Added MessageSquare and Send icons
+import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Define roles
@@ -15,7 +16,9 @@ const UsersList = () => {
     // Modals State
     const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
-    const [showScoreModal, setShowScoreModal] = useState(false); 
+    const [showScoreModal, setShowScoreModal] = useState(false);
+    const [showMessageModal, setShowMessageModal] = useState(false); // <--- NEW: Message Modal
+    
     const [selectedUser, setSelectedUser] = useState(null); 
     const [newScore, setNewScore] = useState(100); 
 
@@ -31,9 +34,12 @@ const UsersList = () => {
         role: 'Student', 
         department: '',
         studentId: '',
-        status: 'Active', // <--- NEW: Status field
+        status: 'Active',
         password: '' 
     });
+
+    // Message Data
+    const [messageData, setMessageData] = useState({ subject: '', body: '' }); // <--- NEW
     const [submitting, setSubmitting] = useState(false);
 
     // 1. FETCH USERS
@@ -88,7 +94,7 @@ const UsersList = () => {
             role: user.role || "Student",
             department: user.department || "",
             studentId: user.studentId || "",
-            status: user.status || "Active", // Load current status
+            status: user.status || "Active",
             password: ""
         });
         setShowEditUserModal(true);
@@ -106,7 +112,7 @@ const UsersList = () => {
                 role: formData.role,
                 department: formData.department,
                 studentId: formData.role === 'Student' ? formData.studentId : undefined,
-                status: formData.status // Send updated status
+                status: formData.status
             };
 
             if (formData.password && formData.password.trim() !== "") {
@@ -126,14 +132,13 @@ const UsersList = () => {
         }
     };
 
-    // 5. HANDLE SUSPEND/ACTIVATE TOGGLE (Quick Action)
+    // 5. HANDLE SUSPEND/ACTIVATE
     const handleToggleStatus = async (user) => {
         const newStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
         const actionName = newStatus === 'Suspended' ? 'Suspended' : 'Activated';
         
         if (!window.confirm(`Are you sure you want to ${newStatus === 'Suspended' ? 'SUSPEND' : 'ACTIVATE'} this user?`)) return;
 
-        // Optimistic Update
         setUsers(users.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
 
         try {
@@ -141,7 +146,7 @@ const UsersList = () => {
             toast.success(`User ${actionName} successfully`);
         } catch (err) {
             toast.error("Failed to change status");
-            fetchUsers(); // Revert
+            fetchUsers(); 
         }
     };
 
@@ -181,6 +186,36 @@ const UsersList = () => {
         }
     };
 
+    // 8. 👇 NEW: MESSAGE LOGIC
+    const openMessageModal = (user) => {
+        setSelectedUser(user);
+        setMessageData({ subject: '', body: '' });
+        setShowMessageModal(true);
+    };
+
+    const handleSendMessage = async () => {
+        if (!messageData.subject || !messageData.body) {
+            return toast.error("Please provide both subject and message");
+        }
+        setSubmitting(true);
+        try {
+            // This endpoint should trigger both Email and DB Notification
+            await api.post('/notifications/send-to-user', { 
+                userId: selectedUser._id,
+                title: messageData.subject,
+                message: messageData.body,
+                type: 'info' // or 'warning', 'alert'
+            });
+            toast.success(`Message sent to ${selectedUser.fullName || selectedUser.username}`);
+            setShowMessageModal(false);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to send message");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     // Filter Logic
     const filteredUsers = users.filter(user => {
         const fullName = user.fullName || user.username || "";
@@ -191,7 +226,6 @@ const UsersList = () => {
         return matchesSearch && matchesRole;
     });
 
-    // Helper Styles
     const getRoleBadgeColor = (role) => {
         switch (role) {
             case 'Student': return 'bg-gray-100 text-gray-600 border-gray-200';
@@ -209,7 +243,6 @@ const UsersList = () => {
         return 'text-red-600 bg-red-50 border-red-100';
     };
 
-    // NEW: Status Badge Helper
     const getStatusColor = (status) => {
         if (status === 'Suspended') return 'bg-red-100 text-red-600 border-red-200';
         return 'bg-emerald-100 text-emerald-600 border-emerald-200';
@@ -298,7 +331,6 @@ const UsersList = () => {
                                                 {user.role}
                                             </span>
                                         </td>
-                                        {/* 👇 NEW: STATUS COLUMN */}
                                         <td className="p-4">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusColor(user.status || 'Active')}`}>
                                                 {user.status === 'Suspended' ? 'SUSPENDED' : 'ACTIVE'}
@@ -313,17 +345,19 @@ const UsersList = () => {
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
                                                 
-                                                {/* Edit Button */}
+                                                {/* 👇 NEW: Message Button */}
+                                                <button onClick={() => openMessageModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-blue-500 transition-colors" title="Send Message">
+                                                    <MessageSquare className="w-4 h-4" />
+                                                </button>
+
                                                 <button onClick={() => openEditModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Edit User">
                                                     <Edit className="w-4 h-4" />
                                                 </button>
 
-                                                {/* Score Button */}
                                                 <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
                                                     <Gavel className="w-4 h-4" />
                                                 </button>
 
-                                                {/* 👇 NEW: SUSPEND/ACTIVATE BUTTON */}
                                                 {user.role !== 'Admin' && (
                                                     <button 
                                                         onClick={() => handleToggleStatus(user)} 
@@ -334,7 +368,6 @@ const UsersList = () => {
                                                     </button>
                                                 )}
 
-                                                {/* Delete Button */}
                                                 {user.role !== 'Admin' && (
                                                     <button onClick={() => handleDeleteUser(user._id)} className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Delete User">
                                                         <Trash2 className="w-4 h-4" />
@@ -403,13 +436,10 @@ const UsersList = () => {
                                 <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
                             </div>
                             <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-                            
-                            {/* Password Reset */}
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                 <input type="password" placeholder="Reset Password (leave empty to keep)" className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:border-red-300 focus:ring-red-100" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
                             </div>
-
                             <div className="grid grid-cols-2 gap-5">
                                 <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
                                     <option value="Student">Student</option>
@@ -437,7 +467,7 @@ const UsersList = () => {
                 </div>
             )}
 
-            {/* --- SCORE MODAL (UNCHANGED) --- */}
+            {/* --- SCORE MODAL --- */}
             {showScoreModal && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative text-center">
@@ -447,7 +477,6 @@ const UsersList = () => {
                         </div>
                         <h2 className="text-xl font-bold text-slate-900">Manage Responsibility Score</h2>
                         <p className="text-gray-500 text-sm mt-1">Adjust score for <span className="font-semibold text-slate-700">{selectedUser.fullName || selectedUser.username}</span></p>
-
                         <div className="flex items-center justify-center gap-6 my-8">
                             <button onClick={() => setNewScore(prev => Math.max(0, prev - 10))} className="w-12 h-12 rounded-full border-2 border-red-100 text-red-500 hover:bg-red-50 flex items-center justify-center transition-all active:scale-95">
                                 <MinusCircle className="w-6 h-6" />
@@ -473,6 +502,57 @@ const UsersList = () => {
                     </div>
                 </div>
             )}
+
+            {/* --- 👇 NEW: MESSAGE MODAL --- */}
+            {showMessageModal && selectedUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
+                        <button onClick={() => setShowMessageModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
+                        
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Notify User</h2>
+                            <p className="text-gray-500 text-sm">
+                                Sending message to <span className="font-bold text-slate-700">{selectedUser.fullName || selectedUser.username}</span> ({selectedUser.email}).
+                                <br/>This will be sent via <span className="font-semibold text-indigo-600">Email</span> & <span className="font-semibold text-indigo-600">System Notification</span>.
+                            </p>
+                        </div>
+
+                        <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">Subject</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. Return Overdue Equipment" 
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all" 
+                                    value={messageData.subject} 
+                                    onChange={e => setMessageData({...messageData, subject: e.target.value})} 
+                                    required 
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">Message</label>
+                                <textarea 
+                                    rows="4"
+                                    placeholder="Type your message here..." 
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all resize-none" 
+                                    value={messageData.body} 
+                                    onChange={e => setMessageData({...messageData, body: e.target.value})} 
+                                    required 
+                                />
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button type="button" onClick={() => setShowMessageModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">Cancel</button>
+                                <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 flex items-center justify-center gap-2 shadow-lg transition-all">
+                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Send Notification</>}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
         </AdminLayout>
     );
 };
