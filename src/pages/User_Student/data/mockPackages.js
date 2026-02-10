@@ -1,8 +1,8 @@
 export const mockPackages = [
     {
         id: 'pkg_1',
-        name: 'Full Workstation Setup',
-        description: 'Complete desk setup for productivity.',
+        name: 'Workstation Setup [UPDATED]',
+        description: 'Complete desk setup for productivity (Verified Update).',
         items: ['Monitor', 'HDMI Cable', 'Keyboard', 'Mouse', 'Extension Cord']
     },
     {

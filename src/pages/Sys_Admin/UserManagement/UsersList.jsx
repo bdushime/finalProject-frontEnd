@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../components/AdminLayout'; 
+import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
 import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,7 +13,7 @@ const UsersList = () => {
     const [roleFilter, setRoleFilter] = useState('All Roles');
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [showFilters, setShowFilters] = useState(false);
-    
+
     // Modals State
     const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [showScoreModal, setShowScoreModal] = useState(false); // <--- NEW MODAL STATE
@@ -53,7 +53,7 @@ const UsersList = () => {
             toast.success("User created successfully!");
             setShowAddUserModal(false);
             setNewUser({ firstName: '', lastName: '', email: '', role: 'Student', department: '' });
-            fetchUsers(); 
+            fetchUsers();
         } catch (err) {
             console.error(err);
             toast.error("Failed to create user. Email may exist.");
@@ -84,9 +84,9 @@ const UsersList = () => {
     // 5. SAVE NEW SCORE (NEW)
     const handleSaveScore = async () => {
         if (!selectedUser) return;
-        
+
         // Optimistic UI Update (Update table immediately before server responds)
-        const updatedUsers = users.map(u => 
+        const updatedUsers = users.map(u =>
             u._id === selectedUser._id ? { ...u, responsibilityScore: newScore } : u
         );
         setUsers(updatedUsers);
@@ -108,9 +108,9 @@ const UsersList = () => {
         const fullName = user.fullName || user.username || "";
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
-        
+
         const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
-        const userStatus = user.status || 'Active'; 
+        const userStatus = user.status || 'Active';
         const matchesStatus = statusFilter === 'All Status' || userStatus === statusFilter;
 
         return matchesSearch && matchesRole && matchesStatus;
@@ -162,9 +162,9 @@ const UsersList = () => {
                         <input type="text" placeholder="Search by name or email..." className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                     {showFilters && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                            <div className="relative">
-                                <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+                        <div className="flex justify-end animate-in slide-in-from-top-2 fade-in duration-200">
+                            <div className="relative w-full md:w-64">
+                                <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8D8DC7] cursor-pointer" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                                     {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -211,7 +211,7 @@ const UsersList = () => {
                                             </span>
                                         </td>
                                         <td className="p-4 text-sm text-gray-600 font-medium">{user.department || "General"}</td>
-                                        
+
                                         {/* SCORE DATA CELL */}
                                         <td className="p-4">
                                             <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-sm font-bold border ${getScoreColor(user.responsibilityScore || 100)}`}>
@@ -227,7 +227,7 @@ const UsersList = () => {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                
+
                                                 {/* NEW: Edit Score Button */}
                                                 <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
                                                     <Gavel className="w-4 h-4" />
@@ -265,15 +265,15 @@ const UsersList = () => {
                             {/* ... (Existing form inputs for First Name, Last Name, Email, Role, Dept) ... */}
                             {/* I'll abbreviate to save space, assuming you keep your existing form inputs here */}
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.firstName} onChange={e => setNewUser({...newUser, firstName: e.target.value})} required />
-                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.lastName} onChange={e => setNewUser({...newUser, lastName: e.target.value})} required />
+                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.firstName} onChange={e => setNewUser({ ...newUser, firstName: e.target.value })} required />
+                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.lastName} onChange={e => setNewUser({ ...newUser, lastName: e.target.value })} required />
                             </div>
-                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} required />
+                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} required />
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })}>
                                     <option value="Student">Student</option><option value="IT_Staff">IT Staff</option><option value="Security">Security</option><option value="Admin">Admin</option>
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.department} onChange={e => setNewUser({...newUser, department: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={newUser.department} onChange={e => setNewUser({ ...newUser, department: e.target.value })}>
                                     <option value="">Select Dept...</option><option value="Software Engineering">Software Engineering</option><option value="IT Services">IT Services</option>
                                 </select>
                             </div>
@@ -291,22 +291,22 @@ const UsersList = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative text-center">
                         <button onClick={() => setShowScoreModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full text-gray-400"><X className="w-5 h-5" /></button>
-                        
+
                         <div className="w-16 h-16 bg-[#EBEBF5] rounded-full flex items-center justify-center mx-auto mb-4 text-[#8D8DC7]">
                             <Gavel className="w-8 h-8" />
                         </div>
-                        
+
                         <h2 className="text-xl font-bold text-slate-900">Manage Responsibility Score</h2>
                         <p className="text-gray-500 text-sm mt-1">Adjust score for <span className="font-semibold text-slate-700">{selectedUser.fullName || selectedUser.username}</span></p>
 
                         <div className="flex items-center justify-center gap-6 my-8">
-                            <button 
+                            <button
                                 onClick={() => setNewScore(prev => Math.max(0, prev - 10))}
                                 className="w-12 h-12 rounded-full border-2 border-red-100 text-red-500 hover:bg-red-50 flex items-center justify-center transition-all active:scale-95"
                             >
                                 <MinusCircle className="w-6 h-6" />
                             </button>
-                            
+
                             <div className="text-center">
                                 <div className={`text-4xl font-bold ${newScore < 50 ? 'text-red-500' : newScore < 80 ? 'text-yellow-500' : 'text-green-500'}`}>
                                     {newScore}
@@ -314,7 +314,7 @@ const UsersList = () => {
                                 <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">Current Score</span>
                             </div>
 
-                            <button 
+                            <button
                                 onClick={() => setNewScore(prev => Math.min(100, prev + 10))}
                                 className="w-12 h-12 rounded-full border-2 border-green-100 text-green-500 hover:bg-green-50 flex items-center justify-center transition-all active:scale-95"
                             >
