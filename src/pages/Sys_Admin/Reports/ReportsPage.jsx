@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 
 // CONSTANTS
 const ROLES = ["All Roles", "Student", "IT_Staff", "Staff", "Admin"];
-const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Lost", "Maintenance", "Damaged", "Stolen", "Inactive"];
+const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Maintenance"];
+const RISK_LEVELS = ["All Levels", "Low", "Medium", "High"];
 const TIME_RANGES = ["Last 30 Days", "Today", "This Week", "This Year"];
 const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
 
@@ -28,6 +29,7 @@ const ReportsPage = () => {
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedRole, setSelectedRole] = useState("All Roles");
+    const [selectedRiskLevel, setSelectedRiskLevel] = useState("All Levels");
 
     const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'System Admin', role: 'Admin' };
 
@@ -37,6 +39,7 @@ const ReportsPage = () => {
         setSelectedStatus("All Statuses");
         setSelectedCategory("All Categories");
         setSelectedRole("All Roles");
+        setSelectedRiskLevel("All Levels");
         setData([]); // Clear data briefly
     };
 
@@ -54,8 +57,10 @@ const ReportsPage = () => {
                     params = { startDate, endDate };
                 } else if (currentReport === 'users') {
                     endpoint = '/users';
+                    params = { startDate, endDate };
                 } else if (currentReport === 'devices') {
                     endpoint = '/equipment/browse';
+                    params = { startDate, endDate };
                 }
 
                 if (endpoint) {
@@ -76,19 +81,27 @@ const ReportsPage = () => {
     const filteredData = useMemo(() => {
         if (!data) return [];
         return data.filter(item => {
-            // Common Filters
-            if (currentReport === 'activity' || currentReport === 'risk') {
-                const itemDate = new Date(item.dateOut || item.createdAt || item.date);
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                end.setHours(23, 59, 59, 999);
+            // Global Date Filter
+            const itemDate = new Date(item.dateOut || item.createdAt || item.date || item.updatedAt);
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
 
-                const dateMatch = !isNaN(itemDate) ? (itemDate >= start && itemDate <= end) : true;
+            const dateMatch = !isNaN(itemDate.getTime()) ? (itemDate >= start && itemDate <= end) : true;
+
+            // Specific Filters
+            if (currentReport === 'activity' || currentReport === 'risk') {
                 const statusMatch = selectedStatus === "All Statuses" || item.status === selectedStatus;
 
-                // Risk Assessment: Show activity data filtered by status/date
+                // Risk Assessment: Show activity data filtered by risk level/status/date
                 if (currentReport === 'risk') {
-                    return statusMatch && dateMatch;
+                    const score = item.responsibilityScore || (item.status === 'Overdue' ? 40 : 100);
+                    let level = "Low";
+                    if (score < 50) level = "High";
+                    else if (score < 80) level = "Medium";
+
+                    const riskMatch = selectedRiskLevel === "All Levels" || level === selectedRiskLevel;
+                    return riskMatch && dateMatch;
                 }
 
                 return statusMatch && dateMatch;
@@ -96,21 +109,20 @@ const ReportsPage = () => {
 
             if (currentReport === 'users') {
                 const roleMatch = selectedRole === "All Roles" || item.role === selectedRole;
-                // Users might not have 'status' field consistent with 'selectedStatus' unless mapped
-                // Let's assume 'Active' / 'Inactive' if available, otherwise ignore status filter for users for now
-                return roleMatch;
+                return roleMatch && dateMatch;
             }
 
             if (currentReport === 'devices') {
-                const catMatch = selectedCategory === "All Categories" || (item.category || item.type) === selectedCategory;
-                // Allow status filter for devices too? 
-                const statusMatch = selectedStatus === "All Statuses" || item.status === selectedStatus;
-                return catMatch && statusMatch;
+                // Device Inventory now uses Status filter instead of Category
+                const statusMatch = selectedStatus === "All Statuses" ||
+                    (item.status === selectedStatus) ||
+                    (selectedStatus === 'Active' && (item.available > 0 || item.status === 'Available'));
+                return statusMatch && dateMatch;
             }
 
             return true;
         });
-    }, [data, currentReport, selectedStatus, selectedRole, selectedCategory]);
+    }, [data, currentReport, selectedStatus, selectedRole, selectedCategory, selectedRiskLevel, startDate, endDate]);
 
     // Stats Calculation
     const stats = useMemo(() => {
@@ -190,9 +202,9 @@ const ReportsPage = () => {
                     { header: "Location", accessor: "location", render: (row) => row.location || "Main Storage" },
                     {
                         header: "Status", render: (row) => (
-                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${(row.available > 0 || row.status === 'Available') ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${(row.available > 0 || row.status === 'Available' || row.status === 'Active') ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
                                 }`}>
-                                {row.available > 0 || row.status === 'Available' ? 'Available' : row.status || 'Unavailable'}
+                                {(row.available > 0 || row.status === 'Available' || row.status === 'Active') ? 'Active' : row.status || 'Unavailable'}
                             </span>
                         )
                     }
@@ -402,38 +414,40 @@ const ReportsPage = () => {
                 {/* Filters Row */}
                 <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
                     <div className="flex items-center gap-3">
-                        {/* Date Range Picker (Only for Activity/Risk) */}
-                        {(currentReport === 'activity' || currentReport === 'risk') && (
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all">
-                                <FileText className="w-4 h-4 text-slate-400" />
-                                <div className="flex items-center gap-1 text-sm font-medium text-slate-600">
-                                    <input
-                                        type="date"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                        className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
-                                    />
-                                    <span className="text-slate-400">to</span>
-                                    <input
-                                        type="date"
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
-                                        className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
-                                    />
-                                </div>
-                                <ChevronDown className="w-4 h-4 text-slate-400" />
+                        {/* Date Range Picker (Now for All Reports) */}
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all">
+                            <FileText className="w-4 h-4 text-slate-400" />
+                            <div className="flex items-center gap-1 text-sm font-medium text-slate-600">
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
+                                />
+                                <span className="text-slate-400">to</span>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
+                                />
                             </div>
-                        )}
+                            <ChevronDown className="w-4 h-4 text-slate-400" />
+                        </div>
 
-                        {/* Status / Role / Category Filter based on Report */}
+                        {/* Status / Role / Category / Risk Filter based on Report */}
                         <div className="relative">
                             {currentReport === 'users' ? (
                                 <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
                                     {ROLES.map(s => <option key={s} value={s}>{s}</option>)}
                                 </select>
                             ) : currentReport === 'devices' ? (
-                                <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
-                                    {CATEGORIES.map(s => <option key={s} value={s}>{s}</option>)}
+                                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
+                                    {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            ) : currentReport === 'risk' ? (
+                                <select value={selectedRiskLevel} onChange={(e) => setSelectedRiskLevel(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
+                                    {RISK_LEVELS.map(s => <option key={s} value={s}>{s}</option>)}
                                 </select>
                             ) : (
                                 <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
@@ -474,15 +488,13 @@ const ReportsPage = () => {
                         <div>
                             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Filter By:</h4>
                             <div className="space-y-2 text-sm text-slate-700">
-                                {(currentReport === 'activity' || currentReport === 'risk') && (
-                                    <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
-                                        <span className="font-semibold text-slate-500">Date Range:</span>
-                                        <span className="font-bold">{startDate} to {endDate}</span>
-                                    </div>
-                                )}
+                                <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
+                                    <span className="font-semibold text-slate-500">Date Range:</span>
+                                    <span className="font-bold">{startDate} to {endDate}</span>
+                                </div>
                                 <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
                                     <span className="font-semibold text-slate-500">Status:</span>
-                                    <span className="font-bold">{selectedStatus}</span>
+                                    <span className="font-bold text-capitalize">{currentReport === 'risk' ? selectedRiskLevel : selectedStatus}</span>
                                 </div>
                                 {currentReport === 'users' && (
                                     <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
