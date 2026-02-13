@@ -135,13 +135,6 @@ export default function CurrentCheckouts() {
         }
     };
 
-            fetchActive();
-        } catch (err) {
-            console.error("Action failed", err);
-            toast.error("Failed to update status.");
-        }
-    };
-
     // Submit Rejection Reason
     const handleRejectSubmit = async () => {
         if (!rejectionReason.trim()) {
@@ -163,20 +156,6 @@ export default function CurrentCheckouts() {
             toast.error("Failed to deny request");
         } finally {
             setProcessing(false);
-        }
-    };
-
-    // Cancel Reservation
-    const handleCancel = async (e, id) => {
-        e.stopPropagation();
-        if (!confirm("Cancel this reservation?")) return;
-
-        try {
-            await api.post(`/transactions/cancel/${id}`);
-            toast.success("Reservation cancelled");
-            fetchActive();
-        } catch (err) {
-            toast.error("Failed to cancel");
         }
     };
 
