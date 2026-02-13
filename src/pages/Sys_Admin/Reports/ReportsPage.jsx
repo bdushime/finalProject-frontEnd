@@ -320,9 +320,7 @@ const ReportsPage = () => {
                             </div>
                         </div>
 
-                                {renderTable()}
-                            </>
-                        )}
+                        {renderTable()}
                     </>
                 )}
 
