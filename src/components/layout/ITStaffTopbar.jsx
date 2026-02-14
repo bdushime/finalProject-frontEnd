@@ -57,7 +57,6 @@ export default function ITStaffTopbar({ onMenuClick }) {
         }
     }, []);
 
-    // Close mobile menu on route change
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [location.pathname]);

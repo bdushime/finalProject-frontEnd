@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AdminLayout from '../components/AdminLayout';
+import AdminLayout from "../components/AdminLayout";
 import api from '@/utils/api';
-import { Download, FileText, Users, Monitor, ShieldAlert, Loader2, ChevronDown } from 'lucide-react';
+import { Download, FileText, Users, Monitor, ShieldAlert, Loader2, ChevronDown, Table, BarChart3, Search, Filter, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { toast } from 'sonner';
 
@@ -11,12 +11,15 @@ const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Maintenance"
 const RISK_LEVELS = ["All Levels", "Low", "Medium", "High"];
 const TIME_RANGES = ["Last 30 Days", "Today", "This Week", "This Year"];
 const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
+const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
 const ReportsPage = () => {
     // Report Mode / State
     const [currentReport, setCurrentReport] = useState('activity');
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
+    const [showExportMenu, setShowExportMenu] = useState(false);
+
     // Date Range State
     const [startDate, setStartDate] = useState(() => {
         const d = new Date();
@@ -48,23 +51,19 @@ const ReportsPage = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                let res;
                 let endpoint = '';
-                let params = {};
+                let params = { startDate, endDate };
 
                 if (currentReport === 'activity' || currentReport === 'risk') {
                     endpoint = '/reports';
-                    params = { startDate, endDate };
                 } else if (currentReport === 'users') {
                     endpoint = '/users';
-                    params = { startDate, endDate };
                 } else if (currentReport === 'devices') {
                     endpoint = '/equipment/browse';
-                    params = { startDate, endDate };
                 }
 
                 if (endpoint) {
-                    res = await api.get(endpoint, { params });
+                    const res = await api.get(endpoint, { params });
                     setData(res.data);
                 }
             } catch (err) {
@@ -113,7 +112,6 @@ const ReportsPage = () => {
             }
 
             if (currentReport === 'devices') {
-                // Device Inventory now uses Status filter instead of Category
                 const statusMatch = selectedStatus === "All Statuses" ||
                     (item.status === selectedStatus) ||
                     (selectedStatus === 'Active' && (item.available > 0 || item.status === 'Available'));
@@ -140,12 +138,11 @@ const ReportsPage = () => {
         } else if (currentReport === 'devices') {
             label1 = "Total Devices";
             label2 = "Available";
-            label3 = "Offline"; // or In Use?
+            label3 = "Broken/Maint.";
             stat1 = total;
             stat2 = filteredData.filter(d => d.available > 0 || d.status === 'Available').length;
             stat3 = filteredData.filter(d => d.status === 'Maintenance' || d.status === 'Broken').length;
         } else {
-            // Activity / Risk
             label1 = "Total Records";
             label2 = "Active";
             label3 = "Overdue";
@@ -306,7 +303,6 @@ const ReportsPage = () => {
     const handleExportPDF = () => {
         if (filteredData.length === 0) return toast.error("No data to export!");
 
-        // Adapt data for PDF Layout
         const formattedForPdf = filteredData.map(row => ({
             createdAt: row.dateOut || row.createdAt || new Date().toISOString(),
             status: row.status || 'Active',
@@ -328,15 +324,11 @@ const ReportsPage = () => {
         if (filteredData.length === 0) return toast.error("No data to export!");
 
         try {
-            // Generate CSV from filtered data
             const headers = getColumns().map(c => c.header).join(',');
             const rows = filteredData.map(row => {
                 const columns = getColumns();
                 return columns.map(col => {
-                    // For simplicity, we just extract text or accessor
                     if (col.accessor) return row[col.accessor] || "N/A";
-                    // If it's a render function, we'd need to extract text which is complex.
-                    // Let's use a simplified approach for Excel export
                     if (currentReport === 'users') return row.fullName || row.username || row.email;
                     if (currentReport === 'devices') return row.name || row.serialNumber;
                     return row.item || row.equipment?.name || "N/A";
@@ -398,9 +390,6 @@ const ReportsPage = () => {
                 <p className="text-blue-100 max-w-2xl opacity-80">
                     Detailed analysis and exportable logs for system auditing.
                 </p>
-            </div>
-            <div className="flex flex-col gap-4 items-end mt-4 md:mt-0">
-                {/* Timeline removed per user request */}
             </div>
         </div>
     );

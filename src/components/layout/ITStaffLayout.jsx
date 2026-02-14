@@ -3,7 +3,7 @@ import ITStaffTopbar from "./ITStaffTopbar";
 
 export default function ITStaffLayout({ children, maxWidth = "max-w-[1400px]" }) {
     return (
-        <div className="bg-linear-to-br from-white to-yellow-100">
+        <div className="min-h-screen bg-gradient-to-br from-white to-yellow-50">
             {/* IT Staff Topbar */}
             <ITStaffTopbar />
 

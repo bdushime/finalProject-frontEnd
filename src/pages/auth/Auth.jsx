@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AtSign } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AtSign, CreditCard } from "lucide-react";
 import { toast } from "sonner"; 
-import api from "@/utils/api";   
+import api from "@/utils/api"; 
+// 👇 IMPORT AUTH CONTEXT
+import { useAuth } from "./AuthContext";
 
 export default function Auth() {
     const [isSignUp, setIsSignUp] = useState(false);
@@ -10,11 +12,17 @@ export default function Auth() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    
+    // 👇 GET LOGIN FUNCTION FROM CONTEXT
+    const { login } = useAuth();
 
     const [loginData, setLoginData] = useState({ email: "", password: "" });
+    
+    // --- UPDATED STATE TO INCLUDE STUDENT ID ---
     const [signUpData, setSignUpData] = useState({
         name: "",
-        username: "", 
+        username: "",
+        studentId: "", // <--- Added this
         email: "",
         password: "",
         confirmPassword: ""
@@ -28,37 +36,32 @@ export default function Auth() {
         try {
             const res = await api.post('/auth/login', loginData);
 
-            // A. Save Data
+            // A. Save Token Manually
             localStorage.setItem('token', res.data.token);
-            localStorage.setItem('user', JSON.stringify(res.data));
+
+            // B. Update Context State (This updates the UI immediately & saves 'user' to localstorage)
+            login(res.data);
             
             toast.success(`Welcome back, ${res.data.username}!`);
 
-            // B. ROUTING LOGIC - Updated for Security & IT Fixes 🚦
+            // C. ROUTING LOGIC
             const role = res.data.role;
 
             switch(role) {
                 case 'Student':
                     navigate("/student/dashboard");
                     break;
-                
                 case 'Admin':
                     navigate("/admin/dashboard");
                     break;
-                
-                // 👇 This is the new role we added!
                 case 'Security':
                     navigate("/security/dashboard");
                     break;
-                
-                // 👇 Handles both 'IT' and 'IT_Staff' just in case
                 case 'IT':
                 case 'IT_Staff': 
                     navigate("/it/dashboard");
                     break;
-                
                 default:
-                    // If the role is unknown, default to student
                     console.warn("Unknown role detected:", role);
                     navigate("/student/dashboard");
             }
@@ -83,19 +86,20 @@ export default function Auth() {
         setIsLoading(true);
 
         try {
+            // --- UPDATED PAYLOAD TO SEND STUDENT ID ---
             const payload = {
                 fullName: signUpData.name,
                 username: signUpData.username,
+                studentId: signUpData.studentId, // <--- Included in payload
                 email: signUpData.email,
                 password: signUpData.password
-                // Note: Standard signup defaults to 'Student' in your backend
             };
 
             await api.post('/auth/register', payload);
 
             toast.success("Account created successfully! Please sign in.");
             toggleMode(); 
-            setSignUpData({ name: "", username: "", email: "", password: "", confirmPassword: "" });
+            setSignUpData({ name: "", username: "", studentId: "", email: "", password: "", confirmPassword: "" });
 
         } catch (err) {
             console.error(err);
@@ -223,7 +227,8 @@ export default function Auth() {
                 }}>
                     <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "#111827" }}>Create Account</h1>
                     
-                    <form onSubmit={handleSignUpSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                    {/* Added overflow-y-auto to allow scrolling if form gets too tall on small screens */}
+                    <form onSubmit={handleSignUpSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.6rem", overflowY: 'auto', maxHeight: '550px', paddingRight: '5px' }}>
                         <div>
                             <label style={labelStyle}>Full Name</label>
                             <div style={{ position: "relative" }}>
@@ -239,6 +244,23 @@ export default function Auth() {
                                 <input type="text" placeholder="johndoe123" value={signUpData.username} onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value })} required style={inputStyle} />
                             </div>
                         </div>
+
+                        {/* --- NEW STUDENT ID FIELD --- */}
+                        <div>
+                            <label style={labelStyle}>Student ID</label>
+                            <div style={{ position: "relative" }}>
+                                <CreditCard style={iconStyle} />
+                                <input 
+                                    type="text" 
+                                    placeholder="2024001" 
+                                    value={signUpData.studentId} 
+                                    onChange={(e) => setSignUpData({ ...signUpData, studentId: e.target.value })} 
+                                    required 
+                                    style={inputStyle} 
+                                />
+                            </div>
+                        </div>
+                        {/* --------------------------- */}
 
                         <div>
                             <label style={labelStyle}>Email Address</label>
