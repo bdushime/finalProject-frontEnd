@@ -16,77 +16,80 @@ import { useAuth } from "@/pages/auth/AuthContext";
 import logo from "@/assets/tracknity_logo.jpeg";
 import smallLogo from "@/assets/logo_small.png";
 import PropTypes from "prop-types";
-
-const navigationLinks = [
-  { label: "Dashboard", path: "/security/dashboard", icon: LayoutGrid },
-  { label: "Devices", path: "/security/devices", icon: Package },
-  { label: "Active Checkouts", path: "/security/active-checkouts", icon: ClipboardList },
-  { label: "Access Logs", path: "/security/logs", icon: ShieldAlert },
-  { label: "Reports", path: "/security/reports", icon: FileText },
-];
-
-// Page-specific headers with titles and descriptions
-const getPageHeaders = () => {
-  const hour = new Date().getHours();
-  let timeGreeting = "Good morning";
-  if (hour >= 12 && hour < 18) {
-    timeGreeting = "Good afternoon";
-  } else if (hour >= 18) {
-    timeGreeting = "Good evening";
-  }
-
-  return {
-    "/security/dashboard": {
-      title: `${timeGreeting}, Security Officer!`,
-      description: "Monitor equipment access, security events, and system activity in real-time",
-      actionButton: { label: "New Log Entry", path: "/security/logs", icon: Plus },
-    },
-    "/security/devices": {
-      title: "Device Management",
-      description: "Browse, add, edit, and manage all equipment in the system. Track device status, location, and availability",
-      actionButton: { label: "Add Device", path: "/security/devices", icon: Plus },
-    },
-    "/security/active-checkouts": {
-      title: "Active Checkouts",
-      description: "View and monitor all currently checked out equipment. Track due dates, borrowers, and checkout status",
-      actionButton: { label: "New Checkout", path: "/security/active-checkouts", icon: Plus },
-    },
-    "/security/logs": {
-      title: "Access Logs",
-      description: "View comprehensive logs of all equipment access activities, security events, and system operations",
-      actionButton: { label: "New Log Entry", path: "/security/logs", icon: Plus },
-    },
-    "/security/reports": {
-      title: "Reports",
-      description: "Generate and view detailed reports on equipment inventory, damaged items, lost equipment, and utilization statistics",
-      actionButton: null,
-    },
-    "/security/settings": {
-      title: "Settings",
-      description: "Configure system settings, security preferences, and user account options",
-      actionButton: null,
-    },
-    "/security/profile": {
-      title: "Profile",
-      description: "Manage your security officer profile, update personal information, and view account details",
-      actionButton: null,
-    },
-    "/security/notifications": {
-      title: "Notifications",
-      description: "View and manage all security alerts, system notifications, and important updates",
-      actionButton: null,
-    },
-  };
-};
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 function Topbar({ onMenuClick }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+  const { t } = useTranslation("common");
+  const { t: tSec } = useTranslation("security");
+
   const unreadCount = 3;
   const currentPath = location.pathname;
+
+  const navigationLinks = [
+    { label: t("nav.dashboard"), path: "/security/dashboard", icon: LayoutGrid },
+    { label: t("nav.devices"), path: "/security/devices", icon: Package },
+    { label: t("nav.checkouts"), path: "/security/active-checkouts", icon: ClipboardList },
+    { label: t("nav.accessLogs"), path: "/security/logs", icon: ShieldAlert },
+    { label: t("nav.reports"), path: "/security/reports", icon: FileText },
+  ];
+
+  // Page-specific headers
+  const getPageHeaders = () => {
+    const hour = new Date().getHours();
+    let timeGreeting = tSec("dashboard.title");
+    if (hour < 12) {
+      timeGreeting = `${t("nav.dashboard")}`;
+    }
+
+    return {
+      "/security/dashboard": {
+        title: tSec("dashboard.title"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/devices": {
+        title: tSec("devices.title"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/active-checkouts": {
+        title: tSec("dashboard.activeCheckouts"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/logs": {
+        title: tSec("accessLogs.title"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/reports": {
+        title: tSec("reports.title"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/settings": {
+        title: t("nav.config"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/profile": {
+        title: t("nav.profile"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/notifications": {
+        title: tSec("notifications.title"),
+        description: null,
+        actionButton: null,
+      },
+    };
+  };
+
   const pageHeaders = getPageHeaders();
   const pageHeader = pageHeaders[currentPath] || pageHeaders["/security/dashboard"];
 
@@ -104,9 +107,8 @@ function Topbar({ onMenuClick }) {
 
   const handleActionClick = () => {
     if (currentPath === "/security/devices") {
-      // For devices page, we'll trigger the add dialog via a custom event
       window.dispatchEvent(new CustomEvent("openAddDeviceDialog"));
-    } else {
+    } else if (pageHeader.actionButton) {
       navigate(pageHeader.actionButton.path);
     }
   };
@@ -126,7 +128,7 @@ function Topbar({ onMenuClick }) {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            
+
             <Link to="/security/dashboard" className="flex items-center gap-2">
               <img
                 src={smallLogo}
@@ -139,38 +141,39 @@ function Topbar({ onMenuClick }) {
                 className="hidden md:block h-10 w-auto rounded"
               />
             </Link>
-            </div>
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navigationLinks.map((link) => {
-                const Icon = link.icon;
-                const active = isLinkActive(link.path);
-                return (
-                  <NavLink
-                    key={link.path}
-                    to={link.path}
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                        active || isActive
-                          ? "bg-[#1A2240] text-white rounded-full"
-                          : "text-gray-300 hover:bg-white/10 hover:text-white"
-                      }`
-                    }
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{link.label}</span>
-                  </NavLink>
-                );
-              })}
-            </nav>
-          
+          </div>
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navigationLinks.map((link) => {
+              const Icon = link.icon;
+              const active = isLinkActive(link.path);
+              return (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${active || isActive
+                      ? "bg-[#1A2240] text-white rounded-full"
+                      : "text-gray-300 hover:bg-white/10 hover:text-white"
+                    }`
+                  }
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{link.label}</span>
+                </NavLink>
+              );
+            })}
+          </nav>
 
-          {/* Right: Notifications, User */}
+
+          {/* Right: Language Switcher, Notifications, User */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher variant="dark" />
+
             <Link
               to="/security/notifications"
               className="relative p-2 rounded-lg hover:bg-white/10 transition-colors"
-              aria-label="Notifications"
+              aria-label={t("nav.notifications")}
             >
               <Bell className="h-5 w-5 text-white" />
               {unreadCount > 0 && (
@@ -188,7 +191,7 @@ function Topbar({ onMenuClick }) {
                   className="flex items-center gap-2 text-white hover:bg-white/10"
                 >
                   <span className="hidden sm:block text-sm font-medium">
-                    {user?.name || "Security Officer"}
+                    {user?.name || t("roles.security")}
                   </span>
                   <Avatar className="h-8 w-8 border-2 border-white/20">
                     <AvatarFallback className="bg-[#BEBEE0] text-[#1A2240] text-sm font-semibold">
@@ -198,17 +201,14 @@ function Topbar({ onMenuClick }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("auth.myAccount")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/security/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/security/settings">Settings</Link>
+                  <Link to="/security/profile">{t("auth.myProfile")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Link to="/login">Logout</Link>
+                  <Link to="/login">{t("auth.logOut")}</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -228,10 +228,9 @@ function Topbar({ onMenuClick }) {
                     to={link.path}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        active || isActive
-                          ? "bg-[#1A2240] text-white"
-                          : "text-gray-300 hover:bg-white/10 hover:text-white"
+                      `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active || isActive
+                        ? "bg-[#1A2240] text-white"
+                        : "text-gray-300 hover:bg-white/10 hover:text-white"
                       }`
                     }
                   >
@@ -255,13 +254,8 @@ function Topbar({ onMenuClick }) {
             <p className="text-gray-200 text-sm sm:text-base mb-2">
               {formattedDate}
             </p>
-            {pageHeader.description && (
-              <p className="text-gray-400 text-sm sm:text-base max-w-2xl">
-                {pageHeader.description}
-              </p>
-            )}
           </div>
-          
+
           {/* Action Button */}
           {pageHeader.actionButton && (
             <Button

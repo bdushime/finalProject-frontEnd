@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/select";
 import { Search, Map as MapIcon, List } from "lucide-react";
 
+import { useTranslation } from "react-i18next";
+
 export default function IoTFiltersBar({
   searchQuery,
   onSearchChange,
@@ -17,6 +19,7 @@ export default function IoTFiltersBar({
   viewMode,
   onViewModeChange,
 }) {
+  const { t } = useTranslation(["itstaff"]);
   return (
     <div className="border-gray-200 shadow-sm rounded-lg">
       <div className="pt-6 px-4 pb-4">
@@ -24,7 +27,7 @@ export default function IoTFiltersBar({
           <div className="relative flex-1 w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by ID, equipment, or location..."
+              placeholder={t('iot.filters.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-9 border-gray-200 shadow-sm bg-background rounded-lg"
@@ -33,12 +36,12 @@ export default function IoTFiltersBar({
 
           <Select value={statusFilter} onValueChange={onStatusChange}>
             <SelectTrigger className="w-full sm:w-[180px] border-gray-200 shadow-sm bg-background rounded-lg">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t('iot.filters.statusPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="offline">Offline</SelectItem>
+              <SelectItem value="all">{t('iot.filters.allStatus')}</SelectItem>
+              <SelectItem value="online">{t('iot.filters.online')}</SelectItem>
+              <SelectItem value="offline">{t('iot.filters.offline')}</SelectItem>
             </SelectContent>
           </Select>
 

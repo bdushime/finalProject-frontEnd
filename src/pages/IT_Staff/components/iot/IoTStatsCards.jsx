@@ -1,32 +1,36 @@
 import { MapPin, Wifi, WifiOff, Battery } from "lucide-react";
 
+import { useTranslation } from "react-i18next";
+
 export default function IoTStatsCards({
   totalTrackers,
   onlineCount,
   offlineCount,
   lowBatteryCount,
 }) {
+  const { t } = useTranslation(["itstaff"]);
+
   const items = [
     {
-      label: "Total Trackers",
+      label: t('iot.stats.total'),
       value: totalTrackers,
       icon: MapPin,
       colorClass: "text-primary",
     },
     {
-      label: "Online",
+      label: t('iot.stats.online'),
       value: onlineCount,
       icon: Wifi,
       colorClass: "text-green-500",
     },
     {
-      label: "Offline",
+      label: t('iot.stats.offline'),
       value: offlineCount,
       icon: WifiOff,
       colorClass: "text-red-500",
     },
     {
-      label: "Low Battery",
+      label: t('iot.stats.lowBattery'),
       value: lowBatteryCount,
       icon: Battery,
       colorClass: "text-orange-500",

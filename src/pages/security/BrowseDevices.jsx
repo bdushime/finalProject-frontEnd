@@ -44,6 +44,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 
 // Mock device data
 const mockDevices = [
@@ -154,6 +155,7 @@ const conditions = ["excellent", "good", "fair", "poor", "damaged"];
 const statuses = ["available", "in-use", "maintenance", "damaged", "lost"];
 
 function BrowseDevices() {
+  const { t } = useTranslation(["security", "common"]);
   const navigate = useNavigate();
   const [devices, setDevices] = useState(mockDevices);
   const [searchQuery, setSearchQuery] = useState("");
@@ -230,10 +232,10 @@ function BrowseDevices() {
       devices.map((device) =>
         device.id === selectedDevice.id
           ? {
-              ...selectedDevice,
-              ...formData,
-              specifications: formData.specifications.split(",").map((s) => s.trim()),
-            }
+            ...selectedDevice,
+            ...formData,
+            specifications: formData.specifications.split(",").map((s) => s.trim()),
+          }
           : device
       )
     );
@@ -329,7 +331,7 @@ function BrowseDevices() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by name, brand, model, serial number, or location..."
+                  placeholder={t('browseDevices.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 rounded-full border-gray-200 shadow-sm bg-white"
@@ -338,25 +340,25 @@ function BrowseDevices() {
               <div className="flex gap-2">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Category" />
+                    <SelectValue placeholder={t('browseDevices.filters.category')} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
                       <SelectItem key={cat} value={cat}>
-                        {cat}
+                        {cat === "All" ? t('browseDevices.filters.allCategories') : cat}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder={t('browseDevices.filters.status')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="all">{t('browseDevices.filters.allStatus')}</SelectItem>
                     {statuses.map((status) => (
                       <SelectItem key={status} value={status}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                        {t(`browseDevices.labels.${status}`) || status.charAt(0).toUpperCase() + status.slice(1)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -435,7 +437,7 @@ function BrowseDevices() {
                   <div className="flex items-center gap-2 text-gray-600">
                     <Package className="h-4 w-4" />
                     <span>
-                      {device.available} / {device.total} available
+                      {device.available} / {device.total} {t('browseDevices.labels.available')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
@@ -444,7 +446,7 @@ function BrowseDevices() {
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Calendar className="h-4 w-4" />
-                    <span>SN: {device.serialNumber}</span>
+                    <span>{t('browseDevices.labels.sn')}: {device.serialNumber}</span>
                   </div>
                 </div>
 
@@ -463,10 +465,10 @@ function BrowseDevices() {
             <CardContent className="py-12 text-center">
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No devices found
+                {t('browseDevices.emptyState.title')}
               </h3>
               <p className="text-gray-600 mb-4">
-                Try adjusting your search or filters
+                {t('browseDevices.emptyState.description')}
               </p>
               <Button
                 onClick={() => {
@@ -476,7 +478,7 @@ function BrowseDevices() {
                 }}
                 variant="outline"
               >
-                Clear Filters
+                {t('browseDevices.filters.clearFilters')}
               </Button>
             </CardContent>
           </Card>
@@ -486,26 +488,26 @@ function BrowseDevices() {
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add New Device</DialogTitle>
+              <DialogTitle>{t('browseDevices.dialogs.addTitle')}</DialogTitle>
               <DialogDescription>
-                Enter the details for the new equipment device
+                {t('browseDevices.dialogs.addDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Device Name *</Label>
+                  <Label htmlFor="name">{t('browseDevices.labels.deviceName')} *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder='e.g., MacBook Pro 16"'
+                    placeholder={t('browseDevices.placeholders.exampleName')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">{t('browseDevices.labels.category')} *</Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) =>
@@ -513,7 +515,7 @@ function BrowseDevices() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t('browseDevices.placeholders.selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
                       {categories
@@ -529,43 +531,43 @@ function BrowseDevices() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="brand">Brand *</Label>
+                  <Label htmlFor="brand">{t('browseDevices.labels.brand')} *</Label>
                   <Input
                     id="brand"
                     value={formData.brand}
                     onChange={(e) =>
                       setFormData({ ...formData, brand: e.target.value })
                     }
-                    placeholder="e.g., Apple"
+                    placeholder={t('browseDevices.placeholders.exampleBrand')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="model">Model *</Label>
+                  <Label htmlFor="model">{t('browseDevices.labels.model')} *</Label>
                   <Input
                     id="model"
                     value={formData.model}
                     onChange={(e) =>
                       setFormData({ ...formData, model: e.target.value })
                     }
-                    placeholder='e.g., MacBook Pro 16" M3 Pro'
+                    placeholder={t('browseDevices.placeholders.exampleModel')}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="serialNumber">Serial Number *</Label>
+                  <Label htmlFor="serialNumber">{t('browseDevices.labels.serialNumber')} *</Label>
                   <Input
                     id="serialNumber"
                     value={formData.serialNumber}
                     onChange={(e) =>
                       setFormData({ ...formData, serialNumber: e.target.value })
                     }
-                    placeholder="e.g., SN-MBP-001"
+                    placeholder={t('browseDevices.placeholders.exampleSN')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-2">
-                    <Label htmlFor="condition">Condition</Label>
+                    <Label htmlFor="condition">{t('browseDevices.labels.condition')}</Label>
                     <Select
                       value={formData.condition}
                       onValueChange={(value) =>
@@ -585,7 +587,7 @@ function BrowseDevices() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
+                    <Label htmlFor="status">{t('browseDevices.labels.status')}</Label>
                     <Select
                       value={formData.status}
                       onValueChange={(value) =>
@@ -598,7 +600,7 @@ function BrowseDevices() {
                       <SelectContent>
                         {statuses.map((status) => (
                           <SelectItem key={status} value={status}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                            {t(`browseDevices.labels.${status}`) || status.charAt(0).toUpperCase() + status.slice(1)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -608,31 +610,31 @@ function BrowseDevices() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location *</Label>
+                  <Label htmlFor="location">{t('browseDevices.labels.location')} *</Label>
                   <Input
                     id="location"
                     value={formData.location}
                     onChange={(e) =>
                       setFormData({ ...formData, location: e.target.value })
                     }
-                    placeholder="e.g., Building A, Room 101"
+                    placeholder={t('browseDevices.placeholders.exampleLocation')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="department">Department *</Label>
+                  <Label htmlFor="department">{t('browseDevices.labels.department')} *</Label>
                   <Input
                     id="department"
                     value={formData.department}
                     onChange={(e) =>
                       setFormData({ ...formData, department: e.target.value })
                     }
-                    placeholder="e.g., IT Department"
+                    placeholder={t('browseDevices.placeholders.exampleDept')}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="available">Available</Label>
+                  <Label htmlFor="available">{t('browseDevices.labels.availableQty')}</Label>
                   <Input
                     id="available"
                     type="number"
@@ -646,7 +648,7 @@ function BrowseDevices() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="total">Total Quantity</Label>
+                  <Label htmlFor="total">{t('browseDevices.labels.totalQty')}</Label>
                   <Input
                     id="total"
                     type="number"
@@ -660,7 +662,7 @@ function BrowseDevices() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="purchasePrice">Purchase Price ($)</Label>
+                  <Label htmlFor="purchasePrice">{t('browseDevices.labels.purchasePrice')}</Label>
                   <Input
                     id="purchasePrice"
                     type="number"
@@ -676,7 +678,7 @@ function BrowseDevices() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="purchaseDate">Purchase Date</Label>
+                  <Label htmlFor="purchaseDate">{t('browseDevices.labels.purchaseDate')}</Label>
                   <Input
                     id="purchaseDate"
                     type="date"
@@ -687,7 +689,7 @@ function BrowseDevices() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="warrantyExpiry">Warranty Expiry</Label>
+                  <Label htmlFor="warrantyExpiry">{t('browseDevices.labels.warrantyExpiry')}</Label>
                   <Input
                     id="warrantyExpiry"
                     type="date"
@@ -702,20 +704,20 @@ function BrowseDevices() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('browseDevices.labels.description')}</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="Enter device description..."
+                  placeholder={t('browseDevices.placeholders.enterDescription')}
                   rows={3}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="specifications">
-                  Specifications (comma-separated)
+                  {t('browseDevices.labels.specifications')}
                 </Label>
                 <Input
                   id="specifications"
@@ -726,7 +728,7 @@ function BrowseDevices() {
                       specifications: e.target.value,
                     })
                   }
-                  placeholder='e.g., 32GB RAM, 1TB SSD, 16.2" Display'
+                  placeholder={t('browseDevices.placeholders.exampleSpecs')}
                 />
               </div>
             </div>
@@ -738,13 +740,13 @@ function BrowseDevices() {
                   resetForm();
                 }}
               >
-                Cancel
+                {t('common:actions.cancel')}
               </Button>
               <Button
                 onClick={handleAddDevice}
                 className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white"
               >
-                Add Device
+                {t('browseDevices.dialogs.addTitle')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -754,9 +756,9 @@ function BrowseDevices() {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Device</DialogTitle>
+              <DialogTitle>{t('browseDevices.dialogs.editTitle')}</DialogTitle>
               <DialogDescription>
-                Update the details for {selectedDevice?.name}
+                {t('browseDevices.dialogs.editDescription')} {selectedDevice?.name}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -1016,19 +1018,18 @@ function BrowseDevices() {
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogTitle>{t('browseDevices.dialogs.deleteTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                device <strong>{selectedDevice?.name}</strong> and all associated data.
+                {t('browseDevices.dialogs.deleteDescription')} <strong>{selectedDevice?.name}</strong> {t('browseDevices.dialogs.deleteWarning')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('common:actions.cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteDevice}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                Delete
+                {t('common:actions.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

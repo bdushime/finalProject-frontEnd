@@ -63,10 +63,14 @@ import BrowseDevices from "./pages/security/BrowseDevices";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
+import SecurityProfile from "./pages/security/Profile";
+
+import { Toaster } from "sonner";
 
 export default function App() {
     return (
         <BrowserRouter>
+            <Toaster position="top-right" richColors />
             <Routes>
                 {/* ==========================
             PUBLIC ROUTES
@@ -201,7 +205,9 @@ export default function App() {
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
                     <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
+                    <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
+                    <Route path="/security/profile" element={<SecurityProfile />} />
                 </Route>
 
                 {/* ==========================

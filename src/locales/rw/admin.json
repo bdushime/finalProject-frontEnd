@@ -1,0 +1,437 @@
+{
+    "dashboard": {
+        "title": "Ikibaho cy'Umuyobozi",
+        "totalUsers": "Abakoresha Bose",
+        "totalEquipment": "Ibikoresho Byose",
+        "activeCheckouts": "Ibyasohotse",
+        "overdueItems": "Ibyarenze Igihe",
+        "weeklyUsageTrends": "Imikorere y'Icyumweru",
+        "systemSnapshots": "Amafoto ya Sisitemu",
+        "quickActions": "Ibikorwa Byihuse",
+        "liveTracking": "Gukurikirana Ibyasohotse",
+        "recentActivity": "Ibikorwa Biheruka",
+        "welcome": "Murakaza neza Muyobozi,",
+        "systemStatus": "Imimerere ya Sisitemu",
+        "statusChecking": "Biracyashakwa...",
+        "activeBorrowed": "Ibyasohotse",
+        "studentsWithItems": "Abanyeshuri bafite ibikoresho",
+        "registeredAccounts": "Konti zanditswe",
+        "atRiskItems": "Ibikoresho Biri mu Mazi",
+        "actionReq": "Hakenewe Igikorwa",
+        "overdueItemsDesc": "Ibikoresho byarenze igihe",
+        "availableEquip": "Ibikoresho Bihari",
+        "readyForCheckout": "Biteguye gusohoka",
+        "recentTransactions": "Ibikorwa Biheruka",
+        "viewAll": "Reba Byose",
+        "noRecentActivity": "Nta bikorwa biheruka",
+        "manageUsers": "Cunga Abakoresha",
+        "systemConfig": "Iboneza rya Sisitemu",
+        "generateReport": "Kora Raporo",
+        "live": "+Ako kanya",
+        "stable": "Birahagaze neza",
+        "stock": "Ububiko"
+    },
+    "users": {
+        "title": "Gucunga Abakoresha",
+        "subtitle": "Gucunga ubwinjira, imyanya, n'imimerere ya konti.",
+        "addUser": "Ongeraho Umukoresha",
+        "editUser": "Hindura Umwirondoro",
+        "newUserProfile": "Umwirondoro Mushya",
+        "defaultPassword": "Ijambo ry'ibanga ry'ibanze: password123",
+        "searchPlaceholder": "Shakisha ku izina, imeri cyangwa ID...",
+        "userIdentity": "Umwirondoro w'Umukoresha",
+        "assignedRole": "Umwanya Watanzwe",
+        "department": "Ishami",
+        "respScore": "Amanota y'Ubushobozi",
+        "firstName": "Izina ry'Ibanze",
+        "lastName": "Irindi Zina",
+        "status": "Imimerere",
+        "filters": "Ishungura",
+        "noUsersFound": "Nta bakoresha babonetse.",
+        "createUser": "Kora Umukoresha",
+        "saveChanges": "Bika Impinduka",
+        "creatingUser": "Gukora...",
+        "savingUser": "Kubika...",
+        "userCreated": "Umukoresha yaremwe neza!",
+        "userUpdated": "Umwirondoro wahinduwe!",
+        "userDeleted": "Umukoresha yasibwe",
+        "userSuspended": "Umukoresha yahagaritswe neza",
+        "userActivated": "Umukoresha yongeye gutangira",
+        "failedCreate": "Kurema umukoresha byanze.",
+        "failedUpdate": "Guhindura umwirondoro byanze.",
+        "failedDelete": "Gusiba umukoresha byanze",
+        "failedChangeStatus": "Guhindura imimerere byanze",
+        "failedFetch": "Kubona abakoresha byanze",
+        "confirmSuspend": "Uremeza ko ushaka GUHAGARIKA uyu mukoresha?",
+        "confirmActivate": "Uremeza ko ushaka GUTANGIZA uyu mukoresha?",
+        "confirmDelete": "Uremeza ko ushaka gusiba uyu mukoresha? Ibi ntibisubizwaho.",
+        "manageScore": "Gucunga Amanota y'Ubushobozi",
+        "adjustScore": "Hindura amanota ya",
+        "currentScore": "Amanota y'Ubu",
+        "scoreUpdated": "Amanota yahinduwe!",
+        "failedUpdateScore": "Guhindura amanota byanze",
+        "notifyUser": "Menyesha Umukoresha",
+        "sendingTo": "Kohereza ubutumwa kuri",
+        "viaEmail": "Imeri",
+        "viaNotification": "Imenyesha rya Sisitemu",
+        "subject": "Insanganyamatsiko",
+        "message": "Ubutumwa",
+        "emailField": "Imeri",
+        "studentId": "Nimero y'Umunyeshuri",
+        "messageVia": "Bizoherezwa ukoresheje Imeri na Sisitemu",
+        "subjectPlaceholder": "urugero: Subiza Ibikoresho Byarenze",
+        "messagePlaceholder": "Andika ubutumwa bwawe hano...",
+        "sendNotification": "Ohereza Imenyesha",
+        "messageSent": "Ubutumwa bwoherejwe kuri {{name}}",
+        "failedSend": "Kohereza ubutumwa byanze",
+        "provideSubjectAndMessage": "Tanga insanganyamatsiko n'ubutumwa",
+        "resetPassword": "Hindura Ijambo ry'Ibanga (siga ubusa kugirango ugumishe)",
+        "updatingFor": "Guhindura amakuru ya",
+        "general": "Rusange",
+        "suspended": "BIRAHAGARITSWE",
+        "activeStatus": "BIRAKORA",
+        "allRoles": "Imyanya Yose",
+        "actions": "Ibikorwa"
+    },
+    "config": {
+        "title": "Igenamiterere rya Sisitemu",
+        "subtitle": "Gucunga igenamiterere rya sisitemu yose.",
+        "sections": {
+            "general": {
+                "title": "Igenamiterere Rusange",
+                "desc": "Tegeka izina rya sisitemu, isaha, ifaranga, n'ururimi."
+            },
+            "locations": {
+                "title": "Amashami n'Ahantu",
+                "desc": "Cunga amashami y'ikigo, inyubako, n'ububiko."
+            },
+            "categories": {
+                "title": "Ibyiciro by'Ibikoresho",
+                "desc": "Sobanura amoko y'ibikoresho n'ibyiciro."
+            },
+            "policies": {
+                "title": "Amategeko y'Itizwa",
+                "desc": "Shiraho igihe ntarengwa, umubare w'ibikoresho, n'amategeko."
+            },
+            "responsibility": {
+                "title": "Amanota y'Inshingano",
+                "desc": "Tegeka itangwa ry'amanota n'ibihano."
+            },
+            "alerts": {
+                "title": "Imenyesha (Alerts)",
+                "desc": "Cunga imenyesha rya sisitemu n'ibintu byarengeje igihe."
+            },
+            "email": {
+                "title": "Inyandiko za Imeri",
+                "desc": "Hindura ubutumwa bwa imeri bujyanye n'itizwa cyangwa kugarura."
+            },
+            "qrcode": {
+                "title": "Igenamiterere rya QR Code",
+                "desc": "Hindura ingano n'imiterere ya QR Code."
+            },
+            "branding": {
+                "title": "Ikirango cya Sisitemu",
+                "desc": "Hindura ibirango, amabara, n'isura."
+            }
+        },
+        "general": {
+            "basicInfo": "Amakuru y'Ibanze",
+            "systemName": "Izina rya Sisitemu",
+            "timezone": "Isaha (Timezone)",
+            "maintenanceMode": "Mode yo Kubungabunga",
+            "maintenanceDesc": "Emeza ibi kugirango abanyeshuri badashobora kwinjira mugihe urigukora impinduka.",
+            "on": "Yego",
+            "off": "Oya"
+        },
+        "locations": {
+            "title": "Ahantu ha IoT",
+            "addZone": "+ Ongeraho Zone",
+            "zoneNamePlaceholder": "Izina rya Zone (urugero: Lab)",
+            "typePlaceholder": "Ubwoko (urugero: Computer Lab)"
+        },
+        "categories": {
+            "title": "Ibyiciro by'Ibikoresho",
+            "addCategory": "+ Icyiciro Gishya",
+            "namePlaceholder": "Izina ry'Icyiciro",
+            "codePlaceholder": "Kodi (inyuguti 1)"
+        },
+        "policies": {
+            "studentTitle": "Amategeko y'Abanyeshuri",
+            "studentDesc": "Amategeko areba abanyeshuri bose.",
+            "maxDuration": "Igihe Ntarengwa cyo Gutiza",
+            "itemsPerCheckout": "Ibikoresho ku Itizwa",
+            "hours": "Amasaha",
+            "mins": "Iminota",
+            "maxAllowed": "Ntarengwa: Amasaha 5",
+            "staffTitle": "Amategeko y'Abakozi",
+            "staffDesc": "Amategeko areba abarimu n'abakozi.",
+            "borrowDuration": "Igihe cyo Gutiza",
+            "approvalRequired": "Bisaba Kwemezwa?"
+        },
+        "responsibility": {
+            "scoreImpact": "Ingaruka ku Manota",
+            "desc": "Hindura ibihano byo gutinda cyangwa kwangiza.",
+            "latePenalty": "Igihano cyo Gutinda",
+            "damagePenalty": "Igihano cyo Kwangiza (Biciriritse)",
+            "ptsPerHour": "amanota / isaha",
+            "pts": "amanota"
+        },
+        "alerts": {
+            "title": "Imenyesha rya Sisitemu",
+            "overdueTitle": "Imenyesha ry'Ibikoresho Byarenze Igihe",
+            "overdueDesc": "Menyesha admin niba hashize amasaha 24",
+            "lowStockTitle": "Umuburo w'ibikoresho bike",
+            "lowStockDesc": "Menyesha niba biri munsi ya 10%",
+            "unauthorizedTitle": "Kwimura Ibikoresho bitemewe",
+            "unauthorizedDesc": "Vuza inzogera niba tag ya IoT isohotse muri zone",
+            "maintenanceTitle": "Igihe cyo Gukora Isuku/Sivisi",
+            "maintenanceDesc": "Kwibukiriza igenzura ry'ibikoresho"
+        },
+        "email": {
+            "receipt": "Imeri ya Risiti",
+            "receiptDesc": "Yoherezwa nyuma yo gutiza",
+            "overdue": "Imenyesha ryo Gutinda",
+            "overdueDesc": "Yoherezwa iyo batinze",
+            "editing": "Guhindura",
+            "variables": "Impinduka zemewe",
+            "subject": "Insanganyamatsiko",
+            "html": "Ubutumwa (HTML)",
+            "addName": "+ Izina",
+            "addDate": "+ Itariki",
+            "sendTest": "Ohereza Igerageza"
+        },
+        "qrcode": {
+            "title": "Igenamiterere rya QR Label",
+            "labelSize": "Ingano ya Label",
+            "includeLogo": "Ongeraho Ikirango cya Kaminuza",
+            "printSample": "Sohora Label y'Igerageza"
+        },
+        "branding": {
+            "systemLogo": "Ikirango cya Sisitemu",
+            "upload": "Kanda hano uhindure",
+            "primaryColor": "Ibara Nyamukuru"
+        },
+        "actions": {
+            "configure": "Hindura",
+            "save": "Bika Impinduka",
+            "cancel": "Kureka"
+        },
+        "messages": {
+            "success": "Igenamiterere ryabitswe!",
+            "failure": "Kubika byanze.",
+            "nameRequired": "Izina rirakewe",
+            "nameCodeRequired": "Izina na Kodi birakewe"
+        }
+    },
+    "reports": {
+        "title": "Raporo",
+        "activityReports": "Raporo z'Ibikorwa",
+        "userReports": "Raporo z'Abakoresha",
+        "deviceInventory": "Ububiko bw'Ibikoresho",
+        "riskAnalysis": "Isesengura ry'Ingaruka",
+        "subtitle": "Isesengura rirambuye n'inyandiko zoherezwa mu isuzuma rya sisitemu.",
+        "activityLogs": "Inyandiko z'Ibikorwa",
+        "transactionsHistory": "Amateka y'Ibikorwa",
+        "userDirectory": "Urutonde rw'Abakoresha",
+        "usersAndRoles": "Abakoresha n'Imyanya",
+        "equipmentStatus": "Imimerere y'Ibikoresho",
+        "riskAssessment": "Isuzuma ry'Ingaruka",
+        "borrowingRisks": "Ingaruka zo Gutiya",
+        "reportInfo": "Amakuru ya Raporo:",
+        "filterBy": "Shungura:",
+        "exportDate": "Itariki yo Kohereza:",
+        "dateRange": "Amatariki:",
+        "statusFilter": "Imimerere:",
+        "roleFilter": "Umwanya:",
+        "categoryFilter": "Icyiciro:",
+        "item": "Ikintu",
+        "user": "Umukoresha",
+        "date": "Itariki",
+        "riskLevel": "Urwego rw'Ingaruka",
+        "riskScore": "Amanota y'Ingaruka",
+        "userIdentity": "Umwirondoro w'Umukoresha",
+        "deviceName": "Izina ry'Igikoresho",
+        "category": "Icyiciro",
+        "serialNumber": "Nomero",
+        "location": "Aho Biri",
+        "mainStorage": "Ububiko Nyamukuru",
+        "score": "Amanota",
+        "allStatuses": "Imimerere Yose",
+        "allRoles": "Imyanya Yose",
+        "allLevels": "Intera Zose",
+        "allCategories": "Ibyiciro Byose",
+        "totalUsers": "Abakoresha Bose",
+        "students": "Abanyeshuri",
+        "staff": "Abakozi",
+        "totalDevices": "Ibikoresho Byose",
+        "totalRecords": "Inyandiko Zose",
+        "brokenMaint": "Byangiritse/Gusanwa",
+        "failedLoadData": "Gukura amakuru ya raporo byanze.",
+        "highRisk": "Ingaruka Nyinshi",
+        "mediumRisk": "Ingaruka Zimwe",
+        "lowRisk": "Ingaruka Nke"
+    },
+    "profile": {
+        "title": "Umwirondoro Wanjye",
+        "subtitle": "Gucunga igenamiterere rya paji yawe.",
+        "personalInfo": "Amakuru Yihariye",
+        "fullName": "Amazina Yose",
+        "phone": "Nimero ya Telefoni",
+        "email": "Imeyili",
+        "locked": "Bifunze",
+        "security": "Umutekano",
+        "changePassword": "Hindura Ijambo ry'Ibanga",
+        "save": "Bika Impinduka",
+        "success": "Umwirondoro wavuguruwe neza"
+    },
+    "monitoring": {
+        "title": "Gukurikirana Sisitemu",
+        "subtitle": "Imimerere y'ubuzima, ibipimo by'imikorere, n'inyandiko.",
+        "operational": "Sisitemu Zose Zirakora",
+        "kpi": {
+            "uptime": "Igihe Sisitemu Ikora",
+            "cpu": "Impuzandengo ya CPU",
+            "memory": "Imikoreshereze ya Memory",
+            "errorRate": "Igipimo cy'Amakosa",
+            "uptimeSub": "Igihe iheruka guhagarara: iminsi 32 ishize",
+            "cpuSub": "Cores 4 Zikora",
+            "memorySub": "Yose hamwe: 16 GB Zirahari",
+            "errorSub": "Mu masaha 24 ashize",
+            "stable": "Birahamye"
+        },
+        "charts": {
+            "performance": "Ibipimo by'Imikorere ya Sisitemu",
+            "perfDesc": "Imikoreshereze ya CPU & Memory",
+            "cpu": "CPU",
+            "memory": "Memory"
+        },
+        "servers": {
+            "title": "Imimerere ya Server Node",
+            "warning": "Umuburo",
+            "online": "Irakora"
+        },
+        "logs": {
+            "title": "Inyandiko z'Amakosa za Vuba",
+            "desc": "Imiburo ikomeye ya sisitemu.",
+            "viewAll": "Reba Inyandiko Zose",
+            "status": "Imimerere",
+            "message": "Ubutumwa",
+            "source": "Inkomoko",
+            "time": "Igihe",
+            "user": "Umukoresha",
+            "action": "Igikorwa",
+            "details": "Ibisobanuro"
+        }
+    },
+    "data": {
+        "title": "Imicungire y'Amakuru",
+        "subtitle": "Cunga za backup, kohereza amakuru, no gusukura sisitemu.",
+        "backups": {
+            "title": "Kopi z'Ububiko",
+            "create": "Kora Kopi Nshya",
+            "backingUp": "Birimo kubikwa...",
+            "filename": "Izina rya Dosiye",
+            "type": "Ubwoko",
+            "size": "Ingano",
+            "date": "Itariki",
+            "status": "Imimerere"
+        },
+        "export": {
+            "title": "Kohereza Amakuru",
+            "equipmentTitle": "Amakuru y'Ibikoresho",
+            "equipmentDesc": "Imimerere y'ububiko & ibisobanuro",
+            "usersTitle": "Inyandiko z'Abakoresha",
+            "usersDesc": "Imirondoro & imyanya",
+            "csv": "CSV"
+        },
+        "cleanup": {
+            "title": "Gutunganya Sisitemu",
+            "clearLogs": "Siba Inyandiko za Kera",
+            "clearLogsDesc": "Siba ibyakozwe birengeje iminsi 90.",
+            "execute": "Emeza Isuku",
+            "confirm": "Usibe inyandiko zirengeje iminsi 90?"
+        },
+        "messages": {
+            "backupSuccess": "Kopi yakozwe neza!",
+            "backupFailure": "Gukora kopi byanze.",
+            "exportSuccess": "byoherejwe neza!",
+            "exportFailure": "Kohereza byanze.",
+            "cleanupFailure": "Gusukura byanze."
+        }
+    },
+    "tracking": {
+        "title": "Gukurikirana Imenyetso",
+        "subtitle": "Aho ibyuma biherereye hifashishijwe Campus IoT Grid.",
+        "refresh": "Vugurura Imenyetso",
+        "map": {
+            "online": "Sisitemu Irakora",
+            "grid": "Akarere: Zone A - Agace ko Guhanga Udushya",
+            "wifiZone": "Wifi Zone 1",
+            "projector": "Projector X4 (Irakora)",
+            "laptopCart": "Akagare ka Laptop (Gahagaze)",
+            "camera": "Canon Camera (Imenyetso ni rito)"
+        },
+        "signal": {
+            "title": "Ubwiza bw'Imenyetso",
+            "zoneA": "Zone A (Isomero)",
+            "strengthA": "98% Imbaraga - Bihebuje",
+            "active": "Irakora",
+            "zoneB": "Zone B (Itangazamakuru)",
+            "strengthB": "82% Imbaraga - Byiza",
+            "idle": "Ntacyo Irigukora"
+        },
+        "tags": {
+            "title": "Tags Zikora",
+            "total": "Zose Ziri Online",
+            "lowBattery": "Bateri Nto"
+        }
+    },
+    "security": {
+        "title": "Umutekano & Iyubahiriza",
+        "subtitle": "Kurikirana iyinjira, shyiraho amabwiriza, no gutahura ibyago.",
+        "export": "Kohereza Raporo",
+        "tabs": {
+            "audit": "Inyandiko z'Ubugenzuzi",
+            "compliance": "Ikibaho cy'Iyubahiriza",
+            "sessions": "Sessions Zikora"
+        },
+        "audit": {
+            "search": "Shakisha inyandiko...",
+            "timestamp": "Igihe",
+            "user": "Umukoresha",
+            "action": "Igikorwa",
+            "target": "Intego / Ibisobanuro",
+            "ip": "Aderesi ya IP",
+            "status": "Imimerere",
+            "noLogs": "Nta nyandiko zibonetse."
+        },
+        "compliance": {
+            "compliant": "Birubahirijwe",
+            "critical": "Bikomeye",
+            "checked": "Reba:"
+        },
+        "sessions": {
+            "title": "Sessions z'Abakoresha (24h)",
+            "revoke": "Hagarika Uburenganzira",
+            "login": "Kwinjira:",
+            "noSessions": "Nta sessions zikora zibonetse."
+        }
+    },
+    "notifications": {
+        "title": "Imenyesha",
+        "subtitle": "Menya amakuru agezweho n'ibikorwa bya sisitemu.",
+        "recent": "Imenyesha Riheruka",
+        "markAll": "Zose nka zasomwe",
+        "empty": "Nta menyesha nshya",
+        "success": "Imenyesha zose zimeze nka zasomwe",
+        "error": "Guhindura imenyesha byanze",
+        "time": {
+            "years": "Imyaka {{count}} ishize",
+            "months": "Amezi {{count}} ashize",
+            "days": "Iminsi {{count}} ishize",
+            "hours": "Amasaha {{count}} ashize",
+            "minutes": "Iminota {{count}} ishize",
+            "seconds": "Amasegonda {{count}} ashize"
+        }
+    }
+}

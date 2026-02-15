@@ -12,46 +12,49 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/images/logo8noback.png";
-import api from "@/utils/api"; // ✅ Import API
-
-const studentLinks = [
-    { name: "Dashboard", path: "/student/dashboard" },
-    { name: "Equipment", path: "/student/browse" },
-    { name: "Borrowed Items", path: "/student/borrowed-items" },
-    { name: "Score", path: "/student/score" },
-    { name: "Report", path: "/student/report" },
-    { name: "Help & Support", path: "/student/help" },
-];
+import api from "@/utils/api";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 export default function StudentTopbar({ onMenuClick }) {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-const unreadCount = 0;
+    const unreadCount = 0;
+    const { t } = useTranslation("common");
+    const { t: tStudent } = useTranslation("student");
+
+    const studentLinks = [
+        { name: t("nav.dashboard"), path: "/student/dashboard" },
+        { name: t("nav.equipment"), path: "/student/browse" },
+        { name: t("nav.borrowedItems"), path: "/student/borrowed-items" },
+        { name: t("nav.score"), path: "/student/score" },
+        { name: t("nav.report"), path: "/student/report" },
+        { name: t("nav.helpSupport"), path: "/student/help" },
+    ];
 
     // --- NEW: State for Dynamic User Info ---
     const [user, setUser] = useState({
-        name: "Student",
+        name: t("roles.student"),
         initial: "S",
-        role: "Student"
+        role: t("roles.student")
     });
 
     // --- 1. FETCH NOTIFICATIONS LOGIC ---
     const fetchUnreadCount = async () => {
         try {
             const res = await api.get('/notifications');
-            // Filter only unread messages
             const count = res.data.filter(n => !n.read).length;
-            setUnreadCount(count);
+            // setUnreadCount(count); // uncomment when state is wired
         } catch (err) {
             console.error("Failed to fetch notification count", err);
         }
     };
 
     useEffect(() => {
-        fetchUnreadCount(); // Fetch immediately
-        const interval = setInterval(fetchUnreadCount, 15000); // Poll every 15s
+        fetchUnreadCount();
+        const interval = setInterval(fetchUnreadCount, 15000);
         return () => clearInterval(interval);
-    }, [location.pathname]); // Refresh on navigation too
+    }, [location.pathname]);
 
     // --- 2. Load User from Local Storage ---
     useEffect(() => {
@@ -59,9 +62,7 @@ const unreadCount = 0;
         if (userStr) {
             try {
                 const userData = JSON.parse(userStr);
-// Get Name
                 const displayName = userData.fullName || userData.username || "Student";
-                // Get Initial (First letter of name)
                 const displayInitial = displayName.charAt(0).toUpperCase();
                 const displayRole = userData.role || "Student";
 
@@ -90,9 +91,9 @@ const unreadCount = 0;
 
     const getGreeting = () => {
         const hour = new Date().getHours();
-        if (hour < 12) return "Good morning";
-        if (hour < 18) return "Good afternoon";
-        return "Good evening";
+        if (hour < 12) return tStudent("dashboard.greeting.morning");
+        if (hour < 18) return tStudent("dashboard.greeting.afternoon");
+        return tStudent("dashboard.greeting.evening");
     };
 
     const formattedDate = new Intl.DateTimeFormat("en-US", {
@@ -137,7 +138,7 @@ const unreadCount = 0;
                                 className="w-12 h-12 object-contain group-hover:scale-110 transition-transform"
                             />
                             <span className="text-xl font-bold text-[#0b1d3a] font-serif tracking-tight hidden sm:block">
-                                Tracknity
+                                {t("misc.tracknity")}
                             </span>
                         </Link>
                     </div>
@@ -152,7 +153,7 @@ const unreadCount = 0;
                                         key={link.path}
                                         to={link.path}
                                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
-? "bg-[#0b1d3a] text-white"
+                                            ? "bg-[#0b1d3a] text-white"
                                             : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                                             }`}
                                     >
@@ -163,16 +164,16 @@ const unreadCount = 0;
                         </div>
                     </nav>
 
-                    {/* Right: Settings, Notification, Profile */}
+                    {/* Right: Language Switcher, Notification, Profile */}
                     <div className="flex items-center gap-3">
-                        <Link
+                        <LanguageSwitcher variant="light" />
 
+                        <Link
                             to="/student/notifications"
                             className="relative h-11 w-11 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#0b1d3a] hover:bg-white/60 transition-all hover:shadow-sm hover:scale-110"
-                            aria-label="Notifications"
+                            aria-label={t("nav.notifications")}
                         >
                             <Bell className="h-5 w-5 text-[#0b1d3a]" />
-                            {/* 👇 DYNAMIC BADGE */}
                             {unreadCount > 0 && (
                                 <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-in zoom-in duration-200">
                                     {unreadCount}
@@ -196,7 +197,7 @@ const unreadCount = 0;
                                     </div>
                                 </button>
                             </DropdownMenuTrigger>
-<DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl border-slate-100 shadow-xl bg-white/90 backdrop-blur-lg">
+                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl border-slate-100 shadow-xl bg-white/90 backdrop-blur-lg">
                                 <DropdownMenuLabel className="font-normal p-3 bg-slate-50 rounded-xl mb-2">
                                     <div className="flex flex-col gap-1">
                                         <p className="text-sm font-bold text-[#0b1d3a]">{user.name}</p>
@@ -205,13 +206,13 @@ const unreadCount = 0;
                                 </DropdownMenuLabel>
                                 <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
                                     <Link to="/student/profile" className="flex items-center gap-2 font-medium">
-                                        My Profile
+                                        {t("auth.myProfile")}
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-slate-100 my-1" />
                                 <DropdownMenuItem asChild className="rounded-lg focus:bg-rose-50 focus:text-rose-600 text-rose-500 cursor-pointer p-3 transition-colors">
                                     <Link to="/login" onClick={handleLogout} className="flex items-center gap-2 font-medium">
-                                        Log Out
+                                        {t("auth.logOut")}
                                     </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -230,7 +231,7 @@ const unreadCount = 0;
                                         key={link.path}
                                         to={link.path}
                                         className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-? "bg-[#0b1d3a] text-white"
+                                            ? "bg-[#0b1d3a] text-white"
                                             : "text-gray-600 hover:bg-gray-100"
                                             }`}
                                     >
@@ -243,14 +244,6 @@ const unreadCount = 0;
                     </div>
                 )}
             </header>
-
-            {/* Welcome Section - Also made Dynamic! */}
-            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-4">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {getGreeting()}, {user.name}!
-                </h1>
-                <p className="text-gray-500 text-sm sm:text-base">{formattedDate}</p>
-            </div>
         </div>
     );
 }

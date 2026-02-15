@@ -10,10 +10,12 @@ import BackButton from "./components/BackButton";
 import ExtendModal from "@/components/ui/extendmodal";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
+import { useTranslation } from "react-i18next";
 
 export default function MyBorrowedItems() {
     const navigate = useNavigate();
-// --- REAL DATA STATE ---
+    const { t } = useTranslation("student");
+    // --- REAL DATA STATE ---
     const [pendingRequests, setPendingRequests] = useState([]);
     const [activeBorrows, setActiveBorrows] = useState([]);
     const [reservations, setReservations] = useState([]);
@@ -22,7 +24,7 @@ export default function MyBorrowedItems() {
 
     const [extendModalOpen, setExtendModalOpen] = useState(false);
     const [selectedItemForExtend, setSelectedItemForExtend] = useState(null);
-const [activeTab, setActiveTab] = useState('active'); // active | history
+    const [activeTab, setActiveTab] = useState('active'); // active | history
 
     // --- FETCH DATA ---
     useEffect(() => {
@@ -33,7 +35,7 @@ const [activeTab, setActiveTab] = useState('active'); // active | history
                     api.get('/transactions/my-history')
                 ]);
 
-// 1. FILTER PENDING
+                // 1. FILTER PENDING
                 const pending = activeRes.data.filter(t => t.status === 'Pending');
 
                 // 2. FILTER ACTIVE BORROWS
@@ -47,7 +49,7 @@ const [activeTab, setActiveTab] = useState('active'); // active | history
                 const reserved = activeRes.data.filter(t => t.status === 'Reserved');
 
                 setPendingRequests(pending);
-setActiveBorrows(borrowed);
+                setActiveBorrows(borrowed);
                 setReservations(reserved);
 
                 const returnedOnly = historyRes.data.filter(item => item.status === 'Returned');
@@ -68,7 +70,7 @@ setActiveBorrows(borrowed);
         return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
 
-const getDaysLeft = (dueDate) => {
+    const getDaysLeft = (dueDate) => {
         if (!dueDate) return 0;
         const diff = new Date(dueDate) - new Date();
         return Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -94,14 +96,14 @@ const getDaysLeft = (dueDate) => {
 
     // --- CANCEL LOGIC ---
     const handleCancelReservation = async (id) => {
-if (!confirm("Are you sure you want to cancel this reservation?")) return;
+        if (!confirm("Are you sure you want to cancel this reservation?")) return;
         try {
             await api.post(`/transactions/cancel/${id}`);
             setReservations(prev => prev.filter(item => item._id !== id));
-            alert("Reservation cancelled successfully.");
+            alert(t("borrowed.cancelSuccess"));
         } catch (err) {
             console.error("Cancel failed:", err);
-            alert("Failed to cancel. Please try again.");
+            alert(t("borrowed.cancelFailed"));
         }
     };
 
@@ -109,7 +111,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
         return (
             <StudentLayout>
                 <div className="h-screen flex items-center justify-center text-slate-400">
-                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> Loading your items...
+                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> {t("borrowed.loading")}
                 </div>
             </StudentLayout>
         );
@@ -117,13 +119,13 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
 
     return (
         <StudentLayout>
-<PageContainer>
+            <PageContainer>
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
                         <BackButton to="/student/dashboard" className="mb-4" />
-                        <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">My Borrowed Items</h1>
-                        <p className="text-slate-500 mt-1">Track your active equipment and history</p>
+                        <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">{t("borrowed.title")}</h1>
+                        <p className="text-slate-500 mt-1">{t("borrowed.trackSubtitle")}</p>
                     </div>
 
                     <div className="flex gap-2 p-1 bg-slate-100 rounded-xl w-full md:w-auto">
@@ -134,7 +136,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                 : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
-                            Active Items
+                            {t("borrowed.activeItems")}
                         </button>
                         <button
                             onClick={() => setActiveTab('history')}
@@ -143,7 +145,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                 : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
-                            History
+                            {t("borrowed.historyTab")}
                         </button>
                     </div>
                 </div>
@@ -157,7 +159,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                 <div className="space-y-4 mb-8">
                                     <h2 className="text-lg font-bold text-[#0b1d3a] flex items-center gap-2">
                                         <Clock className="w-5 h-5 text-yellow-600" />
-                                        Pending Requests
+                                        {t("borrowed.pendingRequests")}
                                     </h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {pendingRequests.map((req) => (
@@ -172,10 +174,10 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                             <p className="text-xs text-slate-500">Requested: {new Date(req.createdAt).toLocaleString()}</p>
                                                         </div>
                                                     </div>
-                                                    <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100">Pending Approval</Badge>
+                                                    <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100">{t("borrowed.pendingApproval")}</Badge>
                                                 </div>
                                                 <div className="bg-white p-3 rounded-lg border border-yellow-100 text-xs text-slate-500">
-                                                    <span className="font-semibold text-yellow-700">Status:</span> Waiting for IT Staff to approve this request. You cannot pick it up yet.
+                                                    <span className="font-semibold text-yellow-700">{t("borrowed.status")}:</span> {t("borrowed.waitingApproval")}
                                                 </div>
                                             </div>
                                         ))}
@@ -188,7 +190,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                 <div className="space-y-4 mb-8">
                                     <h2 className="text-lg font-bold text-[#0b1d3a] flex items-center gap-2">
                                         <CalendarClock className="w-5 h-5 text-purple-600" />
-                                        Upcoming Reservations
+                                        {t("borrowed.upcomingReservations")}
                                     </h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {reservations.map((res) => (
@@ -203,7 +205,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                             <p className="text-xs text-slate-500">Starts: {new Date(res.startTime).toLocaleString()}</p>
                                                         </div>
                                                     </div>
-                                                    <Badge className="bg-purple-100 text-purple-700 border-purple-200">Reserved</Badge>
+                                                    <Badge className="bg-purple-100 text-purple-700 border-purple-200">{t("equipment.reserved")}</Badge>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <Button
@@ -211,14 +213,14 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                         className="w-full text-xs h-8 border-purple-200 text-purple-700 hover:bg-purple-100"
                                                         onClick={() => alert("Please ask Admin to check out this item.")}
                                                     >
-                                                        Check In / Pick Up
+                                                        {t("borrowed.checkInPickUp")}
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
                                                         className="w-auto text-xs h-8 text-rose-600 hover:bg-rose-50"
                                                         onClick={() => handleCancelReservation(res._id)}
                                                     >
-                                                        Cancel
+                                                        {t("profile.cancel")}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -229,7 +231,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
 
                             {/* --- 3. ACTIVE BORROWS SECTION --- */}
                             <div className="space-y-4">
-                                <h2 className="text-lg font-bold text-[#0b1d3a] mb-4">Active Borrows</h2>
+                                <h2 className="text-lg font-bold text-[#0b1d3a] mb-4">{t("borrowed.activeBorrows")}</h2>
                                 {activeBorrows.length > 0 ? (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         {activeBorrows.map((item) => {
@@ -261,10 +263,10 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end" className="w-48">
                                                                 <DropdownMenuItem onClick={() => navigate('/student/help')}>
-                                                                    Report Issue
+                                                                    {t("borrowed.reportIssue")}
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuItem className="text-rose-600" onClick={() => handleExtend(item)}>
-                                                                    Request Extension
+                                                                    {t("borrowed.requestExtension")}
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
@@ -275,7 +277,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                         <div className="flex justify-between text-xs font-semibold mb-2">
                                                             <span className="text-slate-500">Due: {formatDate(item.expectedReturnTime)}</span>
                                                             <span className={`${isOverdue ? 'text-rose-600' : isDueSoon ? 'text-amber-600' : 'text-[#126dd5]'}`}>
-                                                                {isOverdue ? 'Overdue' : `${daysLeft} days left`}
+                                                                {isOverdue ? t("borrowed.overdue") : `${daysLeft} ${t("borrowed.daysLeft")}`}
                                                             </span>
                                                         </div>
                                                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-4">
@@ -289,7 +291,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                         <div className="flex items-center justify-between bg-slate-50 rounded-xl p-3 border border-slate-100">
                                                             <div className="text-xs text-slate-500 flex items-center gap-2">
                                                                 <Clock className="w-3.5 h-3.5" />
-                                                                Time Remaining:
+                                                                {t("borrowed.timeRemaining")}:
                                                             </div>
                                                             {countdown && !countdown.overdue && (
                                                                 <div className="flex items-baseline gap-1">
@@ -300,7 +302,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                             )}
                                                             {countdown?.overdue && (
                                                                 <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
-                                                                    <AlertCircle className="w-3 h-3" /> Overdue
+                                                                    <AlertCircle className="w-3 h-3" /> {t("borrowed.overdue")}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -310,7 +312,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                         <div className="bg-slate-50 rounded-xl p-3">
                                                             <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
                                                                 <Calendar className="w-3.5 h-3.5" />
-                                                                Borrowed
+                                                                {t("borrowed.borrowed")}
                                                             </div>
                                                             <p className="text-sm font-bold text-[#0b1d3a]">{formatDate(item.createdAt)}</p>
                                                         </div>
@@ -319,7 +321,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                             <div className={`flex items-center gap-2 text-xs mb-1 ${isOverdue ? 'text-rose-600' : 'text-slate-500'
                                                                 }`}>
                                                                 <Clock className="w-3.5 h-3.5" />
-                                                                Status
+                                                                {t("borrowed.status")}
                                                             </div>
                                                             <p className={`text-sm font-bold ${isOverdue ? 'text-rose-700' : 'text-[#0b1d3a]'
                                                                 }`}>
@@ -333,14 +335,14 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                                             className="flex-1 bg-[#0b1d3a] hover:bg-[#2c3e50] text-white font-semibold h-10 rounded-xl shadow-sm"
                                                             onClick={() => handleReturn(item)}
                                                         >
-                                                            Return Item
+                                                            {t("borrowed.returnItem")}
                                                         </Button>
                                                         <Button
                                                             variant="outline"
                                                             className="px-4 border-slate-200 hover:bg-slate-50 hover:text-[#0b1d3a] rounded-xl"
                                                             onClick={() => navigate(`/student/equipment/${item.equipment?._id || ''}`)}
                                                         >
-                                                            Details
+                                                            {t("equipment.details")}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -355,27 +357,27 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                             <div className="w-16 h-16 rounded-full bg-white border border-slate-200 group-hover:border-[#126dd5] flex items-center justify-center mb-4 transition-colors shadow-sm">
                                                 <Package className="w-8 h-8 text-slate-400 group-hover:text-[#126dd5]" />
                                             </div>
-                                            <h3 className="text-lg font-bold text-[#0b1d3a] mb-2">Borrow More items</h3>
+                                            <h3 className="text-lg font-bold text-[#0b1d3a] mb-2">{t("borrowed.borrowMore")}</h3>
                                             <p className="text-sm text-slate-500 mb-6 max-w-[200px]">
-                                                Browse the catalog to find equipment for your next project.
+                                                {t("borrowed.browseCatalogDesc")}
                                             </p>
                                             <Button
                                                 variant="ghost"
                                                 className="text-[#126dd5] hover:text-[#0b1d3a] hover:bg-transparent font-semibold"
                                             >
-                                                Browse Catalog <ArrowRight className="w-4 h-4 ml-2" />
+                                                {t("borrowed.browseCatalog")} <ArrowRight className="w-4 h-4 ml-2" />
                                             </Button>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <p className="text-slate-500">No active borrows found.</p>
+                                        <p className="text-slate-500">{t("borrowed.noActiveBorrows")}</p>
                                         <Button
                                             variant="outline"
                                             className="mt-4"
                                             onClick={() => navigate('/student/equipment')}
                                         >
-                                            Browse Catalog
+                                            {t("borrowed.browseCatalog")}
                                         </Button>
                                     </div>
                                 )}
@@ -387,7 +389,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                             <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                                 <h3 className="font-bold text-[#0b1d3a] flex items-center gap-2">
                                     <History className="w-5 h-5 text-slate-400" />
-                                    Past Borrows
+                                    {t("borrowed.pastBorrows")}
                                 </h3>
                             </div>
                             <div className="divide-y divide-slate-100">
@@ -407,29 +409,29 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                                         </div>
                                         <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
                                             <div className="text-right">
-                                                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Duration</p>
+                                                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">{t("borrowed.duration")}</p>
                                                 <p className="text-sm font-bold text-[#0b1d3a]">
                                                     {item.returnTime && item.createdAt
-                                                        ? `${Math.ceil((new Date(item.returnTime) - new Date(item.createdAt)) / (1000 * 60 * 60 * 24))} Days`
+                                                        ? `${Math.ceil((new Date(item.returnTime) - new Date(item.createdAt)) / (1000 * 60 * 60 * 24))} ${t("borrowed.days")}`
                                                         : "N/A"
                                                     }
                                                 </p>
                                             </div>
                                             <Button variant="outline" size="sm" className="rounded-lg">
-                                                Report Issue
+                                                {t("borrowed.reportIssue")}
                                             </Button>
                                         </div>
                                     </div>
                                 ))}
-{historyList.length === 0 && (
+                                {historyList.length === 0 && (
                                     <div className="p-12 text-center text-slate-500 text-sm">
-                                        No returned items found.
+                                        {t("borrowed.noReturnedItems")}
                                     </div>
                                 )}
                             </div>
                             <div className="p-4 border-t border-slate-100 bg-slate-50/50 text-center">
                                 <Button variant="link" className="text-[#126dd5]" onClick={() => navigate('/student/report')}>
-                                    View Full History
+                                    {t("borrowed.viewFullHistory")}
                                 </Button>
                             </div>
                         </div>
@@ -444,7 +446,7 @@ if (!confirm("Are you sure you want to cancel this reservation?")) return;
                         onConfirm={() => { alert("Extend request sent!"); setExtendModalOpen(false); }}
                     />
                 )}
-</PageContainer>
+            </PageContainer>
         </StudentLayout>
     );
 }

@@ -11,7 +11,10 @@ import {
 import api from "@/utils/api";
 import { toast } from "sonner"; // Assuming you have sonner installed, optional
 
+import { useTranslation } from "react-i18next";
+
 export default function IoTTrackerLiveView() {
+  const { t } = useTranslation(["itstaff", "common"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState("map");
@@ -86,17 +89,17 @@ export default function IoTTrackerLiveView() {
       // If was online (or unknown) and NOW is offline, trigger alert
       // We only alert if we specifically knew it was 'online' before to avoid spam on load
       if (prev === 'online' && isNowOffline) {
-        const message = `Device ${t.equipment} (${t.id}) went OFFLINE!`;
+        const message = t('iot.alerts.offlineMessage', { equipment: t.equipment, id: t.id });
 
         // 1. Show Visual Toast
-        toast.error(`ALERT: ${message}`, {
+        toast.error(t('iot.alerts.alertPrefix', { message }), {
           duration: 5000,
           icon: '🚨'
         });
 
         // 2. Persist to Backend (Fire and Forget)
         api.post('/notifications', {
-          title: "Device Offline Alert",
+          title: t('iot.alerts.offlineTitle'),
           message: message,
           type: "error", // red icon in list
           role: "it_staff",

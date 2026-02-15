@@ -1,0 +1,437 @@
+{
+    "dashboard": {
+        "title": "Tableau de bord Admin",
+        "totalUsers": "Total Utilisateurs",
+        "totalEquipment": "Total Équipement",
+        "activeCheckouts": "Sorties Actives",
+        "overdueItems": "Éléments en Retard",
+        "weeklyUsageTrends": "Tendances Hebdomadaires",
+        "systemSnapshots": "Aperçu du Système",
+        "quickActions": "Actions Rapides",
+        "liveTracking": "Suivi en Direct & Sorties",
+        "recentActivity": "Activité Récente",
+        "welcome": "Bienvenue Admin,",
+        "systemStatus": "État du Système",
+        "statusChecking": "Vérification...",
+        "activeBorrowed": "Emprunts Actifs",
+        "studentsWithItems": "Étudiants avec matériel",
+        "registeredAccounts": "Comptes enregistrés",
+        "atRiskItems": "Éléments à Risque",
+        "actionReq": "Action Requise",
+        "overdueItemsDesc": "Éléments en retard",
+        "availableEquip": "Équipement Disponible",
+        "readyForCheckout": "Prêt pour la sortie",
+        "recentTransactions": "Transactions Récentes",
+        "viewAll": "Voir Tout",
+        "noRecentActivity": "Aucune activité récente",
+        "manageUsers": "Gérer les Utilisateurs",
+        "systemConfig": "Config Système",
+        "generateReport": "Générer un Rapport",
+        "live": "+En Direct",
+        "stable": "Stable",
+        "stock": "Stock"
+    },
+    "users": {
+        "title": "Gestion des Utilisateurs",
+        "subtitle": "Gérer les accès, les rôles et les statuts des comptes.",
+        "addUser": "Ajouter un Utilisateur",
+        "editUser": "Modifier le Profil",
+        "newUserProfile": "Nouveau Profil",
+        "defaultPassword": "Mot de passe par défaut : password123",
+        "searchPlaceholder": "Rechercher par nom, e-mail ou ID...",
+        "userIdentity": "Identité de l'Utilisateur",
+        "assignedRole": "Rôle Attribué",
+        "department": "Département",
+        "respScore": "Score de Resp.",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "status": "Statut",
+        "filters": "Filtres",
+        "noUsersFound": "Aucun utilisateur trouvé.",
+        "createUser": "Créer l'Utilisateur",
+        "saveChanges": "Enregistrer",
+        "creatingUser": "Création en cours...",
+        "savingUser": "Enregistrement...",
+        "userCreated": "Utilisateur créé avec succès !",
+        "userUpdated": "Profil mis à jour !",
+        "userDeleted": "Utilisateur supprimé",
+        "userSuspended": "Utilisateur suspendu avec succès",
+        "userActivated": "Utilisateur activé avec succès",
+        "failedCreate": "Échec de la création de l'utilisateur.",
+        "failedUpdate": "Échec de la mise à jour du profil.",
+        "failedDelete": "Échec de la suppression de l'utilisateur",
+        "failedChangeStatus": "Échec du changement de statut",
+        "failedFetch": "Échec du chargement des utilisateurs",
+        "confirmSuspend": "Voulez-vous vraiment SUSPENDRE cet utilisateur ?",
+        "confirmActivate": "Voulez-vous vraiment ACTIVER cet utilisateur ?",
+        "confirmDelete": "Voulez-vous vraiment supprimer cet utilisateur ? Cette action est irréversible.",
+        "manageScore": "Gérer le Score de Responsabilité",
+        "adjustScore": "Ajuster le score de",
+        "currentScore": "Score Actuel",
+        "scoreUpdated": "Score mis à jour !",
+        "failedUpdateScore": "Échec de la mise à jour du score",
+        "notifyUser": "Notifier l'Utilisateur",
+        "sendingTo": "Envoyer un message à",
+        "viaEmail": "E-mail",
+        "viaNotification": "Notification Système",
+        "subject": "Objet",
+        "message": "Message",
+        "emailField": "E-mail",
+        "studentId": "ID Étudiant",
+        "messageVia": "Sera envoyé par E-mail & Notification Système",
+        "subjectPlaceholder": "ex : Retourner l'équipement en retard",
+        "messagePlaceholder": "Saisissez votre message ici...",
+        "sendNotification": "Envoyer la Notification",
+        "messageSent": "Message envoyé à {{name}}",
+        "failedSend": "Échec de l'envoi du message",
+        "provideSubjectAndMessage": "Veuillez fournir un objet et un message",
+        "resetPassword": "Réinitialiser le mot de passe (laisser vide pour conserver)",
+        "updatingFor": "Mise à jour des détails de",
+        "general": "Général",
+        "suspended": "SUSPENDU",
+        "activeStatus": "ACTIF",
+        "allRoles": "Tous les Rôles",
+        "actions": "Actions"
+    },
+    "config": {
+        "title": "Configuration Système",
+        "subtitle": "Gérer tous les paramètres du système globalement.",
+        "sections": {
+            "general": {
+                "title": "Paramètres Généraux",
+                "desc": "Configurer nom du système, fuseau horaire, devise."
+            },
+            "locations": {
+                "title": "Départements & Lieux",
+                "desc": "Gérer les départements, bâtiments et lieux de stockage."
+            },
+            "categories": {
+                "title": "Catégories d’Équipement",
+                "desc": "Définir les types d'équipements et catégories."
+            },
+            "policies": {
+                "title": "Politiques de Prêt",
+                "desc": "Définir les durées, limites et règles de renouvellement."
+            },
+            "responsibility": {
+                "title": "Score de Responsabilité",
+                "desc": "Configurer les règles de score et les pénalités."
+            },
+            "alerts": {
+                "title": "Config Alertes",
+                "desc": "Gérer les alertes système et notifications de retard."
+            },
+            "email": {
+                "title": "Modèles E-mail",
+                "desc": "Personnaliser les notifications par e-mail."
+            },
+            "qrcode": {
+                "title": "Paramètres QR Code",
+                "desc": "Ajuster les formats et tailles des étiquettes QR."
+            },
+            "branding": {
+                "title": "Image de Marque",
+                "desc": "Mettre à jour les logos, couleurs et thèmes."
+            }
+        },
+        "general": {
+            "basicInfo": "Informations de Base",
+            "systemName": "Nom du Système",
+            "timezone": "Fuseau Horaire",
+            "maintenanceMode": "Mode Maintenance",
+            "maintenanceDesc": "Activer pour empêcher les étudiants de se connecter pendant les changements.",
+            "on": "Oui",
+            "off": "Non"
+        },
+        "locations": {
+            "title": "Zones IoT Campus",
+            "addZone": "+ Ajouter Zone",
+            "zoneNamePlaceholder": "Nom de la Zone (ex: Labo Design)",
+            "typePlaceholder": "Type (ex: Labo)"
+        },
+        "categories": {
+            "title": "Catégories d’Équipement",
+            "addCategory": "+ Nouvelle Catégorie",
+            "namePlaceholder": "Nom de la Catégorie",
+            "codePlaceholder": "Code (1 car.)"
+        },
+        "policies": {
+            "studentTitle": "Politique Étudiant",
+            "studentDesc": "Règles appliquées aux comptes étudiants.",
+            "maxDuration": "Durée Max d'Emprunt",
+            "itemsPerCheckout": "Articles par Emprunt",
+            "hours": "Heures",
+            "mins": "Mins",
+            "maxAllowed": "Max autorisé : 5 Heures",
+            "staffTitle": "Politique Personnel",
+            "staffDesc": "Règles pour le personnel et les enseignants.",
+            "borrowDuration": "Durée d'Emprunt",
+            "approvalRequired": "Approbation Requise ?"
+        },
+        "responsibility": {
+            "scoreImpact": "Configuration Impact Score",
+            "desc": "Ajuster les pénalités pour retard ou dommages.",
+            "latePenalty": "Pénalité de Retard",
+            "damagePenalty": "Pénalité de Dommage (Mineur)",
+            "ptsPerHour": "pts / heure de retard",
+            "pts": "pts"
+        },
+        "alerts": {
+            "title": "Alertes Système",
+            "overdueTitle": "Alerte Équipement En Retard",
+            "overdueDesc": "Notifier admin si retard > 24h",
+            "lowStockTitle": "Alerte Stock Faible",
+            "lowStockDesc": "Alerte si stock < 10%",
+            "unauthorizedTitle": "Mouvement Non Autorisé",
+            "unauthorizedDesc": "Alarme si tag IoT quitte la zone",
+            "maintenanceTitle": "Maintenance Due",
+            "maintenanceDesc": "Rappel pour vérifications planifiées"
+        },
+        "email": {
+            "receipt": "E-mail Reçu",
+            "receiptDesc": "Envoyé après emprunt",
+            "overdue": "Avis de Retard",
+            "overdueDesc": "Envoyé si en retard",
+            "editing": "Édition",
+            "variables": "Variables supportées",
+            "subject": "Objet",
+            "html": "Contenu HTML",
+            "addName": "+ Nom",
+            "addDate": "+ Date",
+            "sendTest": "Envoyer Test"
+        },
+        "qrcode": {
+            "title": "Paramètres Étiquette QR",
+            "labelSize": "Taille Étiquette",
+            "includeLogo": "Inclure Logo Université",
+            "printSample": "Imprimer Échantillon"
+        },
+        "branding": {
+            "systemLogo": "Logo Système",
+            "upload": "Appuyer pour remplacer",
+            "primaryColor": "Couleur Primaire"
+        },
+        "actions": {
+            "configure": "Configurer",
+            "save": "Enregistrer",
+            "cancel": "Annuler"
+        },
+        "messages": {
+            "success": "Paramètres enregistrés !",
+            "failure": "Échec de l'enregistrement.",
+            "nameRequired": "Le nom est requis",
+            "nameCodeRequired": "Nom et Code requis"
+        }
+    },
+    "reports": {
+        "title": "Rapports",
+        "activityReports": "Rapports d'Activité",
+        "userReports": "Rapports Utilisateurs",
+        "deviceInventory": "Inventaire des Appareils",
+        "riskAnalysis": "Analyse des Risques",
+        "subtitle": "Analyse détaillée et journaux exportables pour l'audit du système.",
+        "activityLogs": "Journaux d'Activité",
+        "transactionsHistory": "Historique des Transactions",
+        "userDirectory": "Répertoire des Utilisateurs",
+        "usersAndRoles": "Utilisateurs & Rôles",
+        "equipmentStatus": "État de l'Équipement",
+        "riskAssessment": "Évaluation des Risques",
+        "borrowingRisks": "Risques d'Emprunt",
+        "reportInfo": "Info du Rapport :",
+        "filterBy": "Filtrer par :",
+        "exportDate": "Date d'Export :",
+        "dateRange": "Période :",
+        "statusFilter": "Statut :",
+        "roleFilter": "Rôle :",
+        "categoryFilter": "Catégorie :",
+        "item": "Élément",
+        "user": "Utilisateur",
+        "date": "Date",
+        "riskLevel": "Niveau de Risque",
+        "riskScore": "Score de Risque",
+        "userIdentity": "Identité de l'Utilisateur",
+        "deviceName": "Nom de l'Appareil",
+        "category": "Catégorie",
+        "serialNumber": "Numéro de Série",
+        "location": "Emplacement",
+        "mainStorage": "Stockage Principal",
+        "score": "Score",
+        "allStatuses": "Tous les Statuts",
+        "allRoles": "Tous les Rôles",
+        "allLevels": "Tous les Niveaux",
+        "allCategories": "Toutes les Catégories",
+        "totalUsers": "Total Utilisateurs",
+        "students": "Étudiants",
+        "staff": "Personnel",
+        "totalDevices": "Total Appareils",
+        "totalRecords": "Total Enregistrements",
+        "brokenMaint": "En panne/Maintenance",
+        "failedLoadData": "Échec du chargement des données du rapport.",
+        "highRisk": "Risque Élevé",
+        "mediumRisk": "Risque Moyen",
+        "lowRisk": "Risque Faible"
+    },
+    "profile": {
+        "title": "Mon Profil",
+        "subtitle": "Gérer vos paramètres de compte et préférences.",
+        "personalInfo": "Informations Personnelles",
+        "fullName": "Nom Complet",
+        "phone": "Numéro de Téléphone",
+        "email": "Adresse Email",
+        "locked": "Verrouillé",
+        "security": "Sécurité",
+        "changePassword": "Changer Mot de Passe",
+        "save": "Enregistrer",
+        "success": "Profil mis à jour avec succès"
+    },
+    "monitoring": {
+        "title": "Surveillance du Système",
+        "subtitle": "État de santé en temps réel, métriques de performance et journaux.",
+        "operational": "Tous les Systèmes Opérationnels",
+        "kpi": {
+            "uptime": "Disponibilité Système",
+            "cpu": "Charge CPU Moy.",
+            "memory": "Utilisation Mémoire",
+            "errorRate": "Taux d'Erreur",
+            "uptimeSub": "Dernier arrêt : il y a 32 jours",
+            "cpuSub": "4 Coeurs Actifs",
+            "memorySub": "Total : 16 GB Disponibles",
+            "errorSub": "Dernières 24 heures",
+            "stable": "Stable"
+        },
+        "charts": {
+            "performance": "Métriques Performance Système",
+            "perfDesc": "Utilisation CPU & Mémoire temps réel",
+            "cpu": "CPU",
+            "memory": "Mémoire"
+        },
+        "servers": {
+            "title": "État des Nœuds Serveur",
+            "warning": "Avertissement",
+            "online": "En Ligne"
+        },
+        "logs": {
+            "title": "Journaux d'Erreurs Récents",
+            "desc": "Alertes système critiques et avertissements.",
+            "viewAll": "Voir Tous les Journaux",
+            "status": "Statut",
+            "message": "Message",
+            "source": "Source",
+            "time": "Heure",
+            "user": "Utilisateur",
+            "action": "Action",
+            "details": "Détails"
+        }
+    },
+    "data": {
+        "title": "Gestion des Données",
+        "subtitle": "Gérer les sauvegardes, exports, imports et nettoyage.",
+        "backups": {
+            "title": "Sauvegardes Base de Données",
+            "create": "Nouvelle Sauvegarde",
+            "backingUp": "Sauvegarde en cours...",
+            "filename": "Nom de Fichier",
+            "type": "Type",
+            "size": "Taille",
+            "date": "Date",
+            "status": "Statut"
+        },
+        "export": {
+            "title": "Exporter Données",
+            "equipmentTitle": "Données Équipement",
+            "equipmentDesc": "État inventaire & détails",
+            "usersTitle": "Dossiers Utilisateurs",
+            "usersDesc": "Profils & rôles",
+            "csv": "CSV"
+        },
+        "cleanup": {
+            "title": "Maintenance Système",
+            "clearLogs": "Effacer Vieux Journaux",
+            "clearLogsDesc": "Supprimer transactions > 90 jours.",
+            "execute": "Exécuter Nettoyage",
+            "confirm": "Supprimer journaux > 90 jours ?"
+        },
+        "messages": {
+            "backupSuccess": "Sauvegarde réussie !",
+            "backupFailure": "Échec de sauvegarde.",
+            "exportSuccess": "exporté avec succès !",
+            "exportFailure": "Échec de l'export.",
+            "cleanupFailure": "Échec du nettoyage."
+        }
+    },
+    "tracking": {
+        "title": "Suivi des Capteurs",
+        "subtitle": "Localisation temps réel via Campus IoT.",
+        "refresh": "Actualiser Signal",
+        "map": {
+            "online": "Système En Ligne",
+            "grid": "Grille : Zone A - Hub Innovation",
+            "wifiZone": "Zone Wifi 1",
+            "projector": "Projecteur X4 (Actif)",
+            "laptopCart": "Chariot PC (Fixe)",
+            "camera": "Canon Caméra (Signal Faible)"
+        },
+        "signal": {
+            "title": "Qualité du Signal",
+            "zoneA": "Zone A (Bibliothèque)",
+            "strengthA": "98% Force - Excellent",
+            "active": "Actif",
+            "zoneB": "Zone B (Médias)",
+            "strengthB": "82% Force - Bon",
+            "idle": "Inactif"
+        },
+        "tags": {
+            "title": "Tags Actifs",
+            "total": "Total En Ligne",
+            "lowBattery": "Batterie Faible"
+        }
+    },
+    "security": {
+        "title": "Sécurité & Conformité",
+        "subtitle": "Surveiller les journaux, appliquer les politiques et suivre les menaces.",
+        "export": "Exporter Journal",
+        "tabs": {
+            "audit": "Journaux d'Audit",
+            "compliance": "Tableau de Conformité",
+            "sessions": "Sessions Actives"
+        },
+        "audit": {
+            "search": "Rechercher journaux...",
+            "timestamp": "Horodatage",
+            "user": "Utilisateur",
+            "action": "Action",
+            "target": "Cible / Détails",
+            "ip": "Adresse IP",
+            "status": "Statut",
+            "noLogs": "Aucun journal trouvé."
+        },
+        "compliance": {
+            "compliant": "Conforme",
+            "critical": "Critique",
+            "checked": "Vérifié:"
+        },
+        "sessions": {
+            "title": "Sessions Utilisateurs Actives (24h)",
+            "revoke": "Révoquer Accès",
+            "login": "Connexion:",
+            "noSessions": "Aucune session active trouvée."
+        }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "subtitle": "Restez informé des alertes et activités du système.",
+        "recent": "Alertes Récentes",
+        "markAll": "Tout marquer comme lu",
+        "empty": "Aucune nouvelle notification",
+        "success": "Toutes les notifications marquées comme lues",
+        "error": "Échec de mise à jour des notifications",
+        "time": {
+            "years": "il y a {{count}} ans",
+            "months": "il y a {{count}} mois",
+            "days": "il y a {{count}} jours",
+            "hours": "il y a {{count}} heures",
+            "minutes": "il y a {{count}} min",
+            "seconds": "il y a {{count}} sec"
+        }
+    }
+}

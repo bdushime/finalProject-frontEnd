@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import AdminLayout from '../components/AdminLayout'; // Check Path
 import api from '@/utils/api';
 import { Settings, MapPin, Tags, FileText, Scale, Bell, Mail, MessageSquare, QrCode, PenTool, ChevronRight, X, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ConfigPage = () => {
+    const { t } = useTranslation(["admin", "common"]);
     const [activeSection, setActiveSection] = useState(null);
     const [isAnimating, setIsAnimating] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -68,10 +70,10 @@ const ConfigPage = () => {
     const handleSave = async () => {
         try {
             await api.put('/config', config);
-            toast.success("Settings saved successfully!");
+            toast.success(t('config.messages.success'));
             handleClose();
         } catch (err) {
-            toast.error("Failed to save settings.");
+            toast.error(t('config.messages.failure'));
         }
     };
 
@@ -137,15 +139,15 @@ const ConfigPage = () => {
     };
 
     const configSections = [
-        { id: 'general', title: 'General System Settings', description: 'Configure system name, timezone, default currency, and localization.', icon: Settings, color: 'bg-blue-50 text-blue-600' },
-        { id: 'locations', title: 'Department & Locations', description: 'Manage campus departments, buildings, and storage locations.', icon: MapPin, color: 'bg-emerald-50 text-emerald-600' },
-        { id: 'categories', title: 'Equipment Categories', description: 'Define equipment types, categories, and custom attributes.', icon: Tags, color: 'bg-purple-50 text-purple-600' },
-        { id: 'policies', title: 'Checkout Policies', description: 'Set borrow durations, limits, and renewal rules per role.', icon: FileText, color: 'bg-orange-50 text-orange-600' },
-        { id: 'responsibility', title: 'Responsibility Score', description: 'Configure scoring rules, penalties, and trust levels.', icon: Scale, color: 'bg-rose-50 text-rose-600' },
-        { id: 'alerts', title: 'Alert Config', description: 'Manage system alerts, overdue notifications, and triggers.', icon: Bell, color: 'bg-amber-50 text-amber-600' },
-        { id: 'email', title: 'Email Templates', description: 'Customize email notifications for checkouts, returns, and warnings.', icon: Mail, color: 'bg-indigo-50 text-indigo-600' },
-        { id: 'qrcode', title: 'QR Code Settings', description: 'Adjust QR code generation formats and label sizes.', icon: QrCode, color: 'bg-slate-50 text-slate-600' },
-        { id: 'branding', title: 'System Branding', description: 'Update logos, colors, and portal themes.', icon: PenTool, color: 'bg-pink-50 text-pink-600' }
+        { id: 'general', title: t('config.sections.general.title'), description: t('config.sections.general.desc'), icon: Settings, color: 'bg-blue-50 text-blue-600' },
+        { id: 'locations', title: t('config.sections.locations.title'), description: t('config.sections.locations.desc'), icon: MapPin, color: 'bg-emerald-50 text-emerald-600' },
+        { id: 'categories', title: t('config.sections.categories.title'), description: t('config.sections.categories.desc'), icon: Tags, color: 'bg-purple-50 text-purple-600' },
+        { id: 'policies', title: t('config.sections.policies.title'), description: t('config.sections.policies.desc'), icon: FileText, color: 'bg-orange-50 text-orange-600' },
+        { id: 'responsibility', title: t('config.sections.responsibility.title'), description: t('config.sections.responsibility.desc'), icon: Scale, color: 'bg-rose-50 text-rose-600' },
+        { id: 'alerts', title: t('config.sections.alerts.title'), description: t('config.sections.alerts.desc'), icon: Bell, color: 'bg-amber-50 text-amber-600' },
+        { id: 'email', title: t('config.sections.email.title'), description: t('config.sections.email.desc'), icon: Mail, color: 'bg-indigo-50 text-indigo-600' },
+        { id: 'qrcode', title: t('config.sections.qrcode.title'), description: t('config.sections.qrcode.desc'), icon: QrCode, color: 'bg-slate-50 text-slate-600' },
+        { id: 'branding', title: t('config.sections.branding.title'), description: t('config.sections.branding.desc'), icon: PenTool, color: 'bg-pink-50 text-pink-600' }
     ];
 
     const renderContent = (id) => {
@@ -154,10 +156,10 @@ const ConfigPage = () => {
                 return (
                     <div className="space-y-8">
                         <div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-4">Basic Information</h3>
+                            <h3 className="text-lg font-bold text-slate-900 mb-4">{t('config.general.basicInfo')}</h3>
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">System Name</label>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('config.general.systemName')}</label>
                                     <input
                                         name="systemName"
                                         value={config.systemName}
@@ -166,7 +168,7 @@ const ConfigPage = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Timezone</label>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('config.general.timezone')}</label>
                                     <div className="relative">
                                         <select
                                             name="timezone"
@@ -191,14 +193,14 @@ const ConfigPage = () => {
                                     <Settings className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-blue-900 text-sm">Maintenance Mode</h4>
-                                    <p className="text-xs text-blue-600/80 mt-0.5">Enable this to prevent students from logging in while you make changes.</p>
+                                    <h4 className="font-bold text-blue-900 text-sm">{t('config.general.maintenanceMode')}</h4>
+                                    <p className="text-xs text-blue-600/80 mt-0.5">{t('config.general.maintenanceDesc')}</p>
                                 </div>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="maintenanceMode" checked={config.maintenanceMode} onChange={handleChange} className="sr-only peer" />
                                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                <span className={`ml-3 text-sm font-medium ${config.maintenanceMode ? 'text-blue-600' : 'text-slate-500'}`}>{config.maintenanceMode ? 'On' : 'Off'}</span>
+                                <span className={`ml-3 text-sm font-medium ${config.maintenanceMode ? 'text-blue-600' : 'text-slate-500'}`}>{config.maintenanceMode ? t('config.general.on') : t('config.general.off')}</span>
                             </label>
                         </div>
                     </div>
@@ -207,12 +209,12 @@ const ConfigPage = () => {
                 return (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-slate-900">Campus IoT Zones</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t('config.locations.title')}</h3>
                             <button
                                 onClick={() => setIsAddingZone(true)}
                                 className="px-4 py-2 bg-[#8D8DC7] text-white text-sm font-medium rounded-lg hover:bg-[#7b7bb5] transition-colors shadow-sm shadow-indigo-200"
                             >
-                                + Add Zone
+                                {t('config.locations.addZone')}
                             </button>
                         </div>
                         <div className="space-y-3">
@@ -224,14 +226,14 @@ const ConfigPage = () => {
                                         </div>
                                         <div className="flex-1 grid grid-cols-2 gap-4 mr-4">
                                             <input
-                                                placeholder="Zone Name (e.g. Design Lab)"
+                                                placeholder={t('config.locations.zoneNamePlaceholder')}
                                                 value={newZone.name}
                                                 onChange={e => setNewZone({ ...newZone, name: e.target.value })}
                                                 className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7]"
                                                 autoFocus
                                             />
                                             <input
-                                                placeholder="Type (e.g. Lab)"
+                                                placeholder={t('config.locations.typePlaceholder')}
                                                 value={newZone.type}
                                                 onChange={e => setNewZone({ ...newZone, type: e.target.value })}
                                                 className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 outline-none focus:border-[#8D8DC7]"
@@ -278,12 +280,12 @@ const ConfigPage = () => {
                 return (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-slate-900">Equipment Categories</h3>
+                            <h3 className="text-lg font-bold text-slate-900">{t('config.categories.title')}</h3>
                             <button
                                 onClick={() => setIsAddingCategory(true)}
                                 className="px-4 py-2 bg-[#8D8DC7] text-white text-sm font-medium rounded-lg hover:bg-[#7b7bb5] transition-colors shadow-sm shadow-indigo-200"
                             >
-                                + New Category
+                                {t('config.categories.addCategory')}
                             </button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -295,14 +297,14 @@ const ConfigPage = () => {
                                         </div>
                                         <div className="flex-1 space-y-2">
                                             <input
-                                                placeholder="Category Name"
+                                                placeholder={t('config.categories.namePlaceholder')}
                                                 value={newCategory.name}
                                                 onChange={e => setNewCategory({ ...newCategory, name: e.target.value })}
                                                 className="w-full px-2 py-1 rounded bg-white/50 border border-transparent focus:bg-white focus:border-[#8D8DC7] outline-none text-sm font-bold"
                                                 autoFocus
                                             />
                                             <input
-                                                placeholder="Code (1 char)"
+                                                placeholder={t('config.categories.codePlaceholder')}
                                                 maxLength={1}
                                                 value={newCategory.code}
                                                 onChange={e => setNewCategory({ ...newCategory, code: e.target.value.toUpperCase() })}
@@ -346,14 +348,14 @@ const ConfigPage = () => {
                                     <FileText className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800 text-lg">Student Borrowing Policy</h3>
-                                    <p className="text-sm text-slate-500">Rules applied to general student accounts.</p>
+                                    <h3 className="font-bold text-slate-800 text-lg">{t('config.policies.studentTitle')}</h3>
+                                    <p className="text-sm text-slate-500">{t('config.policies.studentDesc')}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Max Borrow Duration</label>
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('config.policies.maxDuration')}</label>
                                     <div className="flex items-center gap-3">
                                         <div className="flex-1 flex items-center gap-2">
                                             <input
@@ -363,7 +365,7 @@ const ConfigPage = () => {
                                                 onChange={handleChange}
                                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-center font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                                             />
-                                            <span className="font-bold text-slate-400">Hours</span>
+                                            <span className="font-bold text-slate-400">{t('config.policies.hours')}</span>
                                         </div>
                                         <div className="flex-1 flex items-center gap-2">
                                             <input
@@ -373,13 +375,13 @@ const ConfigPage = () => {
                                                 onChange={handleChange}
                                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-center font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                                             />
-                                            <span className="font-bold text-slate-400">Mins</span>
+                                            <span className="font-bold text-slate-400">{t('config.policies.mins')}</span>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-slate-400 mt-1">Max allowed: 5 Hours</p>
+                                    <p className="text-xs text-slate-400 mt-1">{t('config.policies.maxAllowed')}</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Items Per Checkout</label>
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('config.policies.itemsPerCheckout')}</label>
                                     <input
                                         type="number"
                                         name="studentMaxItems"
@@ -398,14 +400,14 @@ const ConfigPage = () => {
                                     <FileText className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800 text-lg">Staff & Faculty Policy</h3>
-                                    <p className="text-sm text-slate-500">Rules for teaching and admin staff.</p>
+                                    <h3 className="font-bold text-slate-800 text-lg">{t('config.policies.staffTitle')}</h3>
+                                    <p className="text-sm text-slate-500">{t('config.policies.staffDesc')}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Borrow Duration</label>
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('config.policies.borrowDuration')}</label>
                                     <div className="relative">
                                         <select
                                             name="staffDuration"
@@ -421,7 +423,7 @@ const ConfigPage = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Approval Required?</label>
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('config.policies.approvalRequired')}</label>
                                     <div className="relative">
                                         <select
                                             name="staffApproval"
@@ -429,8 +431,8 @@ const ConfigPage = () => {
                                             onChange={handleChange}
                                             className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 appearance-none font-medium text-slate-700"
                                         >
-                                            <option value="No">No</option>
-                                            <option value="Yes">Yes</option>
+                                            <option value="No">{t('config.general.off')}</option>
+                                            <option value="Yes">{t('config.general.on')}</option>
                                         </select>
                                         <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 rotate-90 pointer-events-none" />
                                     </div>
@@ -447,16 +449,16 @@ const ConfigPage = () => {
                                 <Scale className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-rose-800 text-lg">Score Impact Configuration</h3>
-                                <p className="text-sm text-rose-600 mt-1">Adjust penalties for late returns or damaged items.</p>
+                                <h3 className="font-bold text-rose-800 text-lg">{t('config.responsibility.scoreImpact')}</h3>
+                                <p className="text-sm text-rose-600 mt-1">{t('config.responsibility.desc')}</p>
                             </div>
                         </div>
 
                         <div className="space-y-8 px-2">
                             <div className="space-y-4">
                                 <label className="flex justify-between items-center">
-                                    <span className="font-bold text-slate-700 text-lg">Late Return Penalty</span>
-                                    <span className="px-3 py-1 bg-rose-100 text-rose-700 font-bold rounded-lg text-sm">-{config.latePenalty} pts / hour late</span>
+                                    <span className="font-bold text-slate-700 text-lg">{t('config.responsibility.latePenalty')}</span>
+                                    <span className="px-3 py-1 bg-rose-100 text-rose-700 font-bold rounded-lg text-sm">-{config.latePenalty} {t('config.responsibility.ptsPerHour')}</span>
                                 </label>
                                 <input
                                     type="range"
@@ -471,8 +473,8 @@ const ConfigPage = () => {
 
                             <div className="space-y-4">
                                 <label className="flex justify-between items-center">
-                                    <span className="font-bold text-slate-700 text-lg">Damage Penalty (Minor)</span>
-                                    <span className="px-3 py-1 bg-rose-100 text-rose-700 font-bold rounded-lg text-sm">-{config.damagePenalty} pts</span>
+                                    <span className="font-bold text-slate-700 text-lg">{t('config.responsibility.damagePenalty')}</span>
+                                    <span className="px-3 py-1 bg-rose-100 text-rose-700 font-bold rounded-lg text-sm">-{config.damagePenalty} {t('config.responsibility.pts')}</span>
                                 </label>
                                 <input
                                     type="range"
@@ -490,13 +492,13 @@ const ConfigPage = () => {
             case 'alerts':
                 return (
                     <div className="space-y-6">
-                        <h3 className="text-lg font-bold text-slate-900">System Alerts</h3>
+                        <h3 className="text-lg font-bold text-slate-900">{t('config.alerts.title')}</h3>
                         <div className="space-y-4">
                             {[
-                                { id: 'alertOverdue', title: 'Overdue Equipment Alert', desc: 'Notify admin when equipment is 24h overdue' },
-                                { id: 'alertLowStock', title: 'Low Stock Warning', desc: 'Alert when inventory drops below 10%' },
-                                { id: 'alertUnauthorized', title: 'Unauthorized Movement', desc: 'Trigger alarm if IoT tag leaves designated zone' },
-                                { id: 'alertMaintenance', title: 'Maintenance Due', desc: 'Reminder for scheduled equipment checks' }
+                                { id: 'alertOverdue', title: t('config.alerts.overdueTitle'), desc: t('config.alerts.overdueDesc') },
+                                { id: 'alertLowStock', title: t('config.alerts.lowStockTitle'), desc: t('config.alerts.lowStockDesc') },
+                                { id: 'alertUnauthorized', title: t('config.alerts.unauthorizedTitle'), desc: t('config.alerts.unauthorizedDesc') },
+                                { id: 'alertMaintenance', title: t('config.alerts.maintenanceTitle'), desc: t('config.alerts.maintenanceDesc') }
                             ].map((alert) => (
                                 <div key={alert.id} className="p-5 border border-slate-100 rounded-2xl flex items-center justify-between hover:border-slate-200 transition-colors bg-white shadow-sm">
                                     <div>
@@ -526,27 +528,27 @@ const ConfigPage = () => {
                                 onClick={() => setEmailTab('receipt')}
                                 className={`p-6 rounded-2xl border-2 text-left transition-all ${emailTab === 'receipt' ? 'border-[#8D8DC7] bg-indigo-50/50' : 'border-slate-100 bg-white hover:border-slate-200'}`}
                             >
-                                <h4 className={`font-bold text-lg ${emailTab === 'receipt' ? 'text-[#8D8DC7]' : 'text-slate-700'}`}>Receipt Email</h4>
-                                <p className="text-sm text-gray-500 mt-1">Sent after checkout</p>
+                                <h4 className={`font-bold text-lg ${emailTab === 'receipt' ? 'text-[#8D8DC7]' : 'text-slate-700'}`}>{t('config.email.receipt')}</h4>
+                                <p className="text-sm text-gray-500 mt-1">{t('config.email.receiptDesc')}</p>
                             </button>
                             <button
                                 onClick={() => setEmailTab('overdue')}
                                 className={`p-6 rounded-2xl border-2 text-left transition-all ${emailTab === 'overdue' ? 'border-rose-400 bg-rose-50/50' : 'border-slate-100 bg-white hover:border-slate-200'}`}
                             >
-                                <h4 className={`font-bold text-lg ${emailTab === 'overdue' ? 'text-rose-500' : 'text-slate-700'}`}>Overdue Notice</h4>
-                                <p className="text-sm text-gray-400 mt-1">Sent when late</p>
+                                <h4 className={`font-bold text-lg ${emailTab === 'overdue' ? 'text-rose-500' : 'text-slate-700'}`}>{t('config.email.overdue')}</h4>
+                                <p className="text-sm text-gray-400 mt-1">{t('config.email.overdueDesc')}</p>
                             </button>
                         </div>
 
                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <div className="flex justify-between items-center mb-4">
-                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Editing: {emailTab === 'receipt' ? 'Checkout Receipt' : 'Overdue Warning'}</h4>
-                                <div className="text-xs font-medium text-slate-400">Supported variables: {'{student_name}'}, {'{item_count}'}, {'{date}'}</div>
+                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('config.email.editing')}: {emailTab === 'receipt' ? t('config.email.receipt') : t('config.email.overdue')}</h4>
+                                <div className="text-xs font-medium text-slate-400">{t('config.email.variables')}: {'{student_name}'}, {'{item_count}'}, {'{date}'}</div>
                             </div>
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Subject Line</label>
+                                    <label className="text-xs font-bold text-slate-400 uppercase">{t('config.email.subject')}</label>
                                     <input
                                         name={emailTab === 'receipt' ? "emailReceiptSubject" : "emailOverdueSubject"}
                                         value={emailTab === 'receipt' ? (config.emailReceiptSubject || '') : (config.emailOverdueSubject || '')}
@@ -556,7 +558,7 @@ const ConfigPage = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase">HTML Content</label>
+                                    <label className="text-xs font-bold text-slate-400 uppercase">{t('config.email.html')}</label>
                                     <textarea
                                         name={emailTab === 'receipt' ? "emailReceiptContent" : "emailOverdueContent"}
                                         value={emailTab === 'receipt' ? (config.emailReceiptContent || '') : (config.emailOverdueContent || '')}
@@ -570,10 +572,10 @@ const ConfigPage = () => {
 
                         <div className="flex justify-between items-center">
                             <div className="flex gap-2">
-                                <button className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200" onClick={() => insertVariable('{student_name}')}>+ Name</button>
-                                <button className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200" onClick={() => insertVariable('{return_date}')}>+ Date</button>
+                                <button className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200" onClick={() => insertVariable('{student_name}')}>{t('config.email.addName')}</button>
+                                <button className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200" onClick={() => insertVariable('{return_date}')}>{t('config.email.addDate')}</button>
                             </div>
-                            <button className="text-[#8D8DC7] font-semibold text-sm hover:underline">Send Test {emailTab === 'receipt' ? 'Receipt' : 'Warning'}</button>
+                            <button className="text-[#8D8DC7] font-semibold text-sm hover:underline">{t('config.email.sendTest')}</button>
                         </div>
                     </div>
                 );
@@ -585,10 +587,10 @@ const ConfigPage = () => {
                                 <QrCode className="w-20 h-20 text-slate-800" />
                             </div>
                             <div className="flex-1 space-y-6 w-full">
-                                <h3 className="font-bold text-slate-800 text-lg">QR Label Settings</h3>
+                                <h3 className="font-bold text-slate-800 text-lg">{t('config.qrcode.title')}</h3>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Label Size</label>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('config.qrcode.labelSize')}</label>
                                     <div className="relative">
                                         <select
                                             name="qrLabelSize"
@@ -609,13 +611,13 @@ const ConfigPage = () => {
                                         {config.qrIncludeLogo && <div className="w-2 h-2 bg-white rounded-sm" />}
                                     </div>
                                     <input type="checkbox" name="qrIncludeLogo" checked={!!config.qrIncludeLogo} onChange={handleChange} className="hidden" />
-                                    <span className="font-bold text-slate-700 group-hover:text-blue-600 transition-colors">Include University Logo</span>
+                                    <span className="font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{t('config.qrcode.includeLogo')}</span>
                                 </label>
                             </div>
                         </div>
 
                         <button className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
-                            Print Sample Label
+                            {t('config.qrcode.printSample')}
                         </button>
                     </div>
                 );
@@ -624,15 +626,15 @@ const ConfigPage = () => {
                     <div className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">System Logo</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('config.branding.systemLogo')}</label>
                                 <div className="h-48 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer group">
                                     <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 mb-4 group-hover:scale-110 transition-transform"></div>
-                                    <span className="text-slate-500 font-medium text-sm">Tap to upload replacement</span>
+                                    <span className="text-slate-500 font-medium text-sm">{t('config.branding.upload')}</span>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Primary Color</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('config.branding.primaryColor')}</label>
                                 <div className="flex items-center gap-3">
                                     {['#8D8DC7', '#80A4FF', '#74D4B5'].map((color) => (
                                         <button
@@ -664,8 +666,8 @@ const ConfigPage = () => {
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">System Configuration</h1>
-                <p className="text-gray-400">Manage all system settings globally.</p>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('config.title')}</h1>
+                <p className="text-gray-400">{t('config.subtitle')}</p>
             </div>
         </div>
     );
@@ -706,9 +708,9 @@ const ConfigPage = () => {
                         </div>
                         <div className="p-8 overflow-y-auto flex-1">{renderContent(activeSection)}</div>
                         <div className="p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-3xl flex justify-end space-x-3">
-                            <button onClick={handleClose} className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-white">Cancel</button>
+                            <button onClick={handleClose} className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-white">{t('config.actions.cancel')}</button>
                             <button onClick={handleSave} className="px-5 py-2.5 rounded-xl bg-[#8D8DC7] text-white font-medium hover:bg-[#7b7bb5] flex items-center gap-2">
-                                <Save className="h-4 w-4" /> Save Changes
+                                <Save className="h-4 w-4" /> {t('config.actions.save')}
                             </button>
                         </div>
                     </div>

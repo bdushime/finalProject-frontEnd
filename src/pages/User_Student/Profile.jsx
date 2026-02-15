@@ -13,10 +13,12 @@ import { borrowHistory } from "./data/mockData";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "./components/StatusBadge";
 import CategoryBadge from "./components/CategoryBadge";
+import { useTranslation } from "react-i18next";
 
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false);
-const [studentData, setStudentData] = useState({
+    const { t } = useTranslation("student");
+    const [studentData, setStudentData] = useState({
         name: "Student",
         email: "student@auca.ac.rw",
         department: "Information Technology",
@@ -51,7 +53,7 @@ const [studentData, setStudentData] = useState({
     };
 
     const handleSave = () => {
-// Here you would typically make an API call to update the user
+        // Here you would typically make an API call to update the user
         // await api.put('/users/profile', studentData);
         console.log('Saving student data:', studentData);
 
@@ -81,8 +83,8 @@ const [studentData, setStudentData] = useState({
                     <BackButton to="/student/dashboard" />
                 </div>
                 <PageHeader
-                    title="My Profile"
-                    subtitle="View and manage your account information."
+                    title={t("profile.title")}
+                    subtitle={t("profile.subtitle")}
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -116,19 +118,19 @@ const [studentData, setStudentData] = useState({
                             <div className="p-6 pt-0 space-y-3">
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-2xl">
                                     <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-sm">
-<Hash className="h-4 w-4 text-[#0b1d3a]" />
+                                        <Hash className="h-4 w-4 text-[#0b1d3a]" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">Student ID</div>
+                                        <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">{t("profile.studentId")}</div>
                                         <div className="font-bold text-[#0b1d3a] text-sm">{studentData.studentId}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-2xl">
                                     <div className="p-2 rounded-xl bg-white border border-slate-100 shadow-sm">
-<GraduationCap className="h-4 w-4 text-[#0b1d3a]" />
+                                        <GraduationCap className="h-4 w-4 text-[#0b1d3a]" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">Year</div>
+                                        <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">{t("profile.year")}</div>
                                         <div className="font-bold text-[#0b1d3a] text-sm">{studentData.year}</div>
                                     </div>
                                 </div>
@@ -137,7 +139,7 @@ const [studentData, setStudentData] = useState({
                                         <Calendar className="h-4 w-4 text-[#0b1d3a]" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">Member Since</div>
+                                        <div className="text-[10px] uppercase tracking-wide text-slate-400 font-bold">{t("profile.memberSince")}</div>
                                         <div className="font-bold text-[#0b1d3a] text-sm">{formatDate(studentData.joinDate)}</div>
                                     </div>
                                 </div>
@@ -150,8 +152,8 @@ const [studentData, setStudentData] = useState({
                         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                                 <div>
-                                    <h3 className="font-bold text-lg text-[#0b1d3a]">Personal Information</h3>
-                                    <p className="text-sm text-slate-500">Update your personal details.</p>
+                                    <h3 className="font-bold text-lg text-[#0b1d3a]">{t("profile.personalInfo")}</h3>
+                                    <p className="text-sm text-slate-500">{t("profile.updateDetails")}</p>
                                 </div>
                                 {!isEditing && (
                                     <Button
@@ -161,22 +163,22 @@ const [studentData, setStudentData] = useState({
                                         onClick={() => setIsEditing(true)}
                                     >
                                         <Edit2 className="h-3.5 w-3.5 mr-2" />
-                                        Edit Profile
+                                        {t("profile.editProfile")}
                                     </Button>
                                 )}
                             </div>
                             <div className="p-6">
                                 <div className="space-y-5">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-{/* Full Name - Read Only */}
+                                        {/* Full Name - Read Only */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="name" className="text-sm font-semibold text-slate-700">Full Name</Label>
+                                            <Label htmlFor="name" className="text-sm font-semibold text-slate-700">{t("profile.fullName")}</Label>
                                             <div className="relative">
                                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                                 <Input
                                                     id="name"
                                                     value={studentData.name}
-disabled={true}
+                                                    disabled={true}
                                                     className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-11 text-slate-500 cursor-not-allowed"
                                                 />
                                             </div>
@@ -184,7 +186,7 @@ disabled={true}
 
                                         {/* Student ID - Read Only */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="studentId" className="text-sm font-semibold text-slate-700">Student ID</Label>
+                                            <Label htmlFor="studentId" className="text-sm font-semibold text-slate-700">{t("profile.studentId")}</Label>
                                             <div className="relative">
                                                 <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                                 <Input
@@ -198,7 +200,7 @@ disabled={true}
 
                                         {/* Email - Editable */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Email</Label>
+                                            <Label htmlFor="email" className="text-sm font-semibold text-slate-700">{t("profile.email")}</Label>
                                             <div className="relative">
                                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                                 <Input
@@ -207,14 +209,14 @@ disabled={true}
                                                     value={studentData.email}
                                                     onChange={(e) => handleInputChange('email', e.target.value)}
                                                     disabled={!isEditing}
-className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
+                                                    className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Phone Number - Editable */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="phone" className="text-sm font-semibold text-slate-700">Phone Number</Label>
+                                            <Label htmlFor="phone" className="text-sm font-semibold text-slate-700">{t("profile.phone")}</Label>
                                             <div className="relative">
                                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                                 <Input
@@ -223,14 +225,14 @@ className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus
                                                     value={studentData.phone}
                                                     onChange={(e) => handleInputChange('phone', e.target.value)}
                                                     disabled={!isEditing}
-className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
+                                                    className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus-visible:ring-[#0b1d3a]' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Department - Read Only */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="department" className="text-sm font-semibold text-slate-700">Department</Label>
+                                            <Label htmlFor="department" className="text-sm font-semibold text-slate-700">{t("profile.department")}</Label>
                                             <div className="relative">
                                                 <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                                 <Input
@@ -244,7 +246,7 @@ className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus
 
                                         {/* Year - Read Only */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="year" className="text-sm font-semibold text-slate-700">Year</Label>
+                                            <Label htmlFor="year" className="text-sm font-semibold text-slate-700">{t("profile.year")}</Label>
                                             <div className="relative">
                                                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                                 <Input
@@ -264,7 +266,7 @@ className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus
                                                 className="rounded-xl text-slate-500 hover:text-slate-700"
                                                 onClick={() => {
                                                     setIsEditing(false);
-// Re-load initial data to reset form
+                                                    // Re-load initial data to reset form
                                                     const userStr = localStorage.getItem("user");
                                                     if (userStr) {
                                                         const user = JSON.parse(userStr);
@@ -276,11 +278,11 @@ className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus
                                                     }
                                                 }}
                                             >
-                                                Cancel
+                                                {t("profile.cancel")}
                                             </Button>
                                             <Button onClick={handleSave} className="bg-[#0b1d3a] hover:bg-[#126dd5] text-white font-bold rounded-xl h-10 shadow-sm px-6">
                                                 <Save className="h-4 w-4 mr-2" />
-                                                Save Changes
+                                                {t("profile.saveChanges")}
                                             </Button>
                                         </div>
                                     )}
@@ -292,8 +294,8 @@ className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus
                         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                                 <div>
-                                    <h3 className="font-bold text-lg text-[#0b1d3a]">Recent Activity</h3>
-                                    <p className="text-sm text-slate-500">Your latest borrowing history.</p>
+                                    <h3 className="font-bold text-lg text-[#0b1d3a]">{t("dashboard.recentActivity")}</h3>
+                                    <p className="text-sm text-slate-500">{t("profile.latestHistory")}</p>
                                 </div>
                                 <Button
                                     asChild
@@ -302,14 +304,14 @@ className={`pl-10 rounded-xl h-11 ${isEditing ? 'bg-white border-slate-200 focus
                                     className="rounded-xl border-slate-200 hover:bg-white text-slate-600 h-9 group"
                                 >
                                     <Link to="/student/report">
-                                        View Full Report
+                                        {t("score.viewFullReport")}
                                         <ArrowRight className="h-3.5 w-3.5 ml-2 group-hover:translate-x-0.5 transition-transform" />
                                     </Link>
                                 </Button>
                             </div>
                             <div className="p-0">
-<div className="text-center py-12 text-slate-400">
-                                    <p>No recent activity.</p>
+                                <div className="text-center py-12 text-slate-400">
+                                    <p>{t("dashboard.noRecentActivity")}</p>
                                 </div>
                             </div>
                         </div>

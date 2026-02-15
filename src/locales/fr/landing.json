@@ -1,0 +1,25 @@
+{
+    "hero": {
+        "title": "Gestion Intelligente de l'Équipement",
+        "subtitle": "Suivez, gérez et optimisez l'équipement de votre institution facilement.",
+        "getStarted": "Commencer",
+        "learnMore": "En savoir plus"
+    },
+    "features": {
+        "title": "Fonctionnalités",
+        "realTimeTracking": "Suivi en Temps Réel",
+        "realTimeTrackingDesc": "Surveillez l'emplacement et l'état des équipements en temps réel.",
+        "smartAlerts": "Alertes Intelligentes",
+        "smartAlertsDesc": "Rappels automatiques pour les dates de retour, la maintenance et la disponibilité.",
+        "analytics": "Analytique",
+        "analyticsDesc": "Suivez les tendances d'utilisation et optimisez l'inventaire.",
+        "qrScanning": "Scan QR Code",
+        "qrScanningDesc": "Entrée/sortie rapide de l'équipement avec les codes QR."
+    },
+    "nav": {
+        "features": "Fonctionnalités",
+        "benefits": "Avantages",
+        "contact": "Contact",
+        "signIn": "Se connecter"
+    }
+}
