@@ -37,7 +37,7 @@
         "addUser": "Ajouter un Utilisateur",
         "editUser": "Modifier le Profil",
         "newUserProfile": "Nouveau Profil",
-        "defaultPassword": "Mot de passe par défaut : password123",
+        "defaultPassword": "Mot de passe par défaut : ********",
         "searchPlaceholder": "Rechercher par nom, e-mail ou ID...",
         "userIdentity": "Identité de l'Utilisateur",
         "assignedRole": "Rôle Attribué",

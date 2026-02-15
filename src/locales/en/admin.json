@@ -37,7 +37,7 @@
         "addUser": "Add User",
         "editUser": "Edit User Profile",
         "newUserProfile": "New User Profile",
-        "defaultPassword": "Default password: password123",
+        "defaultPassword": "Default password: ********",
         "searchPlaceholder": "Search by name, email or ID...",
         "userIdentity": "User Identity",
         "assignedRole": "Assigned Role",
