@@ -1,349 +1,549 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import AdminLayout from "../components/AdminLayout";
 import api from '@/utils/api';
-import { Search, Filter, Download, FileText, BarChart3, Table, Loader2, ChevronDown, AlertCircle, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { Download, FileText, Users, Monitor, ShieldAlert, Loader2, ChevronDown, Table, BarChart3, Search, Filter, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
+import { toast } from 'sonner';
 
 // CONSTANTS
-const ROLES = ["All Users", "Student", "Staff", "Admin"];
-const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Lost", "Maintenance", "Damaged", "Stolen"];
+const ROLES = ["All Roles", "Student", "IT_Staff", "Staff", "Admin"];
+const STATUSES = ["All Statuses", "Active", "Overdue", "Returned", "Maintenance"];
+const RISK_LEVELS = ["All Levels", "Low", "Medium", "High"];
 const TIME_RANGES = ["Last 30 Days", "Today", "This Week", "This Year"];
-const CATEGORIES = ["All Categories", "Laptops", "Cameras", "Audio", "Cables", "Tablets", "Accessories"];
+const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
 const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
 const ReportsPage = () => {
-    const [reportMode, setReportMode] = useState('admin');
+    // Report Mode / State
+    const [currentReport, setCurrentReport] = useState('activity');
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
-    const [showExportMenu, setShowExportMenu] = useState(false); // <--- NEW: Toggle for export menu
-    
+    const [showExportMenu, setShowExportMenu] = useState(false);
+
+    // Date Range State
+    const [startDate, setStartDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 30);
+        return d.toISOString().split('T')[0];
+    });
+    const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+
     // Filters
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
-    const [selectedRole, setSelectedRole] = useState("All Users");
-    const [timeRange, setTimeRange] = useState("Last 30 Days");
+    const [selectedRole, setSelectedRole] = useState("All Roles");
+    const [selectedRiskLevel, setSelectedRiskLevel] = useState("All Levels");
 
     const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'System Admin', role: 'Admin' };
 
-    // FETCH DATA
+    // Reset filters when report changes
+    const handleReportChange = (report) => {
+        setCurrentReport(report);
+        setSelectedStatus("All Statuses");
+        setSelectedCategory("All Categories");
+        setSelectedRole("All Roles");
+        setSelectedRiskLevel("All Levels");
+        setData([]); // Clear data briefly
+    };
+
+    // Fetch Data
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const params = {
-                    status: selectedStatus === "All Statuses" ? undefined : selectedStatus,
-                    role: selectedRole === "All Users" ? undefined : selectedRole,
-                    category: selectedCategory === "All Categories" ? undefined : selectedCategory,
-                    timeRange
-                };
-                const res = await api.get('/reports', { params });
-                setData(res.data);
+                let endpoint = '';
+                let params = { startDate, endDate };
+
+                if (currentReport === 'activity' || currentReport === 'risk') {
+                    endpoint = '/reports';
+                } else if (currentReport === 'users') {
+                    endpoint = '/users';
+                } else if (currentReport === 'devices') {
+                    endpoint = '/equipment/browse';
+                }
+
+                if (endpoint) {
+                    const res = await api.get(endpoint, { params });
+                    setData(res.data);
+                }
             } catch (err) {
                 console.error("Reports Fetch Error:", err);
+                toast.error("Failed to load report data.");
             } finally {
                 setLoading(false);
             }
         };
         fetchData();
-    }, [selectedStatus, selectedCategory, selectedRole, timeRange]);
+    }, [currentReport, startDate, endDate]); // Refetch on report or date change
 
-    // Chart Data
-    const categoryStats = useMemo(() => {
-        const stats = {};
-        data.forEach(item => {
-            stats[item.category] = (stats[item.category] || 0) + 1;
+    // Filtered Data Logic (Client Side)
+    const filteredData = useMemo(() => {
+        if (!data) return [];
+        return data.filter(item => {
+            // Global Date Filter
+            const itemDate = new Date(item.dateOut || item.createdAt || item.date || item.updatedAt);
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+
+            const dateMatch = !isNaN(itemDate.getTime()) ? (itemDate >= start && itemDate <= end) : true;
+
+            // Specific Filters
+            if (currentReport === 'activity' || currentReport === 'risk') {
+                const statusMatch = selectedStatus === "All Statuses" || item.status === selectedStatus;
+
+                // Risk Assessment: Show activity data filtered by risk level/status/date
+                if (currentReport === 'risk') {
+                    const score = item.responsibilityScore || (item.status === 'Overdue' ? 40 : 100);
+                    let level = "Low";
+                    if (score < 50) level = "High";
+                    else if (score < 80) level = "Medium";
+
+                    const riskMatch = selectedRiskLevel === "All Levels" || level === selectedRiskLevel;
+                    return riskMatch && dateMatch;
+                }
+
+                return statusMatch && dateMatch;
+            }
+
+            if (currentReport === 'users') {
+                const roleMatch = selectedRole === "All Roles" || item.role === selectedRole;
+                return roleMatch && dateMatch;
+            }
+
+            if (currentReport === 'devices') {
+                const statusMatch = selectedStatus === "All Statuses" ||
+                    (item.status === selectedStatus) ||
+                    (selectedStatus === 'Active' && (item.available > 0 || item.status === 'Available'));
+                return statusMatch && dateMatch;
+            }
+
+            return true;
         });
-        return Object.keys(stats).map(key => ({ name: key, value: stats[key] }));
-    }, [data]);
+    }, [data, currentReport, selectedStatus, selectedRole, selectedCategory, selectedRiskLevel, startDate, endDate]);
 
-    // 👇 IMPROVED: HANDLE PDF GENERATION WITH TYPES
-    const handleExportPDF = (type = 'full') => {
-        if (data.length === 0) return alert("No data to export!");
+    // Stats Calculation
+    const stats = useMemo(() => {
+        const total = filteredData.length;
+        let stat1 = 0, stat2 = 0, stat3 = 0;
+        let label1 = "Total", label2 = "Active", label3 = "Overdue";
 
-        let filteredData = [...data];
-        let reportTitle = "ADMINISTRATIVE EQUIPMENT REPORT";
-
-        // Logic to filter data based on Report Type
-        if (type === 'risk') {
-            filteredData = data.filter(row => 
-                row.responsibilityScore < 60 || 
-                ['Overdue', 'Lost', 'Stolen', 'Damaged'].includes(row.status)
-            );
-            reportTitle = "HIGH RISK & INCIDENT REPORT";
-        } else if (type === 'active') {
-            filteredData = data.filter(row => row.status === 'Active' || row.status === 'Overdue');
-            reportTitle = "ACTIVE LOANS REPORT";
-        } else if (type === 'returned') {
-            filteredData = data.filter(row => row.status === 'Returned');
-            reportTitle = "RETURN HISTORY REPORT";
+        if (currentReport === 'users') {
+            label1 = "Total Users";
+            label2 = "Students";
+            label3 = "Staff";
+            stat1 = total;
+            stat2 = filteredData.filter(u => u.role === 'Student').length;
+            stat3 = filteredData.filter(u => u.role === 'Staff' || u.role === 'IT_Staff').length;
+        } else if (currentReport === 'devices') {
+            label1 = "Total Devices";
+            label2 = "Available";
+            label3 = "Broken/Maint.";
+            stat1 = total;
+            stat2 = filteredData.filter(d => d.available > 0 || d.status === 'Available').length;
+            stat3 = filteredData.filter(d => d.status === 'Maintenance' || d.status === 'Broken').length;
+        } else {
+            label1 = "Total Records";
+            label2 = "Active";
+            label3 = "Overdue";
+            stat1 = total;
+            stat2 = filteredData.filter(i => i.status === 'Active').length;
+            stat3 = filteredData.filter(i => i.status === 'Overdue').length;
         }
 
-        if (filteredData.length === 0) return alert(`No records found for ${reportTitle}`);
+        return { total: stat1, active: stat2, overdue: stat3, labelTotal: label1, labelActive: label2, labelOverdue: label3 };
+    }, [filteredData, currentReport]);
+
+    // Dynamic Columns Config
+    const getColumns = () => {
+        switch (currentReport) {
+            case 'users':
+                return [
+                    {
+                        header: "User Identity", render: (row) => (
+                            <div>
+                                <div className="font-bold text-slate-900">{row.fullName || row.username}</div>
+                                <div className="text-xs text-slate-400">{row.email}</div>
+                            </div>
+                        )
+                    },
+                    {
+                        header: "Role", render: (row) => (
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${row.role === 'Student' ? 'bg-gray-100 text-gray-600' :
+                                row.role === 'Admin' ? 'bg-slate-800 text-white' :
+                                    'bg-blue-50 text-blue-600'
+                                }`}>{row.role}</span>
+                        )
+                    },
+                    { header: "Department", accessor: "department", render: (row) => row.department || "N/A" },
+                    {
+                        header: "Score", render: (row) => (
+                            <span className={`font-bold ${!row.responsibilityScore || row.responsibilityScore >= 80 ? 'text-emerald-500' : row.responsibilityScore < 50 ? 'text-red-500' : 'text-yellow-500'}`}>
+                                {row.responsibilityScore ?? 100}%
+                            </span>
+                        )
+                    },
+                    {
+                        header: "Status", render: (row) => (
+                            <span className={`text-xs font-bold ${row.status === 'Inactive' ? 'text-red-500' : 'text-emerald-600'}`}>
+                                {row.status || 'Active'}
+                            </span>
+                        )
+                    }
+                ];
+            case 'devices':
+                return [
+                    { header: "Device Name", render: (row) => <div className="font-bold text-slate-900">{row.name}</div> },
+                    { header: "Category", accessor: "category", render: (row) => row.category || row.type || "N/A" },
+                    { header: "Serial Number", accessor: "serialNumber", render: (row) => <span className="font-mono text-xs">{row.serialNumber || (row.id || row._id || "").slice(-6)}</span> },
+                    { header: "Location", accessor: "location", render: (row) => row.location || "Main Storage" },
+                    {
+                        header: "Status", render: (row) => (
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${(row.available > 0 || row.status === 'Available' || row.status === 'Active') ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+                                }`}>
+                                {(row.available > 0 || row.status === 'Available' || row.status === 'Active') ? 'Active' : row.status || 'Unavailable'}
+                            </span>
+                        )
+                    }
+                ];
+            case 'risk':
+                return [
+                    {
+                        header: "User Identity", render: (row) => (
+                            <div>
+                                <div className="font-bold text-slate-900">{row.user?.username || row.user || "Unknown User"}</div>
+                                <div className="text-xs text-slate-400">{row.user?.email || row.email || "N/A"}</div>
+                            </div>
+                        )
+                    },
+                    {
+                        header: "Risk Level", render: (row) => {
+                            const score = row.responsibilityScore || (row.status === 'Overdue' ? 40 : 100);
+                            let level = "Low";
+                            let color = "text-emerald-600 bg-emerald-50 border-emerald-100";
+                            if (score < 50) {
+                                level = "High";
+                                color = "text-rose-600 bg-rose-50 border-rose-100";
+                            } else if (score < 80) {
+                                level = "Medium";
+                                color = "text-orange-600 bg-orange-50 border-orange-100";
+                            }
+                            return (
+                                <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${color}`}>
+                                    {level} Risk
+                                </span>
+                            );
+                        }
+                    },
+                    {
+                        header: "Risk Score", render: (row) => {
+                            const score = row.responsibilityScore || (row.status === 'Overdue' ? 40 : 100);
+                            return (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full ${score < 50 ? 'bg-rose-500' : score < 80 ? 'bg-orange-500' : 'bg-emerald-500'}`}
+                                            style={{ width: `${score}%` }}
+                                        ></div>
+                                    </div>
+                                    <span className={`font-bold text-sm ${score < 50 ? 'text-rose-500' : score < 80 ? 'text-orange-500' : 'text-emerald-500'}`}>
+                                        {score}%
+                                    </span>
+                                </div>
+                            );
+                        }
+                    },
+                    {
+                        header: "Status", render: (row) => (
+                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${row.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                row.status === 'Overdue' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                    row.status === 'Returned' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                        'bg-slate-50 text-slate-500 border-slate-100'
+                                }`}>
+                                {row.status}
+                            </span>
+                        )
+                    }
+                ];
+            case 'activity':
+            default:
+                return [
+                    {
+                        header: "Item", render: (row) => (
+                            <div>
+                                <div className="font-bold text-slate-900">{row.item || row.equipment?.name || "Unknown Item"}</div>
+                                <div className="text-xs text-slate-400">ID: {(row.id || "").slice(-6)}</div>
+                            </div>
+                        )
+                    },
+                    {
+                        header: "User", render: (row) => (
+                            <div>
+                                <div className="font-medium text-slate-700">{row.user?.username || row.user || "Unknown"}</div>
+                                <div className="text-xs text-slate-400">{row.role || row.user?.role || "User"}</div>
+                            </div>
+                        )
+                    },
+                    { header: "Date", render: (row) => row.dateOut ? new Date(row.dateOut).toLocaleDateString() : "N/A" },
+                    {
+                        header: "Status", render: (row) => (
+                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${row.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                row.status === 'Overdue' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                    row.status === 'Returned' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                        'bg-slate-50 text-slate-500 border-slate-100'
+                                }`}>
+                                {row.status}
+                            </span>
+                        )
+                    }
+                ];
+        }
+    };
+
+    const handleExportPDF = () => {
+        if (filteredData.length === 0) return toast.error("No data to export!");
 
         const formattedForPdf = filteredData.map(row => ({
-            createdAt: row.dateOut,
-            status: row.status,
+            createdAt: row.dateOut || row.createdAt || new Date().toISOString(),
+            status: row.status || 'Active',
             equipment: {
-                name: row.item,
-                serialNumber: row.id.slice(-6).toUpperCase(),
-                category: row.category
+                name: row.item || row.name || row.equipment?.name || "N/A",
+                serialNumber: (row.id || row._id || "").slice(-6).toUpperCase(),
+                category: row.category || row.type || "N/A"
             },
             user: {
-                username: row.user,
-                email: row.role
+                username: row.user?.username || row.user || row.fullName || "N/A",
+                email: row.email || "N/A"
             }
         }));
 
-        generatePDF(formattedForPdf, currentUser, reportTitle);
-        setShowExportMenu(false); // Close menu after click
+        generatePDF(formattedForPdf, currentUser, `${currentReport.toUpperCase()} REPORT`);
     };
 
-    // --- RENDERERS ---
+    const handleExportExcel = async () => {
+        if (filteredData.length === 0) return toast.error("No data to export!");
 
-    const renderTable = () => (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="border-b border-slate-100">
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">#</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">ITEM ID</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">ITEM NAME</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">CATEGORY</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">ASSIGNED TO</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                DATE BORROWED <AlertCircle className="w-3 h-3 inline text-slate-300 ml-1" />
-                            </th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">STATUS</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">RISK</th>
-                            <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">SCORE</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                        {loading ? (
-                            <tr><td colSpan="9" className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#8D8DC7]" /></td></tr>
-                        ) : data.length === 0 ? (
-                            <tr><td colSpan="9" className="p-12 text-center text-slate-400">No records found matching your filters.</td></tr>
-                        ) : (
-                            data.map((row, index) => {
-                                const riskLevel = row.responsibilityScore < 50 ? 'High' : row.responsibilityScore < 80 ? 'Medium' : 'Low';
-                                const statusColor =
-                                    row.status === 'Overdue' ? 'text-red-500 font-bold' :
-                                        row.status === 'Active' ? 'text-slate-700 font-medium' :
-                                            row.status === 'Returned' ? 'text-emerald-600 font-medium' :
-                                                row.status === 'Lost' ? 'text-orange-500' :
-                                                    row.status === 'Stolen' ? 'text-red-600 font-bold' :
-                                                        'text-slate-500';
+        try {
+            const headers = getColumns().map(c => c.header).join(',');
+            const rows = filteredData.map(row => {
+                const columns = getColumns();
+                return columns.map(col => {
+                    if (col.accessor) return row[col.accessor] || "N/A";
+                    if (currentReport === 'users') return row.fullName || row.username || row.email;
+                    if (currentReport === 'devices') return row.name || row.serialNumber;
+                    return row.item || row.equipment?.name || "N/A";
+                }).join(',');
+            }).join('\n');
 
-                                return (
-                                    <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="p-4 text-sm text-slate-400 font-medium">{index + 1}</td>
-                                        <td className="p-4 text-sm font-bold text-slate-700">{row.id}</td>
-                                        <td className="p-4 text-sm font-bold text-slate-900">{row.item}</td>
-                                        <td className="p-4 text-sm text-slate-500">{row.category}</td>
-                                        <td className="p-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-800">{row.user}</span>
-                                                <span className="text-xs text-slate-400">{row.role}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-sm text-slate-500">{new Date(row.dateOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                                        <td className={`p-4 text-sm ${statusColor}`}>{row.status}</td>
-                                        <td className="p-4">
-                                            <span className={`text-sm font-medium ${riskLevel === 'High' ? 'text-red-600' : riskLevel === 'Medium' ? 'text-yellow-600' : 'text-slate-600'}`}>
-                                                {riskLevel}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            <span className={`font-bold text-sm ${row.responsibilityScore < 50 ? 'text-red-500' : row.responsibilityScore >= 90 ? 'text-emerald-500' : 'text-slate-700'}`}>
-                                                {row.responsibilityScore}%
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            })
-                        )}
-                    </tbody>
-                </table>
+            const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows;
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${currentReport}_report_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            toast.success("Excel (CSV) Export Successful");
+        } catch (e) {
+            console.error(e);
+            toast.error("Export failed");
+        }
+    };
+
+    // --- COMPONENTS ---
+
+    const LandingCard = ({ title, desc, icon: Icon, color, onClick, isSelected }) => (
+        <button
+            onClick={onClick}
+            className={`flex flex-col items-start p-6 bg-white border rounded-2xl transition-all duration-300 group text-left w-full relative overflow-hidden ${isSelected
+                ? 'border-blue-500 shadow-lg ring-2 ring-blue-500/20 translate-y-[-2px]'
+                : 'border-slate-200 hover:border-blue-300 hover:shadow-md hover:-translate-y-1'
+                }`}
+        >
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/0 to-slate-50 rounded-bl-full -mr-4 -mt-4 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}></div>
+
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${color} ${isSelected ? 'scale-110 shadow-md' : 'group-hover:scale-110'} duration-300 relative z-10`}>
+                <Icon className="w-6 h-6 text-white" />
             </div>
-            
-            {/* Footer with Smart Export */}
-            <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-end gap-3 relative">
-                
-                {/* 👇 NEW: Dropdown Menu */}
-                {showExportMenu && (
-                    <div className="absolute bottom-16 right-4 w-64 bg-white rounded-xl shadow-xl border border-slate-100 p-2 z-50 animate-in slide-in-from-bottom-2">
-                        <div className="text-xs font-bold text-slate-400 px-3 py-2 uppercase">Select Report Type</div>
-                        <button onClick={() => handleExportPDF('full')} className="w-full text-left px-3 py-2.5 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700 flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-slate-400" /> Full Detailed Report
-                        </button>
-                        <button onClick={() => handleExportPDF('active')} className="w-full text-left px-3 py-2.5 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700 flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Active Loans Only
-                        </button>
-                        <button onClick={() => handleExportPDF('risk')} className="w-full text-left px-3 py-2.5 hover:bg-red-50 rounded-lg text-sm font-medium text-red-600 flex items-center gap-2">
-                            <ShieldAlert className="w-4 h-4 text-red-500" /> High Risk & Overdue
-                        </button>
-                    </div>
-                )}
+            <h3 className={`text-lg font-bold mb-1 relative z-10 ${isSelected ? 'text-blue-600' : 'text-slate-900'}`}>{title}</h3>
+            <p className="text-slate-500 text-xs leading-relaxed relative z-10">{desc}</p>
+        </button>
+    );
 
-                {/* Export Button toggles menu */}
-                <button 
-                    onClick={() => setShowExportMenu(!showExportMenu)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors text-slate-700 shadow-sm"
-                >
-                    <Download className="w-4 h-4" /> Download Report <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
-                </button>
-
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50">
-                    <Table className="w-4 h-4" /> Export Excel
-                </button>
-            </div>
+    const SelectionGrid = () => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <LandingCard title="Activity Logs" desc="Transactions & History" icon={FileText} color="bg-slate-900" onClick={() => handleReportChange('activity')} isSelected={currentReport === 'activity'} />
+            <LandingCard title="User Directory" desc="Users & Roles" icon={Users} color="bg-slate-900" onClick={() => handleReportChange('users')} isSelected={currentReport === 'users'} />
+            <LandingCard title="Device Inventory" desc="Equipment Status" icon={Monitor} color="bg-slate-900" onClick={() => handleReportChange('devices')} isSelected={currentReport === 'devices'} />
+            <LandingCard title="Risk Assessment" desc="Borrowing Risks" icon={ShieldAlert} color="bg-slate-900" onClick={() => handleReportChange('risk')} isSelected={currentReport === 'risk'} />
         </div>
     );
 
     const HeroSection = (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10 w-full">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 mt-4 relative z-10 w-full text-white">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">System Reports</h1>
-                <p className="text-slate-400">Generate and export detailed system logs and inventories.</p>
-            </div>
-            <div className="bg-slate-800 p-1 rounded-xl flex gap-1 mt-4 md:mt-0">
-                <button onClick={() => setReportMode('admin')} className={`px-4 py-2 rounded-lg text-sm font-medium ${reportMode === 'admin' ? 'bg-[#8D8DC7] text-white' : 'text-gray-400'}`}>
-                    <Table className="w-4 h-4 inline mr-2" />
-                </button>
-                <button onClick={() => setReportMode('analytics')} className={`px-4 py-2 rounded-lg text-sm font-medium ${reportMode === 'analytics' ? 'bg-[#8D8DC7] text-white' : 'text-gray-400'}`}>
-                    <BarChart3 className="w-4 h-4 inline mr-2" />
-                </button>
+                <h1 className="text-4xl font-bold mb-2">
+                    {currentReport === 'activity' && "Activity Reports"}
+                    {currentReport === 'users' && "User Reports"}
+                    {currentReport === 'devices' && "Device Inventory"}
+                    {currentReport === 'risk' && "Risk Analysis"}
+                </h1>
+                <p className="text-blue-100 max-w-2xl opacity-80">
+                    Detailed analysis and exportable logs for system auditing.
+                </p>
             </div>
         </div>
     );
 
-    return (
-        <AdminLayout heroContent={HeroSection}>
-            <div className="space-y-6">
-                {/* Mode: Admin Table */}
-                {reportMode === 'admin' && (
-                    <>
-                        {/* Filters Card */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-6">
-                            <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
-                                <Filter className="w-5 h-5 text-slate-400" />
-                                <div>
-                                    <h3 className="font-bold text-slate-800 text-sm">Report Filters</h3>
-                                    <p className="text-xs text-gray-400">Customize your report by selecting filters below</p>
-                                </div>
+    const renderReportDetail = () => {
+        const columns = getColumns();
+
+        return (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+                {/* Filters Row */}
+                <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
+                    <div className="flex items-center gap-3">
+                        {/* Date Range Picker (Now for All Reports) */}
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all">
+                            <FileText className="w-4 h-4 text-slate-400" />
+                            <div className="flex items-center gap-1 text-sm font-medium text-slate-600">
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
+                                />
+                                <span className="text-slate-400">to</span>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
+                                />
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                {/* Date Range */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                        Date Range <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={timeRange}
-                                            onChange={e => setTimeRange(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                        >
-                                            {TIME_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
-
-                                {/* Category */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                        Equipment Category <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={selectedCategory}
-                                            onChange={e => setSelectedCategory(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                        >
-                                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
-
-                                {/* Condition / Status */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                        Equipment & Condition
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={selectedStatus}
-                                            onChange={e => setSelectedStatus(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                        >
-                                            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
-
-                                {/* User Filter */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                        User Filter
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            value={selectedRole}
-                                            onChange={e => setSelectedRole(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7] appearance-none"
-                                        >
-                                            {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end gap-3 pt-2">
-                                <button onClick={() => {
-                                    setSelectedStatus("All Statuses");
-                                    setSelectedCategory("All Categories");
-                                    setSelectedRole("All Users");
-                                    setTimeRange("Last 30 Days");
-                                }} className="px-6 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                                    <Filter className="w-4 h-4" /> Reset Filters
-                                </button>
-                                <button className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 flex items-center gap-2 shadow-lg shadow-slate-900/10">
-                                    <Filter className="w-4 h-4" /> Generate Report
-                                </button>
-                            </div>
+                            <ChevronDown className="w-4 h-4 text-slate-400" />
                         </div>
 
-                        {renderTable()}
-                    </>
-                )}
-
-                {/* Mode: Analytics */}
-                {reportMode === 'analytics' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-96">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4">Items by Category (Current View)</h3>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={categoryStats} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                                        {categoryStats.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                                    </Pie>
-                                    <Tooltip />
-                                    <Legend />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-center text-gray-400">
-                            More analytics coming soon...
+                        {/* Status / Role / Category / Risk Filter based on Report */}
+                        <div className="relative">
+                            {currentReport === 'users' ? (
+                                <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
+                                    {ROLES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            ) : currentReport === 'devices' ? (
+                                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
+                                    {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            ) : currentReport === 'risk' ? (
+                                <select value={selectedRiskLevel} onChange={(e) => setSelectedRiskLevel(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
+                                    {RISK_LEVELS.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            ) : (
+                                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="appearance-none bg-white border border-slate-200 text-slate-700 text-sm font-bold pl-4 pr-10 py-2.5 rounded-xl hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm">
+                                    {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            )}
+                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                     </div>
-                )}
+
+                    {/* Exports */}
+                    <div className="flex gap-2">
+                        <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-200 transition-colors">
+                            <Download className="w-4 h-4" /> Excel
+                        </button>
+                        <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">
+                            <FileText className="w-4 h-4" /> PDF
+                        </button>
+                    </div>
+                </div>
+
+                {/* Report Info Block (Gray Header) */}
+                <div className="bg-slate-100 rounded-xl p-6 mb-6">
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 capitalize">{currentReport} Reports</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        {/* Column 1: Report Info */}
+                        <div>
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Report Info:</h4>
+                            <div className="space-y-2 text-sm text-slate-700">
+                                <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
+                                    <span className="font-semibold text-slate-500">Export Date:</span>
+                                    <span className="font-bold">{new Date().toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 2: Filter By */}
+                        <div>
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Filter By:</h4>
+                            <div className="space-y-2 text-sm text-slate-700">
+                                <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
+                                    <span className="font-semibold text-slate-500">Date Range:</span>
+                                    <span className="font-bold">{startDate} to {endDate}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
+                                    <span className="font-semibold text-slate-500">Status:</span>
+                                    <span className="font-bold text-capitalize">{currentReport === 'risk' ? selectedRiskLevel : selectedStatus}</span>
+                                </div>
+                                {currentReport === 'users' && (
+                                    <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
+                                        <span className="font-semibold text-slate-500">Role:</span>
+                                        <span className="font-bold">{selectedRole}</span>
+                                    </div>
+                                )}
+                                {currentReport === 'devices' && (
+                                    <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
+                                        <span className="font-semibold text-slate-500">Category:</span>
+                                        <span className="font-bold">{selectedCategory}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Table */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-slate-50/50 border-b border-slate-100">
+                                <tr>
+                                    {columns.map((col, idx) => (
+                                        <th key={idx} className="p-5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                            {col.header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {loading ? (
+                                    <tr><td colSpan={columns.length} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" /></td></tr>
+                                ) : filteredData.length === 0 ? (
+                                    <tr><td colSpan={columns.length} className="p-12 text-center text-slate-400">No records found.</td></tr>
+                                ) : (
+                                    filteredData.map((row, rIdx) => (
+                                        <tr key={row.id || row._id || rIdx} className="hover:bg-slate-50 transition-colors group">
+                                            {columns.map((col, cIdx) => (
+                                                <td key={cIdx} className="p-5">
+                                                    {col.render ? col.render(row) : (row[col.accessor] || "N/A")}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <AdminLayout heroContent={HeroSection}>
+            <div className="mt-8 px-1">
+                <SelectionGrid />
+                {renderReportDetail()}
             </div>
         </AdminLayout>
     );

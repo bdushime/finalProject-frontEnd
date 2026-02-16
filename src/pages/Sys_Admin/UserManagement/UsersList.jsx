@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../components/AdminLayout'; 
+import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
-// 👇 Added MessageSquare and Send icons
 import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -12,30 +11,30 @@ const UsersList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('All Roles');
     const [showFilters, setShowFilters] = useState(false);
-    
+
     // Modals State
     const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
     const [showScoreModal, setShowScoreModal] = useState(false);
     const [showMessageModal, setShowMessageModal] = useState(false); // <--- NEW: Message Modal
-    
-    const [selectedUser, setSelectedUser] = useState(null); 
-    const [newScore, setNewScore] = useState(100); 
+
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [newScore, setNewScore] = useState(100);
 
     // Dynamic Data
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Form Data
-    const [formData, setFormData] = useState({ 
-        firstName: '', 
-        lastName: '', 
-        email: '', 
-        role: 'Student', 
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'Student',
         department: '',
         studentId: '',
         status: 'Active',
-        password: '' 
+        password: ''
     });
 
     // Message Data
@@ -65,13 +64,13 @@ const UsersList = () => {
         try {
             const payload = {
                 ...formData,
-                studentId: formData.role === 'Student' ? formData.studentId : undefined 
+                studentId: formData.role === 'Student' ? formData.studentId : undefined
             };
             await api.post('/users', payload);
             toast.success("User created successfully!");
             setShowAddUserModal(false);
             setFormData({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '', status: 'Active', password: '' });
-            fetchUsers(); 
+            fetchUsers();
         } catch (err) {
             console.error(err);
             toast.error("Failed to create user.");
@@ -121,7 +120,7 @@ const UsersList = () => {
 
             await api.put(`/users/${selectedUser._id}`, payload);
             toast.success("User profile updated!");
-            
+
             setShowEditUserModal(false);
             fetchUsers();
         } catch (err) {
@@ -136,7 +135,7 @@ const UsersList = () => {
     const handleToggleStatus = async (user) => {
         const newStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
         const actionName = newStatus === 'Suspended' ? 'Suspended' : 'Activated';
-        
+
         if (!window.confirm(`Are you sure you want to ${newStatus === 'Suspended' ? 'SUSPEND' : 'ACTIVATE'} this user?`)) return;
 
         setUsers(users.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
@@ -146,7 +145,7 @@ const UsersList = () => {
             toast.success(`User ${actionName} successfully`);
         } catch (err) {
             toast.error("Failed to change status");
-            fetchUsers(); 
+            fetchUsers();
         }
     };
 
@@ -165,13 +164,15 @@ const UsersList = () => {
     // 7. SCORE LOGIC
     const openScoreModal = (user) => {
         setSelectedUser(user);
-        setNewScore(user.responsibilityScore || 100); 
+        setNewScore(user.responsibilityScore || 100);
         setShowScoreModal(true);
     };
 
     const handleSaveScore = async () => {
         if (!selectedUser) return;
-        const updatedUsers = users.map(u => 
+
+        // Optimistic UI Update
+        const updatedUsers = users.map(u =>
             u._id === selectedUser._id ? { ...u, responsibilityScore: newScore } : u
         );
         setUsers(updatedUsers);
@@ -186,7 +187,7 @@ const UsersList = () => {
         }
     };
 
-    // 8. 👇 NEW: MESSAGE LOGIC
+    // 8. MESSAGE LOGIC
     const openMessageModal = (user) => {
         setSelectedUser(user);
         setMessageData({ subject: '', body: '' });
@@ -199,12 +200,11 @@ const UsersList = () => {
         }
         setSubmitting(true);
         try {
-            // This endpoint should trigger both Email and DB Notification
-            await api.post('/notifications/send-to-user', { 
+            await api.post('/notifications/send-to-user', {
                 userId: selectedUser._id,
                 title: messageData.subject,
                 message: messageData.body,
-                type: 'info' // or 'warning', 'alert'
+                type: 'info'
             });
             toast.success(`Message sent to ${selectedUser.fullName || selectedUser.username}`);
             setShowMessageModal(false);
@@ -221,7 +221,7 @@ const UsersList = () => {
         const fullName = user.fullName || user.username || "";
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.studentId && user.studentId.toLowerCase().includes(searchTerm.toLowerCase())); 
+            (user.studentId && user.studentId.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
         return matchesSearch && matchesRole;
     });
@@ -279,9 +279,9 @@ const UsersList = () => {
                         <input type="text" placeholder="Search by name, email or ID..." className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                     {showFilters && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                            <div className="relative">
-                                <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+                        <div className="flex justify-end animate-in slide-in-from-top-2 fade-in duration-200">
+                            <div className="relative w-full md:w-64">
+                                <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8D8DC7] cursor-pointer" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                                     {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -317,7 +317,7 @@ const UsersList = () => {
                                                 <div>
                                                     <div className="font-semibold text-slate-800">{user.fullName || user.username}</div>
                                                     <div className="text-xs text-gray-500">
-                                                        {user.email} 
+                                                        {user.email}
                                                         {user.role === 'Student' && user.studentId && (
                                                             <span className="ml-2 bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-mono">#{user.studentId}</span>
                                                         )}
@@ -344,8 +344,8 @@ const UsersList = () => {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                
-                                                {/* 👇 NEW: Message Button */}
+
+                                                {/* MESSAGE BUTTON */}
                                                 <button onClick={() => openMessageModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-blue-500 transition-colors" title="Send Message">
                                                     <MessageSquare className="w-4 h-4" />
                                                 </button>
@@ -359,9 +359,9 @@ const UsersList = () => {
                                                 </button>
 
                                                 {user.role !== 'Admin' && (
-                                                    <button 
-                                                        onClick={() => handleToggleStatus(user)} 
-                                                        className={`p-2 rounded-lg transition-colors ${user.status === 'Suspended' ? 'hover:bg-emerald-50 text-emerald-500' : 'hover:bg-orange-50 text-orange-500'}`} 
+                                                    <button
+                                                        onClick={() => handleToggleStatus(user)}
+                                                        className={`p-2 rounded-lg transition-colors ${user.status === 'Suspended' ? 'hover:bg-emerald-50 text-emerald-500' : 'hover:bg-orange-50 text-orange-500'}`}
                                                         title={user.status === 'Suspended' ? "Activate User" : "Suspend User"}
                                                     >
                                                         {user.status === 'Suspended' ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
@@ -393,18 +393,18 @@ const UsersList = () => {
                         <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">New User Profile</h2><p className="text-gray-500">Default password: <strong>password123</strong></p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleAddUser(); }}>
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
-                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
+                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
+                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
                             </div>
-                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
                                     <option value="Student">Student</option>
                                     <option value="IT_Staff">IT Staff</option>
                                     <option value="Security">Security</option>
                                     <option value="Admin">Admin</option>
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                                     <option value="Active">Active</option>
                                     <option value="Suspended">Suspended</option>
                                 </select>
@@ -412,7 +412,7 @@ const UsersList = () => {
                             {formData.role === 'Student' && (
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} />
+                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
@@ -432,22 +432,22 @@ const UsersList = () => {
                         <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">Edit User Profile</h2><p className="text-gray-500">Updating details for <strong>{selectedUser.fullName || selectedUser.username}</strong></p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleUpdateUser(); }}>
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
-                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
+                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
+                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
                             </div>
-                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                <input type="password" placeholder="Reset Password (leave empty to keep)" className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:border-red-300 focus:ring-red-100" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                                <input type="password" placeholder="Reset Password (leave empty to keep)" className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:border-red-300 focus:ring-red-100" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                             </div>
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
                                     <option value="Student">Student</option>
                                     <option value="IT_Staff">IT Staff</option>
                                     <option value="Security">Security</option>
                                     <option value="Admin">Admin</option>
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                                     <option value="Active">Active</option>
                                     <option value="Suspended">Suspended</option>
                                 </select>
@@ -455,7 +455,7 @@ const UsersList = () => {
                             {formData.role === 'Student' && (
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} />
+                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
@@ -503,42 +503,42 @@ const UsersList = () => {
                 </div>
             )}
 
-            {/* --- 👇 NEW: MESSAGE MODAL --- */}
+            {/* --- MESSAGE MODAL --- */}
             {showMessageModal && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
                         <button onClick={() => setShowMessageModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
-                        
+
                         <div className="mb-6">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">Notify User</h2>
                             <p className="text-gray-500 text-sm">
                                 Sending message to <span className="font-bold text-slate-700">{selectedUser.fullName || selectedUser.username}</span> ({selectedUser.email}).
-                                <br/>This will be sent via <span className="font-semibold text-indigo-600">Email</span> & <span className="font-semibold text-indigo-600">System Notification</span>.
+                                <br />This will be sent via <span className="font-semibold text-indigo-600">Email</span> & <span className="font-semibold text-indigo-600">System Notification</span>.
                             </p>
                         </div>
 
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">Subject</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="e.g. Return Overdue Equipment" 
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all" 
-                                    value={messageData.subject} 
-                                    onChange={e => setMessageData({...messageData, subject: e.target.value})} 
-                                    required 
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Return Overdue Equipment"
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all"
+                                    value={messageData.subject}
+                                    onChange={e => setMessageData({ ...messageData, subject: e.target.value })}
+                                    required
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">Message</label>
-                                <textarea 
+                                <textarea
                                     rows="4"
-                                    placeholder="Type your message here..." 
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all resize-none" 
-                                    value={messageData.body} 
-                                    onChange={e => setMessageData({...messageData, body: e.target.value})} 
-                                    required 
+                                    placeholder="Type your message here..."
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all resize-none"
+                                    value={messageData.body}
+                                    onChange={e => setMessageData({ ...messageData, body: e.target.value })}
+                                    required
                                 />
                             </div>
 

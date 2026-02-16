@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout'; // Your layout file
 import StatsCard from './components/StatsCard';
 import api from '@/utils/api';
-import { 
-    Package, 
-    Wifi, 
-    AlertTriangle, 
-    UserX, 
-    Clock, 
-    ChevronDown, 
-    QrCode, 
-    ShieldAlert, 
+import {
+    Package,
+    Wifi,
+    AlertTriangle,
+    UserX,
+    Clock,
+    ChevronDown,
+    QrCode,
+    ShieldAlert,
     Activity,
     Loader2
 } from 'lucide-react';
@@ -93,12 +93,7 @@ const Dashboard = () => {
                     </p>
                 </div>
                 <div className="mt-6 md:mt-0 flex gap-3">
-                    <button className="bg-slate-800 text-gray-300 font-medium py-3 px-6 rounded-2xl border border-slate-700 hover:bg-slate-700 transition-all flex items-center">
-                        <Clock className="w-4 h-4 mr-2" /> Today <ChevronDown className="w-4 h-4 ml-2" />
-                    </button>
-                    <button onClick={() => navigate('/admin/equipment')} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-8 rounded-2xl shadow-lg transition-all flex items-center">
-                        <QrCode className="w-5 h-5 mr-2" /> Manage Inventory
-                    </button>
+                    {/* Buttons removed as per request */}
                 </div>
             </div>
 
@@ -158,7 +153,7 @@ const Dashboard = () => {
                             <h3 className="text-lg font-bold text-slate-900">Recent Transactions</h3>
                             <button onClick={() => navigate('/admin/reports')} className="text-sm text-[#8D8DC7] font-medium hover:underline">View All</button>
                         </div>
-                        
+
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left text-gray-600">
                                 <thead className="text-xs text-gray-400 uppercase bg-gray-50/50">
@@ -179,11 +174,10 @@ const Dashboard = () => {
                                                 <td className="px-4 py-3">{tx.equipment?.name || 'Deleted Item'}</td>
                                                 <td className="px-4 py-3">{new Date(tx.createdAt).toLocaleDateString()}</td>
                                                 <td className="px-4 py-3">
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                                        tx.status === 'Checked Out' ? 'bg-blue-100 text-blue-700' :
-                                                        tx.status === 'Returned' ? 'bg-green-100 text-green-700' :
-                                                        'bg-red-100 text-red-700'
-                                                    }`}>
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${tx.status === 'Checked Out' ? 'bg-blue-100 text-blue-700' :
+                                                            tx.status === 'Returned' ? 'bg-green-100 text-green-700' :
+                                                                'bg-red-100 text-red-700'
+                                                        }`}>
                                                         {tx.status}
                                                     </span>
                                                 </td>

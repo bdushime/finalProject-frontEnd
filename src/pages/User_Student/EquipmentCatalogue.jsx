@@ -17,8 +17,6 @@ export default function EquipmentCatalogue() {
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState("single"); // 'single' | 'packages'
 
-    // --- MOCK PACKAGES --- (Removed, imported from data)
-
     // --- FETCH REAL EQUIPMENT ---
     useEffect(() => {
         const fetchEquipment = async () => {
