@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import BackButton from "./components/BackButton";
 import { Shield, Lock, CheckCircle, History, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "@/utils/api";
+import { useTranslation } from "react-i18next";
 
 export default function Score() {
     const [score, setScore] = useState(100);
@@ -15,6 +16,7 @@ export default function Score() {
     const [loading, setLoading] = useState(true);
     const [isRequestingUnblock, setIsRequestingUnblock] = useState(false);
     const [requestSent, setRequestSent] = useState(false);
+    const { t } = useTranslation("student");
 
     const isBlocked = score <= 50;
 
@@ -29,13 +31,13 @@ export default function Score() {
                 // 2. Get History (to calc stats)
                 const historyRes = await api.get('/transactions/my-history');
                 const history = historyRes.data;
-                
+
                 // Calculate simple stats
                 const totalCheckouts = history.length;
                 const onTimeReturns = history.filter(t => t.status === 'Returned').length;
-                
-                const percent = totalCheckouts > 0 
-                    ? Math.round((onTimeReturns / totalCheckouts) * 100) 
+
+                const percent = totalCheckouts > 0
+                    ? Math.round((onTimeReturns / totalCheckouts) * 100)
                     : 100;
 
                 setStats({ total: totalCheckouts, onTimePercent: percent });
@@ -65,16 +67,16 @@ export default function Score() {
     };
 
     const getScoreLabel = (s) => {
-        if (s >= 80) return "Excellent";
-        if (s >= 50) return "Fair";
-        return "Critical";
+        if (s >= 80) return t("score.excellent");
+        if (s >= 50) return t("score.fair");
+        return t("score.poor");
     };
 
     if (loading) {
         return (
             <StudentLayout>
                 <div className="h-screen flex items-center justify-center text-slate-400">
-                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> Loading score...
+                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> {t("score.loading")}
                 </div>
             </StudentLayout>
         );
@@ -85,8 +87,9 @@ export default function Score() {
             <PageContainer>
                 <BackButton to="/student/dashboard" />
                 <PageHeader
-                    title="My Reliability Score"
-                    subtitle="Track your borrowing reputation and standing."
+                    title={t("score.title")}
+                    subtitle={t("score.subtitle")}
+                    showBack={false}
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -133,15 +136,15 @@ export default function Score() {
                                                 <div className="h-12 w-12 bg-rose-100 rounded-full flex items-center justify-center">
                                                     <Lock className="h-6 w-6 text-rose-600" />
                                                 </div>
-                                                <h3 className="text-xl font-bold text-rose-700">Access Restricted</h3>
+                                                <h3 className="text-xl font-bold text-rose-700">{t("score.accessRestricted")}</h3>
                                             </div>
                                             <p className="text-slate-600 mb-6">
-                                                Your reliability score has dropped below 50%. You are currently blocked from borrowing new equipment.
+                                                {t("score.blockedMessage")}
                                             </p>
                                             {requestSent ? (
                                                 <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex items-center gap-3 text-emerald-800">
                                                     <CheckCircle className="h-5 w-5" />
-                                                    <span className="font-semibold">Request sent to Administration</span>
+                                                    <span className="font-semibold">{t("score.requestSentAdmin")}</span>
                                                 </div>
                                             ) : (
                                                 <Button
@@ -149,23 +152,23 @@ export default function Score() {
                                                     disabled={isRequestingUnblock}
                                                     className="w-full bg-rose-600 hover:bg-rose-700 text-white rounded-xl h-11 shadow-lg shadow-rose-200"
                                                 >
-                                                    {isRequestingUnblock ? "Sending Request..." : "Request Unblock Review"}
+                                                    {isRequestingUnblock ? t("score.sendingRequest") : t("score.requestUnblock")}
                                                 </Button>
                                             )}
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
                                             <p className="text-slate-500">
-                                                You are in good standing. Keep returning items on time to maintain your Trusted status.
+                                                {t("score.goodStanding")}
                                             </p>
                                             <div className="flex justify-center gap-4">
                                                 <div className="text-center px-6 py-3 bg-slate-50 rounded-xl border border-slate-100">
                                                     <span className="block text-2xl font-bold text-[#0b1d3a]">{stats.total}</span>
-                                                    <span className="text-xs text-slate-400 uppercase font-bold">Checkouts</span>
+                                                    <span className="text-xs text-slate-400 uppercase font-bold">{t("score.checkouts")}</span>
                                                 </div>
                                                 <div className="text-center px-6 py-3 bg-slate-50 rounded-xl border border-slate-100">
                                                     <span className="block text-2xl font-bold text-emerald-600">{stats.onTimePercent}%</span>
-                                                    <span className="text-xs text-slate-400 uppercase font-bold">On Time</span>
+                                                    <span className="text-xs text-slate-400 uppercase font-bold">{t("score.onTime")}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -182,21 +185,21 @@ export default function Score() {
                             <CardHeader>
                                 <CardTitle className="text-lg font-bold text-[#0b1d3a] flex items-center gap-2">
                                     <Shield className="h-5 w-5 text-[#126dd5]" />
-                                    How it works
+                                    {t("score.howItWorks")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4 text-sm text-slate-600">
                                 <div className="flex gap-3">
                                     <div className="h-2 w-2 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                                    <p><span className="font-semibold text-[#0b1d3a]">Standard Return:</span> +5 points</p>
+                                    <p><span className="font-semibold text-[#0b1d3a]">{t("score.standardReturn")}:</span> +5 {t("score.points")}</p>
                                 </div>
                                 <div className="flex gap-3">
                                     <div className="h-2 w-2 rounded-full bg-rose-500 mt-2 shrink-0" />
-                                    <p><span className="font-semibold text-rose-600">Late Return:</span> -10 points</p>
+                                    <p><span className="font-semibold text-rose-600">{t("score.lateReturn")}:</span> -10 {t("score.points")}</p>
                                 </div>
                                 <div className="flex gap-3">
                                     <div className="h-2 w-2 rounded-full bg-rose-500 mt-2 shrink-0" />
-                                    <p><span className="font-semibold text-rose-600">Damage/Loss:</span> Immediate review & penalty.</p>
+                                    <p><span className="font-semibold text-rose-600">{t("score.damageLoss")}:</span> {t("score.immediatePenalty")}</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -206,14 +209,14 @@ export default function Score() {
                             <CardContent className="p-6">
                                 <h3 className="font-bold text-[#0b1d3a] mb-2 flex items-center gap-2">
                                     <History className="h-4 w-4" />
-                                    Need details?
+                                    {t("score.needDetails")}
                                 </h3>
                                 <p className="text-sm text-slate-600 mb-4">
-                                    View your complete borrowing history, including exact times and score impact.
+                                    {t("score.viewHistoryDesc")}
                                 </p>
                                 <Link to="/student/report">
                                     <Button className="w-full bg-white border border-blue-200 text-[#126dd5] hover:bg-blue-50">
-                                        View Full Report
+                                        {t("score.viewFullReport")}
                                     </Button>
                                 </Link>
                             </CardContent>

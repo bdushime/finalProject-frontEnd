@@ -1,0 +1,119 @@
+{
+    "nav": {
+        "dashboard": "Ikibaho",
+        "equipment": "Ibikoresho",
+        "borrowedItems": "Ibyo Natiye",
+        "score": "Amanota",
+        "report": "Raporo",
+        "reports": "Raporo",
+        "notifications": "Amakuru",
+        "profile": "Umwirondoro",
+        "helpSupport": "Ubufasha",
+        "userMgmt": "Abakoresha",
+        "config": "Iboneza",
+        "data": "Amakuru",
+        "monitoring": "Gukurikirana",
+        "security": "Umutekano",
+        "browseInventory": "Reba Ibikoresho",
+        "scanVerify": "Suzuma",
+        "checkouts": "Ibyasohotse",
+        "classrooms": "Amasomo",
+        "tracking": "Gukurikirana",
+        "accessLogs": "Inyandiko z'Ubwinjira",
+        "devices": "Ibikoresho"
+    },
+    "actions": {
+        "save": "Bika",
+        "cancel": "Hagarika",
+        "delete": "Siba",
+        "edit": "Hindura",
+        "add": "Ongeraho",
+        "search": "Shakisha",
+        "filter": "Shungura",
+        "export": "Ohereza",
+        "download": "Manura",
+        "submit": "Ohereza",
+        "confirm": "Emeza",
+        "close": "Funga",
+        "viewAll": "Reba Byose",
+        "reset": "Subiza",
+        "generate": "Kora",
+        "send": "Ohereza",
+        "back": "Subira",
+        "next": "Komeza",
+        "refresh": "Kora Bundi",
+        "loading": "Gutegereza...",
+        "apply": "Shyira mu bikorwa"
+    },
+    "status": {
+        "active": "Gikoreshwa",
+        "inactive": "Ntikikoreshwa",
+        "overdue": "Byarenze",
+        "returned": "Byasubijwe",
+        "maintenance": "Gusanwa",
+        "available": "Biraboneka",
+        "unavailable": "Ntibiboneka",
+        "suspended": "Birahagaritswe",
+        "online": "Kuri Interineti",
+        "offline": "Ntabwo ari kuri Interineti",
+        "borrowed": "Byakatishijwe",
+        "pending": "Bitegereje",
+        "approved": "Byemejwe",
+        "rejected": "Byanzwe"
+    },
+    "auth": {
+        "login": "Injira",
+        "logout": "Sohoka",
+        "logOut": "Sohoka",
+        "myProfile": "Umwirondoro Wanjye",
+        "myAccount": "Konti Yanjye",
+        "systemAdmin": "Umuyobozi w'Sisitemu"
+    },
+    "footer": {
+        "copyright": "© {{year}} Tracknity Management System. v1.0.0",
+        "allRightsReserved": "© {{year}} Tracknity. Uburenganzira bwose bwabikiwe."
+    },
+    "misc": {
+        "noData": "Nta makuru ahari",
+        "noRecords": "Nta nyandiko zabonetse.",
+        "searchPlaceholder": "Shakisha...",
+        "today": "Uyu Munsi",
+        "exit": "Sohoka",
+        "studentPortal": "Urubuga rw'Umunyeshuri",
+        "tracknity": "Tracknity",
+        "items": "Ibintu",
+        "to": "kuri",
+        "of": "bya",
+        "all": "Byose",
+        "total": "Igiteranyo",
+        "na": "N/A",
+        "equipment": "Ibikoresho"
+    },
+    "roles": {
+        "student": "Umunyeshuri",
+        "admin": "Umuyobozi",
+        "itStaff": "Umukozi wa IT",
+        "security": "Umutekano",
+        "staff": "Umukozi"
+    },
+    "time": {
+        "lastNDays": "Iminsi {{count}} ishize",
+        "thisWeek": "Iki Cyumweru",
+        "thisYear": "Uyu Mwaka",
+        "dateRange": "Amatariki"
+    },
+    "export": {
+        "excel": "Excel",
+        "pdf": "PDF",
+        "csv": "CSV",
+        "exportSuccess": "Byoherejwe neza",
+        "exportFailed": "Kohereza byanze",
+        "noDataToExport": "Nta makuru yo kohereza!"
+    },
+    "language": {
+        "en": "Icyongereza",
+        "rw": "Ikinyarwanda",
+        "fr": "Igifaransa",
+        "switchLanguage": "Ururimi"
+    }
+}

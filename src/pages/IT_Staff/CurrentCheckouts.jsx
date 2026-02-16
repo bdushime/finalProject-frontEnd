@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Eye, Loader2, Plus, Check, X, Calendar, Clock } from "lucide-react";
-import CheckoutDetailsDialog from "./checkout/CheckoutDetailsDialog"; 
+import CheckoutDetailsDialog from "./checkout/CheckoutDetailsDialog";
 import api from "@/utils/api";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -18,20 +18,22 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 
 export default function CurrentCheckouts() {
+    const { t } = useTranslation(["itstaff", "common"]);
     const navigate = useNavigate();
     const [allTransactions, setAllTransactions] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCheckout, setSelectedCheckout] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    
-    // Tabs state: 'requests' | 'reservations' | 'active'
-    const [currentTab, setCurrentTab] = useState('requests'); 
 
-//     // Tabs state: 'requests' | 'reservations' | 'active'
-//     const [currentTab, setCurrentTab] = useState('requests');
+    // Tabs state: 'requests' | 'reservations' | 'active'
+    const [currentTab, setCurrentTab] = useState('requests');
+
+    //     // Tabs state: 'requests' | 'reservations' | 'active'
+    //     const [currentTab, setCurrentTab] = useState('requests');
 
     // --- REJECTION LOGIC STATE ---
     const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -63,7 +65,7 @@ export default function CurrentCheckouts() {
             setAllTransactions(mappedData);
         } catch (err) {
             console.error("Failed to fetch checkouts", err);
-            toast.error("Failed to load data");
+            toast.error(t('checkouts.messages.loadError'));
         } finally {
             setLoading(false);
         }
@@ -108,57 +110,58 @@ export default function CurrentCheckouts() {
             return;
         }
 
-        if (!confirm(`Are you sure you want to approve this item?`)) return;
+        if (!confirm(t('checkouts.messages.confirmApprove'))) return;
 
         try {
             // 'Approve' on a Reservation converts it to 'Checked Out'
             await api.put(`/transactions/${id}/respond`, { action });
-            toast.success("Status updated successfully");
-            fetchActive(); 
+            toast.success(t('checkouts.messages.statusUpdated'));
+            fetchActive();
         } catch (err) {
             console.error("Action failed", err);
-            toast.error("Failed to update status.");
+            toast.error(t('checkouts.messages.statusError'));
+        }
+    };
+
+
+
+    // Submit Rejection Reason
+    const handleRejectSubmit = async () => {
+        if (!rejectionReason.trim()) {
+            toast.error(t('checkouts.messages.provideReason'));
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            await api.put(`/transactions/${rejectId}/respond`, {
+                action: 'Deny',
+                reason: rejectionReason
+            });
+            toast.success(t('checkouts.messages.requestDenied'));
+            setIsRejectOpen(false);
+            fetchActive();
+        } catch (err) {
+            console.error(err);
+            toast.error(t('checkouts.messages.denyError'));
+        } finally {
+            setProcessing(false);
         }
     };
 
     // Cancel Reservation
     const handleCancel = async (e, id) => {
         e.stopPropagation();
-        if (!confirm("Cancel this reservation?")) return;
+        if (!confirm(t('checkouts.messages.confirmCancel'))) return;
 
         try {
             await api.post(`/transactions/cancel/${id}`);
-            toast.success("Reservation cancelled");
+            toast.success(t('checkouts.messages.reservationCancelled'));
             fetchActive();
         } catch (err) {
-            toast.error("Failed to cancel");
+            toast.error(t('checkouts.messages.cancelError'));
         }
     };
-
-    // Submit Rejection Reason
-    const handleRejectSubmit = async () => {
-        if (!rejectionReason.trim()) {
-            toast.error("Please provide a reason.");
-            return;
-        }
-
-        setProcessing(true);
-        try {
-            await api.put(`/transactions/${rejectId}/respond`, { 
-                action: 'Deny', 
-                reason: rejectionReason 
-            });
-            toast.success("Request Denied");
-            setIsRejectOpen(false);
-            fetchActive();
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to deny request");
-        } finally {
-            setProcessing(false);
-        }
-    };
-
     // Helper: Is reservation ready? (Within 30 mins of start time)
     const isReservationReady = (startTimeString) => {
         if (!startTimeString) return false;
@@ -175,14 +178,14 @@ export default function CurrentCheckouts() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-gray-900">Manage Transactions</h2>
-                        <p className="text-gray-500 text-sm">Handle requests, upcoming reservations, and active loans.</p>
+                        <h2 className="text-2xl font-bold tracking-tight text-gray-900">{t('checkouts.manageTransactions')}</h2>
+                        <p className="text-gray-500 text-sm">{t('checkouts.manageDesc')}</p>
                     </div>
                     <Button
                         onClick={() => navigate('/it/checkout/select')}
                         className="bg-[#0b1d3a] hover:bg-[#1a2f55]"
                     >
-                        <Plus className="mr-2 h-4 w-4" /> New Manual Checkout
+                        <Plus className="mr-2 h-4 w-4" /> {t('checkouts.newCheckout')}
                     </Button>
                 </div>
 
@@ -192,7 +195,7 @@ export default function CurrentCheckouts() {
                         onClick={() => setCurrentTab('requests')}
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'requests' ? 'border-[#0b1d3a] text-[#0b1d3a]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
-                        Requests
+                        {t('checkouts.tabs.requests')}
                         {allTransactions.filter(t => t.status === 'Pending').length > 0 &&
                             <span className="ml-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full">{allTransactions.filter(t => t.status === 'Pending').length}</span>
                         }
@@ -201,7 +204,7 @@ export default function CurrentCheckouts() {
                         onClick={() => setCurrentTab('reservations')}
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'reservations' ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
-                        Reservations
+                        {t('checkouts.tabs.reservations')}
                         {allTransactions.filter(t => t.status === 'Reserved').length > 0 &&
                             <span className="ml-2 bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">{allTransactions.filter(t => t.status === 'Reserved').length}</span>
                         }
@@ -210,7 +213,7 @@ export default function CurrentCheckouts() {
                         onClick={() => setCurrentTab('active')}
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'active' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
-                        Active Borrows
+                        {t('checkouts.tabs.active')}
                     </button>
                 </div>
 
@@ -220,12 +223,12 @@ export default function CurrentCheckouts() {
                         <Table className="w-full text-sm">
                             <TableHeader className="bg-[#0b1d3a] border-b border-gray-100">
                                 <tr className="text-white">
-                                    <th className="px-6 py-4 font-semibold text-left">Item</th>
+                                    <th className="px-6 py-4 font-semibold text-left">{t('checkouts.table.item')}</th>
                                     <th className="px-6 py-4 font-semibold text-left">
-                                        {currentTab === 'reservations' ? 'Start Time' : 'Date'}
+                                        {currentTab === 'reservations' ? t('checkouts.table.startTime') : t('checkouts.table.date')}
                                     </th>
-                                    <th className="px-6 py-4 font-semibold text-left">Status</th>
-                                    <th className="px-6 py-4 font-semibold text-left">Actions</th>
+                                    <th className="px-6 py-4 font-semibold text-left">{t('checkouts.table.status')}</th>
+                                    <th className="px-6 py-4 font-semibold text-left">{t('checkouts.table.actions')}</th>
                                 </tr>
                             </TableHeader>
                             <TableBody>
@@ -234,14 +237,14 @@ export default function CurrentCheckouts() {
                                         <td colSpan="4" className="text-center py-12">
                                             <div className="flex justify-center items-center gap-2 text-gray-500">
                                                 <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                                                Loading data...
+                                                {t('checkouts.table.loading')}
                                             </div>
                                         </td>
                                     </tr>
                                 ) : filteredData.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="text-center py-12 text-gray-400">
-                                            No items found in this category.
+                                            {t('checkouts.table.noItems')}
                                         </td>
                                     </tr>
                                 ) : (
@@ -260,7 +263,7 @@ export default function CurrentCheckouts() {
                                                         row.status === 'Reserved' ? 'bg-purple-600' :
                                                             row.status === 'Overdue' ? 'bg-red-600' :
                                                                 'bg-[#0b1d3a]'
-                                                    }`}></div>
+                                                        }`}></div>
                                                     <span className="pl-6">{row.equipmentName}</span>
                                                 </div>
                                             </td>
@@ -277,7 +280,7 @@ export default function CurrentCheckouts() {
                                                     row.status === 'Reserved' ? 'bg-purple-100 text-purple-700' :
                                                         row.status === 'Overdue' ? 'bg-red-100 text-red-700' :
                                                             'bg-blue-100 text-blue-700'
-                                                }`}>
+                                                    }`}>
                                                     {row.status}
                                                 </span>
                                             </td>
@@ -288,11 +291,11 @@ export default function CurrentCheckouts() {
                                                         <>
                                                             <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 px-3"
                                                                 onClick={(e) => handleResponse(e, row.checkoutId, 'Approve')}>
-                                                                <Check className="h-4 w-4 mr-1" /> Approve
+                                                                <Check className="h-4 w-4 mr-1" /> {t('checkouts.actions.approve')}
                                                             </Button>
                                                             <Button size="sm" variant="outline" className="h-8 px-3 text-red-600 border-red-200 hover:bg-red-50"
                                                                 onClick={(e) => handleResponse(e, row.checkoutId, 'Deny')}>
-                                                                <X className="h-4 w-4 mr-1" /> Deny
+                                                                <X className="h-4 w-4 mr-1" /> {t('checkouts.actions.deny')}
                                                             </Button>
                                                         </>
                                                     )}
@@ -302,16 +305,16 @@ export default function CurrentCheckouts() {
                                                             {isReservationReady(row.startTime) ? (
                                                                 <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white h-8 px-3"
                                                                     onClick={(e) => handleResponse(e, row.checkoutId, 'Approve')}>
-                                                                    <Check className="h-4 w-4 mr-1" /> Check Out
+                                                                    <Check className="h-4 w-4 mr-1" /> {t('checkouts.actions.checkout')}
                                                                 </Button>
                                                             ) : (
                                                                 <span className="text-xs text-gray-400 italic flex items-center h-8">
-                                                                    Too early
+                                                                    {t('checkouts.actions.tooEarly')}
                                                                 </span>
                                                             )}
                                                             <Button size="sm" variant="outline" className="h-8 px-3 text-gray-600 hover:bg-gray-100"
                                                                 onClick={(e) => handleCancel(e, row.checkoutId)}>
-                                                                Cancel
+                                                                {t('checkouts.actions.cancel')}
                                                             </Button>
                                                         </>
                                                     )}
@@ -342,14 +345,14 @@ export default function CurrentCheckouts() {
                 <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
                     <DialogContent className="bg-white sm:max-w-md border border-gray-200 shadow-lg">
                         <DialogHeader>
-                            <DialogTitle>Deny Request</DialogTitle>
+                            <DialogTitle>{t('checkouts.dialog.denyTitle')}</DialogTitle>
                             <DialogDescription className="text-gray-500">
-                                Please enter the reason why you are denying this request. This will be sent to the student.
+                                {t('checkouts.dialog.denyDesc')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">
                             <Textarea
-                                placeholder="e.g., Item is under maintenance, Low responsibility score..."
+                                placeholder={t('checkouts.dialog.reasonPlaceholder')}
                                 value={rejectionReason}
                                 onChange={(e) => setRejectionReason(e.target.value)}
                                 className="min-h-[100px] bg-white border-gray-300 focus:border-blue-500"
@@ -357,22 +360,22 @@ export default function CurrentCheckouts() {
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setIsRejectOpen(false)} disabled={processing}>
-                                Cancel
+                                {t('checkouts.dialog.cancel')}
                             </Button>
-                            <Button 
-                                className="bg-red-600 hover:bg-red-700 text-white" 
-                                onClick={handleRejectSubmit} 
+                            <Button
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                                onClick={handleRejectSubmit}
                                 disabled={processing}
                             >
                                 {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                Confirm Denial
+                                {t('checkouts.dialog.confirmDeny')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
 
             </div>
-            
+
         </ITStaffLayout>
     );
 }

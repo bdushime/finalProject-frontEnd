@@ -1,0 +1,25 @@
+{
+    "hero": {
+        "title": "Smart Equipment Management",
+        "subtitle": "Track, manage, and optimize your institution's equipment with ease.",
+        "getStarted": "Get Started",
+        "learnMore": "Learn More"
+    },
+    "features": {
+        "title": "Features",
+        "realTimeTracking": "Real-Time Tracking",
+        "realTimeTrackingDesc": "Monitor equipment location and status in real time.",
+        "smartAlerts": "Smart Alerts",
+        "smartAlertsDesc": "Automated reminders for due dates, maintenance, and availability.",
+        "analytics": "Analytics",
+        "analyticsDesc": "Track usage patterns, identify trends, and optimize inventory.",
+        "qrScanning": "QR Code Scanning",
+        "qrScanningDesc": "Quick equipment check-in/check-out with QR codes."
+    },
+    "nav": {
+        "features": "Features",
+        "benefits": "Benefits",
+        "contact": "Contact",
+        "signIn": "Sign In"
+    }
+}

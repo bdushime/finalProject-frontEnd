@@ -17,9 +17,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 import { Textarea } from "@/components/ui/textarea";
 
 export function Dashboard() {
+    const { t } = useTranslation(["itstaff", "common"]);
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -49,7 +51,7 @@ export function Dashboard() {
             }
         } catch (err) {
             console.error("Failed to load dashboard stats", err);
-            toast.error("Failed to load dashboard data");
+            toast.error(t('dashboard.messages.loadError'));
         } finally {
             setLoading(false);
         }
@@ -63,19 +65,19 @@ export function Dashboard() {
 
     const getGreeting = () => {
         const hour = new Date().getHours();
-        if (hour < 12) return "Good morning";
-        if (hour < 18) return "Good afternoon";
-        return "Good evening";
+        if (hour < 12) return t('dashboard.greetings.morning');
+        if (hour < 18) return t('dashboard.greetings.afternoon');
+        return t('dashboard.greetings.evening');
     };
 
     // Approve Request
     const handleApprove = async (id) => {
         try {
             await api.put(`/transactions/${id}/respond`, { action: 'Approve' });
-            toast.success("Request Approved");
+            toast.success(t('dashboard.messages.approved'));
             fetchStats(); // Refresh data
         } catch (err) {
-            toast.error("Failed to approve request");
+            toast.error(t('dashboard.messages.failedApprove'));
         }
     };
 
@@ -89,29 +91,29 @@ export function Dashboard() {
     // Submit Rejection
     const handleRejectSubmit = async () => {
         if (!rejectionReason.trim()) {
-            toast.error("Please provide a reason for rejection.");
+            toast.error(t('dashboard.messages.provideReason'));
             return;
         }
 
         setProcessing(true);
         try {
-            await api.put(`/transactions/${rejectId}/respond`, { 
-                action: 'Deny', 
-                reason: rejectionReason 
+            await api.put(`/transactions/${rejectId}/respond`, {
+                action: 'Deny',
+                reason: rejectionReason
             });
-            toast.success("Request Denied");
+            toast.success(t('dashboard.messages.denied'));
             setIsRejectOpen(false);
             fetchStats(); // Refresh data
         } catch (err) {
             console.error(err);
-            toast.error("Failed to deny request");
+            toast.error(t('dashboard.messages.failedDeny'));
         } finally {
             setProcessing(false);
         }
     };
 
     // --- 3. PREPARE DATA ---
-    
+
     const formattedDate = new Intl.DateTimeFormat("en-US", {
         weekday: "long", month: "long", day: "numeric", year: "numeric",
     }).format(new Date());
@@ -164,18 +166,18 @@ export function Dashboard() {
                 {/* --- PENDING REQUESTS SECTION --- */}
                 {pendingRequests.length > 0 && (
                     <div className="bg-white p-6 rounded-xl border shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Pending Requests</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.pendingRequests')}</h3>
                         <div className="space-y-3">
                             {pendingRequests.map((req) => (
                                 <div key={req._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg bg-gray-50 gap-4">
                                     <div>
                                         <p className="font-semibold text-gray-900">
                                             {req.user?.username || "Unknown User"}
-                                            <span className="font-normal text-gray-500"> wants </span>
+                                            <span className="font-normal text-gray-500"> {t('dashboard.wants')} </span>
                                             {req.equipment?.name || "Unknown Item"}
                                         </p>
                                         <p className="text-sm text-gray-500">
-                                            Requested: {format(new Date(req.createdAt), "MMM d, h:mm a")}
+                                            {t('dashboard.requested')} {format(new Date(req.createdAt), "MMM d, h:mm a")}
                                         </p>
                                     </div>
                                     <div className="flex gap-2 w-full sm:w-auto">
@@ -183,14 +185,14 @@ export function Dashboard() {
                                             onClick={() => handleApprove(req._id)}
                                             className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white gap-2"
                                         >
-                                            <CheckCircle className="w-4 h-4" /> Approve
+                                            <CheckCircle className="w-4 h-4" /> {t('dashboard.approve')}
                                         </Button>
                                         <Button
                                             onClick={() => openRejectDialog(req._id)}
                                             variant="destructive"
                                             className="flex-1 sm:flex-none gap-2"
                                         >
-                                            <XCircle className="w-4 h-4" /> Deny
+                                            <XCircle className="w-4 h-4" /> {t('dashboard.deny')}
                                         </Button>
                                     </div>
                                 </div>
@@ -203,14 +205,14 @@ export function Dashboard() {
                 <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
                     <DialogContent className="bg-white sm:max-w-md border border-gray-200 shadow-lg">
                         <DialogHeader>
-                            <DialogTitle>Deny Request</DialogTitle>
+                            <DialogTitle>{t('dashboard.denyTitle')}</DialogTitle>
                             <DialogDescription className="text-gray-500">
-                                Please enter the reason why you are denying this request. This will be sent to the student.
+                                {t('dashboard.denyDesc')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">
                             <Textarea
-                                placeholder="e.g., Item is under maintenance, Low responsibility score..."
+                                placeholder={t('dashboard.denyPlaceholder')}
                                 value={rejectionReason}
                                 onChange={(e) => setRejectionReason(e.target.value)}
                                 className="min-h-[100px] bg-white border-gray-300 focus:border-blue-500"
@@ -218,11 +220,11 @@ export function Dashboard() {
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setIsRejectOpen(false)} disabled={processing}>
-                                Cancel
+                                {t('dashboard.cancel')}
                             </Button>
                             <Button variant="destructive" onClick={handleRejectSubmit} disabled={processing}>
                                 {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                Confirm Denial
+                                {t('dashboard.confirmDenial')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

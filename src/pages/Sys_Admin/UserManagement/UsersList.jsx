@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '../components/AdminLayout'; 
+import { useTranslation } from "react-i18next";
+import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
-// 👇 Added MessageSquare and Send icons
 import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -9,33 +9,34 @@ import { toast } from 'sonner';
 const ROLES = ['All Roles', 'Student', 'IT_Staff', 'Security', 'Admin'];
 
 const UsersList = () => {
+    const { t } = useTranslation(["admin", "common"]);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('All Roles');
     const [showFilters, setShowFilters] = useState(false);
-    
+
     // Modals State
     const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
     const [showScoreModal, setShowScoreModal] = useState(false);
     const [showMessageModal, setShowMessageModal] = useState(false); // <--- NEW: Message Modal
-    
-    const [selectedUser, setSelectedUser] = useState(null); 
-    const [newScore, setNewScore] = useState(100); 
+
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [newScore, setNewScore] = useState(100);
 
     // Dynamic Data
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Form Data
-    const [formData, setFormData] = useState({ 
-        firstName: '', 
-        lastName: '', 
-        email: '', 
-        role: 'Student', 
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'Student',
         department: '',
         studentId: '',
         status: 'Active',
-        password: '' 
+        password: ''
     });
 
     // Message Data
@@ -49,7 +50,7 @@ const UsersList = () => {
             setUsers(res.data);
         } catch (err) {
             console.error(err);
-            toast.error("Failed to fetch users");
+            toast.error(t('users.failedFetch'));
         } finally {
             setLoading(false);
         }
@@ -65,16 +66,16 @@ const UsersList = () => {
         try {
             const payload = {
                 ...formData,
-                studentId: formData.role === 'Student' ? formData.studentId : undefined 
+                studentId: formData.role === 'Student' ? formData.studentId : undefined
             };
             await api.post('/users', payload);
-            toast.success("User created successfully!");
+            toast.success(t('users.userCreated'));
             setShowAddUserModal(false);
             setFormData({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '', status: 'Active', password: '' });
-            fetchUsers(); 
+            fetchUsers();
         } catch (err) {
             console.error(err);
-            toast.error("Failed to create user.");
+            toast.error(t('users.failedCreate'));
         } finally {
             setSubmitting(false);
         }
@@ -120,13 +121,13 @@ const UsersList = () => {
             }
 
             await api.put(`/users/${selectedUser._id}`, payload);
-            toast.success("User profile updated!");
-            
+            toast.success(t('users.userUpdated'));
+
             setShowEditUserModal(false);
             fetchUsers();
         } catch (err) {
             console.error(err);
-            toast.error("Failed to update user.");
+            toast.error(t('users.failedUpdate'));
         } finally {
             setSubmitting(false);
         }
@@ -136,42 +137,44 @@ const UsersList = () => {
     const handleToggleStatus = async (user) => {
         const newStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
         const actionName = newStatus === 'Suspended' ? 'Suspended' : 'Activated';
-        
-        if (!window.confirm(`Are you sure you want to ${newStatus === 'Suspended' ? 'SUSPEND' : 'ACTIVATE'} this user?`)) return;
+
+        if (!window.confirm(newStatus === 'Suspended' ? t('users.confirmSuspend') : t('users.confirmActivate'))) return;
 
         setUsers(users.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
 
         try {
             await api.put(`/users/${user._id}`, { status: newStatus });
-            toast.success(`User ${actionName} successfully`);
+            toast.success(newStatus === 'Suspended' ? t('users.userSuspended') : t('users.userActivated'));
         } catch (err) {
-            toast.error("Failed to change status");
-            fetchUsers(); 
+            toast.error(t('users.failedChangeStatus'));
+            fetchUsers();
         }
     };
 
     // 6. DELETE USER
     const handleDeleteUser = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
+        if (!window.confirm(t('users.confirmDelete'))) return;
         try {
             await api.delete(`/users/${id}`);
-            toast.success("User deleted");
+            toast.success(t('users.userDeleted'));
             setUsers(users.filter(u => u._id !== id));
         } catch (err) {
-            toast.error("Failed to delete user");
+            toast.error(t('users.failedDelete'));
         }
     };
 
     // 7. SCORE LOGIC
     const openScoreModal = (user) => {
         setSelectedUser(user);
-        setNewScore(user.responsibilityScore || 100); 
+        setNewScore(user.responsibilityScore || 100);
         setShowScoreModal(true);
     };
 
     const handleSaveScore = async () => {
         if (!selectedUser) return;
-        const updatedUsers = users.map(u => 
+
+        // Optimistic UI Update
+        const updatedUsers = users.map(u =>
             u._id === selectedUser._id ? { ...u, responsibilityScore: newScore } : u
         );
         setUsers(updatedUsers);
@@ -179,14 +182,14 @@ const UsersList = () => {
 
         try {
             await api.put(`/users/${selectedUser._id}`, { responsibilityScore: newScore });
-            toast.success("Score updated!");
+            toast.success(t('users.scoreUpdated'));
         } catch (err) {
-            toast.error("Failed to update score");
+            toast.error(t('users.failedUpdateScore'));
             fetchUsers();
         }
     };
 
-    // 8. 👇 NEW: MESSAGE LOGIC
+    // 8. MESSAGE LOGIC
     const openMessageModal = (user) => {
         setSelectedUser(user);
         setMessageData({ subject: '', body: '' });
@@ -195,22 +198,21 @@ const UsersList = () => {
 
     const handleSendMessage = async () => {
         if (!messageData.subject || !messageData.body) {
-            return toast.error("Please provide both subject and message");
+            return toast.error(t('users.provideSubjectAndMessage'));
         }
         setSubmitting(true);
         try {
-            // This endpoint should trigger both Email and DB Notification
-            await api.post('/notifications/send-to-user', { 
+            await api.post('/notifications/send-to-user', {
                 userId: selectedUser._id,
                 title: messageData.subject,
                 message: messageData.body,
-                type: 'info' // or 'warning', 'alert'
+                type: 'info'
             });
-            toast.success(`Message sent to ${selectedUser.fullName || selectedUser.username}`);
+            toast.success(t('users.messageSent', { name: selectedUser.fullName || selectedUser.username }));
             setShowMessageModal(false);
         } catch (err) {
             console.error(err);
-            toast.error("Failed to send message");
+            toast.error(t('users.failedSend'));
         } finally {
             setSubmitting(false);
         }
@@ -221,7 +223,7 @@ const UsersList = () => {
         const fullName = user.fullName || user.username || "";
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.studentId && user.studentId.toLowerCase().includes(searchTerm.toLowerCase())); 
+            (user.studentId && user.studentId.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
         return matchesSearch && matchesRole;
     });
@@ -251,18 +253,18 @@ const UsersList = () => {
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">User Management</h1>
-                <p className="text-gray-400">Manage access, roles, and account status.</p>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('users.title')}</h1>
+                <p className="text-gray-400">{t('users.subtitle')}</p>
             </div>
             <div className="mt-6 md:mt-0 flex space-x-3">
                 <button onClick={() => setShowFilters(!showFilters)} className={`font-medium py-3 px-6 rounded-2xl shadow-lg border transition-all flex items-center ${showFilters ? 'bg-[#8D8DC7] text-white border-[#8D8DC7]' : 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700'}`}>
-                    <Filter className="w-4 h-4 mr-2" /> Filters
+                    <Filter className="w-4 h-4 mr-2" /> {t('users.filters')}
                 </button>
                 <button onClick={() => {
                     setFormData({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '', status: 'Active', password: '' });
                     setShowAddUserModal(true);
                 }} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-6 rounded-2xl shadow-lg shadow-[#8D8DC7]/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center">
-                    <Plus className="w-5 h-5 mr-2" /> Add User
+                    <Plus className="w-5 h-5 mr-2" /> {t('users.addUser')}
                 </button>
             </div>
         </div>
@@ -276,13 +278,17 @@ const UsersList = () => {
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <input type="text" placeholder="Search by name, email or ID..." className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <input type="text" placeholder={t('users.searchPlaceholder')} className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                     {showFilters && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-200">
-                            <div className="relative">
-                                <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
-                                    {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
+                        <div className="flex justify-end animate-in slide-in-from-top-2 fade-in duration-200">
+                            <div className="relative w-full md:w-64">
+                                <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8D8DC7] cursor-pointer" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+                                    {ROLES.map(role => (
+                                        <option key={role} value={role}>
+                                            {role === 'All Roles' ? t('users.allRoles') : t(`common.roles.${role === 'IT_Staff' ? 'itStaff' : role.toLowerCase()}`)}
+                                        </option>
+                                    ))}
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                             </div>
@@ -295,12 +301,12 @@ const UsersList = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                <th className="p-4 pl-0">User Identity</th>
-                                <th className="p-4">Assigned Role</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4">Department</th>
-                                <th className="p-4">Resp. Score</th>
-                                <th className="p-4 text-right">Actions</th>
+                                <th className="p-4 pl-0">{t('users.userIdentity')}</th>
+                                <th className="p-4">{t('users.assignedRole')}</th>
+                                <th className="p-4">{t('users.status')}</th>
+                                <th className="p-4">{t('users.department')}</th>
+                                <th className="p-4">{t('users.respScore')}</th>
+                                <th className="p-4 text-right">{t('users.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -317,7 +323,7 @@ const UsersList = () => {
                                                 <div>
                                                     <div className="font-semibold text-slate-800">{user.fullName || user.username}</div>
                                                     <div className="text-xs text-gray-500">
-                                                        {user.email} 
+                                                        {user.email}
                                                         {user.role === 'Student' && user.studentId && (
                                                             <span className="ml-2 bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-mono">#{user.studentId}</span>
                                                         )}
@@ -328,23 +334,15 @@ const UsersList = () => {
                                         <td className="p-4">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${getRoleBadgeColor(user.role)}`}>
                                                 {user.role === 'Admin' && <Shield className="w-3 h-3 mr-1.5" />}
-                                                {user.role}
+                                                {t(`common.roles.${user.role === 'IT_Staff' ? 'itStaff' : user.role.toLowerCase()}`)}
                                             </span>
                                         </td>
                                         <td className="p-4">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusColor(user.status || 'Active')}`}>
-                                                {user.status === 'Suspended' ? 'SUSPENDED' : 'ACTIVE'}
+                                                {user.status === 'Suspended' ? t('users.suspended') : t('users.activeStatus')}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-sm text-gray-600 font-medium">{user.department || "General"}</td>
-                                        
-                                        {/* SCORE DATA CELL */}
-                                        <td className="p-4">
-                                            <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-sm font-bold border ${getScoreColor(user.responsibilityScore || 100)}`}>
-                                                {user.responsibilityScore ?? 100}
-                                            </span>
-                                        </td>
-
+                                        <td className="p-4 text-sm text-gray-600 font-medium">{user.department || t('users.general')}</td>
                                         <td className="p-4">
                                             <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-sm font-bold border ${getScoreColor(user.responsibilityScore || 100)}`}>
                                                 {user.responsibilityScore ?? 100}
@@ -352,8 +350,8 @@ const UsersList = () => {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                
-                                                {/* 👇 NEW: Message Button */}
+
+                                                {/* MESSAGE BUTTON */}
                                                 <button onClick={() => openMessageModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-blue-500 transition-colors" title="Send Message">
                                                     <MessageSquare className="w-4 h-4" />
                                                 </button>
@@ -367,9 +365,9 @@ const UsersList = () => {
                                                 </button>
 
                                                 {user.role !== 'Admin' && (
-                                                    <button 
-                                                        onClick={() => handleToggleStatus(user)} 
-                                                        className={`p-2 rounded-lg transition-colors ${user.status === 'Suspended' ? 'hover:bg-emerald-50 text-emerald-500' : 'hover:bg-orange-50 text-orange-500'}`} 
+                                                    <button
+                                                        onClick={() => handleToggleStatus(user)}
+                                                        className={`p-2 rounded-lg transition-colors ${user.status === 'Suspended' ? 'hover:bg-emerald-50 text-emerald-500' : 'hover:bg-orange-50 text-orange-500'}`}
                                                         title={user.status === 'Suspended' ? "Activate User" : "Suspend User"}
                                                     >
                                                         {user.status === 'Suspended' ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
@@ -386,7 +384,7 @@ const UsersList = () => {
                                     </tr>
                                 ))
                             ) : (
-                                <tr><td colSpan="6" className="p-8 text-center text-gray-400">No users found matching your filters.</td></tr>
+                                <tr><td colSpan="6" className="p-8 text-center text-gray-400">{t('users.noUsersFound')}</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -398,36 +396,36 @@ const UsersList = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
                         <button onClick={() => setShowAddUserModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
-                        <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">New User Profile</h2><p className="text-gray-500">Default password: <strong>password123</strong></p></div>
+                        <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">{t('users.newUserProfile')}</h2><p className="text-gray-500">{t('users.defaultPassword')}</p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleAddUser(); }}>
                             {/* ... (Existing form inputs for First Name, Last Name, Email, Role, Dept) ... */}
                             {/* I'll abbreviate to save space, assuming you keep your existing form inputs here */}
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
-                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
+                                <input type="text" placeholder={t('users.firstName')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
+                                <input type="text" placeholder={t('users.lastName')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
                             </div>
-                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                            <input type="email" placeholder={t('users.emailField')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
-                                    <option value="Student">Student</option>
-                                    <option value="IT_Staff">IT Staff</option>
-                                    <option value="Security">Security</option>
-                                    <option value="Admin">Admin</option>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+                                    <option value="Student">{t('common.roles.student')}</option>
+                                    <option value="IT_Staff">{t('common.roles.itStaff')}</option>
+                                    <option value="Security">{t('common.roles.security')}</option>
+                                    <option value="Admin">{t('common.roles.admin')}</option>
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                                    <option value="Active">Active</option>
-                                    <option value="Suspended">Suspended</option>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                                    <option value="Active">{t('users.activeStatus')}</option>
+                                    <option value="Suspended">{t('users.suspended')}</option>
                                 </select>
                             </div>
                             {formData.role === 'Student' && (
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} />
+                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
-                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">Cancel</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800">{submitting ? "Creating..." : "Create User"}</button>
+                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">{t('common.actions.cancel')}</button>
+                                <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800">{submitting ? t('users.creatingUser') : t('users.createUser')}</button>
                             </div>
                         </form>
                     </div>
@@ -439,38 +437,38 @@ const UsersList = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
                         <button onClick={() => setShowEditUserModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
-                        <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">Edit User Profile</h2><p className="text-gray-500">Updating details for <strong>{selectedUser.fullName || selectedUser.username}</strong></p></div>
+                        <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">{t('users.editUser')}</h2><p className="text-gray-500">{t('users.updatingFor')} <strong>{selectedUser.fullName || selectedUser.username}</strong></p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleUpdateUser(); }}>
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
-                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
+                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
+                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
                             </div>
-                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                <input type="password" placeholder="Reset Password (leave empty to keep)" className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:border-red-300 focus:ring-red-100" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                                <input type="password" placeholder={t('users.resetPassword')} className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:border-red-300 focus:ring-red-100" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                             </div>
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
-                                    <option value="Student">Student</option>
-                                    <option value="IT_Staff">IT Staff</option>
-                                    <option value="Security">Security</option>
-                                    <option value="Admin">Admin</option>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+                                    <option value="Student">{t('common.roles.student')}</option>
+                                    <option value="IT_Staff">{t('common.roles.itStaff')}</option>
+                                    <option value="Security">{t('common.roles.security')}</option>
+                                    <option value="Admin">{t('common.roles.admin')}</option>
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                                    <option value="Active">Active</option>
-                                    <option value="Suspended">Suspended</option>
+                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                                    <option value="Active">{t('users.activeStatus')}</option>
+                                    <option value="Suspended">{t('users.suspended')}</option>
                                 </select>
                             </div>
                             {formData.role === 'Student' && (
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({...formData, studentId: e.target.value})} />
+                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
-                                <button type="button" onClick={() => setShowEditUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">Cancel</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-[#8D8DC7] hover:bg-[#7b7bb5]">{submitting ? "Saving..." : "Save Changes"}</button>
+                                <button type="button" onClick={() => setShowEditUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">{t('common.actions.cancel')}</button>
+                                <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-[#8D8DC7] hover:bg-[#7b7bb5]">{submitting ? t('users.savingUser') : t('users.saveChanges')}</button>
                             </div>
                         </form>
                     </div>
@@ -485,8 +483,8 @@ const UsersList = () => {
                         <div className="w-16 h-16 bg-[#EBEBF5] rounded-full flex items-center justify-center mx-auto mb-4 text-[#8D8DC7]">
                             <Gavel className="w-8 h-8" />
                         </div>
-                        <h2 className="text-xl font-bold text-slate-900">Manage Responsibility Score</h2>
-                        <p className="text-gray-500 text-sm mt-1">Adjust score for <span className="font-semibold text-slate-700">{selectedUser.fullName || selectedUser.username}</span></p>
+                        <h2 className="text-xl font-bold text-slate-900">{t('users.manageScore')}</h2>
+                        <p className="text-gray-500 text-sm mt-1">{t('users.adjustScore')} <span className="font-semibold text-slate-700">{selectedUser.fullName || selectedUser.username}</span></p>
                         <div className="flex items-center justify-center gap-6 my-8">
                             <button onClick={() => setNewScore(prev => Math.max(0, prev - 10))} className="w-12 h-12 rounded-full border-2 border-red-100 text-red-500 hover:bg-red-50 flex items-center justify-center transition-all active:scale-95">
                                 <MinusCircle className="w-6 h-6" />
@@ -495,7 +493,7 @@ const UsersList = () => {
                                 <div className={`text-4xl font-bold ${newScore < 50 ? 'text-red-500' : newScore < 80 ? 'text-yellow-500' : 'text-green-500'}`}>
                                     {newScore}
                                 </div>
-                                <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">Current Score</span>
+                                <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">{t('users.currentScore')}</span>
                             </div>
                             <button onClick={() => setNewScore(prev => Math.min(100, prev + 10))} className="w-12 h-12 rounded-full border-2 border-green-100 text-green-500 hover:bg-green-50 flex items-center justify-center transition-all active:scale-95">
                                 <PlusCircle className="w-6 h-6" />
@@ -503,59 +501,59 @@ const UsersList = () => {
                         </div>
                         <div className="space-y-3">
                             <button onClick={handleSaveScore} className="w-full py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg transition-all">
-                                Save Changes
+                                {t('users.saveChanges')}
                             </button>
                             <button onClick={() => setShowScoreModal(false)} className="w-full py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition-colors">
-                                Cancel
+                                {t('common.actions.cancel')}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* --- 👇 NEW: MESSAGE MODAL --- */}
+            {/* --- MESSAGE MODAL --- */}
             {showMessageModal && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
                         <button onClick={() => setShowMessageModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
-                        
+
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Notify User</h2>
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">{t('users.notifyUser')}</h2>
                             <p className="text-gray-500 text-sm">
-                                Sending message to <span className="font-bold text-slate-700">{selectedUser.fullName || selectedUser.username}</span> ({selectedUser.email}).
-                                <br/>This will be sent via <span className="font-semibold text-indigo-600">Email</span> & <span className="font-semibold text-indigo-600">System Notification</span>.
+                                {t('users.sendingTo')} <span className="font-bold text-slate-700">{selectedUser.fullName || selectedUser.username}</span> ({selectedUser.email}).
+                                <br />{t('users.messageVia')}
                             </p>
                         </div>
 
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">Subject</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="e.g. Return Overdue Equipment" 
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all" 
-                                    value={messageData.subject} 
-                                    onChange={e => setMessageData({...messageData, subject: e.target.value})} 
-                                    required 
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">{t('users.subject')}</label>
+                                <input
+                                    type="text"
+                                    placeholder={t('users.subjectPlaceholder')}
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all"
+                                    value={messageData.subject}
+                                    onChange={e => setMessageData({ ...messageData, subject: e.target.value })}
+                                    required
                                 />
                             </div>
-                            
+
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">Message</label>
-                                <textarea 
+                                <label className="block text-sm font-bold text-slate-700 mb-1.5 ml-1">{t('users.message')}</label>
+                                <textarea
                                     rows="4"
-                                    placeholder="Type your message here..." 
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all resize-none" 
-                                    value={messageData.body} 
-                                    onChange={e => setMessageData({...messageData, body: e.target.value})} 
-                                    required 
+                                    placeholder={t('users.messagePlaceholder')}
+                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all resize-none"
+                                    value={messageData.body}
+                                    onChange={e => setMessageData({ ...messageData, body: e.target.value })}
+                                    required
                                 />
                             </div>
 
                             <div className="pt-4 flex gap-3">
-                                <button type="button" onClick={() => setShowMessageModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">Cancel</button>
+                                <button type="button" onClick={() => setShowMessageModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">{t('common.actions.cancel')}</button>
                                 <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 flex items-center justify-center gap-2 shadow-lg transition-all">
-                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Send Notification</>}
+                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> {t('users.sendNotification')}</>}
                                 </button>
                             </div>
                         </form>

@@ -1,15 +1,18 @@
 import MainLayout from "./layout/MainLayout";
 import ReportsContent from "@/components/reports/ReportsContent";
-
-const SECURITY_REPORT_TYPES = [
-  { value: "inventory", label: "Equipment Inventory Report" },
-  { value: "damaged", label: "Damaged Equipment Report" },
-  { value: "lost", label: "Lost Equipment Report" },
-  { value: "utilization", label: "Equipment Utilization Report" },
-  { value: "logs", label: "Device Movement Logs Report" },
-];
+import { useTranslation } from "react-i18next";
 
 export default function SecurityReports() {
+  const { t } = useTranslation(["security"]);
+
+  const SECURITY_REPORT_TYPES = [
+    { value: "inventory", label: t('reports.types.inventory') },
+    { value: "damaged", label: t('reports.types.damaged') },
+    { value: "lost", label: t('reports.types.lost') },
+    { value: "utilization", label: t('reports.types.utilization') },
+    { value: "logs", label: t('reports.types.logs') },
+  ];
+
   return (
     <MainLayout>
       <ReportsContent

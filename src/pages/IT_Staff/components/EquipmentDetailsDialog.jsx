@@ -32,12 +32,14 @@ import {
   Trash2,
 } from "lucide-react";
 import api from "@/utils/api";
+import { useTranslation } from "react-i18next";
 
 export default function EquipmentDetailsDialog({
   equipment,
   open,
   onOpenChange,
 }) {
+  const { t } = useTranslation(["itstaff", "common"]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -96,7 +98,7 @@ export default function EquipmentDetailsDialog({
     } catch (err) {
       console.error("❌ Request Failed:", err);
       // Alert user if something goes wrong so they know
-      alert("Failed to save. Check F12 Console for details.");
+      alert(t('equipment.messages.saveError') + ". Check F12 Console for details.");
     } finally {
       setLoading(false);
     }
@@ -105,7 +107,7 @@ export default function EquipmentDetailsDialog({
   const handleDelete = async () => {
     if (
       !confirm(
-        "Are you sure you want to delete this equipment? This cannot be undone."
+        t('equipment.dialog.confirmDelete')
       )
     )
       return;
@@ -116,7 +118,7 @@ export default function EquipmentDetailsDialog({
       window.location.reload();
     } catch (err) {
       console.error("Delete failed", err);
-      alert("Failed to delete equipment.");
+      alert(t('equipment.messages.deleteError'));
     }
   };
 
@@ -145,8 +147,8 @@ export default function EquipmentDetailsDialog({
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the equipment details below."
-              : "View detailed information and status for this item."}
+              ? t('equipment.dialog.updateDesc')
+              : t('equipment.dialog.viewDesc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -158,13 +160,13 @@ export default function EquipmentDetailsDialog({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="p-3 bg-slate-50 rounded-lg">
                   <span className="text-slate-500 block text-xs uppercase">
-                    Category
+                    {t('equipment.category')}
                   </span>
                   <span className="font-medium">{formData.type}</span>
                 </div>
                 <div className="p-3 bg-slate-50 rounded-lg">
                   <span className="text-slate-500 block text-xs uppercase">
-                    Serial Number
+                    {t('equipment.dialog.serialNumber')}
                   </span>
                   <span className="font-medium font-mono">
                     {equipment.serialNumber || equipment.id?.substring(0, 8)}
@@ -174,7 +176,7 @@ export default function EquipmentDetailsDialog({
                   <MapPin className="h-5 w-5 text-blue-500" />
                   <div>
                     <span className="text-slate-500 block text-xs uppercase">
-                      Location
+                      {t('equipment.dialog.location')}
                     </span>
                     <span className="font-medium">{formData.location}</span>
                   </div>
@@ -187,7 +189,7 @@ export default function EquipmentDetailsDialog({
                   Description
                 </h4>
                 <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                  {formData.description || "No description provided."}
+                  {formData.description || t('equipment.dialog.noDescription')}
                 </p>
               </div>
 
@@ -213,7 +215,7 @@ export default function EquipmentDetailsDialog({
             /* --- EDIT MODE --- */
             <div className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Equipment Name</Label>
+                <Label htmlFor="name">{t('equipment.dialog.name')}</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -225,7 +227,7 @@ export default function EquipmentDetailsDialog({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="type">Category</Label>
+                  <Label htmlFor="type">{t('equipment.category')}</Label>
                   <Select
                     value={formData.type}
                     onValueChange={(val) =>
@@ -233,15 +235,15 @@ export default function EquipmentDetailsDialog({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
+                      <SelectValue placeholder={t('equipment.dialog.selectType')} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="Laptop">Laptop</SelectItem>
-                      <SelectItem value="Projector">Projector</SelectItem>
-                      <SelectItem value="Tablet">Tablet</SelectItem>
-                      <SelectItem value="Camera">Camera</SelectItem>
-                      <SelectItem value="Audio">Audio</SelectItem>
-                      <SelectItem value="Accessories">Accessories</SelectItem>
+                      <SelectItem value="Laptop">{t('equipment.categories.laptop')}</SelectItem>
+                      <SelectItem value="Projector">{t('equipment.categories.projector')}</SelectItem>
+                      <SelectItem value="Tablet">{t('equipment.categories.tablet')}</SelectItem>
+                      <SelectItem value="Camera">{t('equipment.categories.camera')}</SelectItem>
+                      <SelectItem value="Audio">{t('equipment.categories.audio')}</SelectItem>
+                      <SelectItem value="Accessories">{t('equipment.categories.accessories')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -255,19 +257,19 @@ export default function EquipmentDetailsDialog({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Status" />
+                      <SelectValue placeholder={t('equipment.dialog.selectStatus')} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="Available">Available</SelectItem>
-                      <SelectItem value="Maintenance">Maintenance</SelectItem>
-                      <SelectItem value="Lost">Lost</SelectItem>
+                      <SelectItem value="Available">{t('equipment.status.available')}</SelectItem>
+                      <SelectItem value="Maintenance">{t('equipment.status.maintenance')}</SelectItem>
+                      <SelectItem value="Lost">{t('equipment.status.lost')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="location">Storage Location</Label>
+                <Label htmlFor="location">{t('equipment.dialog.storageLocation')}</Label>
                 <Input
                   id="location"
                   value={formData.location}
@@ -278,7 +280,7 @@ export default function EquipmentDetailsDialog({
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="desc">Description</Label>
+                <Label htmlFor="desc">{t('equipment.dialog.description')}</Label>
                 <Textarea
                   id="desc"
                   value={formData.description}
@@ -299,7 +301,7 @@ export default function EquipmentDetailsDialog({
                   onClick={() => setIsEditing(false)}
                   disabled={loading}
                 >
-                  Cancel
+                  {t('equipment.dialog.cancel')}
                 </Button>
                 {/* FIX: Added type="button" and passed event (e) to handler */}
                 <Button
@@ -313,7 +315,7 @@ export default function EquipmentDetailsDialog({
                   ) : (
                     <Save className="w-4 h-4 mr-2" />
                   )}
-                  Save Changes
+                  {t('equipment.dialog.save')}
                 </Button>
               </>
             ) : (
@@ -322,20 +324,20 @@ export default function EquipmentDetailsDialog({
                   variant="destructive"
                   size="icon"
                   onClick={handleDelete}
-                  title="Delete Item"
+                  title={t('equipment.dialog.delete')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => onOpenChange(false)}>
-                    Close
+                    {t('equipment.dialog.close')}
                   </Button>
                   <Button
                     onClick={() => setIsEditing(true)}
                     className="bg-[#0b1d3a] text-white"
                   >
                     <Edit2 className="w-4 h-4 mr-2" />
-                    Edit Details
+                    {t('equipment.dialog.edit')}
                   </Button>
                 </div>
               </>

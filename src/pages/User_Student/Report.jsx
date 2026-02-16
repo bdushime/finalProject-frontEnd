@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import StudentLayout from "@/components/layout/StudentLayout";
 import { PageContainer } from "@/components/common/Page";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
     Search,
     Download,
-FileText,
+    FileText,
     Filter,
     Loader2,
     ChevronDown,
@@ -17,6 +17,7 @@ import api from "@/utils/api";
 import logo from "@/assets/logo_tracknity.png";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useTranslation } from "react-i18next";
 
 export default function Report() {
     // --- STATE ---
@@ -26,6 +27,8 @@ export default function Report() {
     const [historyData, setHistoryData] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const location = useLocation();
+    const { t } = useTranslation("student");
 
     // --- FETCH DATA ---
     useEffect(() => {
@@ -41,9 +44,16 @@ export default function Report() {
             }
         };
         fetchHistory();
-    }, []);
 
-// --- FILTER LOGIC ---
+        // Check for incoming filter from Dashboard
+        if (location.state?.filter) {
+            setTimeRange(location.state.filter);
+            // Clear state so it doesn't persist on refresh/back if desired, 
+            // but for now keeping it simple is fine.
+        }
+    }, [location.state]);
+
+    // --- FILTER LOGIC ---
     const filteredData = useMemo(() => {
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -51,7 +61,7 @@ export default function Report() {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-return historyData.filter(item => {
+        return historyData.filter(item => {
             const dateOut = new Date(item.createdAt);
 
             // 1. Time Range
@@ -61,7 +71,7 @@ return historyData.filter(item => {
             else if (timeRange === "This Month") matchesTime = dateOut >= startOfMonth;
             else if (timeRange === "This Year") matchesTime = dateOut >= startOfYear;
 
-// 2. Status
+            // 2. Status
             let matchesStatus = true;
             if (statusFilter !== "All Status") {
                 matchesStatus = item.status === statusFilter;
@@ -303,12 +313,12 @@ return historyData.filter(item => {
         document.body.removeChild(link);
     };
 
-if (loading) return <StudentLayout><div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-slate-400" /></div></StudentLayout>;
+    if (loading) return <StudentLayout><div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-slate-400" /></div></StudentLayout>;
 
     return (
         <StudentLayout>
             <PageContainer>
-{/* HEADER + BACK BUTTON (Aligned with EquipmentCatalogue) */}
+                {/* HEADER + BACK BUTTON (Aligned with EquipmentCatalogue) */}
                 <div className="mb-8">
                     <div>
                         <Button
@@ -320,8 +330,8 @@ if (loading) return <StudentLayout><div className="h-screen flex items-center ju
                             <ArrowLeft className="w-5 h-5 mr-1" />
                             Back
                         </Button>
-                        <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">My Reports</h1>
-                        <p className="text-slate-500 mt-1">Detailed ledger of your equipment usage.</p>
+                        <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">{t("report.title")}</h1>
+                        <p className="text-slate-500 mt-1">{t("report.detailedLedger")}</p>
                     </div>
                 </div>
 
@@ -329,14 +339,14 @@ if (loading) return <StudentLayout><div className="h-screen flex items-center ju
                 <div className="space-y-6">
                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-center gap-4">
                         <div className="flex items-center gap-2 text-slate-500 font-bold uppercase text-xs tracking-wider min-w-[80px]">
-                            <Filter className="w-4 h-4" /> Filters
+                            <Filter className="w-4 h-4" /> {t("report.filters")}
                         </div>
 
                         <div className="flex-1 w-full relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
                                 type="text"
-                                placeholder="Search Report..."
+                                placeholder={t("report.searchReport")}
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#126dd5] transition-colors"
@@ -360,7 +370,7 @@ if (loading) return <StudentLayout><div className="h-screen flex items-center ju
                                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             </div>
 
-{/* Status */}
+                            {/* Status */}
                             <div className="relative">
                                 <select
                                     className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg py-2.5 pl-3 pr-8 focus:border-[#126dd5] outline-none cursor-pointer min-w-[130px]"
@@ -388,7 +398,7 @@ if (loading) return <StudentLayout><div className="h-screen flex items-center ju
                     {/* ACTIONS */}
                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-2 text-[#126dd5] font-bold uppercase text-xs tracking-wider">
-                            <FileText className="w-4 h-4" /> Actions
+                            <FileText className="w-4 h-4" /> {t("report.actions")}
                         </div>
 
                         <div className="flex gap-3 w-full sm:w-auto">
@@ -396,37 +406,37 @@ if (loading) return <StudentLayout><div className="h-screen flex items-center ju
                                 onClick={handleDownloadPDF}
                                 className="bg-[#126dd5] hover:bg-[#0b1d3a] text-white flex-1 sm:flex-none font-semibold shadow-md rounded-lg"
                             >
-                                <FileText className="w-4 h-4 mr-2" /> Generate PDF Report
+                                <FileText className="w-4 h-4 mr-2" /> {t("report.generatePDF")}
                             </Button>
-                            
+
                             {/* CSV Button */}
                             <Button
                                 onClick={handleExportCSV}
                                 variant="outline"
                                 className="border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100 flex-1 sm:flex-none rounded-lg focus:ring-0 active:text-slate-900"
                             >
-                                <Download className="w-4 h-4 mr-2" /> Export CSV
+                                <Download className="w-4 h-4 mr-2" /> {t("report.exportCSV")}
                             </Button>
                         </div>
                     </div>
 
-{/* UI TABLE (WEB VIEW - SIMPLIFIED) */}
+                    {/* UI TABLE (WEB VIEW - SIMPLIFIED) */}
                     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
-                            <h2 className="font-bold text-[#0b1d3a]">Report Data Preview</h2>
-                            <span className="text-xs font-medium text-slate-400">{filteredData.length} Records Found</span>
+                            <h2 className="font-bold text-[#0b1d3a]">{t("report.dataPreview")}</h2>
+                            <span className="text-xs font-medium text-slate-400">{filteredData.length} {t("report.recordsFound")}</span>
                         </div>
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                                        <th className="p-4 pl-6 w-16">No.</th>
-                                        <th className="p-4">Equipment</th>
-                                        <th className="p-4">Category</th>
-                                        <th className="p-4">Borrowed Date</th>
-                                        <th className="p-4">Duration</th>
-                                        <th className="p-4 text-right pr-6">Status</th>
+                                        <th className="p-4 pl-6 w-16">{t("report.no")}</th>
+                                        <th className="p-4">{t("report.equipmentName")}</th>
+                                        <th className="p-4">{t("report.category")}</th>
+                                        <th className="p-4">{t("report.borrowedDate")}</th>
+                                        <th className="p-4">{t("report.duration")}</th>
+                                        <th className="p-4 text-right pr-6">{t("report.status")}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
@@ -468,7 +478,7 @@ if (loading) return <StudentLayout><div className="h-screen flex items-center ju
                                                     <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
                                                         <FileText className="w-6 h-6 text-slate-300" />
                                                     </div>
-                                                    <p className="font-medium">No records found matching your filters.</p>
+                                                    <p className="font-medium">{t("report.noRecords")}</p>
                                                 </div>
                                             </td>
                                         </tr>

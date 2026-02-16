@@ -17,48 +17,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/pages/auth/AuthContext";
 import logo from "@/assets/tracknity_logo.jpeg";
 import smallLogo from "@/assets/logo_small.png";
-
-const navigationLinks = [
-  { label: "Dashboard", path: "/security/dashboard", icon: LayoutGrid },
-  { label: "Devices", path: "/security/devices", icon: Package },
-  // { label: "Active Checkouts", path: "/security/active-checkouts", icon: ClipboardList },
-  { label: "Access Logs", path: "/security/logs", icon: ShieldAlert },
-  { label: "Gate keeper", path: "/gate-verification", icon: Shield },
-  { label: "Reports", path: "/security/reports", icon: FileText },
-];
-
-const getPageHeaders = () => {
-  const hour = new Date().getHours();
-  let timeGreeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-
-  return {
-    "/security/dashboard": {
-      title: `${timeGreeting}, Security Officer!`,
-      description: "Monitor equipment access, security events, and system activity in real-time",
-
-    },
-    "/security/devices": {
-      title: "Device Management",
-      description: "Browse, add, edit, and manage all equipment in the system.",
-      actionButton: { label: "Add Device", path: "/security/devices", icon: Plus },
-      secondaryAction: { label: "Bulk Upload", icon: Upload },
-    },
-    "/security/device": {
-      title: "Device Details",
-      description: "View complete information about this device.",
-    },
-    // "/security/active-checkouts": {
-    //   title: "Active Checkouts",
-    //   description: "View and monitor all currently checked out equipment.",
-    //   actionButton: { label: "New Checkout", path: "/security/active-checkouts", icon: Plus },
-    // },
-    "/security/logs": { title: "Access Logs", description: "View comprehensive logs of all activities.", actionButton: null },
-    "/security/reports": { title: "Reports", description: "Generate and view detailed reports.", actionButton: null },
-    "/security/settings": { title: "Settings", description: "Configure system settings.", actionButton: null },
-    "/security/profile": { title: "Profile", description: "Manage your account details.", actionButton: null },
-    "/security/notifications": { title: "Notifications", description: "View security alerts.", actionButton: null },
-  };
-};
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 const getPageHeader = (pathname, headers) => {
   if (headers[pathname]) {
@@ -85,9 +46,73 @@ function Topbar() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useTranslation("common");
+  const { t: tSec } = useTranslation("security");
 
   const unreadCount = 3;
   const currentPath = location.pathname;
+
+  const navigationLinks = [
+    { label: t("nav.dashboard"), path: "/security/dashboard", icon: LayoutGrid },
+    { label: t("nav.devices"), path: "/security/devices", icon: Package },
+    { label: t("nav.checkouts"), path: "/security/active-checkouts", icon: ClipboardList },
+    { label: t("nav.accessLogs"), path: "/security/logs", icon: ShieldAlert },
+    { label: t("nav.reports"), path: "/security/reports", icon: FileText },
+  ];
+
+  // Page-specific headers
+  const getPageHeaders = () => {
+    const hour = new Date().getHours();
+    let timeGreeting = tSec("dashboard.title");
+    if (hour < 12) {
+      timeGreeting = `${t("nav.dashboard")}`;
+    }
+
+    return {
+      "/security/dashboard": {
+        title: tSec("dashboard.title"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/devices": {
+        title: tSec("devices.title"),
+        description: null,
+        actionButton: { label: tSec("devices.addDevice") || "Add Device", path: "/security/devices", icon: Plus },
+        secondaryAction: { label: "Bulk Upload", icon: Upload },
+      },
+      "/security/active-checkouts": {
+        title: tSec("dashboard.activeCheckouts"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/logs": {
+        title: tSec("accessLogs.title"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/reports": {
+        title: tSec("reports.title"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/settings": {
+        title: t("nav.config"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/profile": {
+        title: t("nav.profile"),
+        description: null,
+        actionButton: null,
+      },
+      "/security/notifications": {
+        title: tSec("notifications.title"),
+        description: null,
+        actionButton: null,
+      },
+    };
+  };
+
   const pageHeaders = getPageHeaders();
   const pageHeader = getPageHeader(currentPath, pageHeaders);
 
@@ -125,21 +150,32 @@ function Topbar() {
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
 
-            <Link to="/security/dashboard" className="flex-shrink-0">
-              <img src={smallLogo} alt="Logo" className="h-10 w-10 md:hidden rounded-full" />
-              <img src={logo} alt="Tracknity" className="hidden md:block h-10 w-auto rounded" />
+            <Link to="/security/dashboard" className="flex items-center gap-2">
+              <img
+                src={smallLogo}
+                alt="Tracknity"
+                className="block md:hidden w-10 h-10 rounded-full"
+              />
+              <img
+                src={logo}
+                alt="Tracknity"
+                className="hidden md:block h-10 w-auto rounded"
+              />
             </Link>
           </div>
-
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1">
             {navigationLinks.map((link) => {
               const Icon = link.icon;
+              const active = isLinkActive(link.path);
               return (
                 <NavLink
                   key={link.path}
                   to={link.path}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-full transition-all ${isActive ? "bg-[#1A2240] text-white shadow-sm" : "text-gray-400 hover:text-white hover:bg-white/5"
+                    `flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${active || isActive
+                      ? "bg-[#1A2240] text-white rounded-full"
+                      : "text-gray-300 hover:bg-white/10 hover:text-white"
                     }`
                   }
                 >
@@ -150,9 +186,17 @@ function Topbar() {
             })}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/security/notifications" className="relative p-2 text-gray-400 hover:text-white transition-colors">
-              <Bell className="h-5 w-5" />
+
+          {/* Right: Language Switcher, Notifications, User */}
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher variant="dark" />
+
+            <Link
+              to="/security/notifications"
+              className="relative p-2 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label={t("nav.notifications")}
+            >
+              <Bell className="h-5 w-5 text-white" />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-[#0A1128]">
                   {unreadCount}
@@ -162,43 +206,59 @@ function Topbar() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="border-none p-0 sm:px-2 flex items-center gap-3 hover:bg-white/5">
-                  <span className="hidden sm:block text-sm font-medium text-white">{user?.name || "Officer"}</span>
-                  <Avatar className="h-9 w-9 border border-white/10">
-                    <AvatarFallback className="bg-[#BEBEE0] text-[#1A2240] font-bold">
-                      {user?.name?.charAt(0) || "S"}
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-white hover:bg-white/10"
+                >
+                  <span className="hidden sm:block text-sm font-medium">
+                    {user?.name || t("roles.security")}
+                  </span>
+                  <Avatar className="h-8 w-8 border-2 border-white/20">
+                    <AvatarFallback className="bg-[#BEBEE0] text-[#1A2240] text-sm font-semibold">
+                      {user?.name?.charAt(0)?.toUpperCase() || "S"}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 mt-2 bg-[#BEBEE0] border-none">
-                <DropdownMenuLabel>Account</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>{t("auth.myAccount")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/security/profile")}>Profile</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/security/settings")}>Settings</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/security/profile">{t("auth.myProfile")}</Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-500" onClick={() => navigate("/login")}>Logout</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link to="/login">{t("auth.logOut")}</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
 
         {isMobileMenuOpen && (
-          <div className="lg:hidden mt-4 space-y-1 pb-4 animate-in slide-in-from-top-2 z-50 duration-200">
-            {navigationLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${isActive ? "bg-[#1A2240] text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"
-                  }`
-                }
-              >
-                <link.icon className="h-5 w-5" />
-                {link.label}
-              </NavLink>
-            ))}
+          <div className="md:hidden mt-4 pb-4 border-t border-white/20 pt-4">
+            <nav className="flex flex-col gap-2">
+              {navigationLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isLinkActive(link.path);
+                return (
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${active || isActive
+                        ? "bg-[#1A2240] text-white"
+                        : "text-gray-300 hover:bg-white/10 hover:text-white"
+                      }`
+                    }
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{link.label}</span>
+                  </NavLink>
+                );
+              })}
+            </nav>
           </div>
         )}
       </div>
@@ -210,6 +270,9 @@ function Topbar() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
               {pageHeader.title}
             </h1>
+            <p className="text-gray-200 text-sm sm:text-base mb-2">
+              {formattedDate}
+            </p>
             {pageHeader.description && (
               <p className="text-gray-400 text-sm sm:text-base max-w-xl leading-relaxed">
                 {pageHeader.description}

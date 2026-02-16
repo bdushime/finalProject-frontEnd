@@ -22,6 +22,7 @@ import { Search, Download, ArrowUpRight, Eye } from "lucide-react";
 import { Badge } from "@components/ui/badge";
 import { Avatar, AvatarFallback } from "@components/ui/avatar";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // Mock data - replace with actual API call
 const mockAccessLogs = [
@@ -105,6 +106,7 @@ const actionConfig = {
 };
 
 export default function AccessLogsTable({ data = mockAccessLogs }) {
+  const { t } = useTranslation(["security", "common"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
@@ -140,15 +142,15 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2">
-          <div>
-            <CardTitle className="text-xl font-bold text-gray-900">
-              Access Logs
-            </CardTitle>
-            <CardDescription className="text-sm text-gray-500 mt-1">
-              Recent equipment access activities and security events
-            </CardDescription>
-          </div>
-          
+            <div>
+              <CardTitle className="text-xl font-bold text-gray-900">
+                {t('accessLogs.title')}
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500 mt-1">
+                {t('accessLogs.subtitle')}
+              </CardDescription>
+            </div>
+
           </div>
           <div className="flex items-center gap-2">
             <Select value={timeFilter} onValueChange={setTimeFilter} >
@@ -156,15 +158,15 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#BEBEE0] text-gray-700 border-none">
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">{t('accessLogs.filters.today')}</SelectItem>
+                <SelectItem value="week">{t('accessLogs.filters.week')}</SelectItem>
+                <SelectItem value="month">{t('accessLogs.filters.month')}</SelectItem>
+                <SelectItem value="all">{t('accessLogs.filters.allTime')}</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm" className="gap-2 border border-gray-300 rounded-lg shadow-sm bg-white">
               <Download className="h-4 w-4" />
-              Export
+              {t('common:actions.export')}
             </Button>
           </div>
         </div>
@@ -175,7 +177,7 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by user, ID, equipment, or email..."
+              placeholder={t('accessLogs.filters.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 border border-gray-300 rounded-lg shadow-sm bg-white"
@@ -184,42 +186,42 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
           <div className="flex gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[140px] border border-gray-300 rounded-lg shadow-sm bg-white">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('accessLogs.filters.status')} />
               </SelectTrigger>
               <SelectContent className="bg-[#BEBEE0] text-gray-700 border-none">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="success">Success</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="suspicious">Suspicious</SelectItem>
+                <SelectItem value="all">{t('accessLogs.filters.allStatus')}</SelectItem>
+                <SelectItem value="success">{t('accessLogs.status.success')}</SelectItem>
+                <SelectItem value="failed">{t('accessLogs.status.failed')}</SelectItem>
+                <SelectItem value="pending">{t('accessLogs.status.pending')}</SelectItem>
+                <SelectItem value="suspicious">{t('accessLogs.status.suspicious')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={actionFilter} onValueChange={setActionFilter}>
               <SelectTrigger className="w-[140px] border border-gray-300 rounded-lg shadow-sm bg-white">
-                <SelectValue placeholder="Action" />
+                <SelectValue placeholder={t('accessLogs.filters.action')} />
               </SelectTrigger>
               <SelectContent className="bg-[#BEBEE0] text-gray-700 border-none">
-                <SelectItem value="all">All Actions</SelectItem>
-                <SelectItem value="Checkout">Checkout</SelectItem>
-                <SelectItem value="Return">Return</SelectItem>
+                <SelectItem value="all">{t('accessLogs.filters.allActions')}</SelectItem>
+                <SelectItem value="Checkout">{t('accessLogs.actions.checkout')}</SelectItem>
+                <SelectItem value="Return">{t('accessLogs.actions.return')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
         {/* Table */}
-        
+
         <div className="rounded-lg border border-gray-200 overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-[#BEBEE0] hover:bg-[#BEBEE0]">
-                <TableHead className="font-semibold text-white">Log ID</TableHead>
-                <TableHead className="font-semibold text-white">User</TableHead>
-                <TableHead className="font-semibold text-white">Action</TableHead>
-                <TableHead className="font-semibold text-white">Equipment</TableHead>
-                <TableHead className="font-semibold text-white">Location</TableHead>
-                <TableHead className="font-semibold text-white">Timestamp</TableHead>
-                <TableHead className="font-semibold text-white">Status</TableHead>
+                <TableHead className="font-semibold text-white">{t('accessLogs.table.logId')}</TableHead>
+                <TableHead className="font-semibold text-white">{t('accessLogs.table.user')}</TableHead>
+                <TableHead className="font-semibold text-white">{t('accessLogs.table.action')}</TableHead>
+                <TableHead className="font-semibold text-white">{t('accessLogs.table.equipment')}</TableHead>
+                <TableHead className="font-semibold text-white">{t('accessLogs.table.location')}</TableHead>
+                <TableHead className="font-semibold text-white">{t('accessLogs.table.timestamp')}</TableHead>
+                <TableHead className="font-semibold text-white">{t('accessLogs.table.status')}</TableHead>
                 <TableHead className="font-semibold text-white"></TableHead>
               </TableRow>
             </TableHeader>
@@ -227,7 +229,7 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
               {filteredData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    No access logs found matching your filters.
+                    {t('accessLogs.table.noLogs')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -254,7 +256,7 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
                         variant="outline"
                         className={`border ${actionConfig[log.action]?.className || "bg-gray-100 text-gray-800"}`}
                       >
-                        {log.action}
+                        {t(`accessLogs.actions.${actionConfig[log.action]?.label?.toLowerCase()}`) || log.action}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-gray-700">{log.equipment}</TableCell>
@@ -265,7 +267,7 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
                         variant="outline"
                         className={`border ${statusConfig[log.status]?.className || statusConfig.pending.className}`}
                       >
-                        {statusConfig[log.status]?.label || log.status}
+                        {t(`accessLogs.status.${statusConfig[log.status]?.label?.toLowerCase() || log.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -285,8 +287,8 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
         </div>
         <Link to="/security/logs" className="flex items-center gap-2 mt-2 p-4 justify-end border-t border-gray-200 ">
           <Button variant="outline" size="sm" className="gap-2 border-gray-400">
-              <Eye className="h-4 w-4" />
-            View All
+            <Eye className="h-4 w-4" />
+            {t('accessLogs.viewAll')}
           </Button>
         </Link>
       </CardContent>

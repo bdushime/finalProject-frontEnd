@@ -1,0 +1,437 @@
+{
+    "dashboard": {
+        "title": "Admin Dashboard",
+        "totalUsers": "Total Users",
+        "totalEquipment": "Total Equipment",
+        "activeCheckouts": "Active Checkouts",
+        "overdueItems": "Overdue Items",
+        "weeklyUsageTrends": "Weekly Usage Trends",
+        "systemSnapshots": "System Snapshots",
+        "quickActions": "Quick Actions",
+        "liveTracking": "Live Tracking & Check-outs",
+        "recentActivity": "Recent Activity",
+        "welcome": "Welcome Admin,",
+        "systemStatus": "System Status",
+        "statusChecking": "Checking...",
+        "activeBorrowed": "Active Borrowed",
+        "studentsWithItems": "Students with items",
+        "registeredAccounts": "Registered accounts",
+        "atRiskItems": "At-Risk Items",
+        "actionReq": "Action Req",
+        "overdueItemsDesc": "Overdue items",
+        "availableEquip": "Available Equip",
+        "readyForCheckout": "Ready for checkout",
+        "recentTransactions": "Recent Transactions",
+        "viewAll": "View All",
+        "noRecentActivity": "No recent activity",
+        "manageUsers": "Manage Users",
+        "systemConfig": "System Config",
+        "generateReport": "Generate Report",
+        "live": "+Live",
+        "stable": "Stable",
+        "stock": "Stock"
+    },
+    "users": {
+        "title": "User Management",
+        "subtitle": "Manage access, roles, and account status.",
+        "addUser": "Add User",
+        "editUser": "Edit User Profile",
+        "newUserProfile": "New User Profile",
+        "defaultPassword": "Default password: ********",
+        "searchPlaceholder": "Search by name, email or ID...",
+        "userIdentity": "User Identity",
+        "assignedRole": "Assigned Role",
+        "department": "Department",
+        "respScore": "Resp. Score",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "status": "Status",
+        "filters": "Filters",
+        "noUsersFound": "No users found matching your filters.",
+        "createUser": "Create User",
+        "saveChanges": "Save Changes",
+        "creatingUser": "Creating...",
+        "savingUser": "Saving...",
+        "userCreated": "User created successfully!",
+        "userUpdated": "User profile updated!",
+        "userDeleted": "User deleted",
+        "userSuspended": "User Suspended successfully",
+        "userActivated": "User Activated successfully",
+        "failedCreate": "Failed to create user.",
+        "failedUpdate": "Failed to update user.",
+        "failedDelete": "Failed to delete user",
+        "failedChangeStatus": "Failed to change status",
+        "failedFetch": "Failed to fetch users",
+        "confirmSuspend": "Are you sure you want to SUSPEND this user?",
+        "confirmActivate": "Are you sure you want to ACTIVATE this user?",
+        "confirmDelete": "Are you sure you want to delete this user? This cannot be undone.",
+        "manageScore": "Manage Responsibility Score",
+        "adjustScore": "Adjust score for",
+        "currentScore": "Current Score",
+        "scoreUpdated": "Score updated!",
+        "failedUpdateScore": "Failed to update score",
+        "notifyUser": "Notify User",
+        "sendingTo": "Sending message to",
+        "viaEmail": "Email",
+        "viaNotification": "System Notification",
+        "subject": "Subject",
+        "message": "Message",
+        "emailField": "Email",
+        "studentId": "Student ID (e.g. 2024001)",
+        "messageVia": "This will be sent via Email & System Notification",
+        "subjectPlaceholder": "e.g. Return Overdue Equipment",
+        "messagePlaceholder": "Type your message here...",
+        "sendNotification": "Send Notification",
+        "messageSent": "Message sent to {{name}}",
+        "failedSend": "Failed to send message",
+        "provideSubjectAndMessage": "Please provide both subject and message",
+        "resetPassword": "Reset Password (leave empty to keep)",
+        "updatingFor": "Updating details for",
+        "general": "General",
+        "suspended": "SUSPENDED",
+        "activeStatus": "ACTIVE",
+        "allRoles": "All Roles",
+        "actions": "Actions"
+    },
+    "config": {
+        "title": "System Configuration",
+        "subtitle": "Manage all system settings globally.",
+        "sections": {
+            "general": {
+                "title": "General System Settings",
+                "desc": "Configure system name, timezone, default currency, and localization."
+            },
+            "locations": {
+                "title": "Department & Locations",
+                "desc": "Manage campus departments, buildings, and storage locations."
+            },
+            "categories": {
+                "title": "Equipment Categories",
+                "desc": "Define equipment types, categories, and custom attributes."
+            },
+            "policies": {
+                "title": "Checkout Policies",
+                "desc": "Set borrow durations, limits, and renewal rules per role."
+            },
+            "responsibility": {
+                "title": "Responsibility Score",
+                "desc": "Configure scoring rules, penalties, and trust levels."
+            },
+            "alerts": {
+                "title": "Alert Config",
+                "desc": "Manage system alerts, overdue notifications, and triggers."
+            },
+            "email": {
+                "title": "Email Templates",
+                "desc": "Customize email notifications for checkouts, returns, and warnings."
+            },
+            "qrcode": {
+                "title": "QR Code Settings",
+                "desc": "Adjust QR code generation formats and label sizes."
+            },
+            "branding": {
+                "title": "System Branding",
+                "desc": "Update logos, colors, and portal themes."
+            }
+        },
+        "general": {
+            "basicInfo": "Basic Information",
+            "systemName": "System Name",
+            "timezone": "Timezone",
+            "maintenanceMode": "Maintenance Mode",
+            "maintenanceDesc": "Enable this to prevent students from logging in while you make changes.",
+            "on": "On",
+            "off": "Off"
+        },
+        "locations": {
+            "title": "Campus IoT Zones",
+            "addZone": "+ Add Zone",
+            "zoneNamePlaceholder": "Zone Name (e.g. Design Lab)",
+            "typePlaceholder": "Type (e.g. Lab)"
+        },
+        "categories": {
+            "title": "Equipment Categories",
+            "addCategory": "+ New Category",
+            "namePlaceholder": "Category Name",
+            "codePlaceholder": "Code (1 char)"
+        },
+        "policies": {
+            "studentTitle": "Student Borrowing Policy",
+            "studentDesc": "Rules applied to general student accounts.",
+            "maxDuration": "Max Borrow Duration",
+            "itemsPerCheckout": "Items Per Checkout",
+            "hours": "Hours",
+            "mins": "Mins",
+            "maxAllowed": "Max allowed: 5 Hours",
+            "staffTitle": "Staff & Faculty Policy",
+            "staffDesc": "Rules for teaching and admin staff.",
+            "borrowDuration": "Borrow Duration",
+            "approvalRequired": "Approval Required?"
+        },
+        "responsibility": {
+            "scoreImpact": "Score Impact Configuration",
+            "desc": "Adjust penalties for late returns or damaged items.",
+            "latePenalty": "Late Return Penalty",
+            "damagePenalty": "Damage Penalty (Minor)",
+            "ptsPerHour": "pts / hour late",
+            "pts": "pts"
+        },
+        "alerts": {
+            "title": "System Alerts",
+            "overdueTitle": "Overdue Equipment Alert",
+            "overdueDesc": "Notify admin when equipment is 24h overdue",
+            "lowStockTitle": "Low Stock Warning",
+            "lowStockDesc": "Alert when inventory drops below 10%",
+            "unauthorizedTitle": "Unauthorized Movement",
+            "unauthorizedDesc": "Trigger alarm if IoT tag leaves designated zone",
+            "maintenanceTitle": "Maintenance Due",
+            "maintenanceDesc": "Reminder for scheduled equipment checks"
+        },
+        "email": {
+            "receipt": "Receipt Email",
+            "receiptDesc": "Sent after checkout",
+            "overdue": "Overdue Notice",
+            "overdueDesc": "Sent when late",
+            "editing": "Editing",
+            "variables": "Supported variables",
+            "subject": "Subject Line",
+            "html": "HTML Content",
+            "addName": "+ Name",
+            "addDate": "+ Date",
+            "sendTest": "Send Test"
+        },
+        "qrcode": {
+            "title": "QR Label Settings",
+            "labelSize": "Label Size",
+            "includeLogo": "Include University Logo",
+            "printSample": "Print Sample Label"
+        },
+        "branding": {
+            "systemLogo": "System Logo",
+            "upload": "Tap to upload replacement",
+            "primaryColor": "Primary Color"
+        },
+        "actions": {
+            "configure": "Configure",
+            "save": "Save Changes",
+            "cancel": "Cancel"
+        },
+        "messages": {
+            "success": "Settings saved successfully!",
+            "failure": "Failed to save settings.",
+            "nameRequired": "Name is required",
+            "nameCodeRequired": "Name and Code required"
+        }
+    },
+    "reports": {
+        "title": "Reports",
+        "activityReports": "Activity Reports",
+        "userReports": "User Reports",
+        "deviceInventory": "Device Inventory",
+        "riskAnalysis": "Risk Analysis",
+        "subtitle": "Detailed analysis and exportable logs for system auditing.",
+        "activityLogs": "Activity Logs",
+        "transactionsHistory": "Transactions & History",
+        "userDirectory": "User Directory",
+        "usersAndRoles": "Users & Roles",
+        "equipmentStatus": "Equipment Status",
+        "riskAssessment": "Risk Assessment",
+        "borrowingRisks": "Borrowing Risks",
+        "reportInfo": "Report Info:",
+        "filterBy": "Filter By:",
+        "exportDate": "Export Date:",
+        "dateRange": "Date Range:",
+        "statusFilter": "Status:",
+        "roleFilter": "Role:",
+        "categoryFilter": "Category:",
+        "item": "Item",
+        "user": "User",
+        "date": "Date",
+        "riskLevel": "Risk Level",
+        "riskScore": "Risk Score",
+        "userIdentity": "User Identity",
+        "deviceName": "Device Name",
+        "category": "Category",
+        "serialNumber": "Serial Number",
+        "location": "Location",
+        "mainStorage": "Main Storage",
+        "score": "Score",
+        "allStatuses": "All Statuses",
+        "allRoles": "All Roles",
+        "allLevels": "All Levels",
+        "allCategories": "All Categories",
+        "totalUsers": "Total Users",
+        "students": "Students",
+        "staff": "Staff",
+        "totalDevices": "Total Devices",
+        "totalRecords": "Total Records",
+        "brokenMaint": "Broken/Maint.",
+        "failedLoadData": "Failed to load report data.",
+        "highRisk": "High Risk",
+        "mediumRisk": "Medium Risk",
+        "lowRisk": "Low Risk"
+    },
+    "profile": {
+        "title": "My Profile",
+        "subtitle": "Manage your account settings and preferences.",
+        "personalInfo": "Personal Information",
+        "fullName": "Full Name",
+        "phone": "Phone Number",
+        "email": "Email Address",
+        "locked": "Locked",
+        "security": "Security",
+        "changePassword": "Change Password",
+        "save": "Save Changes",
+        "success": "Profile updated successfully"
+    },
+    "monitoring": {
+        "title": "System Monitoring",
+        "subtitle": "Real-time health status, performance metrics, and logs.",
+        "operational": "All Systems Operational",
+        "kpi": {
+            "uptime": "System Uptime",
+            "cpu": "Avg. CPU Load",
+            "memory": "Memory Usage",
+            "errorRate": "Error Rate",
+            "uptimeSub": "Last downtime: 32 days ago",
+            "cpuSub": "4 Cores Active",
+            "memorySub": "Total: 16 GB Available",
+            "errorSub": "Last 24 hours",
+            "stable": "Stable"
+        },
+        "charts": {
+            "performance": "System Performance Metrics",
+            "perfDesc": "Real-time CPU & Memory utilization",
+            "cpu": "CPU",
+            "memory": "Memory"
+        },
+        "servers": {
+            "title": "Server Node Status",
+            "warning": "Warning",
+            "online": "Online"
+        },
+        "logs": {
+            "title": "Recent Error Logs",
+            "desc": "Critical system alerts and warnings.",
+            "viewAll": "View All Logs",
+            "status": "Status",
+            "message": "Message",
+            "source": "Source",
+            "time": "Time",
+            "user": "User",
+            "action": "Action",
+            "details": "Details"
+        }
+    },
+    "data": {
+        "title": "Data Management",
+        "subtitle": "Manage database backups, exports, imports, and system cleanup.",
+        "backups": {
+            "title": "Database Backups",
+            "create": "Create New Backup",
+            "backingUp": "Backing up...",
+            "filename": "Filename",
+            "type": "Type",
+            "size": "Size",
+            "date": "Date",
+            "status": "Status"
+        },
+        "export": {
+            "title": "Export Data",
+            "equipmentTitle": "Equipment Data",
+            "equipmentDesc": "Inventory status & details",
+            "usersTitle": "User Records",
+            "usersDesc": "Profiles & roles",
+            "csv": "CSV"
+        },
+        "cleanup": {
+            "title": "System Maintenance",
+            "clearLogs": "Clear Old Logs",
+            "clearLogsDesc": "Remove transactions older than 90 days.",
+            "execute": "Execute Cleanup",
+            "confirm": "Delete logs older than 90 days?"
+        },
+        "messages": {
+            "backupSuccess": "Backup created successfully!",
+            "backupFailure": "Backup failed.",
+            "exportSuccess": "exported successfully!",
+            "exportFailure": "Export failed.",
+            "cleanupFailure": "Cleanup failed."
+        }
+    },
+    "tracking": {
+        "title": "Live Sensor Tracking",
+        "subtitle": "Real-time location of assets via Campus IoT Grid.",
+        "refresh": "Refresh Signal",
+        "map": {
+            "online": "System Online",
+            "grid": "Grid: Zone A - Innovation Hub",
+            "wifiZone": "Wifi Zone 1",
+            "projector": "Projector X4 (Active)",
+            "laptopCart": "Laptop Cart (Stationary)",
+            "camera": "Canon Camera (Weak Signal)"
+        },
+        "signal": {
+            "title": "Signal Quality",
+            "zoneA": "Zone A (Library)",
+            "strengthA": "98% Strength - Excellent",
+            "active": "Active",
+            "zoneB": "Zone B (Media)",
+            "strengthB": "82% Strength - Good",
+            "idle": "Idle"
+        },
+        "tags": {
+            "title": "Active Tags",
+            "total": "Total Online",
+            "lowBattery": "Low Battery"
+        }
+    },
+    "security": {
+        "title": "Security & Compliance",
+        "subtitle": "Monitor access log, enforce policies, and track threats.",
+        "export": "Export Log",
+        "tabs": {
+            "audit": "Audit Logs",
+            "compliance": "Compliance Dashboard",
+            "sessions": "Active Sessions"
+        },
+        "audit": {
+            "search": "Search logs...",
+            "timestamp": "Timestamp",
+            "user": "User",
+            "action": "Action",
+            "target": "Target / Details",
+            "ip": "IP Address",
+            "status": "Status",
+            "noLogs": "No logs found."
+        },
+        "compliance": {
+            "compliant": "Compliant",
+            "critical": "Critical",
+            "checked": "Checked:"
+        },
+        "sessions": {
+            "title": "Live User Sessions (24h)",
+            "revoke": "Revoke Access",
+            "login": "Login:",
+            "noSessions": "No active sessions found."
+        }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "subtitle": "Stay updated with system alerts and activities.",
+        "recent": "Recent Alerts",
+        "markAll": "Mark all as read",
+        "empty": "No new notifications",
+        "success": "All notifications marked as read",
+        "error": "Failed to update notifications",
+        "time": {
+            "years": "{{count}} years ago",
+            "months": "{{count}} months ago",
+            "days": "{{count}} days ago",
+            "hours": "{{count}} hours ago",
+            "minutes": "{{count}} mins ago",
+            "seconds": "{{count}} seconds ago"
+        }
+    }
+}

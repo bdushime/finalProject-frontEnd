@@ -51,6 +51,7 @@ import {
 } from "./iotUtils";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/common/PaginationControls";
+import { useTranslation } from "react-i18next";
 
 export function IoTTableSection({
   viewMode,
@@ -62,6 +63,7 @@ export function IoTTableSection({
   setPage,
   // pageSize,
 }) {
+  const { t } = useTranslation(["itstaff"]);
   if (viewMode !== "table") return null;
 
   const effectivePageSize = 10;
@@ -78,12 +80,12 @@ export function IoTTableSection({
       {/* Desktop table */}
       <Card className="border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Tracker Details</CardTitle>
+          <CardTitle className="text-xl font-bold">{t('iot.table.title')}</CardTitle>
           <CardDescription>
-            Showing {currentTrackers.length} of {trackers.length} trackers
+            {t('iot.table.showing', { current: currentTrackers.length, total: trackers.length })}
           </CardDescription>
           <CardDescription>
-            Page {currentPage} of {totalPages}
+            {t('iot.table.page', { current: currentPage, total: totalPages })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -91,14 +93,14 @@ export function IoTTableSection({
             <Table>
               <TableHeader>
                 <TableRow className=" font-bold text-gray-800">
-                  <TableHead>Equipment</TableHead>
-                  <TableHead>Tracker ID</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Battery</TableHead>
-                  <TableHead>Temperature</TableHead>
-                  <TableHead>Humidity</TableHead>
-                  <TableHead>Last Seen</TableHead>
+                  <TableHead>{t('iot.table.headers.equipment')}</TableHead>
+                  <TableHead>{t('iot.table.headers.id')}</TableHead>
+                  <TableHead>{t('iot.table.headers.location')}</TableHead>
+                  <TableHead>{t('iot.table.headers.status')}</TableHead>
+                  <TableHead>{t('iot.table.headers.battery')}</TableHead>
+                  <TableHead>{t('iot.table.headers.temp')}</TableHead>
+                  <TableHead>{t('iot.table.headers.humidity')}</TableHead>
+                  <TableHead>{t('iot.table.headers.lastSeen')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -196,7 +198,7 @@ export function IoTTableSection({
                       colSpan={8}
                       className="text-center py-8 text-muted-foreground"
                     >
-                      No trackers found matching your filters
+                      {t('iot.table.noTrackers')}
                     </TableCell>
                   </TableRow>
                 )}
@@ -258,7 +260,7 @@ export function IoTTableSection({
                     <Battery
                       className={`h-4 w-4 ${getBatteryColor(tracker.battery)}`}
                     />
-                    <span>Battery</span>
+                    <span>{t('iot.table.headers.battery')}</span>
                   </div>
                   <span className="font-medium">{tracker.battery}%</span>
                 </div>
@@ -287,7 +289,7 @@ export function IoTTableSection({
                 <div className="flex items-center gap-2">
                   <Droplets className="h-4 w-4 text-blue-500" />
                   <div>
-                    <div className="text-muted-foreground">Humidity</div>
+                    <div className="text-muted-foreground">{t('iot.table.headers.humidity')}</div>
                     <div className="font-medium">{tracker.humidity}%</div>
                   </div>
                 </div>
@@ -295,7 +297,7 @@ export function IoTTableSection({
 
               <div className="pt-2 border-t border-border">
                 <div className="text-xs text-muted-foreground mb-2">
-                  Last seen: {formatLastSeen(tracker.lastSeen)}
+                  {t('iot.table.lastSeen', { time: formatLastSeen(tracker.lastSeen) })}
                 </div>
                 <Dialog>
                   <DialogTrigger asChild>
@@ -309,13 +311,13 @@ export function IoTTableSection({
                       }}
                     >
                       <History className="h-3 w-3 mr-2" />
-                      View History
+                      {t('iot.table.viewHistory')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>
-                        Device History - {tracker.equipment}
+                        {t('iot.table.historyTitle', { equipment: tracker.equipment })}
                       </DialogTitle>
                       <DialogDescription>
                         {tracker.id} • {tracker.location}
@@ -341,6 +343,7 @@ export function TrackerHistoryDialog({
   onClose,
   historyData,
 }) {
+  const { t } = useTranslation(["itstaff"]);
   if (!selectedTracker) return null;
 
   return (
@@ -352,7 +355,7 @@ export function TrackerHistoryDialog({
       <DialogContent className="max-w-2xl border-gray-200 shadow-sm bg-[#8D8DC7] rounded-lg">
         <DialogHeader>
           <DialogTitle>
-            Device History - {selectedTracker.equipment}
+            {t('iot.table.historyTitle', { equipment: selectedTracker.equipment })}
           </DialogTitle>
           <DialogDescription>
             {selectedTracker.id} • {selectedTracker.location}
@@ -368,11 +371,12 @@ export function TrackerHistoryDialog({
 }
 
 function TrackerHistoryChart({ data, tracker }) {
+  const { t } = useTranslation(["itstaff"]);
   return (
     <div className="space-y-4">
       <div>
         <h4 className="text-sm font-medium mb-2">
-          Battery & Temperature Trends (Last Hour)
+          {t('iot.table.trends')}
         </h4>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={data}>
@@ -401,7 +405,7 @@ function TrackerHistoryChart({ data, tracker }) {
               dataKey="battery"
               stroke="#3b82f6"
               strokeWidth={2}
-              name="Battery %"
+              name={t('iot.table.batteryPercent')}
               dot={{ r: 3 }}
             />
             <Line
@@ -410,7 +414,7 @@ function TrackerHistoryChart({ data, tracker }) {
               dataKey="temperature"
               stroke="#ef4444"
               strokeWidth={2}
-              name="Temperature °C"
+              name={t('iot.table.tempCelcius')}
               dot={{ r: 3 }}
             />
           </LineChart>
@@ -418,11 +422,11 @@ function TrackerHistoryChart({ data, tracker }) {
       </div>
       <div className="grid grid-cols-2 gap-4 pt-4 border-t">
         <div>
-          <p className="text-sm text-muted-foreground">Current Battery</p>
+          <p className="text-sm text-muted-foreground">{t('iot.table.currentBattery')}</p>
           <p className="text-2xl font-bold">{tracker.battery}%</p>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Current Temperature</p>
+          <p className="text-sm text-muted-foreground">{t('iot.table.currentTemp')}</p>
           <p className="text-2xl font-bold">{tracker.temperature}°C</p>
         </div>
       </div>
