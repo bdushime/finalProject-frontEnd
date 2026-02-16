@@ -1,0 +1,25 @@
+
+
+{
+  "app_title": "Exit Verification System",
+  "gate_label": "Gate Alpha",
+  "scan_title": "Scan Student ID",
+  "scan_hint": "Enter the student ID here",
+  "placeholder_id": "ID Number...",
+  "btn_verifying": "CHECKING RECORDS...",
+  "btn_verify": "VERIFY STATUS",
+  "status_not_found": "ID NOT FOUND",
+  "not_registered": "is not registered.",
+  "hold_student": "HOLD STUDENT FOR REGISTRATION",
+  "btn_retry": "RETRY SCAN",
+  "status_clear": "CLEAR",
+  "no_items": "No borrowed equipment found.",
+  "btn_next": "NEXT STUDENT",
+  "status_stop": "STOP!",
+  "items_owed_by": "Items Owed by",
+  "table_item": "Item",
+  "table_qty": "Qty",
+  "table_dept": "Dept",
+  "block_exit": "Do Not Allow Exit",
+  "btn_scan_next": "SCAN NEXT"
+}

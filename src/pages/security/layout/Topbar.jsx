@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, NavLink, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, Bell, Plus, LayoutGrid, ShieldAlert, Package, ClipboardList, FileText } from "lucide-react";
-import { NavLink, Link } from "react-router-dom";
+import {
+  Menu, Bell, Plus, LayoutGrid, ShieldAlert, Package,
+  ClipboardList, FileText, Shield, X, Upload
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +21,27 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
-function Topbar({ onMenuClick }) {
+const getPageHeader = (pathname, headers) => {
+  if (headers[pathname]) {
+    return headers[pathname];
+  }
+
+  if (pathname.startsWith("/security/device/")) {
+    return headers["/security/device"];
+  }
+  if (pathname.startsWith("/security/device-movement/")) {
+    return {
+      title: "Device Movement",
+      description: "Track device location and movement history.",
+      backButton: { label: "Back to Devices", path: "/security/devices" },
+    };
+  }
+
+  // Default fallback
+  return headers["/security/dashboard"];
+};
+
+function Topbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -55,7 +77,8 @@ function Topbar({ onMenuClick }) {
       "/security/devices": {
         title: tSec("devices.title"),
         description: null,
-        actionButton: null,
+        actionButton: { label: tSec("devices.addDevice") || "Add Device", path: "/security/devices", icon: Plus },
+        secondaryAction: { label: "Bulk Upload", icon: Upload },
       },
       "/security/active-checkouts": {
         title: tSec("dashboard.activeCheckouts"),
@@ -91,19 +114,14 @@ function Topbar({ onMenuClick }) {
   };
 
   const pageHeaders = getPageHeaders();
-  const pageHeader = pageHeaders[currentPath] || pageHeaders["/security/dashboard"];
+  const pageHeader = getPageHeader(currentPath, pageHeaders);
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    month: "long",
+    weekday: "short",
+    month: "short",
     day: "numeric",
     year: "numeric",
   }).format(new Date());
-
-  const isLinkActive = (path) => {
-    if (currentPath === path) return true;
-    return currentPath.startsWith(path);
-  };
 
   const handleActionClick = () => {
     if (currentPath === "/security/devices") {
@@ -113,20 +131,23 @@ function Topbar({ onMenuClick }) {
     }
   };
 
+  const handleBulkUploadClick = () => {
+    window.dispatchEvent(new CustomEvent("openBulkUploadDialog"));
+  };
+
   return (
-    <div className="w-full bg-[#0A1128] rounded-b-3xl">
-      {/* Top Navigation Bar */}
-      <div className="w-full text-white px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Left: Logo and Navigation */}
-          <div className="flex items-center gap-6">
+    <header className="w-full bg-[#0A1128] rounded-b-[2rem] shadow-xl">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="flex items-center justify-between h-14">
+
+          <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
-              className="sm:hidden text-white hover:bg-white/10"
+              className="lg:hidden text-white hover:bg-white/10"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              <Menu className="h-5 w-5" />
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
 
             <Link to="/security/dashboard" className="flex items-center gap-2">
@@ -177,13 +198,12 @@ function Topbar({ onMenuClick }) {
             >
               <Bell className="h-5 w-5 text-white" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-[#0A1128]">
                   {unreadCount}
                 </span>
               )}
             </Link>
 
-            {/* User Profile */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -215,7 +235,6 @@ function Topbar({ onMenuClick }) {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-white/20 pt-4">
             <nav className="flex flex-col gap-2">
@@ -244,36 +263,62 @@ function Topbar({ onMenuClick }) {
         )}
       </div>
 
-      {/* Dynamic Page Header */}
-      <div className="w-full px-4 sm:px-6 py-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-100">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 pb-8 pt-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1">
+            <p className="text-[#BEBEE0] text-xs font-semibold uppercase tracking-wider">{formattedDate}</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
               {pageHeader.title}
             </h1>
             <p className="text-gray-200 text-sm sm:text-base mb-2">
               {formattedDate}
             </p>
+            {pageHeader.description && (
+              <p className="text-gray-400 text-sm sm:text-base max-w-xl leading-relaxed">
+                {pageHeader.description}
+              </p>
+            )}
           </div>
 
-          {/* Action Button */}
-          {pageHeader.actionButton && (
-            <Button
-              onClick={handleActionClick}
-              className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white gap-2 shrink-0"
-            >
-              <Plus className="h-4 w-4" />
-              {pageHeader.actionButton.label}
-            </Button>
-          )}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {pageHeader.backButton && (
+              <Button
+                onClick={() => navigate(pageHeader.backButton.path)}
+                variant="outline"
+                className="w-full sm:w-auto bg-transparent border-white/30 hover:bg-white/10 text-white font-bold py-6 px-6 rounded-2xl transition-transform active:scale-95"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                {pageHeader.backButton.label}
+              </Button>
+            )}
+
+            {pageHeader.actionButton && (
+              <Button
+                onClick={handleActionClick}
+                className="w-full sm:w-auto bg-white hover:bg-gray-100 text-[#0A1128] font-bold py-6 px-6 rounded-2xl shadow-lg transition-transform active:scale-95"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                {pageHeader.actionButton.label}
+              </Button>
+            )}
+
+            {pageHeader.secondaryAction && (
+              <Button
+                onClick={handleBulkUploadClick}
+                variant="outline"
+                className="w-full sm:w-auto bg-transparent border-white/30 hover:bg-white/10 text-white font-bold py-6 px-6 rounded-2xl transition-transform active:scale-95"
+              >
+                <Upload className="h-5 w-5 mr-2" />
+                {pageHeader.secondaryAction.label}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
-
-Topbar.propTypes = {
-  onMenuClick: PropTypes.func,
-};
 
 export default Topbar;

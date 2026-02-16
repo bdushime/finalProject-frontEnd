@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
+import api from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,47 +22,78 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2, Monitor, MonitorOff, Plus, School } from "lucide-react";
-import { getClassrooms, addClassroom, updateClassroom, deleteClassroom } from "@/utils/classroomStorage";
+import { Trash2, Monitor, MonitorOff, Plus, School, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
 export default function ClassroomManagement() {
     const { t } = useTranslation(["itstaff", "common"]);
     const [classrooms, setClassrooms] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [newRoomName, setNewRoomName] = useState("");
     const [newRoomHasScreen, setNewRoomHasScreen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         loadClassrooms();
     }, []);
 
-    const loadClassrooms = () => {
-        setClassrooms(getClassrooms());
+    const loadClassrooms = async () => {
+        try {
+            const res = await api.get('/classrooms');
+            setClassrooms(res.data);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to load classrooms");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleAddClassroom = () => {
+    const handleAddClassroom = async () => {
         if (!newRoomName.trim()) return;
-        addClassroom({ name: newRoomName, hasScreen: newRoomHasScreen });
-        setNewRoomName("");
-        setNewRoomHasScreen(false);
-        setIsAddDialogOpen(false);
-        loadClassrooms();
-        toast.success(t('classrooms.messages.addSuccess'));
-    };
-
-    const handleToggleScreen = (id, currentStatus) => {
-        updateClassroom(id, { hasScreen: !currentStatus });
-        loadClassrooms();
-        toast.info(t('classrooms.messages.updateSuccess'));
-    };
-
-    const handleDelete = (id) => {
-        if (confirm(t('classrooms.messages.confirmDelete'))) {
-            deleteClassroom(id);
+        setSubmitting(true);
+        try {
+            await api.post('/classrooms', {
+                name: newRoomName,
+                hasScreen: newRoomHasScreen
+            });
+            toast.success(t('classrooms.messages.addSuccess'));
+            setNewRoomName("");
+            setNewRoomHasScreen(false);
+            setIsAddDialogOpen(false);
             loadClassrooms();
-            toast.error(t('classrooms.messages.deleteSuccess'));
+        } catch (err) {
+            toast.error(err.response?.data?.message || t('classrooms.messages.addError'));
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleToggleScreen = async (id, currentStatus) => {
+        setClassrooms(prev => prev.map(room =>
+            room._id === id ? { ...room, hasScreen: !currentStatus } : room
+        ));
+
+        try {
+            await api.put(`/classrooms/${id}`, { hasScreen: !currentStatus });
+            toast.success(t('classrooms.messages.updateSuccess'));
+        } catch (err) {
+            toast.error(t('classrooms.messages.updateError'));
+            loadClassrooms(); // Revert
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (confirm(t('classrooms.messages.confirmDelete'))) {
+            try {
+                await api.delete(`/classrooms/${id}`);
+                toast.success(t('classrooms.messages.deleteSuccess'));
+                setClassrooms(prev => prev.filter(room => room._id !== id));
+            } catch (err) {
+                toast.error(t('classrooms.messages.deleteError'));
+            }
         }
     };
 
@@ -117,7 +149,9 @@ export default function ClassroomManagement() {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t('classrooms.cancel')}</Button>
-                                <Button onClick={handleAddClassroom} className="bg-[#0b1d3a]">{t('classrooms.save')}</Button>
+                                <Button onClick={handleAddClassroom} disabled={submitting} className="bg-[#0b1d3a]">
+                                    {submitting ? t('classrooms.saving') : t('classrooms.save')}
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -133,7 +167,11 @@ export default function ClassroomManagement() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {classrooms.length === 0 ? (
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="h-48 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-slate-400" /></TableCell>
+                                </TableRow>
+                            ) : classrooms.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={3} className="h-48 text-center text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -144,7 +182,7 @@ export default function ClassroomManagement() {
                                 </TableRow>
                             ) : (
                                 classrooms.map((room) => (
-                                    <TableRow key={room.id} className="hover:bg-slate-50 border-b border-slate-100 transition-colors">
+                                    <TableRow key={room._id} className="hover:bg-slate-50 border-b border-slate-100 transition-colors">
                                         <TableCell className="py-4 pl-6">
                                             <div className="font-bold text-lg text-slate-900">{room.name}</div>
                                         </TableCell>
@@ -158,13 +196,13 @@ export default function ClassroomManagement() {
                                             <div className="flex items-center justify-end gap-6">
                                                 <Switch
                                                     checked={room.hasScreen}
-                                                    onCheckedChange={() => handleToggleScreen(room.id, room.hasScreen)}
+                                                    onCheckedChange={() => handleToggleScreen(room._id, room.hasScreen)}
                                                 />
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
-                                                    onClick={() => handleDelete(room.id)}
+                                                    onClick={() => handleDelete(room._id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -180,3 +218,4 @@ export default function ClassroomManagement() {
         </ITStaffLayout>
     );
 }
+

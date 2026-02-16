@@ -1,23 +1,43 @@
 import React from 'react';
 import { useTranslation } from "react-i18next";
 
-const DeviceUsage = ({ data }) => {
+
+const DeviceUsage = ({ data: serverData }) => {
   const { t } = useTranslation(["security"]);
 
-  const fallbackData = [
-    { name: t('deviceUsage.projectors'), percent: 56, color: "#1A2240" },
-    { name: t('deviceUsage.extensionCables'), percent: 14, color: "#BEBEE0" },
-    { name: t('deviceUsage.tablets'), percent: 30, color: "#343264" },
-  ];
+  // Use server data if available, otherwise use default
+  const displayData = React.useMemo(() => {
+    if (serverData && serverData.length > 0) {
+      // Sort by value (count) descending
+      const sorted = [...serverData].sort((a, b) => b.value - a.value);
+      const total = sorted.reduce((sum, item) => sum + item.value, 0);
 
-  const chartData = data && data.length > 0 ? data : fallbackData;
+      // Take top 3 for the bubble visualization
+      const top3 = sorted.slice(0, 3);
 
-  // Ensure we handle cases with fewer than 3 items gracefully for this specific layout
-  const displayData = [
-    chartData[0] || { name: "", percent: 0, color: "#ccc" },
-    chartData[1] || { name: "", percent: 0, color: "#ccc" },
-    chartData[2] || { name: "", percent: 0, color: "#ccc" }
-  ];
+      return top3.map(item => ({
+        name: item.name,
+        percent: total > 0 ? Math.round((item.value / total) * 100) : 0,
+        color: item.color || "#1A2240"
+      }));
+    }
+
+    // Default fallback
+    return [
+      { name: t('deviceUsage.projectors'), percent: 56, color: "#1A2240" },
+      { name: t('deviceUsage.extensionCables'), percent: 14, color: "#BEBEE0" },
+      { name: t('deviceUsage.tablets'), percent: 30, color: "#343264" },
+    ];
+  }, [serverData, t]);
+
+  const data = displayData;
+
+  // Ensure we have at least 3 items to avoid crash
+  if (data.length < 3) {
+    while (data.length < 3) {
+      data.push({ name: "", percent: 0, color: "#eee" });
+    }
+  }
 
   return (
     <div className="p-6 w-full">

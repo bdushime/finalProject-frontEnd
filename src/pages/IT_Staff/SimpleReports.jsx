@@ -88,7 +88,7 @@ export default function SimpleReports() {
                     </button>
                 </div>
 
-                {/* Filters */}
+                {/* Filters Bar */}
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
@@ -116,7 +116,7 @@ export default function SimpleReports() {
                     </div>
                 </div>
 
-                {/* Main Table */}
+                {/* Main Data Table */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
                     {loading ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-[#0b1d3a] gap-3">
@@ -165,7 +165,14 @@ export default function SimpleReports() {
                                             </td>
                                             <td className="p-5">
                                                 <div className="font-medium text-slate-900">{t.equipment?.name || "Deleted Item"}</div>
-                                                <div className="text-xs text-slate-500 font-mono mt-0.5">{t.equipment?.serialNumber}</div>
+                                                <div className="flex gap-2 mt-1">
+                                                    <span className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
+                                                        {t.equipment?.serialNumber}
+                                                    </span>
+                                                    <span className="text-xs text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">
+                                                        {t.equipment?.category || "General"}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td className="p-5 text-sm text-slate-600">
                                                 <div className="flex flex-col gap-1">

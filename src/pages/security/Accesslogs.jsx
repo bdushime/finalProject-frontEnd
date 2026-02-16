@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
+import MainLayout from "@/pages/security/layout/MainLayout";
 import StatCard from "@/components/security/StatCard"; // Ensure this path is correct
 import api from "@/utils/api";
 import {
@@ -128,7 +128,6 @@ export default function AccessLogs() {
       );
     }
 
-    // 2. Type Filter
     if (filterEventType !== "all") {
       filtered = filtered.filter(m => m.eventType === filterEventType);
     }
@@ -180,7 +179,6 @@ export default function AccessLogs() {
   return (
     <MainLayout>
       <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-
         {/* TOP STATS CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
@@ -235,7 +233,7 @@ export default function AccessLogs() {
                   variant={filterEventType === type ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterEventType(type)}
-                  className={`capitalize ${filterEventType === type ? 'bg-[#0b1d3a]' : ''}`}
+                  className={`capitalize ${filterEventType === type ? 'bg-[#0b1d3a] text-white' : ''}`}
                 >
                   {type === 'all' ? t('accessLogs.filters.allActions') : t(`accessLogs.actions.${type}`)}
                 </Button>
@@ -244,7 +242,6 @@ export default function AccessLogs() {
           </CardContent>
         </Card>
 
-        {/* TIMELINE TABLE */}
         <Card className="border border-gray-200 shadow-sm overflow-hidden">
           <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700">
             <div className="col-span-1">{t('accessLogs.table.event')}</div>

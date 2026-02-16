@@ -244,6 +244,7 @@ export default function StudentTopbar({ onMenuClick }) {
                     </div>
                 )}
             </header>
+
         </div>
     );
 }

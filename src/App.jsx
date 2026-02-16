@@ -34,6 +34,7 @@ import { Dashboard as ITStaffDashboard } from "./pages/IT_Staff/Dashboard";
 import BrowseEquipment from "./pages/IT_Staff/BrowseEquipment";
 import SimpleReports from "./pages/IT_Staff/SimpleReports"; // Used SimpleReports as requested
 import ITStaffProfile from "./pages/IT_Staff/Profile";
+import ITStaffSettings from "./pages/IT_Staff/Settings";
 import ITStaffNotifications from "./pages/IT_Staff/ITStaffNotifications";
 import ITStaffEquipmentDetails from "./pages/IT_Staff/EquipmentDetails";
 import IoTTrackerLiveView from "./pages/IT_Staff/IoTTrackerLiveView";
@@ -60,10 +61,12 @@ import SecurityDashboard from "./pages/security/SecurityDashboard";
 import Accesslogs from "./pages/security/Accesslogs";
 import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
 import BrowseDevices from "./pages/security/BrowseDevices";
+import DeviceDetails from "./pages/security/DeviceDetails";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
 import SecurityProfile from "./pages/security/Profile";
+import GateVerification from "./pages/Gate_security_officer/GateVerification";
 
 import { Toaster } from "sonner";
 
@@ -127,6 +130,7 @@ export default function App() {
                 <Route path="/security/logs" element={<Accesslogs />} />
                 <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                 <Route path="/security/devices" element={<BrowseDevices />} />
+                <Route path="/security/device/:deviceId" element={<DeviceDetails />} />
                 <Route path="/security/reports" element={<SecurityReports />} />
                 <Route path="/security/notifications" element={<SecurityNotifications />} />
                 <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
@@ -202,18 +206,20 @@ export default function App() {
                     <Route path="/security/logs" element={<Accesslogs />} />
                     <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                     <Route path="/security/devices" element={<BrowseDevices />} />
+                    <Route path="/security/device/:deviceId" element={<DeviceDetails />} />
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
                     <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
                     <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
                     <Route path="/security/profile" element={<SecurityProfile />} />
-                </Route>
+                    <Route path="/gate-verification" element={<GateVerification />} />
+                </Route >
 
                 {/* ==========================
             🔒 ADMIN ROUTES
         =========================== */}
-                <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+                < Route element={< ProtectedRoute allowedRoles={['Admin']} />}>
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/users" element={<UsersList />} />
                     <Route path="/admin/config" element={<ConfigPage />} />
@@ -223,11 +229,11 @@ export default function App() {
                     <Route path="/admin/security" element={<SecurityPage />} />
                     <Route path="/admin/tracking" element={<TrackingPage />} />
                     <Route path="/admin/scan" element={<ScannerPage />} />
-                </Route>
+                </Route >
 
                 {/* Fallback Route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-        </BrowserRouter>
+                < Route path="*" element={< Navigate to="/" replace />} />
+            </Routes >
+        </BrowserRouter >
     );
 }

@@ -398,6 +398,8 @@ const UsersList = () => {
                         <button onClick={() => setShowAddUserModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
                         <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">{t('users.newUserProfile')}</h2><p className="text-gray-500">{t('users.defaultPassword')}</p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleAddUser(); }}>
+                            {/* ... (Existing form inputs for First Name, Last Name, Email, Role, Dept) ... */}
+                            {/* I'll abbreviate to save space, assuming you keep your existing form inputs here */}
                             <div className="grid grid-cols-2 gap-5">
                                 <input type="text" placeholder={t('users.firstName')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
                                 <input type="text" placeholder={t('users.lastName')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />

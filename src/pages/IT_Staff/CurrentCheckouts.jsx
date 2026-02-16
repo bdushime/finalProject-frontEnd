@@ -32,6 +32,9 @@ export default function CurrentCheckouts() {
     // Tabs state: 'requests' | 'reservations' | 'active'
     const [currentTab, setCurrentTab] = useState('requests');
 
+    //     // Tabs state: 'requests' | 'reservations' | 'active'
+    //     const [currentTab, setCurrentTab] = useState('requests');
+
     // --- REJECTION LOGIC STATE ---
     const [isRejectOpen, setIsRejectOpen] = useState(false);
     const [rejectId, setRejectId] = useState(null);
@@ -42,6 +45,7 @@ export default function CurrentCheckouts() {
     const fetchActive = async () => {
         setLoading(true);
         try {
+            // This endpoint now returns Pending, Checked Out, AND Reserved items
             const res = await api.get('/transactions/active');
 
             const mappedData = res.data.map(tx => ({
@@ -109,6 +113,7 @@ export default function CurrentCheckouts() {
         if (!confirm(t('checkouts.messages.confirmApprove'))) return;
 
         try {
+            // 'Approve' on a Reservation converts it to 'Checked Out'
             await api.put(`/transactions/${id}/respond`, { action });
             toast.success(t('checkouts.messages.statusUpdated'));
             fetchActive();
@@ -117,6 +122,8 @@ export default function CurrentCheckouts() {
             toast.error(t('checkouts.messages.statusError'));
         }
     };
+
+
 
     // Submit Rejection Reason
     const handleRejectSubmit = async () => {
@@ -155,7 +162,6 @@ export default function CurrentCheckouts() {
             toast.error(t('checkouts.messages.cancelError'));
         }
     };
-
     // Helper: Is reservation ready? (Within 30 mins of start time)
     const isReservationReady = (startTimeString) => {
         if (!startTimeString) return false;
@@ -250,6 +256,7 @@ export default function CurrentCheckouts() {
                                             className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
                                             onClick={() => handleRowClick(row)}
                                         >
+                                            {/* ITEM NAME */}
                                             <td className="px-0 font-medium text-gray-900 relative">
                                                 <div className="flex items-center h-full">
                                                     <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${row.status === 'Pending' ? 'bg-yellow-500' :
@@ -368,6 +375,7 @@ export default function CurrentCheckouts() {
                 </Dialog>
 
             </div>
+
         </ITStaffLayout>
     );
 }
