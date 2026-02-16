@@ -1,18 +1,46 @@
 import React from 'react';
 
-const DeviceUsage = () => {
-  const data = [
-    { name: "Projectors", percent: 56, color: "#1A2240" },
-  { name: "Extension Cables", percent: 14, color: "#BEBEE0" },
-  { name: "Tablets", percent: 30, color: "#343264" },
-  ];
+const DeviceUsage = ({ data: serverData }) => {
+  // Use server data if available, otherwise use default
+  const displayData = React.useMemo(() => {
+    if (serverData && serverData.length > 0) {
+      // Sort by value (count) descending
+      const sorted = [...serverData].sort((a, b) => b.value - a.value);
+      const total = sorted.reduce((sum, item) => sum + item.value, 0);
+
+      // Take top 3 for the bubble visualization
+      const top3 = sorted.slice(0, 3);
+
+      return top3.map(item => ({
+        name: item.name,
+        percent: total > 0 ? Math.round((item.value / total) * 100) : 0,
+        color: item.color || "#1A2240"
+      }));
+    }
+
+    // Default fallback
+    return [
+      { name: "Projectors", percent: 56, color: "#1A2240" },
+      { name: "Accessries", percent: 14, color: "#BEBEE0" },
+      { name: "Tablets", percent: 30, color: "#343264" },
+    ];
+  }, [serverData]);
+
+  const data = displayData;
+
+  // Ensure we have at least 3 items to avoid crash
+  if (data.length < 3) {
+    while (data.length < 3) {
+      data.push({ name: "", percent: 0, color: "#eee" });
+    }
+  }
 
   return (
     <div className="p-6 w-full">
-      
+
       <div className="relative h-60 flex items-center justify-center w-full mb-4">
         {/* Double room - largest, back */}
-        <div 
+        <div
           className="absolute left-[20%] top-[-10%] z-1 w-[200px] h-[200px] flex items-center justify-center rounded-full border-2 border-gray-200"
           style={{
             backgroundColor: data[0].color,
@@ -26,7 +54,7 @@ const DeviceUsage = () => {
         </div>
 
         {/* Single room - medium, front left */}
-        <div 
+        <div
           className="absolute flex items-center justify-center rounded-full border-2 border-gray-200"
           style={{
             width: '150px',
@@ -44,7 +72,7 @@ const DeviceUsage = () => {
         </div>
 
         {/* Deluxe room - smallest, front right */}
-        <div 
+        <div
           className="absolute flex items-center justify-center rounded-full border-2 border-gray-200"
           style={{
             width: '110px',

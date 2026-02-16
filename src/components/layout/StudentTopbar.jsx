@@ -244,13 +244,7 @@ const unreadCount = 0;
                 )}
             </header>
 
-            {/* Welcome Section - Also made Dynamic! */}
-            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-4">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {getGreeting()}, {user.name}!
-                </h1>
-                <p className="text-gray-500 text-sm sm:text-base">{formattedDate}</p>
-            </div>
+
         </div>
     );
 }

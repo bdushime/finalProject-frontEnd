@@ -34,6 +34,7 @@ import { Dashboard as ITStaffDashboard } from "./pages/IT_Staff/Dashboard";
 import BrowseEquipment from "./pages/IT_Staff/BrowseEquipment";
 import SimpleReports from "./pages/IT_Staff/SimpleReports"; // Used SimpleReports as requested
 import ITStaffProfile from "./pages/IT_Staff/Profile";
+import ITStaffSettings from "./pages/IT_Staff/Settings";
 import ITStaffNotifications from "./pages/IT_Staff/ITStaffNotifications";
 import ITStaffEquipmentDetails from "./pages/IT_Staff/EquipmentDetails";
 import IoTTrackerLiveView from "./pages/IT_Staff/IoTTrackerLiveView";
@@ -60,9 +61,11 @@ import SecurityDashboard from "./pages/security/SecurityDashboard";
 import Accesslogs from "./pages/security/Accesslogs";
 import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
 import BrowseDevices from "./pages/security/BrowseDevices";
+import DeviceDetails from "./pages/security/DeviceDetails";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
+import GateVerification from "./pages/Gate_security_officer/GateVerification";
 
 export default function App() {
     return (
@@ -123,6 +126,7 @@ export default function App() {
                 <Route path="/security/logs" element={<Accesslogs />} />
                 <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                 <Route path="/security/devices" element={<BrowseDevices />} />
+                <Route path="/security/device/:deviceId" element={<DeviceDetails />} />
                 <Route path="/security/reports" element={<SecurityReports />} />
                 <Route path="/security/notifications" element={<SecurityNotifications />} />
                 <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
@@ -198,10 +202,12 @@ export default function App() {
                     <Route path="/security/logs" element={<Accesslogs />} />
                     <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                     <Route path="/security/devices" element={<BrowseDevices />} />
+                    <Route path="/security/device/:deviceId" element={<DeviceDetails />} />
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
                     <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
+                    <Route path="/gate-verification" element={<GateVerification />} />
                 </Route>
 
                 {/* ==========================

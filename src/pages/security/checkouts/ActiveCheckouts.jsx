@@ -3,11 +3,11 @@ import MainLayout from '../layout/MainLayout'
 import StatCard from '@/components/security/StatCard'
 import AccessLogsTable from '@/components/security/AccessLogsTable'
 
-function Accesslogs() {
+function ActiveCheckouts() {
   return (
     
     <MainLayout>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 space-y-2 mb-2">
           <StatCard
             title="Total Borrowed Items"
             value="1,386"
@@ -42,4 +42,4 @@ function Accesslogs() {
   )
 }
 
-export default Accesslogs
+export default ActiveCheckouts

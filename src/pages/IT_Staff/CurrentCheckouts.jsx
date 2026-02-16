@@ -26,9 +26,12 @@ export default function CurrentCheckouts() {
     const [loading, setLoading] = useState(true);
     const [selectedCheckout, setSelectedCheckout] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+    
     // Tabs state: 'requests' | 'reservations' | 'active'
-    const [currentTab, setCurrentTab] = useState('requests');
+    const [currentTab, setCurrentTab] = useState('requests'); 
+
+//     // Tabs state: 'requests' | 'reservations' | 'active'
+//     const [currentTab, setCurrentTab] = useState('requests');
 
     // --- REJECTION LOGIC STATE ---
     const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -40,6 +43,7 @@ export default function CurrentCheckouts() {
     const fetchActive = async () => {
         setLoading(true);
         try {
+            // This endpoint now returns Pending, Checked Out, AND Reserved items
             const res = await api.get('/transactions/active');
 
             const mappedData = res.data.map(tx => ({
@@ -107,12 +111,27 @@ export default function CurrentCheckouts() {
         if (!confirm(`Are you sure you want to approve this item?`)) return;
 
         try {
+            // 'Approve' on a Reservation converts it to 'Checked Out'
             await api.put(`/transactions/${id}/respond`, { action });
             toast.success("Status updated successfully");
-            fetchActive();
+            fetchActive(); 
         } catch (err) {
             console.error("Action failed", err);
             toast.error("Failed to update status.");
+        }
+    };
+
+    // Cancel Reservation
+    const handleCancel = async (e, id) => {
+        e.stopPropagation();
+        if (!confirm("Cancel this reservation?")) return;
+
+        try {
+            await api.post(`/transactions/cancel/${id}`);
+            toast.success("Reservation cancelled");
+            fetchActive();
+        } catch (err) {
+            toast.error("Failed to cancel");
         }
     };
 
@@ -137,20 +156,6 @@ export default function CurrentCheckouts() {
             toast.error("Failed to deny request");
         } finally {
             setProcessing(false);
-        }
-    };
-
-    // Cancel Reservation
-    const handleCancel = async (e, id) => {
-        e.stopPropagation();
-        if (!confirm("Cancel this reservation?")) return;
-
-        try {
-            await api.post(`/transactions/cancel/${id}`);
-            toast.success("Reservation cancelled");
-            fetchActive();
-        } catch (err) {
-            toast.error("Failed to cancel");
         }
     };
 
@@ -248,6 +253,7 @@ export default function CurrentCheckouts() {
                                             className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
                                             onClick={() => handleRowClick(row)}
                                         >
+                                            {/* ITEM NAME */}
                                             <td className="px-0 font-medium text-gray-900 relative">
                                                 <div className="flex items-center h-full">
                                                     <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${row.status === 'Pending' ? 'bg-yellow-500' :
@@ -366,6 +372,7 @@ export default function CurrentCheckouts() {
                 </Dialog>
 
             </div>
+            
         </ITStaffLayout>
     );
 }
