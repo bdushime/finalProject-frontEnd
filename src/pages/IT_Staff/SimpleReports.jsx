@@ -5,8 +5,10 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { PageHeader } from "@/components/common/Page";
 // 👇 IMPORT THE NEW GENERATOR
 import { generatePDF } from "@/utils/pdfGenerator";
+import { useTranslation } from "react-i18next";
 
 export default function SimpleReports() {
+    const { t } = useTranslation(["itstaff", "common"]);
     const [transactions, setTransactions] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -28,7 +30,7 @@ export default function SimpleReports() {
                 setFilteredData(res.data);
             } catch (err) {
                 console.error("Fetch error:", err);
-                setError("Failed to load report data.");
+                setError(t('reports.error'));
             } finally {
                 setLoading(false);
             }
@@ -56,7 +58,7 @@ export default function SimpleReports() {
 
     // --- 3. HANDLE PDF EXPORT ---
     const handleExportPDF = () => {
-        if (filteredData.length === 0) return alert("No data to export!");
+        if (filteredData.length === 0) return alert(t('reports.messages.noData'));
         // Call our utility function
         generatePDF(filteredData, currentUser);
     };
@@ -70,10 +72,10 @@ export default function SimpleReports() {
                     <PageHeader
                         title={
                             <span className="flex items-center gap-2">
-                                <FileBarChart className="w-8 h-8" /> System Reports
+                                <FileBarChart className="w-8 h-8" /> {t('reports.title')}
                             </span>
                         }
-                        subtitle={`Viewing ${filteredData.length} records • Professional Report Generation`}
+                        subtitle={t('reports.subtitle', { count: filteredData.length })}
                         className="mb-0"
                     />
 
@@ -82,7 +84,7 @@ export default function SimpleReports() {
                         onClick={handleExportPDF}
                         className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium shadow-sm transition-all"
                     >
-                        <Download className="w-4 h-4" /> Download PDF Report
+                        <Download className="w-4 h-4" /> {t('reports.downloadPdf')}
                     </button>
                 </div>
 
@@ -92,24 +94,24 @@ export default function SimpleReports() {
                         <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                         <input
                             type="text"
-                            placeholder="Search by student, email, or equipment..."
+                            placeholder={t('reports.searchPlaceholder')}
                             className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#0b1d3a] focus:border-transparent outline-none transition-all"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-slate-600 whitespace-nowrap">Filter by:</span>
+                        <span className="text-sm font-medium text-slate-600 whitespace-nowrap">{t('reports.filterBy')}</span>
                         <select
                             className="p-2.5 border border-slate-200 rounded-lg bg-white min-w-[180px] focus:ring-2 focus:ring-[#0b1d3a] outline-none cursor-pointer"
                             value={categoryFilter}
                             onChange={(e) => setCategoryFilter(e.target.value)}
                         >
-                            <option value="All">All Categories</option>
-                            <option value="Laptop">Laptops</option>
-                            <option value="Projector">Projectors</option>
-                            <option value="Camera">Cameras</option>
-                            <option value="Audio">Audio</option>
+                            <option value="All">{t('equipment.categories.all')}</option>
+                            <option value="Laptop">{t('equipment.categories.Laptop')}</option>
+                            <option value="Projector">{t('equipment.categories.Projector')}</option>
+                            <option value="Camera">{t('equipment.categories.Camera')}</option>
+                            <option value="Audio">{t('equipment.categories.Audio')}</option>
                         </select>
                     </div>
                 </div>
@@ -119,7 +121,7 @@ export default function SimpleReports() {
                     {loading ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-[#0b1d3a] gap-3">
                             <Loader2 className="w-10 h-10 animate-spin" />
-                            <p className="font-medium animate-pulse">Fetching records...</p>
+                            <p className="font-medium animate-pulse">{t('reports.loading')}</p>
                         </div>
                     ) : error ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-red-500 gap-2">
@@ -131,18 +133,18 @@ export default function SimpleReports() {
                             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
                                 <Search className="w-8 h-8" />
                             </div>
-                            <p>No records found matching your filters.</p>
+                            <p>{t('reports.noRecords')}</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
                                     <tr>
-                                        <th className="p-5">Student</th>
-                                        <th className="p-5 text-center">Score</th>
-                                        <th className="p-5">Equipment</th>
-                                        <th className="p-5">Dates</th>
-                                        <th className="p-5">Status</th>
+                                        <th className="p-5">{t('reports.table.student')}</th>
+                                        <th className="p-5 text-center">{t('reports.table.score')}</th>
+                                        <th className="p-5">{t('reports.table.equipment')}</th>
+                                        <th className="p-5">{t('reports.table.dates')}</th>
+                                        <th className="p-5">{t('reports.table.status')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -174,9 +176,9 @@ export default function SimpleReports() {
                                             </td>
                                             <td className="p-5 text-sm text-slate-600">
                                                 <div className="flex flex-col gap-1">
-                                                    <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide">Borrowed</div>
+                                                    <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide">{t('reports.table.borrowed')}</div>
                                                     <div>{new Date(t.createdAt).toLocaleDateString()}</div>
-                                                    <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide mt-1">Due</div>
+                                                    <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide mt-1">{t('reports.table.due')}</div>
                                                     <div className={`${new Date() > new Date(t.expectedReturnTime) && t.status !== 'Returned' ? 'text-red-600 font-medium' : ''}`}>
                                                         {new Date(t.expectedReturnTime).toLocaleDateString()}
                                                     </div>

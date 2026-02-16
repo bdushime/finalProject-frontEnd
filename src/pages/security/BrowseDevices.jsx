@@ -23,6 +23,9 @@ import {
   Upload,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 
 import AddDeviceDialog from "./dialogs/AddDeviceDialog";
 import EditDeviceDialog from "./dialogs/EditDeviceDialog";
@@ -43,6 +46,7 @@ import { UserRoles } from "@/config/roleConfig";
  * 5. Each card now represents ONE physical device
  */
 function BrowseDevices() {
+  const { t } = useTranslation(["security", "common"]);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -310,7 +314,7 @@ function BrowseDevices() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by name, brand, model, serial number..."
+                  placeholder={t('browseDevices.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 rounded-full border-gray-200 shadow-sm bg-white"
@@ -318,14 +322,30 @@ function BrowseDevices() {
               </div>
               <div className="flex gap-2">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Category" /></SelectTrigger>
-                  <SelectContent>{categories.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder={t('browseDevices.filters.category')} />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    {statuses.map((status) => (<SelectItem key={status} value={status}>{status}</SelectItem>))}
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat === "All" ? t('browseDevices.filters.allCategories') : cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select >
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder={t('browseDevices.filters.status')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('browseDevices.filters.allStatus')}</SelectItem>
+                    {statuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {t(`browseDevices.labels.${status}`) || status.charAt(0).toUpperCase() + status.slice(1)}
+                      </SelectItem>
+                    ))}
+
                   </SelectContent>
                 </Select>
                 {/* Bulk Upload Button */}
@@ -337,142 +357,151 @@ function BrowseDevices() {
                   <Upload className="h-4 w-4" />
                   <span className="hidden sm:inline">Bulk Upload</span>
                 </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </div >
+            </div >
+          </CardContent >
+        </Card >
 
         {/* Device Count Summary */}
-        <div className="text-sm text-gray-600">
+        < div className="text-sm text-gray-600" >
           Showing {filteredDevices.length} of {deviceList.length} devices
-        </div>
+        </div >
 
         {/* Device Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDevices.map((device) => (
-            <Card
-              key={device.id}
-              className="border border-gray-200 shadow-sm hover:shadow-lg hover:border-[#BEBEE0] transition-all duration-200 cursor-pointer group"
-              onClick={() => navigateToDevice(device)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-[#1A2240]">
-                      {device.name}
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">{device.brand} {device.model}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigateToDevice(device);
-                    }}
-                    title="View Details"
-                  >
-                    <Eye className="h-4 w-4 text-[#1A2240]" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Status and Condition Badges */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className={getStatusColor(device.status)}>
-                    {device.status}
-                  </Badge>
-                  <Badge variant="outline" className={getConditionColor(device.condition)}>
-                    {device.condition}
-                  </Badge>
-                </div>
-
-                {/* REFACTORED: Removed quantity display, show relevant info instead */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Tag className="h-4 w-4" />
-                    <span>{device.category}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span className="truncate">{device.location || "Not specified"}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <span>SN: {device.serialNumber}</span>
-                  </div>
-                  {device.purchasePrice > 0 && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <DollarSign className="h-4 w-4" />
-                      <span>{formatPrice(device.purchasePrice)}</span>
+        < div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" >
+          {
+            filteredDevices.map((device) => (
+              <Card
+                key={device.id}
+                className="border border-gray-200 shadow-sm hover:shadow-lg hover:border-[#BEBEE0] transition-all duration-200 cursor-pointer group"
+                onClick={() => navigateToDevice(device)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-[#1A2240]">
+                        {device.name}
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">{device.brand} {device.model}</p>
                     </div>
-                  )}
-                </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToDevice(device);
+                      }}
+                      title="View Details"
+                    >
+                      <Eye className="h-4 w-4 text-[#1A2240]" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Status and Condition Badges */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className={getStatusColor(device.status)}>
+                      {device.status}
+                    </Badge>
+                    <Badge variant="outline" className={getConditionColor(device.condition)}>
+                      {device.condition}
+                    </Badge>
+                  </div>
 
-                {/* Action Buttons */}
-                <div className="pt-2 border-t border-gray-200 flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/security/device-movement/${device.id}`);
-                    }}
-                    title="View Movement"
-                  >
-                    <MapPin className="h-4 w-4 text-blue-600" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEditDialog(device);
-                    }}
-                    title="Edit Device"
-                  >
-                    <Edit className="h-4 w-4 text-[#1A2240]" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDeleteDialog(device);
-                    }}
-                    title="Delete Device"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  {/* REFACTORED: Removed quantity display, show relevant info instead */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Tag className="h-4 w-4" />
+                      <span>{device.category}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span className="truncate">{device.location || "Not specified"}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>{t('browseDevices.labels.sn')}: {device.serialNumber}</span>
+                    </div>
+                    {device.purchasePrice > 0 && (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <DollarSign className="h-4 w-4" />
+                        <span>{formatPrice(device.purchasePrice)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="pt-2 border-t border-gray-200 flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/security/device-movement/${device.id}`);
+                      }}
+                      title="View Movement"
+                    >
+                      <MapPin className="h-4 w-4 text-blue-600" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditDialog(device);
+                      }}
+                      title="Edit Device"
+                    >
+                      <Edit className="h-4 w-4 text-[#1A2240]" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteDialog(device);
+                      }}
+                      title="Delete Device"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          }
+        </div >
 
         {/* Empty State */}
-        {filteredDevices.length === 0 && (
-          <Card className="border border-gray-200 shadow-sm">
-            <CardContent className="py-12 text-center">
-              <Search className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No Devices Found
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {deviceList.length === 0
-                  ? "No devices have been added yet. Add your first device!"
-                  : "No devices match your current filters. Try adjusting your search."}
-              </p>
-              <Button onClick={() => setIsAddDialogOpen(true)} className="bg-[#343264]">
-                Add New Device
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        {
+          filteredDevices.length === 0 && (
+            <Card className="border border-gray-200 shadow-sm">
+              <CardContent className="py-12 text-center">
+                <Search className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {t('browseDevices.emptyState.title')}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {t('browseDevices.emptyState.description')}
+                </p>
+                <Button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCategoryFilter("All");
+                    setStatusFilter("all");
+                  }}
+                  variant="outline"
+                >
+                  {t('browseDevices.filters.clearFilters')}
+                </Button>
+              </CardContent>
+            </Card>
+          )
+        }
 
         {/* Add Device Dialog - REFACTORED: Now receives userRole */}
         <AddDeviceDialog
@@ -525,9 +554,8 @@ function BrowseDevices() {
           onUploadComplete={handleBulkUploadComplete}
           userRole={currentUser.role}
         />
-
-      </div>
-    </MainLayout>
+      </div >
+    </MainLayout >
   );
 }
 

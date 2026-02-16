@@ -1,0 +1,263 @@
+{
+    "dashboard": {
+        "title": "Security Overview",
+        "actions": {
+            "browseInventory": "Browse Inventory",
+            "scanVerify": "Scan/Verify"
+        },
+        "stats": {
+            "activeCheckouts": "Active Checkouts",
+            "currentlyOut": "Currently out",
+            "securityAlerts": "Security Alerts",
+            "overdueItems": "Overdue Items",
+            "systemStatus": "System Status",
+            "allSystemsNormal": "All systems normal",
+            "online": "Online"
+        },
+        "charts": {
+            "activityTrends": "Activity Trends",
+            "checkoutsVsOverdue": "Checkouts vs Overdue incidents",
+            "checkouts": "Checkouts",
+            "failedOverdue": "Overdue/Alerts",
+            "topEquipment": "Top Equipment",
+            "mostAccessedCategories": "Most accessed categories",
+            "noData": "No Data"
+        },
+        "recentLogs": "Recent Activity Logs"
+    },
+    "devices": {
+        "title": "Browse Devices",
+        "deviceDetails": "Device Details",
+        "movementHistory": "Device Movement History",
+        "deviceUsage": "Device Usage"
+    },
+    "accessLogs": {
+        "title": "Access Logs",
+        "subtitle": "Recent equipment access activities and security events",
+        "viewLogs": "View Logs",
+        "viewAll": "View All",
+        "stats": {
+            "totalBorrowed": "Total Borrowed",
+            "activeLoans": "Active Loans",
+            "totalOverdue": "Total Overdue",
+            "needsAction": "Needs Action",
+            "lostItems": "Lost Items",
+            "reportedLost": "Reported Lost",
+            "damagedItems": "Damaged Items",
+            "maintenance": "Maintenance"
+        },
+        "filters": {
+            "searchPlaceholder": "Search student, device, or serial number...",
+            "status": "Status",
+            "action": "Action",
+            "time": "Time Period",
+            "allStatus": "All Status",
+            "allActions": "All Actions",
+            "today": "Today",
+            "week": "This Week",
+            "month": "This Month",
+            "allTime": "All Time"
+        },
+        "table": {
+            "logId": "Log ID",
+            "user": "User",
+            "action": "Action",
+            "equipment": "Equipment",
+            "location": "Location",
+            "timestamp": "Timestamp",
+            "status": "Status",
+            "event": "Event",
+            "dateTime": "Date/Time",
+            "device": "Device",
+            "eventDetails": "Event Details",
+            "fullTime": "Full Time",
+            "notes": "Notes / Purpose",
+            "viewDeviceHistory": "View Device History",
+            "noLogs": "No access logs found matching your filters."
+        },
+        "status": {
+            "success": "Success",
+            "failed": "Failed",
+            "pending": "Pending",
+            "suspicious": "Suspicious",
+            "checkedOut": "Checked Out",
+            "returned": "Returned",
+            "overdue": "Overdue"
+        },
+        "actions": {
+            "checkout": "Checkout",
+            "return": "Return",
+            "violation": "Violation",
+            "movement": "Movement"
+        }
+    },
+    "activeCheckouts": {
+        "title": "Active Checkouts",
+        "stats": {
+            "totalBorrowed": "Total Borrowed Items",
+            "totalLost": "Total Lost Items",
+            "totalDamaged": "Total Damaged Items",
+            "totalOverdue": "Total Overdue Items",
+            "lastMonth": "last month"
+        }
+    },
+    "browseDevices": {
+        "title": "Browse Devices",
+        "searchPlaceholder": "Search by name, brand, model, serial number, or location...",
+        "filters": {
+            "category": "Category",
+            "status": "Status",
+            "allCategories": "All Categories",
+            "allStatus": "All Status",
+            "clearFilters": "Clear Filters"
+        },
+        "tooltips": {
+            "viewHistory": "View Movement History",
+            "edit": "Edit Device",
+            "delete": "Delete Device"
+        },
+        "labels": {
+            "available": "available",
+            "sn": "SN",
+            "deviceName": "Device Name",
+            "category": "Category",
+            "brand": "Brand",
+            "model": "Model",
+            "serialNumber": "Serial Number",
+            "condition": "Condition",
+            "status": "Status",
+            "location": "Location",
+            "department": "Department",
+            "availableQty": "Available",
+            "totalQty": "Total Quantity",
+            "purchasePrice": "Purchase Price ($)",
+            "purchaseDate": "Purchase Date",
+            "warrantyExpiry": "Warranty Expiry",
+            "description": "Description",
+            "specifications": "Specifications (comma-separated)"
+        },
+        "placeholders": {
+            "selectCategory": "Select category",
+            "enterDescription": "Enter device description...",
+            "exampleName": "e.g., MacBook Pro 16\"",
+            "exampleBrand": "e.g., Apple",
+            "exampleModel": "e.g., MacBook Pro 16\" M3 Pro",
+            "exampleSN": "e.g., SN-MBP-001",
+            "exampleLocation": "e.g., Building A, Room 101",
+            "exampleDept": "e.g., IT Department",
+            "exampleSpecs": "e.g., 32GB RAM, 1TB SSD, 16.2\" Display"
+        },
+        "dialogs": {
+            "addTitle": "Add New Device",
+            "addDescription": "Enter the details for the new equipment device",
+            "editTitle": "Edit Device",
+            "editDescription": "Update the details for",
+            "deleteTitle": "Are you sure?",
+            "deleteDescription": "This action cannot be undone. This will permanently delete the device",
+            "deleteWarning": "and all associated data."
+        },
+        "emptyState": {
+            "title": "No devices found",
+            "description": "Try adjusting your search or filters"
+        }
+    },
+    "deviceMovementHistory": {
+        "title": "Device Movement History",
+        "backToDevices": "Back to Devices",
+        "totalEvents": "Total Events",
+        "loading": "Loading movement history...",
+        "noDeviceSelected": {
+            "title": "No Device Selected",
+            "description": "Please select a device to view its movement history.",
+            "button": "Browse Devices"
+        },
+        "noHistory": {
+            "title": "No Movement History",
+            "description": "No movement history found for"
+        },
+        "stats": {
+            "totalMovements": "Total Movements",
+            "checkouts": "Checkouts",
+            "violations": "Violations",
+            "uniqueLocations": "Unique Locations",
+            "returns": "Returns"
+        },
+        "timeline": {
+            "filters": {
+                "label": "Filters:",
+                "type": "Event Type",
+                "status": "Status",
+                "export": "Export",
+                "allEvents": "All Events",
+                "checkouts": "Checkouts",
+                "returns": "Returns",
+                "movements": "Movements",
+                "violations": "Violations",
+                "allStatus": "All Status",
+                "active": "Active",
+                "completed": "Completed",
+                "resolved": "Resolved"
+            },
+            "empty": "No movement history found",
+            "event": "event",
+            "events": "events",
+            "details": {
+                "location": "Location:",
+                "user": "User:",
+                "duration": "Duration:",
+                "coordinates": "Coordinates:"
+            }
+        }
+    },
+    "reports": {
+        "title": "Reports",
+        "types": {
+            "inventory": "Equipment Inventory Report",
+            "damaged": "Damaged Equipment Report",
+            "lost": "Lost Equipment Report",
+            "utilization": "Equipment Utilization Report",
+            "logs": "Device Movement Logs Report"
+        }
+    },
+    "notifications": {
+        "title": "Security Notifications",
+        "subtitle": "Monitor equipment movements and security alerts",
+        "activeViolations": "Active Violations",
+        "violationSummary": {
+            "title": "Active Geofence Violations",
+            "text": "{{count}} equipment item(s) have violated authorized zones. Immediate action may be required.",
+            "viewLogs": "View All Logs"
+        },
+        "empty": "No notifications",
+        "details": {
+            "currentLocation": "Current Location:",
+            "authorizedZone": "Authorized Zone:",
+            "violationType": "Violation Type:"
+        },
+        "actions": {
+            "device": "Device",
+            "logs": "Logs"
+        }
+    },
+    "profile": {
+        "title": "My Profile",
+        "account": {
+            "title": "Account",
+            "desc": "Basic information",
+            "uploadAvatar": "Upload Avatar"
+        },
+        "personal": {
+            "title": "Personal Info",
+            "desc": "Update your profile details",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "email": "Email",
+            "saveChanges": "Save Changes"
+        }
+    },
+    "deviceUsage": {
+        "projectors": "Projectors",
+        "extensionCables": "Extension Cables",
+        "tablets": "Tablets"
+    }
+}

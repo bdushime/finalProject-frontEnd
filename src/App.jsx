@@ -65,11 +65,15 @@ import DeviceDetails from "./pages/security/DeviceDetails";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
+import SecurityProfile from "./pages/security/Profile";
 import GateVerification from "./pages/Gate_security_officer/GateVerification";
+
+import { Toaster } from "sonner";
 
 export default function App() {
     return (
         <BrowserRouter>
+            <Toaster position="top-right" richColors />
             <Routes>
                 {/* ==========================
             PUBLIC ROUTES
@@ -206,14 +210,16 @@ export default function App() {
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
                     <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
+                    <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
+                    <Route path="/security/profile" element={<SecurityProfile />} />
                     <Route path="/gate-verification" element={<GateVerification />} />
-                </Route>
+                </Route >
 
                 {/* ==========================
             🔒 ADMIN ROUTES
         =========================== */}
-                <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+                < Route element={< ProtectedRoute allowedRoles={['Admin']} />}>
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/users" element={<UsersList />} />
                     <Route path="/admin/config" element={<ConfigPage />} />
@@ -223,11 +229,11 @@ export default function App() {
                     <Route path="/admin/security" element={<SecurityPage />} />
                     <Route path="/admin/tracking" element={<TrackingPage />} />
                     <Route path="/admin/scan" element={<ScannerPage />} />
-                </Route>
+                </Route >
 
                 {/* Fallback Route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-        </BrowserRouter>
+                < Route path="*" element={< Navigate to="/" replace />} />
+            </Routes >
+        </BrowserRouter >
     );
 }

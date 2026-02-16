@@ -1,0 +1,315 @@
+{
+    "dashboard": {
+        "title": "Tableau de Bord TI Staff",
+        "activeCheckouts": "Sorties Actives",
+        "pendingReturns": "Retours en Attente",
+        "equipmentAvailable": "Équipement Disponible",
+        "alerts": "Alertes",
+        "greetings": {
+            "morning": "Bonjour",
+            "afternoon": "Bonne après-midi",
+            "evening": "Bonsoir"
+        },
+        "pendingRequests": "Demandes en Attente",
+        "wants": "veut",
+        "requested": "Demandé:",
+        "approve": "Approuver",
+        "deny": "Refuser",
+        "cancel": "Annuler",
+        "confirmDenial": "Confirmer le Refus",
+        "denyTitle": "Refuser la Demande",
+        "denyDesc": "Veuillez saisir la raison pour laquelle vous refusez cette demande. Cela sera envoyé à l'étudiant.",
+        "denyPlaceholder": "par ex., L'article est en maintenance, Score de responsabilité faible...",
+        "messages": {
+            "approved": "Demande Approuvée",
+            "denied": "Demande Refusée",
+            "failedApprove": "Échec de l'approbation de la demande",
+            "failedDeny": "Échec du refus de la demande",
+            "provideReason": "Veuillez fournir une raison pour le refus.",
+            "loadError": "Échec du chargement des données du tableau de bord"
+        },
+        "stats": {
+            "totalDevices": "Total Appareils",
+            "activeBorrows": "Emprunts Actifs",
+            "lostMaint": "Perdus / Maint.",
+            "overdueItems": "Articles en Retard"
+        },
+        "systemHealth": "Santé Système"
+    },
+    "equipment": {
+        "title": "Parcourir l'Équipement",
+        "searchPlaceholder": "Rechercher par nom, marque ou description...",
+        "search": "Rechercher",
+        "category": "Catégorie",
+        "allCategories": "Toutes Catégories",
+        "sortBy": "Trier par",
+        "sortOptions": {
+            "name": "Nom (A-Z)",
+            "category": "Catégorie",
+            "availability": "Disponibilité"
+        },
+        "searching": "Recherche en cours...",
+        "showingItems": "Affichage de {{count}} articles",
+        "noEquipment": "Aucun équipement trouvé",
+        "adjustFilters": "Essayez d'ajuster vos filtres de recherche.",
+        "details": "Détails",
+        "status": {
+            "available": "Disponible",
+            "unavailable": "Indisponible",
+            "maintenance": "Maintenance",
+            "lost": "Perdu"
+        },
+        "dialog": {
+            "editTitle": "Modifier l'Équipement",
+            "viewTitle": "Détails de l'Équipement",
+            "updateDesc": "Mettez à jour les détails ci-dessous.",
+            "viewDesc": "Voir les informations détaillées.",
+            "serialNumber": "Numéro de Série",
+            "location": "Emplacement",
+            "description": "Description",
+            "noDescription": "Aucune description fournie.",
+            "name": "Nom de l'Équipement",
+            "selectType": "Choisir le type",
+            "selectStatus": "Choisir le statut",
+            "storageLocation": "Emplacement de Stockage",
+            "cancel": "Annuler",
+            "save": "Enregistrer",
+            "delete": "Supprimer",
+            "close": "Fermer",
+            "edit": "Modifier",
+            "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet équipement ? Cela est irréversible."
+        },
+        "messages": {
+            "saveSuccess": "Équipement enregistré avec succès",
+            "saveError": "Échec de l'enregistrement de l'équipement",
+            "deleteSuccess": "Équipement supprimé avec succès",
+            "deleteError": "Échec de la suppression de l'équipement"
+        },
+        "categories": {
+            "all": "Toutes Catégories",
+            "laptop": "Ordinateur Portable",
+            "projector": "Projecteur",
+            "camera": "Caméra",
+            "microphone": "Microphone",
+            "tablet": "Tablette",
+            "audio": "Audio",
+            "accessories": "Accessoires",
+            "other": "Autre"
+        }
+    },
+    "checkouts": {
+        "title": "Sorties en Cours",
+        "manageTransactions": "Gérer les Transactions",
+        "manageDesc": "Gérer les demandes, réservations et emprunts actifs.",
+        "newCheckout": "Nouvelle Sortie Manuelle",
+        "tabs": {
+            "requests": "Demandes",
+            "reservations": "Réservations",
+            "active": "Emprunts Actifs"
+        },
+        "table": {
+            "item": "Article",
+            "date": "Date",
+            "startTime": "Heure de Début",
+            "status": "Statut",
+            "actions": "Actions",
+            "loading": "Chargement...",
+            "noItems": "Aucune élément trouvé"
+        },
+        "actions": {
+            "approve": "Approuver",
+            "deny": "Refuser",
+            "checkout": "Sortir",
+            "cancel": "Annuler",
+            "tooEarly": "Trop tôt",
+            "view": "Voir"
+        },
+        "dialog": {
+            "denyTitle": "Refuser la Demande",
+            "denyDesc": "Veuillez indiquer la raison du refus.",
+            "reasonPlaceholder": "Raison du refus...",
+            "confirmDeny": "Confirmer le Refus",
+            "cancel": "Annuler",
+            "viewDetails": "Détails de la Sortie",
+            "reviewDetails": "Revoir les détails de cette demande {{status}}",
+            "borrowerInfo": "Informations sur l'Emprunteur",
+            "trustScore": "Score de Confiance:",
+            "name": "Nom",
+            "email": "Email",
+            "phone": "Téléphone",
+            "equipInfo": "Informations sur l'Équipement",
+            "equipName": "Nom de l'Équipement",
+            "reqDate": "Date de Demande / Sortie",
+            "returnDate": "Retour Prévu",
+            "logistics": "Logistique",
+            "dest": "Destination / Lieu",
+            "purpose": "But",
+            "photoTitle": "Photo de l'État de l'Équipement",
+            "photoDesc": "Photo prise avant la sortie pour documenter l'état.",
+            "noPhoto": "Aucune Photo Disponible"
+        },
+        "messages": {
+            "statusUpdated": "Statut mis à jour avec succès",
+            "statusError": "Échec de la mise à jour du statut",
+            "provideReason": "Veuillez fournir une raison.",
+            "requestDenied": "Demande Refusée",
+            "denyError": "Échec du refus de la demande",
+            "reservationCancelled": "Réservation annulée",
+            "cancelError": "Échec de l'annulation",
+            "loadError": "Échec du chargement des données",
+            "confirmApprove": "Êtes-vous sûr de vouloir approuver cet article ?",
+            "confirmCancel": "Annuler cette réservation ?"
+        }
+    },
+    "reports": {
+        "title": "Rapports",
+        "generateReport": "Générer un Rapport",
+        "reportFilters": "Filtres du Rapport",
+        "reportType": "Type de Rapport",
+        "resetFilters": "Réinitialiser les Filtres",
+        "noReportGenerated": "Aucun Rapport Généré",
+        "useFiltersPrompt": "Utilisez les filtres ci-dessus pour générer un rapport. Cliquez sur \"Générer un Rapport\" pour afficher les données.",
+        "reportResults": "Résultats du Rapport",
+        "recordsFound": "{{count}} Enregistrements Trouvés",
+        "exportCSV": "Exporter CSV",
+        "exportPDF": "Exporter PDF",
+        "lendingReport": "Rapport de Prêt",
+        "reservationReport": "Rapport de Réservation",
+        "utilizationReport": "Rapport d'Utilisation",
+        "subtitle": "Affichage de {{count}} enregistrements • Génération de Rapports Professionnels",
+        "downloadPdf": "Télécharger le Rapport PDF",
+        "searchPlaceholder": "Rechercher par étudiant, email ou équipement...",
+        "filterBy": "Filtrer par :",
+        "loading": "Récupération des enregistrements...",
+        "error": "Échec du chargement des données.",
+        "noRecords": "Aucun enregistrement trouvé correspondant à vos filtres.",
+        "table": {
+            "student": "Étudiant",
+            "score": "Score",
+            "equipment": "Équipement",
+            "dates": "Dates",
+            "status": "Statut",
+            "borrowed": "Emprunté",
+            "due": "Retour Prévu"
+        },
+        "messages": {
+            "noData": "Aucune donnée à exporter !"
+        }
+    },
+    "iot": {
+        "title": "Suivi IoT en Direct",
+        "subtitle": "Surveillance en temps réel des trackers",
+        "liveConnection": "Connexion Active",
+        "stats": {
+            "total": "Total Trackers",
+            "online": "En Ligne",
+            "offline": "Hors Ligne",
+            "lowBattery": "Batterie Faible"
+        },
+        "filters": {
+            "searchPlaceholder": "Rechercher par ID, équipement ou emplacement...",
+            "statusPlaceholder": "Filtrer par statut",
+            "allStatus": "Tous les Status",
+            "online": "En Ligne",
+            "offline": "Hors Ligne"
+        },
+        "map": {
+            "title": "Carte du Campus",
+            "desc": "Les trackers sont affichés sur OpenStreetMap. Vert = En Ligne, Rouge = Hors Ligne.",
+            "warningNoGps": "Attention : {{count}} appareils trouvés, mais AUCUNE coordonnée GPS reçue !",
+            "youAreHere": "Vous êtes ici",
+            "status": "Statut :"
+        },
+        "table": {
+            "title": "Détails du Tracker",
+            "showing": "Affichage de {{current}} sur {{total}} trackers",
+            "page": "Page {{current}} sur {{total}}",
+            "headers": {
+                "equipment": "Équipement",
+                "id": "ID Tracker",
+                "location": "Emplacement",
+                "status": "Statut",
+                "battery": "Batterie",
+                "temp": "Température",
+                "humidity": "Humidité",
+                "lastSeen": "Dernière Vue"
+            },
+            "noTrackers": "Aucun tracker trouvé correspondant à vos filtres",
+            "lastSeen": "Vu : {{time}}",
+            "viewHistory": "Voir l'Historique",
+            "historyTitle": "Historique de l'Appareil - {{equipment}}",
+            "trends": "Tendances Batterie & Température (Dernière Heure)",
+            "batteryPercent": "Batterie %",
+            "tempCelcius": "Température °C",
+            "currentBattery": "Batterie Actuelle",
+            "currentTemp": "Température Actuelle"
+        },
+        "alerts": {
+            "offlineMessage": "L'appareil {{equipment}} ({{id}}) est HORS LIGNE !",
+            "alertPrefix": "ALERTE : {{message}}",
+            "offlineTitle": "Alerte Appareil Hors Ligne"
+        }
+    },
+    "profile": {
+        "title": "Mon Profil",
+        "account": {
+            "title": "Compte",
+            "desc": "Informations de base",
+            "uploadAvatar": "Charger une Photo"
+        },
+        "personal": {
+            "title": "Infos Personnelles",
+            "desc": "Mettez à jour vos informations",
+            "firstName": "Prénom",
+            "lastName": "Nom",
+            "email": "Email",
+            "saveChanges": "Enregistrer les modifications"
+        }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "unread": "{{count}} Non lus",
+        "desc": "Restez informé des alertes et des demandes.",
+        "markAll": "Tout marquer comme lu",
+        "noNotifications": "Aucune notification",
+        "noNotificationsDesc": "Nous vous alerterons lorsque des événements importants se produiront.",
+        "critical": "CRITIQUE",
+        "viewDetails": "Voir les Détails",
+        "justNow": "À l'instant",
+        "messages": {
+            "loadError": "Impossible de charger les notifications",
+            "updateError": "Échec de la mise à jour de la notification",
+            "markAllSuccess": "Toutes les notifications marquées comme lues",
+            "markAllError": "Échec du marquage de tout comme lu"
+        }
+    },
+    "classrooms": {
+        "title": "Gestion des Salles",
+        "pageTitle": "Salles de Classe",
+        "description": "Gérer l'équipement des salles et la disponibilité.",
+        "addClassroom": "Ajouter une Salle",
+        "addNewTitle": "Ajouter une Nouvelle Salle",
+        "addNewDesc": "Ajoutez une salle au système et définissez son équipement.",
+        "roomName": "Nom de la Salle",
+        "roomNamePlaceholder": "ex. Salle 304",
+        "hasScreen": "A un Écran ?",
+        "screenYes": "Oui, TV/Écran installé",
+        "screenNo": "Pas d'écran disponible",
+        "save": "Enregistrer la Salle",
+        "cancel": "Annuler",
+        "table": {
+            "classroom": "Salle",
+            "equipStatus": "État de l'Équipement",
+            "actions": "Actions Rapides",
+            "noClassrooms": "Aucune salle trouvée. Ajoutez-en une pour commencer.",
+            "screenInstalled": "Écran Installé",
+            "standardRoom": "Salle Standard"
+        },
+        "messages": {
+            "addSuccess": "Salle ajoutée avec succès",
+            "updateSuccess": "Salle mise à jour",
+            "deleteSuccess": "Salle supprimée",
+            "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette salle ?"
+        }
+    }
+}

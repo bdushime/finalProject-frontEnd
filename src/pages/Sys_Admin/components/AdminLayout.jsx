@@ -10,20 +10,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 const AdminLayout = ({ children, heroContent }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const brandColor = '#8D8DC7';
+  const { t } = useTranslation("common");
 
   const navItems = [
-    { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'User Mgmt', href: '/admin/users', icon: Users },
-    { label: 'Config', href: '/admin/config', icon: Settings },
-    { label: 'Data', href: '/admin/data', icon: Database },
-    { label: 'Monitoring', href: '/admin/monitoring', icon: Activity },
-    { label: 'Reports', href: '/admin/reports', icon: FileText },
-    { label: 'Security', href: '/admin/security', icon: Shield },
+    { label: t("nav.dashboard"), href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: t("nav.userMgmt"), href: '/admin/users', icon: Users },
+    { label: t("nav.config"), href: '/admin/config', icon: Settings },
+    { label: t("nav.data"), href: '/admin/data', icon: Database },
+    { label: t("nav.monitoring"), href: '/admin/monitoring', icon: Activity },
+    { label: t("nav.reports"), href: '/admin/reports', icon: FileText },
+    { label: t("nav.security"), href: '/admin/security', icon: Shield },
   ];
 
   const handleLogout = () => {
@@ -36,9 +39,11 @@ const AdminLayout = ({ children, heroContent }) => {
     <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 transition-all duration-300">
 
       {/* Floating Dark Container - Header + Hero */}
-      <div className="bg-slate-900 rounded-[2rem] text-white shadow-2xl relative overflow-hidden mb-8">
+      <div className="bg-slate-900 rounded-[2rem] text-white shadow-2xl relative mb-8">
         {/* Background Glow Effect */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#8D8DC7] opacity-20 blur-[100px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+        <div className="absolute inset-0 overflow-hidden rounded-[2rem] pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#8D8DC7] opacity-20 blur-[100px] rounded-full -mr-20 -mt-20"></div>
+        </div>
 
         <header className="px-6 py-5 relative z-20 border-b border-slate-800/50">
           <div className="flex items-center justify-between">
@@ -52,7 +57,7 @@ const AdminLayout = ({ children, heroContent }) => {
               <div className="flex items-center space-x-3">
                 {/* Logo Image */}
                 <img src={logo} alt="Tracknity Logo" className="h-10 w-auto object-contain" />
-                <span className="text-xl font-bold tracking-tight hidden sm:block">Tracknity</span>
+                <span className="text-xl font-bold tracking-tight hidden sm:block">{t("misc.tracknity")}</span>
               </div>
             </div>
 
@@ -72,14 +77,10 @@ const AdminLayout = ({ children, heroContent }) => {
 
             {/* Utility Icons */}
             <div className="flex items-center space-x-3 sm:space-x-5">
-              <div className="relative hidden md:block group">
-                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-[#8D8DC7] transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="bg-slate-800/50 text-sm text-white pl-10 pr-4 py-2.5 rounded-full focus:outline-none focus:ring-2 focus:ring-[#8D8DC7] w-48 transition-all border border-transparent focus:border-[#8D8DC7]/30"
-                />
-              </div>
+              {/* Search removed as per request */}
+
+              {/* Language Switcher */}
+              <LanguageSwitcher variant="dark" />
 
               <Link to="/admin/notifications" className="relative p-2 hover:bg-slate-800 rounded-full transition-colors group">
                 <Bell className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
@@ -94,7 +95,7 @@ const AdminLayout = ({ children, heroContent }) => {
                         <User className="w-5 h-5" />
                       </div>
                       <div className="text-right hidden sm:block">
-                        <p className="text-sm font-bold text-white group-hover:text-[#8D8DC7] transition-colors">Admin</p>
+                        <p className="text-sm font-bold text-white group-hover:text-[#8D8DC7] transition-colors">{t("roles.admin")}</p>
                         <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">System</p>
                       </div>
                     </button>
@@ -102,20 +103,20 @@ const AdminLayout = ({ children, heroContent }) => {
                   <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-slate-100 shadow-xl bg-white/95 backdrop-blur-lg mt-2">
                     <DropdownMenuLabel className="font-normal p-3 bg-slate-50 rounded-xl mb-2">
                       <div className="flex flex-col gap-1">
-                        <p className="text-sm font-bold text-slate-800">System Administrator</p>
+                        <p className="text-sm font-bold text-slate-800">{t("auth.systemAdmin")}</p>
                         <p className="text-xs text-[#8D8DC7] font-medium">admin@tracknity.com</p>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#8D8DC7] cursor-pointer p-2.5 transition-colors font-medium text-slate-600">
                       <Link to="/admin/profile" className="flex items-center gap-2">
                         <User className="w-4 h-4" />
-                        My Profile
+                        {t("auth.myProfile")}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-slate-100 my-1" />
                     <DropdownMenuItem onClick={handleLogout} className="rounded-lg focus:bg-rose-50 focus:text-rose-600 text-rose-500 cursor-pointer p-2.5 transition-colors font-medium flex items-center gap-2">
                       <LogOut className="w-4 h-4" />
-                      Log Out
+                      {t("auth.logOut")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -153,7 +154,7 @@ const AdminLayout = ({ children, heroContent }) => {
 
       {/* Footer */}
       <div className="w-full text-center text-gray-400 text-xs py-4 mt-auto">
-        &copy; {new Date().getFullYear()} Tracknity Management System. v1.0.0
+        {t("footer.copyright", { year: new Date().getFullYear() })}
       </div>
     </div>
   );

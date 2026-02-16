@@ -1,0 +1,263 @@
+{
+    "dashboard": {
+        "title": "Aperçu de la Sécurité",
+        "actions": {
+            "browseInventory": "Parcourir l'Inventaire",
+            "scanVerify": "Scanner/Vérifier"
+        },
+        "stats": {
+            "activeCheckouts": "Sorties Actives",
+            "currentlyOut": "Actuellement sortis",
+            "securityAlerts": "Alertes de Sécurité",
+            "overdueItems": "Éléments en Retard",
+            "systemStatus": "État du Système",
+            "allSystemsNormal": "Tous les systèmes sont normaux",
+            "online": "En Ligne"
+        },
+        "charts": {
+            "activityTrends": "Tendances d'Activité",
+            "checkoutsVsOverdue": "Sorties vs incidents de retard",
+            "checkouts": "Sorties",
+            "failedOverdue": "Retard/Alertes",
+            "topEquipment": "Équipement Principal",
+            "mostAccessedCategories": "Catégories les plus utilisées",
+            "noData": "Pas de Données"
+        },
+        "recentLogs": "Journaux d'Activité Récents"
+    },
+    "devices": {
+        "title": "Parcourir les Appareils",
+        "deviceDetails": "Détails de l'Appareil",
+        "movementHistory": "Historique des Mouvements",
+        "deviceUsage": "Utilisation de l'Appareil"
+    },
+    "accessLogs": {
+        "title": "Journaux d'Accès",
+        "subtitle": "Activités récentes d'accès aux équipements et événements de sécurité",
+        "viewLogs": "Voir les Journaux",
+        "viewAll": "Voir Tout",
+        "stats": {
+            "totalBorrowed": "Total Emprunté",
+            "activeLoans": "Prêts Actifs",
+            "totalOverdue": "Total en Retard",
+            "needsAction": "Nécessite une Action",
+            "lostItems": "Objets Perdus",
+            "reportedLost": "Signalé Perdu",
+            "damagedItems": "Objets Endommagés",
+            "maintenance": "Maintenance"
+        },
+        "filters": {
+            "searchPlaceholder": "Rechercher étudiant, appareil ou numéro de série...",
+            "status": "Statut",
+            "action": "Action",
+            "time": "Période",
+            "allStatus": "Tous les Statuts",
+            "allActions": "Toutes les Actions",
+            "today": "Aujourd'hui",
+            "week": "Cette Semaine",
+            "month": "Ce Mois",
+            "allTime": "Tout le Temps"
+        },
+        "table": {
+            "logId": "ID Journal",
+            "user": "Utilisateur",
+            "action": "Action",
+            "equipment": "Équipement",
+            "location": "Lieu",
+            "timestamp": "Horodatage",
+            "status": "Statut",
+            "event": "Événement",
+            "dateTime": "Date/Heure",
+            "device": "Appareil",
+            "eventDetails": "Détails de l'Événement",
+            "fullTime": "Heure Complète",
+            "notes": "Notes / Objectif",
+            "viewDeviceHistory": "Voir l'Historique de l'Appareil",
+            "noLogs": "Aucun journal trouvé correspondant à vos filtres."
+        },
+        "status": {
+            "success": "Succès",
+            "failed": "Échec",
+            "pending": "En Attente",
+            "suspicious": "Suspect",
+            "checkedOut": "Sorti",
+            "returned": "Retourné",
+            "overdue": "En Retard"
+        },
+        "actions": {
+            "checkout": "Sortie",
+            "return": "Retour",
+            "violation": "Violation",
+            "movement": "Mouvement"
+        }
+    },
+    "activeCheckouts": {
+        "title": "Sorties Actives",
+        "stats": {
+            "totalBorrowed": "Total Objets Empruntés",
+            "totalLost": "Total Objets Perdus",
+            "totalDamaged": "Total Objets Endommagés",
+            "totalOverdue": "Total Objets en Retard",
+            "lastMonth": "le mois dernier"
+        }
+    },
+    "browseDevices": {
+        "title": "Parcourir les Appareils",
+        "searchPlaceholder": "Rechercher par nom, marque, modèle...",
+        "filters": {
+            "category": "Catégorie",
+            "status": "Statut",
+            "allCategories": "Toutes Catégories",
+            "allStatus": "Tous Statuts",
+            "clearFilters": "Effacer Filtres"
+        },
+        "tooltips": {
+            "viewHistory": "Voir Historique Mouvements",
+            "edit": "Modifier Appareil",
+            "delete": "Supprimer Appareil"
+        },
+        "labels": {
+            "available": "disponible",
+            "sn": "SN",
+            "deviceName": "Nom de l'Appareil",
+            "category": "Catégorie",
+            "brand": "Marque",
+            "model": "Modèle",
+            "serialNumber": "Numéro de Série",
+            "condition": "État",
+            "status": "Statut",
+            "location": "Emplacement",
+            "department": "Département",
+            "availableQty": "Disponible",
+            "totalQty": "Quantité Totale",
+            "purchasePrice": "Prix d'Achat ($)",
+            "purchaseDate": "Date d'Achat",
+            "warrantyExpiry": "Expiration Garantie",
+            "description": "Description",
+            "specifications": "Spécifications (séparées par virgule)"
+        },
+        "placeholders": {
+            "selectCategory": "Sélectionner catégorie",
+            "enterDescription": "Entrer description...",
+            "exampleName": "ex: MacBook Pro 16\"",
+            "exampleBrand": "ex: Apple",
+            "exampleModel": "ex: MacBook Pro 16\" M3 Pro",
+            "exampleSN": "ex: SN-MBP-001",
+            "exampleLocation": "ex: Bâtiment A, Salle 101",
+            "exampleDept": "ex: Département IT",
+            "exampleSpecs": "ex: 32GB RAM, 1TB SSD"
+        },
+        "dialogs": {
+            "addTitle": "Ajouter Nouvel Appareil",
+            "addDescription": "Entrer les détails du nouvel appareil",
+            "editTitle": "Modifier Appareil",
+            "editDescription": "Mettre à jour les détails pour",
+            "deleteTitle": "Êtes-vous sûr ?",
+            "deleteDescription": "Cette action est irréversible. Cela supprimera définitivement l'appareil",
+            "deleteWarning": "et toutes les données associées."
+        },
+        "emptyState": {
+            "title": "Aucun appareil trouvé",
+            "description": "Essayez d'ajuster votre recherche ou vos filtres"
+        }
+    },
+    "deviceMovementHistory": {
+        "title": "Historique des Mouvements",
+        "backToDevices": "Retour aux Appareils",
+        "totalEvents": "Total Événements",
+        "loading": "Chargement de l'historique...",
+        "noDeviceSelected": {
+            "title": "Aucun Appareil Sélectionné",
+            "description": "Veuillez sélectionner un appareil pour voir son historique de mouvements.",
+            "button": "Parcourir les Appareils"
+        },
+        "noHistory": {
+            "title": "Aucun Historique",
+            "description": "Aucun historique de mouvement trouvé pour"
+        },
+        "stats": {
+            "totalMovements": "Total Mouvements",
+            "checkouts": "Sorties",
+            "violations": "Violations",
+            "uniqueLocations": "Lieux Uniques",
+            "returns": "Retours"
+        },
+        "timeline": {
+            "filters": {
+                "label": "Filtres :",
+                "type": "Type d'Événement",
+                "status": "Statut",
+                "export": "Exporter",
+                "allEvents": "Tous les Événements",
+                "checkouts": "Sorties",
+                "returns": "Retours",
+                "movements": "Mouvements",
+                "violations": "Violations",
+                "allStatus": "Tous les Statuts",
+                "active": "Actif",
+                "completed": "Terminé",
+                "resolved": "Résolu"
+            },
+            "empty": "Aucun historique de mouvement trouvé",
+            "event": "événement",
+            "events": "événements",
+            "details": {
+                "location": "Lieu :",
+                "user": "Utilisateur :",
+                "duration": "Durée :",
+                "coordinates": "Coordonnées :"
+            }
+        }
+    },
+    "reports": {
+        "title": "Rapports",
+        "types": {
+            "inventory": "Rapport d'Inventaire d'Équipement",
+            "damaged": "Rapport d'Équipement Endommagé",
+            "lost": "Rapport d'Équipement Perdu",
+            "utilization": "Rapport d'Utilisation d'Équipement",
+            "logs": "Rapport des Journaux de Mouvements"
+        }
+    },
+    "notifications": {
+        "title": "Notifications de Sécurité",
+        "subtitle": "Surveiller les mouvements d'équipement et les alertes de sécurité",
+        "activeViolations": "Violations Actives",
+        "violationSummary": {
+            "title": "Violations de Géolocalisation Actives",
+            "text": "{{count}} équipement(s) ont violé les zones autorisées. Une action immédiate peut être requise.",
+            "viewLogs": "Voir Tous les Journaux"
+        },
+        "empty": "Pas de notifications",
+        "details": {
+            "currentLocation": "Emplacement Actuel :",
+            "authorizedZone": "Zone Autorisée :",
+            "violationType": "Type de Violation :"
+        },
+        "actions": {
+            "device": "Appareil",
+            "logs": "Journaux"
+        }
+    },
+    "profile": {
+        "title": "Mon Profil",
+        "account": {
+            "title": "Compte",
+            "desc": "Informations de base",
+            "uploadAvatar": "Mettre à jour l'avatar"
+        },
+        "personal": {
+            "title": "Infos Personnelles",
+            "desc": "Mettre à jour vos détails de profil",
+            "firstName": "Prénom",
+            "lastName": "Nom",
+            "email": "Email",
+            "saveChanges": "Enregistrer"
+        }
+    },
+    "deviceUsage": {
+        "projectors": "Projecteurs",
+        "extensionCables": "Rallonges",
+        "tablets": "Tablettes"
+    }
+}

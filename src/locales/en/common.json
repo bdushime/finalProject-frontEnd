@@ -1,0 +1,119 @@
+{
+    "nav": {
+        "dashboard": "Dashboard",
+        "equipment": "Equipment",
+        "borrowedItems": "Borrowed Items",
+        "score": "Score",
+        "report": "Report",
+        "reports": "Reports",
+        "notifications": "Notifications",
+        "profile": "Profile",
+        "helpSupport": "Help & Support",
+        "userMgmt": "User Mgmt",
+        "config": "Config",
+        "data": "Data",
+        "monitoring": "Monitoring",
+        "security": "Security",
+        "browseInventory": "Browse Inventory",
+        "scanVerify": "Scan/Verify",
+        "checkouts": "Checkouts",
+        "classrooms": "Classrooms",
+        "tracking": "Tracking",
+        "accessLogs": "Access Logs",
+        "devices": "Devices"
+    },
+    "actions": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "add": "Add",
+        "search": "Search",
+        "filter": "Filter",
+        "export": "Export",
+        "download": "Download",
+        "submit": "Submit",
+        "confirm": "Confirm",
+        "close": "Close",
+        "viewAll": "View All",
+        "reset": "Reset",
+        "generate": "Generate",
+        "send": "Send",
+        "back": "Back",
+        "next": "Next",
+        "refresh": "Refresh",
+        "loading": "Loading...",
+        "apply": "Apply"
+    },
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "overdue": "Overdue",
+        "returned": "Returned",
+        "maintenance": "Maintenance",
+        "available": "Available",
+        "unavailable": "Unavailable",
+        "suspended": "Suspended",
+        "online": "Online",
+        "offline": "Offline",
+        "borrowed": "Borrowed",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+    },
+    "auth": {
+        "login": "Login",
+        "logout": "Log Out",
+        "logOut": "Log Out",
+        "myProfile": "My Profile",
+        "myAccount": "My Account",
+        "systemAdmin": "System Administrator"
+    },
+    "footer": {
+        "copyright": "© {{year}} Tracknity Management System. v1.0.0",
+        "allRightsReserved": "© {{year}} Tracknity. All rights reserved."
+    },
+    "misc": {
+        "noData": "No data available",
+        "noRecords": "No records found.",
+        "searchPlaceholder": "Search...",
+        "today": "Today",
+        "exit": "Exit",
+        "studentPortal": "Student Portal",
+        "tracknity": "Tracknity",
+        "items": "Items",
+        "to": "to",
+        "of": "of",
+        "all": "All",
+        "total": "Total",
+        "na": "N/A",
+        "equipment": "Equipment"
+    },
+    "roles": {
+        "student": "Student",
+        "admin": "Admin",
+        "itStaff": "IT Staff",
+        "security": "Security",
+        "staff": "Staff"
+    },
+    "time": {
+        "lastNDays": "Last {{count}} Days",
+        "thisWeek": "This Week",
+        "thisYear": "This Year",
+        "dateRange": "Date Range"
+    },
+    "export": {
+        "excel": "Excel",
+        "pdf": "PDF",
+        "csv": "CSV",
+        "exportSuccess": "Export Successful",
+        "exportFailed": "Export failed",
+        "noDataToExport": "No data to export!"
+    },
+    "language": {
+        "en": "English",
+        "rw": "Kinyarwanda",
+        "fr": "Français",
+        "switchLanguage": "Language"
+    }
+}
