@@ -16,11 +16,11 @@ import {
     ArrowRight,
     ChevronLeft,
     Camera,
-    Loader2
+    Loader2,
+    AlertTriangle // Used for the warning UI
 } from "lucide-react";
 import api from "@/utils/api";
 import PropTypes from "prop-types";
-import { getClassrooms } from "@/utils/classroomStorage";
 
 export default function BorrowRequestForm({ onSuccess }) {
     const navigate = useNavigate();
@@ -37,14 +37,15 @@ export default function BorrowRequestForm({ onSuccess }) {
     const [step, setStep] = useState(1);
 
     // Data States
-    const [equipmentList, setEquipmentList] = useState([]); // For dropdown
-    const [equipment, setEquipment] = useState(null);       // Selected item
+    const [equipmentList, setEquipmentList] = useState([]); 
+    const [classroomList, setClassroomList] = useState([]); // <--- NEW: Store API classrooms
+    const [equipment, setEquipment] = useState(null);       // Selected item object
 
     // Form Data
     const [formData, setFormData] = useState({
         equipmentId: equipmentIdParam || "",
         course: "",
-        lecture: "",
+        lecture: "", // Optional, merged into destination usually
         purpose: "",
         location: "",
         // Borrow fields
@@ -61,27 +62,34 @@ export default function BorrowRequestForm({ onSuccess }) {
     const [timeSlots, setTimeSlots] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
-    const [roomSuccess, setRoomSuccess] = useState(null);
+    
+    // Exception State
+    const [isException, setIsException] = useState(false); // <--- NEW: Tracks Projector vs Screen conflict
 
     // --- 1. INITIAL DATA FETCHING ---
     useEffect(() => {
         const loadInitialData = async () => {
             try {
-                // Get all equipment for the dropdown
-                const res = await api.get('/equipment');
-                const availableItems = res.data.filter(item => item.status === 'Available');
+                // 1. Get all equipment
+                const eqRes = await api.get('/equipment');
+                // Filter only available items for borrowing
+                const availableItems = eqRes.data.filter(item => item.status === 'Available');
                 setEquipmentList(availableItems);
 
-                // If ID is passed in URL, set it immediately
+                // 2. Get Classrooms (For validation)
+                const roomRes = await api.get('/classrooms');
+                setClassroomList(roomRes.data);
+
+                // 3. Pre-select if ID is in URL
                 if (equipmentIdParam) {
-                    const found = res.data.find(e => e._id === equipmentIdParam);
+                    const found = eqRes.data.find(e => e._id === equipmentIdParam);
                     if (found) {
                         setEquipment(found);
                         setFormData(prev => ({ ...prev, equipmentId: found._id }));
                     }
                 }
             } catch (err) {
-                console.error("Failed to load equipment list", err);
+                console.error("Failed to load initial data", err);
             }
         };
         loadInitialData();
@@ -102,7 +110,7 @@ export default function BorrowRequestForm({ onSuccess }) {
         }
     }, [formData.reservationDate]);
 
-    // --- 3. CAMERA & PHOTO HANDLERS (UI ONLY) ---
+    // --- 3. CAMERA & PHOTO HANDLERS ---
     const handlePhotoUpload = (view, e) => {
         const file = e.target.files[0];
         if (file) {
@@ -151,6 +159,41 @@ export default function BorrowRequestForm({ onSuccess }) {
         setErrors(prev => ({ ...prev, [field]: null }));
     };
 
+    // --- REAL-TIME EXCEPTION CHECK ---
+    useEffect(() => {
+        // Only run check if we are in the details step (3), we have an item, and a location is typed
+        if (step === 3 && equipment && formData.location) {
+            const checkException = () => {
+                // 1. Is Equipment a Projector?
+                const isProjector = equipment.name.toLowerCase().includes('projector') || 
+                                    (equipment.category && equipment.category.toLowerCase().includes('projector'));
+                
+                if (!isProjector) {
+                    setIsException(false);
+                    return;
+                }
+
+                // 2. Does Room have a screen?
+                // Normalize input: "Room 101" -> "room101" to match database fuzzy search
+                const normalize = (str) => str.toLowerCase().replace(/\s+/g, '');
+                const inputLoc = normalize(formData.location);
+
+                // Find matching room in the loaded list
+                const targetClassroom = classroomList.find(c => normalize(c.name) === inputLoc);
+
+                if (targetClassroom && targetClassroom.hasScreen) {
+                    setIsException(true); // <--- CONFLICT DETECTED
+                } else {
+                    setIsException(false);
+                }
+            };
+            
+            // Debounce the check (wait 300ms after typing stops)
+            const timer = setTimeout(checkException, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [formData.location, equipment, step, classroomList]);
+
     // --- VALIDATION LOGIC ---
     const validateForm = () => {
         const newErrors = {};
@@ -160,7 +203,8 @@ export default function BorrowRequestForm({ onSuccess }) {
 
         // Step 2 Logic
         if (step === 2) {
-            if (flowType === 'borrow') {
+            if (flowType === 'borrow' && !isException) {
+                // Standard borrow purpose validation
                 if (!formData.purpose.trim()) newErrors.purpose = "Purpose is required";
             } else if (flowType === 'reserve') {
                 if (!formData.reservationDate) newErrors.reservationDate = "Date is required";
@@ -171,21 +215,17 @@ export default function BorrowRequestForm({ onSuccess }) {
         // Step 3 Logic
         if (step === 3) {
             if (!formData.course.trim()) newErrors.course = "Course is required";
+            if (!formData.location.trim()) newErrors.location = "Location is required";
+            
             if (flowType === 'borrow') {
                 if (!formData.sessionDateTime) newErrors.sessionDateTime = "Return time is required";
+                
+                // 👇 EXCEPTION VALIDATION: Block if no reason provided
+                if (isException && !formData.purpose.trim()) {
+                    newErrors.purpose = "You must provide a reason for using a projector in a screen room.";
+                }
             } else if (flowType === 'reserve') {
-                // For reserve, purpose is asked in step 3
                 if (!formData.purpose.trim()) newErrors.purpose = "Purpose is required";
-            }
-
-            // --- Blocking Validation for Room ---
-            // If there's an existing screen error, block progress
-            if (errors.location && errors.location.includes("already has a TV")) {
-                newErrors.location = errors.location;
-            } else if (equipment && formData.location) {
-                // Re-run check to be safe (in case they typed fast)
-                const check = checkRoomSafety(formData.location);
-                if (check.error) newErrors.location = check.error;
             }
         }
 
@@ -193,88 +233,43 @@ export default function BorrowRequestForm({ onSuccess }) {
         return Object.keys(newErrors).length === 0;
     };
 
-    // --- REAL-TIME ROOM CHECK ---
-    const checkRoomSafety = (locationInput) => {
-        if (!equipment || !locationInput) return { error: null, success: null };
-
-        const screenKeywords = ['tv', 'screen', 'projector', 'display', 'monitor'];
-        const isScreenDevice = screenKeywords.some(k =>
-            equipment.name.toLowerCase().includes(k) ||
-            (equipment.category && equipment.category.toLowerCase().includes(k))
-        );
-
-        if (!isScreenDevice) return { error: null, success: null };
-
-        const classrooms = getClassrooms();
-        const normalize = (str) => str.toLowerCase().replace(/\s+/g, '').replace(/room/g, '');
-        const inputLoc = normalize(locationInput);
-
-        const targetClassroom = classrooms.find(c => normalize(c.name) === inputLoc);
-
-        if (targetClassroom) {
-            if (targetClassroom.hasScreen) {
-                return { error: `Room ${targetClassroom.name} already has a TV/Screen. You don't need to borrow one.`, success: null };
-            } else {
-                return { error: null, success: `Great! Room ${targetClassroom.name} does not have a screen, so you need this.` };
-            }
-        }
-        return { error: null, success: null };
-    };
-
-    useEffect(() => {
-        if (step === 3 && formData.location) {
-            const timeoutId = setTimeout(() => {
-                const result = checkRoomSafety(formData.location);
-                if (result.error) {
-                    setErrors(prev => ({ ...prev, location: result.error }));
-                    setRoomSuccess(null);
-                } else if (result.success) {
-                    setErrors(prev => ({ ...prev, location: null }));
-                    setRoomSuccess(result.success);
-                } else {
-                    // Reset if no match or safe
-                    setErrors(prev => ({ ...prev, location: null }));
-                    setRoomSuccess(null);
-                }
-            }, 500); // Debounce
-            return () => clearTimeout(timeoutId);
-        }
-    }, [formData.location, equipment, step]);
-
-    // --- 5. SUBMIT HANDLER (UPDATED) ---
+    // --- 5. SUBMIT HANDLER ---
     const handleSubmit = async () => {
         if (!validateForm()) return;
         setSubmitting(true);
 
         try {
+            // Prepare payload
+            const payload = {
+                equipmentId: formData.equipmentId,
+                // If it's an exception, prepend a note so IT staff sees it easily
+                purpose: isException ? `[EXCEPTION: Projector in Screen Room] ${formData.purpose}` : formData.purpose,
+                destination: `${formData.location} (${formData.course})`,
+            };
+
             if (flowType === 'borrow') {
-                // === BORROW ACTION (Real) ===
-                const payload = {
-                    equipmentId: formData.equipmentId,
-                    expectedReturnTime: formData.sessionDateTime,
-                    destination: `${formData.location} (${formData.course})`,
-                    purpose: formData.purpose,
-                };
+                // === BORROW ACTION ===
+                payload.expectedReturnTime = formData.sessionDateTime;
+                
+                const res = await api.post('/transactions/checkout', payload);
 
-                await api.post('/transactions/checkout', payload);
-
-                // 👇 UPDATED: Inform user about pending approval
-                alert("Request submitted successfully! Please wait for IT approval.");
+                // Different alerts based on backend status
+                // We check both 'Pending' and 'pending_approval' to be safe
+                if (res.data.status === 'Pending' || res.data.serverStatusMessage === 'pending_approval') {
+                    alert("⚠️ Request Flagged for Approval\n\nBecause this room has a screen, your request is PENDING review by IT Staff.");
+                } else {
+                    alert("✅ Checkout Successful!\n\nYou can pick up your equipment.");
+                }
+                
                 navigate('/student/borrowed-items');
 
             } else {
-                // === RESERVE ACTION (Real) ===
-                const payload = {
-                    equipmentId: formData.equipmentId,
-                    reservationDate: formData.reservationDate,
-                    reservationTime: formData.reservationTime,
-                    location: formData.location,
-                    course: formData.course,
-                    purpose: formData.purpose
-                };
-
+                // === RESERVE ACTION ===
+                payload.reservationDate = formData.reservationDate;
+                payload.reservationTime = formData.reservationTime;
+                payload.location = formData.location; // Fallback if destination logic changes
+                
                 await api.post('/transactions/reserve', payload);
-
                 alert("Reservation confirmed successfully!");
                 navigate('/student/dashboard');
             }
@@ -347,7 +342,6 @@ export default function BorrowRequestForm({ onSuccess }) {
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                     {flowType === 'borrow' && (
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
-                            {/* FAKE CAMERA UI - Does not block submission */}
                             <div className="w-full max-w-sm mx-auto aspect-video bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                                 {isScanning ? (
                                     <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
@@ -383,23 +377,23 @@ export default function BorrowRequestForm({ onSuccess }) {
                 </div>
             )}
 
-            {/* STEP 2: (Borrow: Details) OR (Reserve: Date/Time) */}
+            {/* STEP 2: DETAILS */}
             {step === 2 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                     {flowType === 'borrow' ? (
                         <>
                             <div className="space-y-2">
-                                <Label>Purpose</Label>
+                                <Label>Standard Use Case</Label>
                                 <Textarea
                                     value={formData.purpose}
                                     onChange={(e) => handleInputChange("purpose", e.target.value)}
-                                    placeholder="Why do you need this?"
+                                    placeholder="Briefly describe usage (e.g., Presentation for CS101)"
                                     className="h-32"
                                 />
                                 {errors.purpose && <p className="text-sm text-red-500">{errors.purpose}</p>}
                             </div>
 
-                            {/* FAKE PHOTO UPLOAD UI */}
+                            {/* Optional Photo Upload */}
                             <div className="space-y-2">
                                 <Label>Condition Photos (Optional)</Label>
                                 <div className="grid grid-cols-2 gap-4">
@@ -420,7 +414,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                             </div>
                         </>
                     ) : (
-                        // Reserve Flow: Date Picker
+                        /* Reserve Date Picker */
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label>Reservation Date</Label>
@@ -445,7 +439,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                 </div>
             )}
 
-            {/* STEP 3: (Borrow: Time/Loc) OR (Reserve: Class Info) */}
+            {/* STEP 3: TIME & PLACE (Contains Exception Logic) */}
             {step === 3 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -456,10 +450,37 @@ export default function BorrowRequestForm({ onSuccess }) {
                         </div>
                         <div className="space-y-2">
                             <Label>Classroom / Location</Label>
-                            <Input value={formData.location} onChange={(e) => handleInputChange("location", e.target.value)} placeholder="Room 304" />
+                            <Input 
+                                value={formData.location} 
+                                onChange={(e) => handleInputChange("location", e.target.value)} 
+                                placeholder="Room 304" 
+                            />
                             {errors.location && <p className="text-sm text-red-500">{errors.location}</p>}
                         </div>
                     </div>
+
+                    {/* 👇👇👇 EXCEPTION ALERT UI 👇👇👇 */}
+                    {isException && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 animate-in fade-in slide-in-from-top-2">
+                            <AlertTriangle className="text-amber-600 w-6 h-6 flex-shrink-0" />
+                            <div className="space-y-2 w-full">
+                                <h4 className="font-bold text-amber-800 text-sm">Restricted Setup Detected</h4>
+                                <p className="text-amber-700 text-xs">
+                                    The room you selected ({formData.location}) already has a screen installed. 
+                                    To borrow a projector for this room, you must provide a specific reason for IT Staff approval.
+                                </p>
+                                <Label className="text-amber-900 font-bold mt-2 block">Reason for Exception:</Label>
+                                <Textarea 
+                                    className="bg-white border-amber-300 focus:border-amber-500"
+                                    placeholder="e.g. The built-in screen is broken, or I need dual projection..."
+                                    value={formData.purpose} // Re-using purpose field specifically for this
+                                    onChange={(e) => handleInputChange("purpose", e.target.value)}
+                                />
+                                {errors.purpose && <p className="text-sm text-red-600 font-bold">{errors.purpose}</p>}
+                            </div>
+                        </div>
+                    )}
+                    {/* 👆👆👆 END EXCEPTION UI 👆👆👆 */}
 
                     {flowType === 'borrow' ? (
                         <div className="space-y-2">
@@ -468,10 +489,10 @@ export default function BorrowRequestForm({ onSuccess }) {
                             {errors.sessionDateTime && <p className="text-sm text-red-500">{errors.sessionDateTime}</p>}
                         </div>
                     ) : (
-                        <div className="space-y-2">
+                       <div className="space-y-2">
                             <Label>Purpose</Label>
                             <Textarea value={formData.purpose} onChange={(e) => handleInputChange("purpose", e.target.value)} />
-                        </div>
+                       </div>
                     )}
                 </div>
             )}
@@ -484,6 +505,14 @@ export default function BorrowRequestForm({ onSuccess }) {
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div><span className="text-slate-500">Item:</span> <span className="font-medium block">{equipment?.name}</span></div>
                             <div><span className="text-slate-500">Location:</span> <span className="font-medium block">{formData.location}</span></div>
+                            
+                            {/* Show warning in confirmation if exception */}
+                            {isException && (
+                                <div className="col-span-2 bg-amber-100 text-amber-800 p-2 rounded text-xs font-bold text-center border border-amber-200">
+                                    ⚠️ Requires IT Approval (Projector in Screen Room)
+                                </div>
+                            )}
+
                             <div>
                                 <span className="text-slate-500">{flowType === 'borrow' ? 'Return By:' : 'Reserved For:'}</span>
                                 <span className="font-medium block">
@@ -500,8 +529,12 @@ export default function BorrowRequestForm({ onSuccess }) {
                 {step < 4 ? (
                     <Button onClick={() => validateForm() && setStep(s => s + 1)} className="bg-[#0b1d3a] h-12 px-8 rounded-xl">Continue</Button>
                 ) : (
-                    <Button onClick={handleSubmit} disabled={submitting} className="bg-[#126dd5] h-12 px-8 rounded-xl">
-                        {submitting ? <Loader2 className="animate-spin" /> : "Confirm & Submit"}
+                    <Button 
+                        onClick={handleSubmit} 
+                        disabled={submitting} 
+                        className={`h-12 px-8 rounded-xl ${isException ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#126dd5]'}`}
+                    >
+                        {submitting ? <Loader2 className="animate-spin" /> : isException ? "Submit for Approval" : "Confirm & Submit"}
                     </Button>
                 )}
             </div>

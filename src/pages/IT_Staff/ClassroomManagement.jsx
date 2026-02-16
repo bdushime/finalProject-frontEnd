@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
+import api from "@/utils/api"; 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,45 +22,76 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2, Monitor, MonitorOff, Plus, School } from "lucide-react";
-import { getClassrooms, addClassroom, updateClassroom, deleteClassroom } from "@/utils/classroomStorage";
+import { Trash2, Monitor, MonitorOff, Plus, School, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ClassroomManagement() {
     const [classrooms, setClassrooms] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [newRoomName, setNewRoomName] = useState("");
     const [newRoomHasScreen, setNewRoomHasScreen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         loadClassrooms();
     }, []);
 
-    const loadClassrooms = () => {
-        setClassrooms(getClassrooms());
+    const loadClassrooms = async () => {
+        try {
+            const res = await api.get('/classrooms');
+            setClassrooms(res.data);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to load classrooms");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleAddClassroom = () => {
+    const handleAddClassroom = async () => {
         if (!newRoomName.trim()) return;
-        addClassroom({ name: newRoomName, hasScreen: newRoomHasScreen });
-        setNewRoomName("");
-        setNewRoomHasScreen(false);
-        setIsAddDialogOpen(false);
-        loadClassrooms();
-        toast.success("Classroom added successfully");
-    };
-
-    const handleToggleScreen = (id, currentStatus) => {
-        updateClassroom(id, { hasScreen: !currentStatus });
-        loadClassrooms();
-        toast.info("Classroom updated");
-    };
-
-    const handleDelete = (id) => {
-        if (confirm("Are you sure you want to delete this classroom?")) {
-            deleteClassroom(id);
+        setSubmitting(true);
+        try {
+            await api.post('/classrooms', { 
+                name: newRoomName, 
+                hasScreen: newRoomHasScreen 
+            });
+            toast.success("Classroom added successfully");
+            setNewRoomName("");
+            setNewRoomHasScreen(false);
+            setIsAddDialogOpen(false);
             loadClassrooms();
-            toast.error("Classroom deleted");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to add classroom");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleToggleScreen = async (id, currentStatus) => {
+        setClassrooms(prev => prev.map(room => 
+            room._id === id ? { ...room, hasScreen: !currentStatus } : room
+        ));
+
+        try {
+            await api.put(`/classrooms/${id}`, { hasScreen: !currentStatus });
+            toast.success("Classroom updated");
+        } catch (err) {
+            toast.error("Failed to update status");
+            loadClassrooms(); // Revert
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (confirm("Are you sure you want to delete this classroom?")) {
+            try {
+                await api.delete(`/classrooms/${id}`);
+                toast.success("Classroom deleted");
+                setClassrooms(prev => prev.filter(room => room._id !== id));
+            } catch (err) {
+                toast.error("Failed to delete classroom");
+            }
         }
     };
 
@@ -86,9 +118,7 @@ export default function ClassroomManagement() {
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="name" className="text-right">
-                                        Room Name
-                                    </Label>
+                                    <Label htmlFor="name" className="text-right">Room Name</Label>
                                     <Input
                                         id="name"
                                         value={newRoomName}
@@ -98,9 +128,7 @@ export default function ClassroomManagement() {
                                     />
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="screen" className="text-right">
-                                        Has Screen?
-                                    </Label>
+                                    <Label htmlFor="screen" className="text-right">Has Screen?</Label>
                                     <div className="flex items-center space-x-2 col-span-3">
                                         <Switch
                                             id="screen"
@@ -115,7 +143,9 @@ export default function ClassroomManagement() {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleAddClassroom} className="bg-[#0b1d3a]">Save Classroom</Button>
+                                <Button onClick={handleAddClassroom} disabled={submitting} className="bg-[#0b1d3a]">
+                                    {submitting ? "Saving..." : "Save Classroom"}
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -131,7 +161,11 @@ export default function ClassroomManagement() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {classrooms.length === 0 ? (
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="h-48 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-slate-400" /></TableCell>
+                                </TableRow>
+                            ) : classrooms.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={3} className="h-48 text-center text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-2">
@@ -142,7 +176,7 @@ export default function ClassroomManagement() {
                                 </TableRow>
                             ) : (
                                 classrooms.map((room) => (
-                                    <TableRow key={room.id} className="hover:bg-slate-50 border-b border-slate-100 transition-colors">
+                                    <TableRow key={room._id} className="hover:bg-slate-50 border-b border-slate-100 transition-colors">
                                         <TableCell className="py-4 pl-6">
                                             <div className="font-bold text-lg text-slate-900">{room.name}</div>
                                         </TableCell>
@@ -156,13 +190,13 @@ export default function ClassroomManagement() {
                                             <div className="flex items-center justify-end gap-6">
                                                 <Switch
                                                     checked={room.hasScreen}
-                                                    onCheckedChange={() => handleToggleScreen(room.id, room.hasScreen)}
+                                                    onCheckedChange={() => handleToggleScreen(room._id, room.hasScreen)}
                                                 />
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
-                                                    onClick={() => handleDelete(room.id)}
+                                                    onClick={() => handleDelete(room._id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
