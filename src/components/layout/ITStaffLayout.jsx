@@ -18,6 +18,6 @@ export default function ITStaffLayout({ children, customHeaderActions, maxWidth 
 
 ITStaffLayout.propTypes = {
     children: PropTypes.node,
-    customHeaderActions: PropTypes.node, // 👈 Added prop validation
+    customHeaderActions: PropTypes.node, 
     maxWidth: PropTypes.string,
 };
