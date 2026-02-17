@@ -132,8 +132,8 @@ export default function SecurityDashboard() {
                   formatter={(value, name) => [value, name === 'checkouts' ? t('dashboard.charts.checkouts') : t('dashboard.charts.failedOverdue')]}
                 />
                 <Legend formatter={(value) => value === 'Checkouts' ? t('dashboard.charts.checkouts') : t('dashboard.charts.failedOverdue')} />
-                <Bar dataKey="checkouts" fill={COLORS.navy} radius={[4, 4, 0, 0]} name="Checkouts" />
-                <Bar dataKey="failed" fill={COLORS.red} radius={[4, 4, 0, 0]} name="Overdue/Alerts" />
+                <Bar dataKey="checkouts" fill={COLORS.navy} radius={[4, 4, 0, 0]} name={t('dashboard.charts.checkouts')} />
+                <Bar dataKey="failed" fill={COLORS.red} radius={[4, 4, 0, 0]} name={t('dashboard.charts.failedOverdue')} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>

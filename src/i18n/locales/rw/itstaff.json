@@ -34,7 +34,26 @@
             "lostMaint": "Ibyabuze / Ibyo Gukora",
             "overdueItems": "Ibyakererewe"
         },
-        "systemHealth": "Ubuzima bwa Sisitemu"
+        "systemHealth": "Ubuzima bwa Sisitemu",
+        "quickActions": {
+            "title": "Ibikorwa byihuse",
+            "subtitle": "Imirimo n'ibikorwa dusanzwe dukora",
+            "lend": "Tanga Igikoresho",
+            "report": "Kora Raporo"
+        },
+        "charts": {
+            "activityTrends": "Imigendekere y'Ibikorwa",
+            "monthlyActivity": "Imigendekere yo gutiza no kugarura ya buri kwezi",
+            "deviceTypes": "Ubwoko bw'Ibikoresho",
+            "distribution": "Ikwirakwizwa hakurikijwe ubwoko",
+            "checkouts": "Ibyasohotse",
+            "returns": "Ibyagarutse"
+        },
+        "recentActivity": {
+            "title": "Imikoreshereze y'Ibikoresho",
+            "noActivity": "Nta gikorwa giheruka",
+            "inUse": "{{active}} muri {{total}} ibikoresho biri gukoreshwa ubu."
+        }
     },
     "equipment": {
         "title": "Reba Ibikoresho",

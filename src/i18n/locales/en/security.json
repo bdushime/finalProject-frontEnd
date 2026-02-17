@@ -25,11 +25,10 @@
         },
         "recentLogs": "Recent Activity Logs"
     },
-    "devices": {
-        "title": "Browse Devices",
-        "deviceDetails": "Device Details",
-        "movementHistory": "Device Movement History",
-        "deviceUsage": "Device Usage"
+    "deviceUsage": {
+        "projectors": "Projectors",
+        "extensionCables": "Extension Cables",
+        "tablets": "Tablets"
     },
     "accessLogs": {
         "title": "Access Logs",
@@ -47,7 +46,7 @@
             "maintenance": "Maintenance"
         },
         "filters": {
-            "searchPlaceholder": "Search student, device, or serial number...",
+            "searchPlaceholder": "Search by student, equipment, or location...",
             "status": "Status",
             "action": "Action",
             "time": "Time Period",
@@ -66,30 +65,24 @@
             "location": "Location",
             "timestamp": "Timestamp",
             "status": "Status",
-            "event": "Event",
-            "dateTime": "Date/Time",
-            "device": "Device",
-            "eventDetails": "Event Details",
-            "fullTime": "Full Time",
-            "notes": "Notes / Purpose",
-            "viewDeviceHistory": "View Device History",
             "noLogs": "No access logs found matching your filters."
         },
         "status": {
             "success": "Success",
             "failed": "Failed",
             "pending": "Pending",
-            "suspicious": "Suspicious",
-            "checkedOut": "Checked Out",
-            "returned": "Returned",
-            "overdue": "Overdue"
+            "suspicious": "Suspicious"
         },
         "actions": {
             "checkout": "Checkout",
-            "return": "Return",
-            "violation": "Violation",
-            "movement": "Movement"
+            "return": "Return"
         }
+    },
+    "devices": {
+        "title": "Browse Devices",
+        "deviceDetails": "Device Details",
+        "movementHistory": "Device Movement History",
+        "deviceUsage": "Device Usage"
     },
     "activeCheckouts": {
         "title": "Active Checkouts",
@@ -254,10 +247,5 @@
             "email": "Email",
             "saveChanges": "Save Changes"
         }
-    },
-    "deviceUsage": {
-        "projectors": "Projectors",
-        "extensionCables": "Extension Cables",
-        "tablets": "Tablets"
     }
 }

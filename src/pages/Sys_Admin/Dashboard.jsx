@@ -167,15 +167,18 @@ const Dashboard = () => {
                                     ) : (
                                         data.recentActivity.map((tx) => (
                                             <tr key={tx._id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                                                <td className="px-4 py-3 font-medium text-slate-900">{tx.user?.username || 'Unknown'}</td>
-                                                <td className="px-4 py-3">{tx.equipment?.name || 'Deleted Item'}</td>
+                                                <td className="px-4 py-3 font-medium text-slate-900">{tx.user?.username || t('dashboard.status.unknown')}</td>
+                                                <td className="px-4 py-3">{tx.equipment?.name || t('dashboard.status.deletedItem')}</td>
                                                 <td className="px-4 py-3">{new Date(tx.createdAt).toLocaleDateString()}</td>
                                                 <td className="px-4 py-3">
                                                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${tx.status === 'Checked Out' ? 'bg-blue-100 text-blue-700' :
                                                         tx.status === 'Returned' ? 'bg-green-100 text-green-700' :
                                                             'bg-red-100 text-red-700'
                                                         }`}>
-                                                        {tx.status}
+                                                        {tx.status === 'Checked Out' ? t('dashboard.status.checkedOut') :
+                                                            tx.status === 'Returned' ? t('dashboard.status.returned') :
+                                                                tx.status === 'Overdue' ? t('dashboard.status.overdue') :
+                                                                    tx.status}
                                                     </span>
                                                 </td>
                                             </tr>

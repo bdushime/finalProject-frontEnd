@@ -29,7 +29,14 @@
         "generateReport": "Generate Report",
         "live": "+Live",
         "stable": "Stable",
-        "stock": "Stock"
+        "stock": "Stock",
+        "status": {
+            "checkedOut": "Checked Out",
+            "returned": "Returned",
+            "overdue": "Overdue",
+            "unknown": "Unknown",
+            "deletedItem": "Deleted Item"
+        }
     },
     "users": {
         "title": "User Management",
@@ -245,6 +252,7 @@
         "roleFilter": "Role:",
         "categoryFilter": "Category:",
         "item": "Item",
+        "equipment": "Equipment",
         "user": "User",
         "date": "Date",
         "riskLevel": "Risk Level",
