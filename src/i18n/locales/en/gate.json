@@ -1,0 +1,23 @@
+{
+    "app_title": "Tracknity Gatekeeper",
+    "gate_label": "Gate Security Officer",
+    "scan_title": "Scan Student ID",
+    "scan_hint": "Please scan the student's ID card or enter the ID number manually.",
+    "placeholder_id": "Enter Student ID",
+    "btn_verifying": "Verifying...",
+    "btn_verify": "Verify",
+    "status_not_found": "NOT FOUND",
+    "not_registered": "is not registered in the system.",
+    "hold_student": "Please hold the student and contact Administration.",
+    "btn_retry": "Try Again",
+    "status_clear": "CLEAR TO EXIT",
+    "no_items": "No unreturned items. Good to go.",
+    "btn_next": "Next Student",
+    "status_stop": "STOP - DO NOT EXIT",
+    "items_owed_by": "Items owed by",
+    "table_item": "Item",
+    "table_qty": "Qty",
+    "table_dept": "Department",
+    "block_exit": "BLOCK EXIT",
+    "btn_scan_next": "Scan Next"
+}

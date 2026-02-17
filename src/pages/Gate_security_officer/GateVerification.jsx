@@ -19,7 +19,7 @@ const MOCK_STUDENT_DB = {
 };
 
 const GateVerification = () => {
-    const { t, i18n } = useTranslation();
+    const { t, i18n } = useTranslation("gate");
     const [studentId, setStudentId] = useState('');
     const [status, setStatus] = useState('idle');
     const [studentData, setStudentData] = useState(null);
