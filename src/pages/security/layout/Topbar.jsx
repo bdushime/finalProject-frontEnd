@@ -135,6 +135,11 @@ function Topbar() {
     window.dispatchEvent(new CustomEvent("openBulkUploadDialog"));
   };
 
+  const isLinkActive = (path) => {
+    if (location.pathname === path) return true;
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <header className="w-full bg-[#0A1128] rounded-b-[2rem] shadow-xl">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-3">

@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Simple Leaflet marker styling for IoT map */
 .iot-marker {
   border-radius: 9999px;

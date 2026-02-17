@@ -1,0 +1,81 @@
+{
+    "hero": {
+        "title": "Gestion Intelligente des Équipements",
+        "subtitle": "Suivez, gérez et optimisez les équipements de votre institution en toute simplicité.",
+        "subtitle2": "La méthode moderne pour suivre, gérer et partager l'équipement sur votre campus. Conçu par des étudiants, pour des étudiants.",
+        "startFree": "Commencer gratuitement",
+        "watchDemo": "Voir la démo"
+    },
+    "features": {
+        "title": "Tout ce dont vous avez besoin pour gérer l'équipement",
+        "subtitle": "Des outils puissants conçus pour rendre le suivi des équipements facile pour tout le monde sur le campus.",
+        "smartInventory": "Inventaire Intelligent",
+        "smartInventoryDesc": "Catalogage assisté par IA avec catégorisation automatique et recherche intelligente.",
+        "qrScanning": "Scan QR",
+        "qrScanningDesc": "Enregistrement/sortie instantané avec codes QR. Aucune saisie manuelle requise.",
+        "smartAlerts": "Alertes Intelligentes",
+        "smartAlertsDesc": "Rappels automatisés pour les dates d'échéance, la maintenance et la disponibilité.",
+        "analytics": "Analytique",
+        "analyticsDesc": "Suivez les modèles d'utilisation, identifiez les tendances et optimisez l'inventaire.",
+        "roleAccess": "Accès par Rôle",
+        "roleAccessDesc": "Permissions personnalisées pour les étudiants, le personnel et les administrateurs.",
+        "multiPlatform": "Multi-Plateforme",
+        "multiPlatformDesc": "Accès depuis n'importe quel appareil - bureau, tablette ou mobile."
+    },
+    "howItWorks": {
+        "title": "Simple comme 1-2-3-4",
+        "subtitle": "De la navigation au retour, tout le processus ne prend que quelques minutes.",
+        "step1": "Naviguer",
+        "step1Desc": "Chercher dans notre catalogue intelligent",
+        "step2": "Demander",
+        "step2Desc": "Soumettre en un clic",
+        "step3": "Récupérer",
+        "step3Desc": "Scanner le QR au retrait",
+        "step4": "Retourner",
+        "step4Desc": "Déposer et confirmer"
+    },
+    "users": {
+        "title": "Qui utilise Tracknity ?",
+        "subtitle": "Des étudiants aux administrateurs, tout le monde profite d'une gestion rationalisée des équipements.",
+        "students": "Étudiants",
+        "studentsDesc": "Parcourir, demander et suivre l'équipement facilement",
+        "lecturers": "Enseignants",
+        "lecturersDesc": "Réserver du matériel pour les cours et les projets de recherche",
+        "itStaff": "Personnel IT",
+        "itStaffDesc": "Gérer l'inventaire, les approbations et la maintenance",
+        "researchers": "Chercheurs",
+        "researchersDesc": "Planifier l'équipement spécialisé pour les expériences",
+        "mediaTeams": "Équipes Média",
+        "mediaTeamsDesc": "Coordonner caméras, micros et matériel de studio",
+        "admins": "Administrateurs",
+        "adminsDesc": "Surveiller les tendances d'utilisation et générer des rapports"
+    },
+    "testimonials": {
+        "title": "Ce que les gens disent"
+    },
+    "contact": {
+        "title": "Contactez-nous",
+        "subtitle": "Des questions ? Nous aimerions avoir de vos nouvelles. Envoyez-nous un message !",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "Email",
+        "message": "Message",
+        "send": "Envoyer le message",
+        "location": "Emplacement",
+        "followUs": "Suivez-nous"
+    },
+    "nav": {
+        "features": "Fonctionnalités",
+        "howItWorks": "Comment ça marche",
+        "users": "Utilisateurs",
+        "contact": "Contact",
+        "signIn": "Se connecter",
+        "getStarted": "Commencer"
+    },
+    "stats": {
+        "activeUsers": "Utilisateurs Actifs",
+        "equipmentItems": "Équipements",
+        "uptime": "Disponibilité",
+        "support": "Support"
+    }
+}

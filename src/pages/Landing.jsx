@@ -867,6 +867,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import logo from "@/assets/images/logo 8cc.jpg";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 // Intersection Observer Hook for animations
 const useInView = (threshold = 0.2) => {
@@ -1006,18 +1008,33 @@ const AnimatedChart = () => {
 };
 
 export default function Landing() {
-    const [isDark, setIsDark] = useState(false);
+    const { t } = useTranslation('landing');
+    // Theme state with persistence
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeTestimonial, setActiveTestimonial] = useState(0);
     const [videoModalOpen, setVideoModalOpen] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
-    // Toggle dark mode on the html element
+    const [isDark, setIsDark] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                return savedTheme === 'dark';
+            }
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        return false;
+    });
+
+    // Toggle dark mode
     useEffect(() => {
+        const root = document.documentElement;
         if (isDark) {
-            document.documentElement.classList.add('dark');
+            root.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
         } else {
-            document.documentElement.classList.remove('dark');
+            root.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
         }
     }, [isDark]);
 
@@ -1048,21 +1065,21 @@ export default function Landing() {
     };
 
     const features = [
-        { icon: <Package />, title: "Smart Inventory", desc: "AI-powered cataloguing with automatic categorization and smart search.", color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
-        { icon: <QrCode />, title: "QR Scanning", desc: "Instant check-in/out with QR codes. No manual entry needed.", color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" },
-        { icon: <Bell />, title: "Smart Alerts", desc: "Automated reminders for due dates, maintenance, and availability.", color: "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" },
-        { icon: <BarChart3 />, title: "Analytics", desc: "Track usage patterns, identify trends, and optimize inventory.", color: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" },
-        { icon: <UserCheck />, title: "Role Access", desc: "Custom permissions for students, staff, and administrators.", color: "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400" },
-        { icon: <Laptop />, title: "Multi-Platform", desc: "Access from any device - desktop, tablet, or mobile.", color: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" },
+        { icon: <Package />, title: t('features.smartInventory'), desc: t('features.smartInventoryDesc'), color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
+        { icon: <QrCode />, title: t('features.qrScanning'), desc: t('features.qrScanningDesc'), color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" },
+        { icon: <Bell />, title: t('features.smartAlerts'), desc: t('features.smartAlertsDesc'), color: "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" },
+        { icon: <BarChart3 />, title: t('features.analytics'), desc: t('features.analyticsDesc'), color: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" },
+        { icon: <UserCheck />, title: t('features.roleAccess'), desc: t('features.roleAccessDesc'), color: "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400" },
+        { icon: <Laptop />, title: t('features.multiPlatform'), desc: t('features.multiPlatformDesc'), color: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" },
     ];
 
     const users = [
-        { emoji: "🎓", title: "Students", desc: "Browse, request, and track equipment with ease" },
-        { emoji: "👨‍🏫", title: "Lecturers", desc: "Reserve gear for classes and research projects" },
-        { emoji: "💼", title: "IT Staff", desc: "Manage inventory, approvals, and maintenance" },
-        { emoji: "🔬", title: "Researchers", desc: "Schedule specialized equipment for experiments" },
-        { emoji: "🎬", title: "Media Teams", desc: "Coordinate cameras, mics, and studio gear" },
-        { emoji: "📊", title: "Admins", desc: "Monitor usage trends and generate reports" },
+        { emoji: "🎓", title: t('users.students'), desc: t('users.studentsDesc') },
+        { emoji: "👨‍🏫", title: t('users.lecturers'), desc: t('users.lecturersDesc') },
+        { emoji: "💼", title: t('users.itStaff'), desc: t('users.itStaffDesc') },
+        { emoji: "🔬", title: t('users.researchers'), desc: t('users.researchersDesc') },
+        { emoji: "🎬", title: t('users.mediaTeams'), desc: t('users.mediaTeamsDesc') },
+        { emoji: "📊", title: t('users.admins'), desc: t('users.adminsDesc') },
     ];
 
     const testimonials = [
@@ -1073,10 +1090,10 @@ export default function Landing() {
     ];
 
     const steps = [
-        { num: "01", title: "Browse", desc: "Search our smart catalogue" },
-        { num: "02", title: "Request", desc: "Submit with one click" },
-        { num: "03", title: "Collect", desc: "Scan QR at pickup" },
-        { num: "04", title: "Return", desc: "Drop off & confirm" },
+        { num: "01", title: t('howItWorks.step1'), desc: t('howItWorks.step1Desc') },
+        { num: "02", title: t('howItWorks.step2'), desc: t('howItWorks.step2Desc') },
+        { num: "03", title: t('howItWorks.step3'), desc: t('howItWorks.step3Desc') },
+        { num: "04", title: t('howItWorks.step4'), desc: t('howItWorks.step4Desc') },
     ];
 
     // Section refs for animations
@@ -1180,19 +1197,16 @@ export default function Landing() {
 
                             {/* Desktop Nav */}
                             <div className="hidden md:flex items-center gap-8">
-                                {['Features', 'How it Works', 'Users', 'Contact'].map((item) => (
-                                    <button
-                                        key={item}
-                                        onClick={() => scrollTo(item.toLowerCase().replace(/\s+/g, '-'))}
-                                        className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-                                    >
-                                        {item}
-                                    </button>
-                                ))}
+                                <button onClick={() => scrollTo('features')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.features')}</button>
+                                <button onClick={() => scrollTo('how-it-works')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.howItWorks')}</button>
+                                <button onClick={() => scrollTo('users')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.users')}</button>
+                                <button onClick={() => scrollTo('contact')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.contact')}</button>
                             </div>
 
                             {/* Right Actions */}
                             <div className="flex items-center gap-3">
+                                <LanguageSwitcher variant={isDark ? "dark" : "light"} />
+
                                 <button
                                     onClick={() => setIsDark(!isDark)}
                                     className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
@@ -1202,11 +1216,11 @@ export default function Landing() {
                                 </button>
 
                                 <Link to="/login" className="hidden sm:block px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
-                                    Sign In
+                                    {t('nav.signIn')}
                                 </Link>
 
                                 <Link to="/signup" className="btn-primary px-5 py-2.5 text-sm font-semibold text-white rounded-xl">
-                                    Get Started
+                                    {t('nav.getStarted')}
                                 </Link>
 
                                 <button
@@ -1221,15 +1235,10 @@ export default function Landing() {
                         {/* Mobile Menu */}
                         {mobileMenuOpen && (
                             <div className="md:hidden mt-4 pb-4 border-t border-slate-200 dark:border-slate-800 pt-4">
-                                {['Features', 'How it Works', 'Users', 'Contact'].map((item) => (
-                                    <button
-                                        key={item}
-                                        onClick={() => scrollTo(item.toLowerCase().replace(/\s+/g, '-'))}
-                                        className="block w-full text-left px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
-                                    >
-                                        {item}
-                                    </button>
-                                ))}
+                                <button onClick={() => scrollTo('features')} className="block w-full text-left px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">{t('nav.features')}</button>
+                                <button onClick={() => scrollTo('how-it-works')} className="block w-full text-left px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">{t('nav.howItWorks')}</button>
+                                <button onClick={() => scrollTo('users')} className="block w-full text-left px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">{t('nav.users')}</button>
+                                <button onClick={() => scrollTo('contact')} className="block w-full text-left px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">{t('nav.contact')}</button>
                             </div>
                         )}
                     </div>
@@ -1251,9 +1260,9 @@ export default function Landing() {
                             {/* Left Content - removed badge and social proof */}
                             <div className={`slide-up ${heroInView ? 'visible' : ''}`}>
                                 <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold font-display leading-[1.1] mb-4 text-slate-800 dark:text-white">
-                                    Campus equipment,{' '}
+                                    {t('hero.title')}{' '}
                                     <span className="relative inline-block">
-                                        <span className="gradient-text">simplified</span>
+                                        <span className="gradient-text">{t('hero.subtitle').split(' ').slice(-1)[0]}</span>
                                         <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" fill="none">
                                             <path d="M2 6C40 2 80 2 100 4C120 6 160 6 198 2" stroke="#1864ab" strokeWidth="3" strokeLinecap="round" />
                                         </svg>
@@ -1261,8 +1270,7 @@ export default function Landing() {
                                 </h1>
 
                                 <p className="text-lg text-slate-600 dark:text-slate-400 mb-6 max-w-lg leading-relaxed">
-                                    The modern way to track, manage, and share equipment across your campus.
-                                    Built by students, for students.
+                                    {t('hero.subtitle2')}
                                 </p>
 
                                 {/* CTA Buttons */}
@@ -1271,7 +1279,7 @@ export default function Landing() {
                                         to="/signup"
                                         className="btn-primary group flex items-center gap-2 px-7 py-4 text-base font-semibold text-white rounded-2xl"
                                     >
-                                        Start for free
+                                        {t('hero.startFree')}
                                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                     </Link>
                                     <button
@@ -1281,7 +1289,7 @@ export default function Landing() {
                                         <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-cyan-900/50 flex items-center justify-center">
                                             <Play className="w-4 h-4 text-[#1864ab] dark:text-cyan-400 ml-0.5" />
                                         </div>
-                                        Watch demo
+                                        {t('hero.watchDemo')}
                                     </button>
                                 </div>
                             </div>
@@ -1373,10 +1381,10 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
                             {[
-                                { value: 500, suffix: "+", label: "Active Users" },
-                                { value: 1000, suffix: "+", label: "Equipment Items" },
-                                { value: 99, suffix: "%", label: "Uptime" },
-                                { value: 24, suffix: "/7", label: "Support" },
+                                { value: 500, suffix: "+", label: t('stats.activeUsers') },
+                                { value: 1000, suffix: "+", label: t('stats.equipmentItems') },
+                                { value: 99, suffix: "%", label: t('stats.uptime') },
+                                { value: 24, suffix: "/7", label: t('stats.support') },
                             ].map((stat, i) => (
                                 <div key={i}>
                                     <p className="text-4xl md:text-5xl font-bold font-display mb-1">
@@ -1394,11 +1402,11 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${featuresInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                Everything you need to{' '}
-                                <span className="gradient-text">manage equipment</span>
+                                {t('features.title')}{' '}
+                                <span className="gradient-text">{t('features.title').split(' ').slice(0, 2).join(' ')}</span>
                             </h2>
                             <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-                                Powerful tools designed to make equipment tracking effortless for everyone on campus.
+                                {t('features.subtitle')}
                             </p>
                         </div>
 
@@ -1425,11 +1433,11 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${howInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                Simple as{' '}
+                                {t('howItWorks.title')}{' '}
                                 <span className="gradient-text">1-2-3-4</span>
                             </h2>
                             <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-                                From browsing to returning, the entire process takes just minutes.
+                                {t('howItWorks.subtitle')}
                             </p>
                         </div>
 
@@ -1459,11 +1467,11 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${usersInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                Who uses{' '}
+                                {t('users.title')}{' '}
                                 <span className="gradient-text">Tracknity</span>?
                             </h2>
                             <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-                                From students to administrators, everyone benefits from streamlined equipment management.
+                                {t('users.subtitle')}
                             </p>
                         </div>
 
@@ -1490,8 +1498,8 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${testimonialsInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                What people{' '}
-                                <span className="gradient-text">say</span>
+                                {t('testimonials.title')}{' '}
+                                <span className="gradient-text">{t('testimonials.title').split(' ').slice(0, 1)}</span>
                             </h2>
                         </div>
 
@@ -1537,11 +1545,11 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-8">
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                Get in{' '}
-                                <span className="gradient-text">touch</span>
+                                {t('contact.title')}{' '}
+                                <span className="gradient-text">{t('contact.title').split(' ').slice(-1)}</span>
                             </h2>
                             <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-                                Have questions? We'd love to hear from you. Send us a message!
+                                {t('contact.subtitle')}
                             </p>
                         </div>
 
@@ -1551,24 +1559,24 @@ export default function Landing() {
                                 <form className="space-y-4">
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">First Name</label>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('contact.firstName')}</label>
                                             <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all" placeholder="student" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Last Name</label>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('contact.lastName')}</label>
                                             <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all" placeholder="j" />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('contact.email')}</label>
                                         <input type="email" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all" placeholder="student@example.com" />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message</label>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('contact.message')}</label>
                                         <textarea rows={4} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all resize-none" placeholder="Your message..." />
                                     </div>
                                     <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2 px-6 py-4 text-base font-semibold text-white rounded-xl">
-                                        Send Message
+                                        {t('contact.send')}
                                         <Send className="w-5 h-5" />
                                     </button>
                                 </form>
@@ -1583,7 +1591,7 @@ export default function Landing() {
                                             <MapPin className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400">Location</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">{t('contact.location')}</p>
                                             <p className="font-semibold text-slate-800 dark:text-white">Kigali, Rwanda</p>
                                         </div>
                                     </div>
@@ -1595,7 +1603,7 @@ export default function Landing() {
                                             <Mail className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400">Email</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">{t('contact.email')}</p>
                                             <p className="font-semibold text-slate-800 dark:text-white">info@tracknity.com</p>
                                         </div>
                                     </div>
@@ -1615,7 +1623,7 @@ export default function Landing() {
 
                                 {/* Social Links */}
                                 <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Follow us</p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{t('contact.followUs')}</p>
                                     <div className="flex items-center gap-3">
                                         {[
                                             { href: "https://twitter.com", icon: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z", color: "hover:bg-slate-100 dark:hover:bg-slate-800" },
