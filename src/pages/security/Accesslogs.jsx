@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
+import MainLayout from "@/pages/security/layout/MainLayout";
 import StatCard from "@/components/security/StatCard"; // Ensure this path is correct
 import api from "@/utils/api";
 import {
