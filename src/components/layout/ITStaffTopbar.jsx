@@ -11,29 +11,32 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logo from "@/assets/images/logo8noback.png"; // Using Student logo as requested
-
-const itStaffLinks = [
-    { name: "Dashboard", path: "/it/dashboard" },
-    { name: "Browse Equipment", path: "/it/browse" },
-    { name: "Current Checkouts", path: "/it/current-checkouts" },
-    { name: "IoT Live View", path: "/it/iot-tracker" },
-    { name: "Classrooms", path: "/it/classrooms" },
-    { name: "Notifications", path: "/it/notifications" },
-    { name: "Reports", path: "/it/reports" },
-];
+import logo from "@/assets/images/logo8noback.png";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 export default function ITStaffTopbar({ onMenuClick }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const unreadCount = 5; // Hardcoded for now, or match existing logic
+    const unreadCount = 5;
+    const { t } = useTranslation("common");
+
+    const itStaffLinks = [
+        { name: t("nav.dashboard"), path: "/it/dashboard" },
+        { name: t("nav.browseInventory"), path: "/it/browse" },
+        { name: t("nav.checkouts"), path: "/it/current-checkouts" },
+        { name: t("nav.tracking"), path: "/it/iot-tracker" },
+        { name: t("nav.classrooms"), path: "/it/classrooms" },
+        { name: t("nav.notifications"), path: "/it/notifications" },
+        { name: t("nav.reports"), path: "/it/reports" },
+    ];
 
     // --- State for User Info ---
     const [user, setUser] = useState({
-        name: "IT Staff",
+        name: t("roles.itStaff"),
         initial: "I",
-        role: "IT Staff"
+        role: t("roles.itStaff")
     });
 
     // --- Load User from Local Storage ---
@@ -103,7 +106,7 @@ export default function ITStaffTopbar({ onMenuClick }) {
                                 className="w-12 h-12 object-contain group-hover:scale-110 transition-transform"
                             />
                             <span className="text-xl font-bold text-[#0b1d3a] font-serif tracking-tight hidden sm:block">
-                                Tracknity
+                                {t("misc.tracknity")}
                             </span>
                         </Link>
                     </div>
@@ -129,12 +132,14 @@ export default function ITStaffTopbar({ onMenuClick }) {
                         </div>
                     </nav>
 
-                    {/* Right: Notification, Profile */}
+                    {/* Right: Language Switcher, Notification, Profile */}
                     <div className="flex items-center gap-3">
+                        <LanguageSwitcher variant="light" />
+
                         <Link
                             to="/it/notifications"
                             className="relative h-11 w-11 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#0b1d3a] hover:bg-white/60 transition-all hover:shadow-sm hover:scale-110"
-                            aria-label="Notifications"
+                            aria-label={t("nav.notifications")}
                         >
                             <Bell className="h-5 w-5 text-[#0b1d3a]" />
                             {unreadCount > 0 && (
@@ -169,13 +174,13 @@ export default function ITStaffTopbar({ onMenuClick }) {
                                 </DropdownMenuLabel>
                                 <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
                                     <Link to="/it/profile" className="flex items-center gap-2 font-medium">
-                                        My Profile
+                                        {t("auth.myProfile")}
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-slate-100 my-1" />
                                 <DropdownMenuItem asChild className="rounded-lg focus:bg-rose-50 focus:text-rose-600 text-rose-500 cursor-pointer p-3 transition-colors">
                                     <Link to="/login" onClick={handleLogout} className="flex items-center gap-2 font-medium">
-                                        Log Out
+                                        {t("auth.logOut")}
                                     </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

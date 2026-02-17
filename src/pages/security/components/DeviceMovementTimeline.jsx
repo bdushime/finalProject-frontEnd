@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatDistanceToNow, format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 const EVENT_TYPE_COLORS = {
   checkout: "bg-blue-100 text-blue-700 border-blue-200",
@@ -40,6 +41,7 @@ const EVENT_TYPE_ICONS = {
 };
 
 export default function DeviceMovementTimeline({ movements, deviceName, deviceId }) {
+  const { t } = useTranslation(["security", "common"]);
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -73,8 +75,8 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
       return severity === "critical"
         ? "bg-red-500"
         : severity === "high"
-        ? "bg-orange-500"
-        : "bg-yellow-500";
+          ? "bg-orange-500"
+          : "bg-yellow-500";
     }
     return EVENT_TYPE_COLORS[eventType] || "bg-gray-100 text-gray-700";
   };
@@ -85,36 +87,36 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
       <div className="flex flex-wrap items-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Filters:</span>
+          <span className="text-sm font-medium text-gray-700">{t('deviceMovementHistory.timeline.filters.label')}</span>
         </div>
         <Select value={filterType} onValueChange={setFilterType}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Event Type" />
+            <SelectValue placeholder={t('deviceMovementHistory.timeline.filters.type')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Events</SelectItem>
-            <SelectItem value="checkout">Checkouts</SelectItem>
-            <SelectItem value="return">Returns</SelectItem>
-            <SelectItem value="movement">Movements</SelectItem>
-            <SelectItem value="geofence_violation">Violations</SelectItem>
+            <SelectItem value="all">{t('deviceMovementHistory.timeline.filters.allEvents')}</SelectItem>
+            <SelectItem value="checkout">{t('deviceMovementHistory.timeline.filters.checkouts')}</SelectItem>
+            <SelectItem value="return">{t('deviceMovementHistory.timeline.filters.returns')}</SelectItem>
+            <SelectItem value="movement">{t('deviceMovementHistory.timeline.filters.movements')}</SelectItem>
+            <SelectItem value="geofence_violation">{t('deviceMovementHistory.timeline.filters.violations')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t('deviceMovementHistory.timeline.filters.status')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="violation">Violations</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
+            <SelectItem value="all">{t('deviceMovementHistory.timeline.filters.allStatus')}</SelectItem>
+            <SelectItem value="active">{t('deviceMovementHistory.timeline.filters.active')}</SelectItem>
+            <SelectItem value="completed">{t('deviceMovementHistory.timeline.filters.completed')}</SelectItem>
+            <SelectItem value="violation">{t('deviceMovementHistory.timeline.filters.violations')}</SelectItem>
+            <SelectItem value="resolved">{t('deviceMovementHistory.timeline.filters.resolved')}</SelectItem>
           </SelectContent>
         </Select>
         <div className="ml-auto">
           <Button variant="outline" size="sm" className="flex items-center gap-2">
             <Download className="h-4 w-4" />
-            Export
+            {t('deviceMovementHistory.timeline.filters.export')}
           </Button>
         </div>
       </div>
@@ -123,7 +125,7 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
       {groupedMovements.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p className="text-gray-500">No movement history found</p>
+          <p className="text-gray-500">{t('deviceMovementHistory.timeline.empty')}</p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -137,7 +139,7 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
                     {format(new Date(date), "EEEE, MMMM d, yyyy")}
                   </h3>
                   <Badge variant="outline" className="ml-2">
-                    {dayMovements.length} event{dayMovements.length !== 1 ? "s" : ""}
+                    {dayMovements.length} {dayMovements.length !== 1 ? t('deviceMovementHistory.timeline.events') : t('deviceMovementHistory.timeline.event')}
                   </Badge>
                 </div>
               </div>
@@ -170,11 +172,10 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
 
                         {/* Content Card */}
                         <div
-                          className={`ml-12 p-4 rounded-lg border ${
-                            movement.eventType === "geofence_violation"
-                              ? "bg-red-50 border-red-200"
-                              : "bg-white border-gray-200"
-                          } hover:shadow-md transition-shadow`}
+                          className={`ml-12 p-4 rounded-lg border ${movement.eventType === "geofence_violation"
+                            ? "bg-red-50 border-red-200"
+                            : "bg-white border-gray-200"
+                            } hover:shadow-md transition-shadow`}
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
@@ -183,7 +184,7 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
                                   variant="outline"
                                   className={EVENT_TYPE_COLORS[movement.eventType] || ""}
                                 >
-                                  {movement.eventType.replace(/_/g, " ").toUpperCase()}
+                                  {(t(`deviceMovementHistory.timeline.filters.${movement.eventType === 'geofence_violation' ? 'violations' : movement.eventType}s`) || movement.eventType).toUpperCase()}
                                 </Badge>
                                 {movement.severity && (
                                   <Badge
@@ -205,7 +206,7 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
                                 <div className="flex items-center gap-2 text-gray-600">
                                   <MapPin className="h-4 w-4 text-blue-600" />
                                   <span>
-                                    <strong>Location:</strong> {movement.location}
+                                    <strong>{t('deviceMovementHistory.timeline.details.location')}</strong> {movement.location}
                                   </span>
                                 </div>
 
@@ -223,20 +224,20 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
                                   <div className="flex items-center gap-2 text-gray-600">
                                     <User className="h-4 w-4 text-gray-500" />
                                     <span>
-                                      <strong>User:</strong> {movement.userName}
+                                      <strong>{t('deviceMovementHistory.timeline.details.user')}</strong> {movement.userName}
                                     </span>
                                   </div>
                                 )}
 
                                 {movement.duration && (
                                   <div className="text-xs text-gray-500 mt-1">
-                                    Duration: {movement.duration}
+                                    {t('deviceMovementHistory.timeline.details.duration')} {movement.duration}
                                   </div>
                                 )}
 
                                 {movement.coordinates && (
                                   <div className="text-xs text-gray-500 mt-1">
-                                    Coordinates: {movement.coordinates.lat.toFixed(4)},{" "}
+                                    {t('deviceMovementHistory.timeline.details.coordinates')} {movement.coordinates.lat.toFixed(4)},{" "}
                                     {movement.coordinates.lng.toFixed(4)}
                                   </div>
                                 )}
@@ -257,23 +258,23 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Total Events</div>
+          <div className="text-sm text-gray-600">{t('deviceMovementHistory.timeline.filters.allEvents')}</div>
           <div className="text-2xl font-bold text-gray-900">{filteredMovements.length}</div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Checkouts</div>
+          <div className="text-sm text-gray-600">{t('deviceMovementHistory.timeline.filters.checkouts')}</div>
           <div className="text-2xl font-bold text-blue-600">
             {filteredMovements.filter((m) => m.eventType === "checkout").length}
           </div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Returns</div>
+          <div className="text-sm text-gray-600">{t('deviceMovementHistory.timeline.filters.returns')}</div>
           <div className="text-2xl font-bold text-green-600">
             {filteredMovements.filter((m) => m.eventType === "return").length}
           </div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Violations</div>
+          <div className="text-sm text-gray-600">{t('deviceMovementHistory.timeline.filters.violations')}</div>
           <div className="text-2xl font-bold text-red-600">
             {filteredMovements.filter((m) => m.eventType === "geofence_violation").length}
           </div>

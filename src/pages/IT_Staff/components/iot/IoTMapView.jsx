@@ -8,6 +8,7 @@ import {
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from "react-leaflet";
 import { useMemo, useState, useEffect } from "react";
 import L from "leaflet";
+import { useTranslation } from "react-i18next";
 
 // Helper to auto-center map
 // Helper to auto-center map
@@ -37,6 +38,7 @@ const offlineIcon = L.divIcon({
 });
 
 export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNavigate }) {
+  const { t } = useTranslation(["itstaff"]);
   const [userLocation, setUserLocation] = useState(null);
 
   useEffect(() => {
@@ -101,16 +103,16 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
     <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow h-full w-full flex flex-col relative">
       {showDataWarning && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded shadow-sm text-xs font-bold">
-          Warning: {filteredTrackers.length} devices found, but NO GPS coordinates received!
+          {t('iot.map.warningNoGps', { count: filteredTrackers.length })}
         </div>
       )}
       <CardHeader
         className={`${onNavigate ? "cursor-pointer" : ""} pb-2 sm:pb-4`}
         onClick={onNavigate}
       >
-        <CardTitle className="text-base sm:text-lg font-bold">Campus Map View</CardTitle>
+        <CardTitle className="text-base sm:text-lg font-bold">{t('iot.map.title')}</CardTitle>
         <CardDescription className="text-[10px] sm:text-xs">
-          Trackers are shown on OpenStreetMap. Green = Online, Red = Offline.
+          {t('iot.map.desc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
@@ -137,7 +139,7 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
                 radius={8}
                 pathOptions={{ color: 'white', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 }}
               >
-                <Popup>You are here</Popup>
+                <Popup>{t('iot.map.youAreHere')}</Popup>
               </CircleMarker>
             )}
 
@@ -157,7 +159,7 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
                       {tracker.location}
                     </div>
                     <div className="text-xs mt-1">
-                      Status:{" "}
+                      {t('iot.map.status')}{" "}
                       <span
                         className={
                           tracker.status === "online"

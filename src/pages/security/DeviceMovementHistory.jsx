@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Activity, AlertTriangle, Package } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function DeviceMovementHistory() {
+  const { t } = useTranslation(["security", "common"]);
   const { deviceId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -28,11 +30,11 @@ export default function DeviceMovementHistory() {
       setTimeout(() => {
         const history = getDeviceMovementHistory(effectiveDeviceId);
         const deviceStats = getDeviceMovementStats(effectiveDeviceId);
-        
+
         // Get device name from movements or use a default
         const firstMovement = history[0];
         const name = firstMovement?.deviceName || getDeviceNameFromId(effectiveDeviceId);
-        
+
         setMovements(history);
         setStats(deviceStats);
         setDeviceName(name);
@@ -67,7 +69,7 @@ export default function DeviceMovementHistory() {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400 animate-spin" />
-              <p className="text-gray-500">Loading movement history...</p>
+              <p className="text-gray-500">{t('deviceMovementHistory.loading')}</p>
             </div>
           </div>
         </div>
@@ -82,12 +84,12 @@ export default function DeviceMovementHistory() {
           <Card className="border border-gray-200">
             <CardContent className="p-8 text-center">
               <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Device Selected</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('deviceMovementHistory.noDeviceSelected.title')}</h3>
               <p className="text-gray-600 mb-4">
-                Please select a device to view its movement history.
+                {t('deviceMovementHistory.noDeviceSelected.description')}
               </p>
               <Button onClick={() => navigate("/security/BrowseDevices")} variant="outline">
-                Browse Devices
+                {t('deviceMovementHistory.noDeviceSelected.button')}
               </Button>
             </CardContent>
           </Card>
@@ -106,14 +108,14 @@ export default function DeviceMovementHistory() {
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Devices
+            {t('deviceMovementHistory.backToDevices')}
           </Button>
           <Card className="border border-gray-200">
             <CardContent className="p-8 text-center">
               <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Movement History</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('deviceMovementHistory.noHistory.title')}</h3>
               <p className="text-gray-600">
-                No movement history found for {deviceName} ({effectiveDeviceId}).
+                {t('deviceMovementHistory.noHistory.description')} {deviceName} ({effectiveDeviceId}).
               </p>
             </CardContent>
           </Card>
@@ -129,21 +131,21 @@ export default function DeviceMovementHistory() {
         <div className="mb-6">
           <Button
             variant="ghost"
-              onClick={() => navigate("/security/devices")}
+            onClick={() => navigate("/security/devices")}
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Devices
+            {t('deviceMovementHistory.backToDevices')}
           </Button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Device Movement History</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t('deviceMovementHistory.title')}</h1>
               <p className="text-gray-600 mt-1">
                 {deviceName} • {effectiveDeviceId}
               </p>
             </div>
             <Badge variant="outline" className="text-sm">
-              {movements.length} Total Events
+              {movements.length} {t('deviceMovementHistory.totalEvents')}
             </Badge>
           </div>
         </div>
@@ -162,7 +164,7 @@ export default function DeviceMovementHistory() {
                     <Activity className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total Movements</p>
+                    <p className="text-sm text-gray-600">{t('deviceMovementHistory.stats.totalMovements')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.totalMovements}</p>
                   </div>
                 </div>
@@ -176,7 +178,7 @@ export default function DeviceMovementHistory() {
                     <Package className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Checkouts</p>
+                    <p className="text-sm text-gray-600">{t('deviceMovementHistory.stats.checkouts')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.checkouts}</p>
                   </div>
                 </div>
@@ -190,7 +192,7 @@ export default function DeviceMovementHistory() {
                     <AlertTriangle className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Violations</p>
+                    <p className="text-sm text-gray-600">{t('deviceMovementHistory.stats.violations')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.violations}</p>
                   </div>
                 </div>
@@ -204,7 +206,7 @@ export default function DeviceMovementHistory() {
                     <MapPin className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Unique Locations</p>
+                    <p className="text-sm text-gray-600">{t('deviceMovementHistory.stats.uniqueLocations')}</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.uniqueLocations}</p>
                   </div>
                 </div>

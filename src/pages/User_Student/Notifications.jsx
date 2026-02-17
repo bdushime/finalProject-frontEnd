@@ -7,12 +7,30 @@ import { Bell, CheckCircle, XCircle, AlertCircle, Clock, Info, Trash2, CheckChec
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
 import { useNavigate } from "react-router-dom";
-import api from "@/utils/api"; // Ensure this imports your axios instance
+import api from "@/utils/api";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export default function Notifications() {
     const navigate = useNavigate();
-const [notifications, setNotifications] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const { t } = useTranslation("student");
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const res = await api.get('/notifications');
+            setNotifications(res.data);
+        } catch (err) {
+            console.error("Failed to fetch notifications:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getIcon = (type) => {
         switch (type) {
@@ -33,10 +51,10 @@ const [notifications, setNotifications] = useState([]);
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
 
-        if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
-        if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-        if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        if (diffMins < 60) return t("notifications.minutesAgo", { count: diffMins });
+        if (diffHours < 24) return t("notifications.hoursAgo", { count: diffHours });
+        if (diffDays < 7) return t("notifications.daysAgo", { count: diffDays });
+        return date.toLocaleDateString();
     };
 
     // --- 4. ACTIONS ---
@@ -59,9 +77,9 @@ const [notifications, setNotifications] = useState([]);
             setNotifications(prev =>
                 prev.map(notif => ({ ...notif, read: true }))
             );
-            toast.success("All marked as read");
+            toast.success(t("notifications.allMarkedRead"));
         } catch (err) {
-            toast.error("Failed to update");
+            toast.error(t("notifications.failedToUpdate"));
         }
     };
 
@@ -86,11 +104,14 @@ const [notifications, setNotifications] = useState([]);
     return (
         <StudentLayout>
             <PageContainer>
-                <BackButton to="/student/dashboard" />
+                <div className="flex items-center justify-between mb-2">
+                    <BackButton to="/student/dashboard" />
+                </div>
                 <div className="flex items-center justify-between mb-6">
                     <PageHeader
-                        title="Notifications"
-                        subtitle={`You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`}
+                        title={t("notifications.title")}
+                        subtitle={t("notifications.subtitle", { count: unreadCount })}
+                        showBack={false}
                     />
                     {unreadCount > 0 && (
                         <Button
@@ -99,7 +120,7 @@ const [notifications, setNotifications] = useState([]);
                             onClick={markAllAsRead}
                         >
                             <CheckCheck className="h-4 w-4 mr-2" />
-                            Mark All Read
+                            {t("notifications.markAllRead")}
                         </Button>
                     )}
                 </div>
@@ -111,16 +132,57 @@ const [notifications, setNotifications] = useState([]);
                                 <Bell className="h-10 w-10 text-sky-700" />
                             </div>
                             <h3 className="text-lg font-bold text-black mb-2">
-                                No notifications
+                                {t("notifications.noNotifications")}
                             </h3>
                             <p className="text-black">
-                                You're all caught up! Check back later for updates.
+                                {t("notifications.allCaughtUp")}
                             </p>
                         </CardContent>
                     </Card>
                 ) : (
                     <div className="space-y-4">
-{/* Notifications map would go here if we had data, currently empty by default */}
+                        {notifications.map((notification) => {
+                            const Icon = getIcon(notification.type);
+                            return (
+                                <div
+                                    key={notification._id}
+                                    className={`p-4 rounded-2xl border transition-all hover:shadow-md cursor-pointer
+                                        ${notification.read ? 'bg-white border-slate-100' : 'bg-blue-50/50 border-blue-100'}`}
+                                    onClick={() => markAsRead(notification._id)}
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <div className={`p-2.5 rounded-full shrink-0 
+                                            ${notification.type === 'success' ? 'bg-emerald-100/50 text-emerald-600' :
+                                                notification.type === 'warning' ? 'bg-amber-100/50 text-amber-600' :
+                                                    notification.type === 'error' ? 'bg-rose-100/50 text-rose-600' :
+                                                        'bg-sky-100/50 text-sky-600'}`}>
+                                            <Icon className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <h4 className={`text-base font-semibold ${notification.read ? 'text-slate-700' : 'text-[#0b1d3a]'}`}>
+                                                    {notification.title}
+                                                </h4>
+                                                <span className="text-xs text-slate-400 whitespace-nowrap flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />
+                                                    {formatTime(notification.createdAt)}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600 text-sm mt-1 leading-relaxed">
+                                                {notification.message}
+                                            </p>
+                                        </div>
+                                        {/* Optional Delete Button */}
+                                        {/* <button 
+                                            onClick={(e) => { e.stopPropagation(); deleteNotification(notification._id); }}
+                                            className="text-slate-300 hover:text-rose-500 transition-colors p-1"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button> */}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </PageContainer>

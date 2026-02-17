@@ -14,6 +14,7 @@ import { usePagination } from '@/hooks/usePagination';
 import PaginationControls from '@/components/common/PaginationControls';
 import EquipmentDetailsDialog from './components/EquipmentDetailsDialog';
 import api from '@/utils/api';
+import { useTranslation } from "react-i18next";
 
 // Schema-defined categories to ensure dropdown always has options
 const STATIC_CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
@@ -28,6 +29,7 @@ function deriveCategory(name = '') {
 }
 
 export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
+  const { t } = useTranslation(["itstaff", "common"]);
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('grid');
 
@@ -116,7 +118,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
   return (
     <ITStaffLayout>
       <div className="min-h-screen">
-        <PageHeader title="Browse Equipment" />
+        <PageHeader title={t('equipment.title')} />
 
         <Card className="mb-6 border-gray-300">
           <CardContent className="pt-6">
@@ -125,14 +127,14 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search by name, brand, or description..."
+                    placeholder={t('equipment.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 rounded-full border-gray-300 shadow-sm"
                   />
                 </div>
                 <Button type="submit" className="rounded-full border-gray-300 shadow-sm">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('equipment.search')}
                 </Button>
               </div>
 
@@ -144,7 +146,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                   <SelectContent className="bg-white border-gray-200">
                     {STATIC_CATEGORIES.map(category => (
                       <SelectItem key={category} value={category}>
-                        {category}
+                        {category === 'All Categories' ? t('equipment.categories.all') : t(`equipment.categories.${category.toLowerCase()}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -155,9 +157,9 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200">
-                    <SelectItem value="name">Name (A-Z)</SelectItem>
-                    <SelectItem value="category">Category</SelectItem>
-                    <SelectItem value="availability">Availability</SelectItem>
+                    <SelectItem value="name">{t('equipment.sortOptions.name')}</SelectItem>
+                    <SelectItem value="category">{t('equipment.sortOptions.category')}</SelectItem>
+                    <SelectItem value="availability">{t('equipment.sortOptions.availability')}</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -188,7 +190,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
         {/* Results Info */}
         <div className="mb-4 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
           <span>
-            {loading ? "Searching..." : `Showing ${equipment.length} items`}
+            {loading ? t('equipment.searching') : t('equipment.showingItems', { count: equipment.length })}
           </span>
           {totalPages > 1 && (
             <PaginationControls
@@ -219,7 +221,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                   <div className="flex items-start justify-between mb-2">
                     <CategoryBadge category={item.category} />
                     <Badge className={item.available > 0 ? 'bg-yellow-400 text-yellow-900 rounded-full' : 'bg-gray-200 text-gray-600 rounded-full'}>
-                      {item.available > 0 ? 'Available' : 'Unavailable'}
+                      {item.available > 0 ? t('equipment.status.available') : t('equipment.status.unavailable')}
                     </Badge>
                   </div>
                   <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
@@ -244,7 +246,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                       }}
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      Details
+                      {t('equipment.details')}
                     </Button>
                   </div>
                 </CardContent>
@@ -261,7 +263,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                       <div className="flex items-start gap-3 mb-3">
                         <CategoryBadge category={item.category} />
                         <Badge className={item.available > 0 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-gray-600'}>
-                          {item.available > 0 ? 'Available' : 'Unavailable'}
+                          {item.available > 0 ? t('equipment.status.available') : t('equipment.status.unavailable')}
                         </Badge>
                       </div>
                       <h3 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h3>
@@ -283,7 +285,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         }}
                       >
                         <Eye className="h-4 w-4 sm:mr-2" />
-                        <span className="hidden sm:inline">Details</span>
+                        <span className="hidden sm:inline">{t('equipment.details')}</span>
                       </Button>
                     </div>
                   </div>
@@ -298,9 +300,9 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
           <Card>
             <CardContent className="py-12 text-center">
               <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-gray-900 mb-2">No equipment found</h3>
+              <h3 className="text-gray-900 mb-2">{t('equipment.noEquipment')}</h3>
               <p className="text-gray-600">
-                Try adjusting your search filters.
+                {t('equipment.adjustFilters')}
               </p>
             </CardContent>
           </Card>

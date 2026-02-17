@@ -3,21 +3,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { LayoutGrid, Package, ClipboardList, Bell, User, HelpCircle, LogOut, Shield, FileText } from "lucide-react";
 import logo from "@/assets/images/logo8noback.png";
-
-const links = [
-    { name: "Dashboard", path: "/student/dashboard", icon: LayoutGrid },
-    { name: "Equipment", path: "/student/browse", icon: Package },
-    { name: "Borrowed Items", path: "/student/borrowed-items", icon: ClipboardList },
-    { name: "Score", path: "/student/score", icon: Shield },
-    { name: "Report", path: "/student/report", icon: FileText },
-    { name: "Notifications", path: "/student/notifications", icon: Bell },
-    { name: "Profile", path: "/student/profile", icon: User },
-    { name: "Help & Support", path: "/student/help", icon: HelpCircle },
-];
+import { useTranslation } from "react-i18next";
 
 export default function Sidebar({ isOpen, onClose }) {
     const location = useLocation();
     const navigate = useNavigate();
+    const { t } = useTranslation("common");
+
+    const links = [
+        { name: t("nav.dashboard"), path: "/student/dashboard", icon: LayoutGrid },
+        { name: t("nav.equipment"), path: "/student/browse", icon: Package },
+        { name: t("nav.borrowedItems"), path: "/student/borrowed-items", icon: ClipboardList },
+        { name: t("nav.score"), path: "/student/score", icon: Shield },
+        { name: t("nav.report"), path: "/student/report", icon: FileText },
+        { name: t("nav.notifications"), path: "/student/notifications", icon: Bell },
+        { name: t("nav.profile"), path: "/student/profile", icon: User },
+        { name: t("nav.helpSupport"), path: "/student/help", icon: HelpCircle },
+    ];
 
     return (
         <AnimatePresence>
@@ -33,8 +35,8 @@ export default function Sidebar({ isOpen, onClose }) {
                     <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10 bg-[#0a1b35]">
                         <img src={logo} alt="Tracknity logo" className="h-10 w-10 object-contain drop-shadow-sm" />
                         <div>
-                            <div className="text-white font-semibold text-lg leading-tight">Tracknity</div>
-                            <p className="text-xs text-slate-200/80">Student Portal</p>
+                            <div className="text-white font-semibold text-lg leading-tight">{t("misc.tracknity")}</div>
+                            <p className="text-xs text-slate-200/80">{t("misc.studentPortal")}</p>
                         </div>
                     </div>
 
@@ -79,9 +81,9 @@ export default function Sidebar({ isOpen, onClose }) {
                                 <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 border border-white/10">
                                     <LogOut className="h-4 w-4 text-sky-100" />
                                 </span>
-                                Log out
+                                {t("auth.logOut")}
                             </span>
-                            <span className="text-xs text-slate-200/80">Exit</span>
+                            <span className="text-xs text-slate-200/80">{t("misc.exit")}</span>
                         </button>
                     </div>
                 </div>
@@ -94,5 +96,3 @@ Sidebar.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func,
 };
-
-

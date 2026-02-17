@@ -1,0 +1,315 @@
+{
+    "dashboard": {
+        "title": "Ikibaho cya IT Staff",
+        "activeCheckouts": "Ibyasohotse",
+        "pendingReturns": "Ibyitegereje Gusubizwa",
+        "equipmentAvailable": "Ibikoresho Biboneka",
+        "alerts": "Impuruza",
+        "greetings": {
+            "morning": "Mwaramutse",
+            "afternoon": "Mwiriwe",
+            "evening": "Mwiriwe"
+        },
+        "pendingRequests": "Ubusabe Butegereje",
+        "wants": "arashaka",
+        "requested": "Yasabye:",
+        "approve": "Emeza",
+        "deny": "Hakanira",
+        "cancel": "Bireke",
+        "confirmDenial": "Emeza Guhakanira",
+        "denyTitle": "Hakanira Ubusabe",
+        "denyDesc": "Nyamuneka andika impamvu uhakaniye ubu busabe. Ibi birahita byohererezwa umunyeshuri.",
+        "denyPlaceholder": "urugero, Igikoresho kiri gukorwa, amanota make y'imyitwarire...",
+        "messages": {
+            "approved": "Ubusabe Bwemewe",
+            "denied": "Ubusabe Bwahakaniwe",
+            "failedApprove": "Byanze kwemeza ubusabe",
+            "failedDeny": "Byanze guhakanira ubusabe",
+            "provideReason": "Nyamuneka tanga impamvu yo guhakana.",
+            "loadError": "Byanze kugaraza amakuru ya dashboard"
+        },
+        "stats": {
+            "totalDevices": "Ibikoresho Byose",
+            "activeBorrows": "Ibyatijwe Ubu",
+            "lostMaint": "Ibyabuze / Ibyo Gukora",
+            "overdueItems": "Ibyakererewe"
+        },
+        "systemHealth": "Ubuzima bwa Sisitemu"
+    },
+    "equipment": {
+        "title": "Reba Ibikoresho",
+        "searchPlaceholder": "Shakisha izina, ubwoko, cyangwa ibisobanuro...",
+        "search": "Shakisha",
+        "category": "Icyiciro",
+        "allCategories": "Ibyiciro Byose",
+        "sortBy": "Tondeka ukurikije",
+        "sortOptions": {
+            "name": "Izina (A-Z)",
+            "category": "Icyiciro",
+            "availability": "Kuboneka"
+        },
+        "searching": "Birashakishwa...",
+        "showingItems": "Herekanywe ibintu {{count}}",
+        "noEquipment": "Nta gikoresho cyabonetse",
+        "adjustFilters": "Gerageza guhindura uko ushakisha.",
+        "details": "Ibisobanuro",
+        "status": {
+            "available": "Birahari",
+            "unavailable": "Ntibihari",
+            "maintenance": "Ibyo gukora",
+            "lost": "Ibyabuze"
+        },
+        "dialog": {
+            "editTitle": "Hindura Igikoresho",
+            "viewTitle": "Amakuru y'Igikoresho",
+            "updateDesc": "Hindura amakuru y'igikoresho hepfo.",
+            "viewDesc": "Reba amakuru arambuye n'imimerere by'iki kintu.",
+            "serialNumber": "Nimero iranga",
+            "location": "Aho giherereye",
+            "description": "Ibisobanuro",
+            "noDescription": "Nta bisobanuro byatanzwe.",
+            "name": "Izina ry'Igikoresho",
+            "selectType": "Hitamo ubwoko",
+            "selectStatus": "Hitamo imimerere",
+            "storageLocation": "Aho kibitse",
+            "cancel": "Bireke",
+            "save": "Bika Impinduka",
+            "delete": "Siba Igikoresho",
+            "close": "Funga",
+            "edit": "Hindura",
+            "confirmDelete": "Urakoze ushaka gusiba iki gikoresho? Ibi ntibishobora kugarurwa."
+        },
+        "messages": {
+            "saveSuccess": "Igikoresho cyabitswe neza",
+            "saveError": "Byanze kubika igikoresho",
+            "deleteSuccess": "Igikoresho cyasibwe neza",
+            "deleteError": "Byanze gusiba igikoresho"
+        },
+        "categories": {
+            "all": "Ibyiciro Byose",
+            "laptop": "Mudasobwa",
+            "projector": "Projecciteri",
+            "camera": "Kamera",
+            "microphone": "Mikoro",
+            "tablet": "Tableti",
+            "audio": "Ibifata Amajwi",
+            "accessories": "Ibikoresho Byungirira",
+            "other": "Ibindi"
+        }
+    },
+    "checkouts": {
+        "title": "Ibyasohotse Ubu",
+        "manageTransactions": "Gucunga Ihererekanya",
+        "manageDesc": "Genzura ubusabe, ibyo gufata, n'ibikoresho byatijwe.",
+        "newCheckout": "Gutanga Igikoresho",
+        "tabs": {
+            "requests": "Ubusabe",
+            "reservations": "Ibyo Gufata",
+            "active": "Ibyatijwe Ubu"
+        },
+        "table": {
+            "item": "Igikoresho",
+            "date": "Italiki",
+            "startTime": "Igihe Cyitangiriro",
+            "status": "Imimerere",
+            "actions": "Ibyo Gukora",
+            "loading": "Birimo gushakwa...",
+            "noItems": "Nta kintu cyabonetse"
+        },
+        "actions": {
+            "approve": "Emeza",
+            "deny": "Hakana",
+            "checkout": "Tanga",
+            "cancel": "Hagarika",
+            "tooEarly": "Kare cyane",
+            "view": "Reba"
+        },
+        "dialog": {
+            "denyTitle": "Hakana Ubusabe",
+            "denyDesc": "Andika impamvu yo guhakana ubu busabe.",
+            "reasonPlaceholder": "Impamvu yo guhakana...",
+            "confirmDeny": "Emeza Guhakana",
+            "cancel": "Bireke",
+            "viewDetails": "Amakuru y'Ibyasohotse",
+            "reviewDetails": "Reba amakuru y'ubu busabe bwa {{status}}",
+            "borrowerInfo": "Amakuru y'Uwatijwe",
+            "trustScore": "Amanota y'Icyizere:",
+            "name": "Izina",
+            "email": "Imeli",
+            "phone": "Telefoni",
+            "equipInfo": "Amakuru y'Igikoresho",
+            "equipName": "Izina ry'Igikoresho",
+            "reqDate": "Italiki y'Ubusabe / Gutanga",
+            "returnDate": "Igihe Kugarurira",
+            "logistics": "Aho Gikoreshwa",
+            "dest": "Aho kijya / Aho gikoreshwa",
+            "purpose": "Impamvu",
+            "photoTitle": "Ifoto y'Igikoresho",
+            "photoDesc": "Ifoto yafashwe mbere yo gutanga igikoresho.",
+            "noPhoto": "Nta Foto Ihari"
+        },
+        "messages": {
+            "statusUpdated": "Imimerere yahinduwe neza",
+            "statusError": "Byanze guhindura imimerere",
+            "provideReason": "Nyamuneka tanga impamvu.",
+            "requestDenied": "Ubusabe Bwahakaniwe",
+            "denyError": "Byanze guhakana ubusabe",
+            "reservationCancelled": "Ibyo gufata byahagaritswe",
+            "cancelError": "Byanze guhagarika",
+            "loadError": "Byanze kugaragaza amakuru",
+            "confirmApprove": "Urakoze ushaka kwemeza iki kintu?",
+            "confirmCancel": "Hagarika ibyo gufata?"
+        }
+    },
+    "reports": {
+        "title": "Raporo",
+        "generateReport": "Kora Raporo",
+        "reportFilters": "Ishungura rya Raporo",
+        "reportType": "Ubwoko bwa Raporo",
+        "resetFilters": "Subiza Ishungura",
+        "noReportGenerated": "Nta Raporo Yakozwe",
+        "useFiltersPrompt": "Koresha ishungura ryo hejuru kugirango ukore raporo. Kanda \"Kora Raporo\" kugirango ubone amakuru.",
+        "reportResults": "Ibisubizo bya Raporo",
+        "recordsFound": "Inyandiko {{count}} Zabonetse",
+        "exportCSV": "Ohereza CSV",
+        "exportPDF": "Ohereza PDF",
+        "lendingReport": "Raporo yo Gutiya",
+        "reservationReport": "Raporo yo Guteganya",
+        "utilizationReport": "Raporo y'Imikoreshereze",
+        "subtitle": "Igaragaza inyandiko {{count}} • Raporo ya Kinyamwuga",
+        "downloadPdf": "Kura Raporo ya PDF",
+        "searchPlaceholder": "Shakisha umunyeshuri, imeyili, cyangwa igikoresho...",
+        "filterBy": "Akayunguruzo:",
+        "loading": "Birimo gukurura inyandiko...",
+        "error": "Byanze gukurura raporo.",
+        "noRecords": "Nta nyandiko zibonetse zijyanye n'akayunguruzo.",
+        "table": {
+            "student": "Umunyeshuri",
+            "score": "Amanota",
+            "equipment": "Igikoresho",
+            "dates": "Amatariki",
+            "status": "Imimerere",
+            "borrowed": "Yatijwe",
+            "due": "Igarurwa"
+        },
+        "messages": {
+            "noData": "Nta makuru ahari yo gukura!"
+        }
+    },
+    "iot": {
+        "title": "Gukurikirana IoT",
+        "subtitle": "Kureba aho ibikoresho biherereye ako kanya",
+        "liveConnection": "Umurongo urakora",
+        "stats": {
+            "total": "Ibikoresho byose",
+            "online": "Biri ku murongo",
+            "offline": "Bitari ku murongo",
+            "lowBattery": "Umuriro Muke"
+        },
+        "filters": {
+            "searchPlaceholder": "Shakisha ID, igikoresho, cyangwa aho giherereye...",
+            "statusPlaceholder": "Akayunguruzo k'imimerere",
+            "allStatus": "Imimerere Yose",
+            "online": "Kiri ku murongo",
+            "offline": "Kidahari"
+        },
+        "map": {
+            "title": "Ikarita ya Kaminuza",
+            "desc": "Ibikoresho bigaragazwa kuri OpenStreetMap. Icyatsi = Online, Umutuku = Offline.",
+            "warningNoGps": "Ikitonderwa: Ibikoresho {{count}} byabonetse, ariko NTA GPS bifite!",
+            "youAreHere": "Uherereye hano",
+            "status": "Imimerere:"
+        },
+        "table": {
+            "title": "Amakuru y'Igikoresho",
+            "showing": "Igaragaza {{current}} muri {{total}} byose",
+            "page": "Paji {{current}} ya {{total}}",
+            "headers": {
+                "equipment": "Igikoresho",
+                "id": "Tracker ID",
+                "location": "Aho Giherereye",
+                "status": "Imimerere",
+                "battery": "Umuriro",
+                "temp": "Ubushyuhe",
+                "humidity": "Ubuhehere",
+                "lastSeen": "Giheruka Kuboneka"
+            },
+            "noTrackers": "Nta gikoresho kibonetse",
+            "lastSeen": "Giheruka: {{time}}",
+            "viewHistory": "Reba Amateka",
+            "historyTitle": "Amateka y'Igikoresho - {{equipment}}",
+            "trends": "Umuriro & Ubushyuhe (Isaha ishize)",
+            "batteryPercent": "Umuriro %",
+            "tempCelcius": "Ubushyuhe °C",
+            "currentBattery": "Umuriro Uriho",
+            "currentTemp": "Ubushyuhe Buriho"
+        },
+        "alerts": {
+            "offlineMessage": "Igikoresho {{equipment}} ({{id}}) kivuye ku murongo!",
+            "alertPrefix": "AMAKURU: {{message}}",
+            "offlineTitle": "Kivuye ku Murongo"
+        }
+    },
+    "profile": {
+        "title": "Umwirondoro Wanjye",
+        "account": {
+            "title": "Konti",
+            "desc": "Ibiranga konti",
+            "uploadAvatar": "Shyiraho Ifoto"
+        },
+        "personal": {
+            "title": "Amakuru Bwite",
+            "desc": "Vugurura amakuru yawe",
+            "firstName": "Izina rya mbere",
+            "lastName": "Izina rya kabiri",
+            "email": "Imeyili",
+            "saveChanges": "Bika impinduka"
+        }
+    },
+    "notifications": {
+        "title": "Amakuru",
+        "unread": "{{count}} Atarasomwa",
+        "desc": "Menya amakuru n'amabwiriza agezweho.",
+        "markAll": "Soma byose",
+        "noNotifications": "Nta makuru arahuguka",
+        "noNotificationsDesc": "Tuzakumenyesha igihe habaye ibintu by'ingenzi.",
+        "critical": "IBYIHUTIRWA",
+        "viewDetails": "Reba Ibikurikira",
+        "justNow": "Ubu nonaha",
+        "messages": {
+            "loadError": "Byanze kugarura amakuru",
+            "updateError": "Byanze guhindura amakuru",
+            "markAllSuccess": "Amakuru yose yasomwe",
+            "markAllError": "Byanze gusoma byose"
+        }
+    },
+    "classrooms": {
+        "title": "Gucunga Amashuri",
+        "pageTitle": "Amashuri",
+        "description": "Genzura ibikoresho by'amashuri n'ibibonekamo.",
+        "addClassroom": "Ongeramo Ishuri",
+        "addNewTitle": "Ongeramo Ishuri Rishya",
+        "addNewDesc": "Ongeramo ishuri muri sisitemu kandi ugaragaze ibikoresho byaryo.",
+        "roomName": "Izina ry'Ishuri",
+        "roomNamePlaceholder": "urugero. Ishuri 304",
+        "hasScreen": "Ririmo Ecran?",
+        "screenYes": "Yego, TV/Ecran irashyizweho",
+        "screenNo": "Nta Ecran ihari",
+        "save": "Bika Ishuri",
+        "cancel": "Bireke",
+        "table": {
+            "classroom": "Ishuri",
+            "equipStatus": "Imimerere y'Ibikoresho",
+            "actions": "Ibyo Gukora",
+            "noClassrooms": "Nta shuri ryabonetse. Ongeramo rimwe kugirango utangire.",
+            "screenInstalled": "Ecran Irashyizweho",
+            "standardRoom": "Ishuri Risanzwe"
+        },
+        "messages": {
+            "addSuccess": "Ishuri ryongerewe neza",
+            "updateSuccess": "Ishuri ryavuguruwe",
+            "deleteSuccess": "Ishuri ryasibwe",
+            "confirmDelete": "Urakoze ushaka gusiba iri shuri?"
+        }
+    }
+}

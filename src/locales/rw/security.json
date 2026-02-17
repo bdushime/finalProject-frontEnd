@@ -1,0 +1,263 @@
+{
+    "dashboard": {
+        "title": "Incamake y'Umutekano",
+        "actions": {
+            "browseInventory": "Reba Ibikoresho",
+            "scanVerify": "Genzura/Scan"
+        },
+        "stats": {
+            "activeCheckouts": "Ibyasohotse",
+            "currentlyOut": "Biracyari hanze",
+            "securityAlerts": "Imenyesha ry'Umutekano",
+            "overdueItems": "Ibyarenze Igihe",
+            "systemStatus": "Imimerere ya Sisitemu",
+            "allSystemsNormal": "Sisitemu yose ikora neza",
+            "online": "Irakora"
+        },
+        "charts": {
+            "activityTrends": "Imikorere",
+            "checkoutsVsOverdue": "Ibyasohotse vs Ibyarenze",
+            "checkouts": "Ibyasohotse",
+            "failedOverdue": "Ibyarenze/Impuruza",
+            "topEquipment": "Ibikoresho Bikoreshwa Cyane",
+            "mostAccessedCategories": "Ibyiciro Bikoreshwa Cyane",
+            "noData": "Nta makuru"
+        },
+        "recentLogs": "Inyandiko z'Ibikorwa Biheruka"
+    },
+    "devices": {
+        "title": "Reba Ibikoresho",
+        "deviceDetails": "Amakuru y'Igikoresho",
+        "movementHistory": "Amateka y'Imigendere",
+        "deviceUsage": "Imikoreshereze y'Igikoresho"
+    },
+    "accessLogs": {
+        "title": "Inyandiko z'Ubwinjira",
+        "subtitle": "Ibikorwa bya vuba byo kwinjira no gusohora ibikoresho",
+        "viewLogs": "Reba Inyandiko",
+        "viewAll": "Reba Byose",
+        "stats": {
+            "totalBorrowed": "Ibyatijwe Byose",
+            "activeLoans": "Ibitagarutse",
+            "totalOverdue": "Ibyarenze Igihe Byose",
+            "needsAction": "Birakenewe Gukemurwa",
+            "lostItems": "Ibikoresho Byabuze",
+            "reportedLost": "Byamenyekanye ko Byabuze",
+            "damagedItems": "Ibikoresho Byangiritse",
+            "maintenance": "Gusanwa"
+        },
+        "filters": {
+            "searchPlaceholder": "Shakisha umunyeshuri, igikoresho, cyangwa numero...",
+            "status": "Imimerere",
+            "action": "Igikorwa",
+            "time": "Igihe",
+            "allStatus": "Imimerere Yose",
+            "allActions": "Ibikorwa Byose",
+            "today": "Uyu Munsi",
+            "week": "Iki Cyumweru",
+            "month": "Ukwezi",
+            "allTime": "Bihe Byose"
+        },
+        "table": {
+            "logId": "Nomero y'Inyandiko",
+            "user": "Uwinjiye",
+            "action": "Igikorwa",
+            "equipment": "Igikoresho",
+            "location": "Aho Giherereye",
+            "timestamp": "Igihe",
+            "status": "Imimerere",
+            "event": "Igikorwa",
+            "dateTime": "Itariki/Igihe",
+            "device": "Igikoresho",
+            "eventDetails": "Amakuru y'Igikorwa",
+            "fullTime": "Igihe Cyose",
+            "notes": "Inyandiko / Intego",
+            "viewDeviceHistory": "Reba Amateka y'Igikoresho",
+            "noLogs": "Nta nyandiko zabonetse."
+        },
+        "status": {
+            "success": "Byagenze Neza",
+            "failed": "Byanze",
+            "pending": "Tegereje",
+            "suspicious": "Ibitizewe",
+            "checkedOut": "Ibyasohotse",
+            "returned": "Ibyagarutse",
+            "overdue": "Ibyarenze Igihe"
+        },
+        "actions": {
+            "checkout": "Gusohora",
+            "return": "Kugarura",
+            "violation": "Kurenga Amabwiriza",
+            "movement": "Uruhererekane"
+        }
+    },
+    "activeCheckouts": {
+        "title": "Ibyasohotse",
+        "stats": {
+            "totalBorrowed": "Ibikoresho Byatijwe",
+            "totalLost": "Ibikoresho Byabuze",
+            "totalDamaged": "Ibikoresho Byangiritse",
+            "totalOverdue": "Ibikoresho Byarenze Igihe",
+            "lastMonth": "ukwezi gushize"
+        }
+    },
+    "browseDevices": {
+        "title": "Reba Ibikoresho",
+        "searchPlaceholder": "Shakisha izina, ubwoko, nomero...",
+        "filters": {
+            "category": "Icyiciro",
+            "status": "Imimerere",
+            "allCategories": "Ibyiciro Byose",
+            "allStatus": "Imimerere Yose",
+            "clearFilters": "Siba Akayunguruzo"
+        },
+        "tooltips": {
+            "viewHistory": "Reba Amateka y'Imigendere",
+            "edit": "Hindura Igikoresho",
+            "delete": "Siba Igikoresho"
+        },
+        "labels": {
+            "available": "ahari",
+            "sn": "SN",
+            "deviceName": "Izina ry'Igikoresho",
+            "category": "Icyiciro",
+            "brand": "Uruganda",
+            "model": "Ubwoko",
+            "serialNumber": "Nomero y'Igikoresho",
+            "condition": "Uko Kimeze",
+            "status": "Imimerere",
+            "location": "Aho Giherereye",
+            "department": "Ishami",
+            "availableQty": "Ibihari",
+            "totalQty": "Umubare Wose",
+            "purchasePrice": "Igiciro ($)",
+            "purchaseDate": "Itariki cyaguriweho",
+            "warrantyExpiry": "Itariki Garanti izarangiriraho",
+            "description": "Insobanuro",
+            "specifications": "Ibiranga Igikoresho (bitandukanye na virugule)"
+        },
+        "placeholders": {
+            "selectCategory": "Hitamo icyiciro",
+            "enterDescription": "Andika insobanuro z'igikoresho...",
+            "exampleName": "urugero, MacBook Pro 16\"",
+            "exampleBrand": "urugero, Apple",
+            "exampleModel": "urugero, MacBook Pro 16\" M3 Pro",
+            "exampleSN": "urugero, SN-MBP-001",
+            "exampleLocation": "urugero, Inyubako A, Icyumba 101",
+            "exampleDept": "urugero, Ishami rya IT",
+            "exampleSpecs": "urugero, 32GB RAM, 1TB SSD"
+        },
+        "dialogs": {
+            "addTitle": "Ongeraho Igikoresho Gishya",
+            "addDescription": "Injiza amakuru y'igikoresho gishya",
+            "editTitle": "Hindura Igikoresho",
+            "editDescription": "Vugurura amakuru ya",
+            "deleteTitle": "Urahoza?",
+            "deleteDescription": "Igikorwa ntikizagarurwa. Ibi bizahanagura burundu igikoresho",
+            "deleteWarning": "n'amakuru yacyo yose."
+        },
+        "emptyState": {
+            "title": "Nta gikoresho cyabonetse",
+            "description": "Gerageza guhindura ishakisha cyangwa akayunguruzo"
+        }
+    },
+    "deviceMovementHistory": {
+        "title": "Amateka y'Imigendere y'Igikoresho",
+        "backToDevices": "Subira ku Bikoresho",
+        "totalEvents": "Ibikorwa Byose",
+        "loading": "Itengereza amateka...",
+        "noDeviceSelected": {
+            "title": "Nta Gikoresho Cyahiswemo",
+            "description": "Hitamo igikoresho kugira ngo urebe amateka y'imigendere yacyo.",
+            "button": "Reba Ibikoresho"
+        },
+        "noHistory": {
+            "title": "Nta Mateka y'Imigendere",
+            "description": "Nta mateka y'imigendere yabonetse kuri"
+        },
+        "stats": {
+            "totalMovements": "Ingendo Zose",
+            "checkouts": "Ibyasohotse",
+            "violations": "Ibyarenze Amabwiriza",
+            "uniqueLocations": "Ahantu Hatandukanye",
+            "returns": "Ibyagarutse"
+        },
+        "timeline": {
+            "filters": {
+                "label": "Akayunguruzo:",
+                "type": "Ubwoko bw'Igikorwa",
+                "status": "Imimerere",
+                "export": "Manura Raporo",
+                "allEvents": "Ibikorwa Byose",
+                "checkouts": "Ibyasohotse",
+                "returns": "Ibyagarutse",
+                "movements": "Ingendo",
+                "violations": "Ibyarenze Amabwiriza",
+                "allStatus": "Imimerere Yose",
+                "active": "Birakora",
+                "completed": "Byarangiye",
+                "resolved": "Byakemutse"
+            },
+            "empty": "Nta mateka y'imigendere yabonetse",
+            "event": "igikorwa",
+            "events": "ibikorwa",
+            "details": {
+                "location": "Aho Giherereye:",
+                "user": "Umukoresha:",
+                "duration": "Igihe Cyamaze:",
+                "coordinates": "Kordinater:"
+            }
+        }
+    },
+    "reports": {
+        "title": "Raporo",
+        "types": {
+            "inventory": "Raporo y'Ikigega cy'Ibikoresho",
+            "damaged": "Raporo y'Ibikoresho Byangiritse",
+            "lost": "Raporo y'Ibikoresho Byabuze",
+            "utilization": "Raporo y'Imikoreshereze y'Ibikoresho",
+            "logs": "Raporo y'Ingendo z'Ibikoresho"
+        }
+    },
+    "notifications": {
+        "title": "Amakuru y'Umutekano",
+        "subtitle": "Kurikirana ingendo z'ibikoresho n'imenyesha ry'umutekano",
+        "activeViolations": "Ibyarenze Amabwiriza",
+        "violationSummary": {
+            "title": "Ibyarenze Imbibi",
+            "text": "Ibikoresho {{count}} byarenze imbibi z'ahantu byemerewe. Hakenewe igikorwa cyihuse.",
+            "viewLogs": "Reba Inyandiko Zose"
+        },
+        "empty": "Nta makuru ahari",
+        "details": {
+            "currentLocation": "Aho Giherereye:",
+            "authorizedZone": "Ahantu Byemewe:",
+            "violationType": "Ubwoko bw'Ikosa:"
+        },
+        "actions": {
+            "device": "Igikoresho",
+            "logs": "Inyandiko"
+        }
+    },
+    "profile": {
+        "title": "Umwirondoro Wanjye",
+        "account": {
+            "title": "Konti",
+            "desc": "Amakuru y'ibanze",
+            "uploadAvatar": "Hindura Ifoto"
+        },
+        "personal": {
+            "title": "Amakuru Yihariye",
+            "desc": "Vugurura amakuru y'umwirondoro wawe",
+            "firstName": "Izina",
+            "lastName": "Irindi Zina",
+            "email": "Imeri",
+            "saveChanges": "Bika Impinduka"
+        }
+    },
+    "deviceUsage": {
+        "projectors": "Imashini Zerekana Amashusho",
+        "extensionCables": "Insinga Z'amashanyarazi",
+        "tablets": "Tablete"
+    }
+}

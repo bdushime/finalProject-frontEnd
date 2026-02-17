@@ -1,0 +1,25 @@
+{
+    "hero": {
+        "title": "Gucunga Ibikoresho mu Buryo Bwiza",
+        "subtitle": "Kurikirana, gucunga no kunoza ibikoresho by'ishuri ryawe mu buryo bworoshye.",
+        "getStarted": "Tangira",
+        "learnMore": "Menya Byinshi"
+    },
+    "features": {
+        "title": "Ibiranga",
+        "realTimeTracking": "Gukurikirana mu Gihe Nyacyo",
+        "realTimeTrackingDesc": "Kureba aho ibikoresho biri n'imimerere yabyo mu gihe nyacyo.",
+        "smartAlerts": "Imenyesha Byikora",
+        "smartAlertsDesc": "Kwibutsa ku matariki y'isubiza, gusanwa, n'ububoneka.",
+        "analytics": "Isesengura",
+        "analyticsDesc": "Kurikirana uko ibikoresho bikoreshwa no kunoza ububiko.",
+        "qrScanning": "QR Code",
+        "qrScanningDesc": "Gusohora no gusubiza ibikoresho vuba ukoresheje QR code."
+    },
+    "nav": {
+        "features": "Ibiranga",
+        "benefits": "Inyungu",
+        "contact": "Twandikire",
+        "signIn": "Injira"
+    }
+}

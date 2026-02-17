@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-    Bell, Clock, AlertTriangle, CheckCircle, 
-    ExternalLink, CheckCheck, Loader2 
+import {
+    Bell, Clock, AlertTriangle, CheckCircle,
+    ExternalLink, CheckCheck, Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 // Removed PageHeader import
@@ -12,8 +12,10 @@ import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export default function ITStaffNotifications() {
+    const { t } = useTranslation(["itstaff", "common"]);
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ export default function ITStaffNotifications() {
             setNotifications(res.data);
         } catch (err) {
             console.error("Failed to load notifications", err);
-            toast.error("Could not load notifications");
+            toast.error(t('notifications.messages.loadError'));
         } finally {
             setLoading(false);
         }
@@ -74,7 +76,7 @@ export default function ITStaffNotifications() {
         try {
             // Optimistic Update
             setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
-            
+
             await api.put(`/notifications/${id}/read`);
 
             if (relatedId) {
@@ -82,7 +84,7 @@ export default function ITStaffNotifications() {
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to update notification");
+            toast.error(t('notifications.messages.updateError'));
         }
     };
 
@@ -91,13 +93,13 @@ export default function ITStaffNotifications() {
         try {
             // Optimistic Update
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-            
+
             await api.put('/notifications/mark-all-read');
-            toast.success("All notifications marked as read");
+            toast.success(t('notifications.messages.markAllSuccess'));
         } catch (err) {
             console.error(err);
-            toast.error("Failed to mark all as read");
-            fetchNotifications(); 
+            toast.error(t('notifications.messages.markAllError'));
+            fetchNotifications();
         } finally {
             setMarkingAll(false);
         }
@@ -123,24 +125,24 @@ export default function ITStaffNotifications() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
-                            Notifications
+                            {t('notifications.title')}
                             {unreadCount > 0 && (
                                 <Badge className="bg-red-600 hover:bg-red-700 text-sm">
-                                    {unreadCount} Unread
+                                    {t('notifications.unread', { count: unreadCount })}
                                 </Badge>
                             )}
                         </h1>
-                        <p className="text-gray-500 text-sm mt-1">Stay updated with alerts and requests.</p>
+                        <p className="text-gray-500 text-sm mt-1">{t('notifications.desc')}</p>
                     </div>
                     {unreadCount > 0 && (
-                        <Button 
-                            variant="outline" 
-                            onClick={handleMarkAllRead} 
+                        <Button
+                            variant="outline"
+                            onClick={handleMarkAllRead}
                             disabled={markingAll}
                             className="gap-2"
                         >
                             {markingAll ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCheck className="w-4 h-4" />}
-                            Mark all as read
+                            {t('notifications.markAll')}
                         </Button>
                     )}
                 </div>
@@ -151,8 +153,8 @@ export default function ITStaffNotifications() {
                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Bell className="h-8 w-8 text-gray-300" />
                             </div>
-                            <p className="font-medium">No notifications yet</p>
-                            <p className="text-sm mt-1">We'll alert you when important events happen.</p>
+                            <p className="font-medium">{t('notifications.noNotifications')}</p>
+                            <p className="text-sm mt-1">{t('notifications.noNotificationsDesc')}</p>
                         </div>
                     ) : (
                         notifications.map((n) => {
@@ -186,12 +188,12 @@ export default function ITStaffNotifications() {
                                                 <div className="flex items-center gap-3 mt-3">
                                                     <span className="text-xs text-gray-400 flex items-center gap-1">
                                                         <Clock className="w-3 h-3" />
-                                                        {n.createdAt ? format(new Date(n.createdAt), "MMM d, h:mm a") : 'Just now'}
+                                                        {n.createdAt ? format(new Date(n.createdAt), "MMM d, h:mm a") : t('notifications.justNow')}
                                                     </span>
 
                                                     {isCritical && (
                                                         <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-5 ${getSeverityColor(severity)}`}>
-                                                            CRITICAL
+                                                            {t('notifications.critical')}
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -206,7 +208,7 @@ export default function ITStaffNotifications() {
                                                     onClick={() => handleMarkRead(n._id, n.relatedId)}
                                                 >
                                                     <ExternalLink className="h-3 w-3 mr-1.5" />
-                                                    View Details
+                                                    {t('notifications.viewDetails')}
                                                 </Button>
                                             )}
                                         </div>

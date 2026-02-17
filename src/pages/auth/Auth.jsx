@@ -1,109 +1,116 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AtSign, CreditCard } from "lucide-react";
-import { toast } from "sonner"; 
-import api from "@/utils/api"; 
-// 👇 IMPORT AUTH CONTEXT
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AtSign, CreditCard, AlertCircle, CheckCircle2 } from "lucide-react";
+import api from "@/utils/api";
 import { useAuth } from "./AuthContext";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 
 export default function Auth() {
+    const { t } = useTranslation("auth");
     const [isSignUp, setIsSignUp] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Feedback state for inline alerts
+    const [feedback, setFeedback] = useState({ type: null, message: null }); // type: 'success' | 'error'
+
     const navigate = useNavigate();
-    
-    // 👇 GET LOGIN FUNCTION FROM CONTEXT
     const { login } = useAuth();
 
     const [loginData, setLoginData] = useState({ email: "", password: "" });
-    
-    // --- UPDATED STATE TO INCLUDE STUDENT ID ---
+
     const [signUpData, setSignUpData] = useState({
         name: "",
         username: "",
-        studentId: "", // <--- Added this
+        studentId: "",
         email: "",
         password: "",
         confirmPassword: ""
     });
 
-    // --- 1. SMART LOGIN LOGIC (UPDATED) ---
+    const clearFeedback = () => setFeedback({ type: null, message: null });
+
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        clearFeedback();
 
         try {
             const res = await api.post('/auth/login', loginData);
-
-            // A. Save Token Manually
             localStorage.setItem('token', res.data.token);
-
-            // B. Update Context State (This updates the UI immediately & saves 'user' to localstorage)
             login(res.data);
-            
-            toast.success(`Welcome back, ${res.data.username}!`);
 
-            // C. ROUTING LOGIC
-            const role = res.data.role;
+            // Success feedback
+            setFeedback({ type: 'success', message: t("welcomeUser", { name: res.data.username }) });
 
-            switch(role) {
-                case 'Student':
-                    navigate("/student/dashboard");
-                    break;
-                case 'Admin':
-                    navigate("/admin/dashboard");
-                    break;
-                case 'Security':
-                    navigate("/security/dashboard");
-                    break;
-                case 'IT':
-                case 'IT_Staff': 
-                    navigate("/it/dashboard");
-                    break;
-                default:
-                    console.warn("Unknown role detected:", role);
-                    navigate("/student/dashboard");
-            }
+            // Small delay to let user see success message before redirect
+            setTimeout(() => {
+                const role = res.data.role;
+                switch (role) {
+                    case 'Student':
+                        navigate("/student/dashboard");
+                        break;
+                    case 'Admin':
+                        navigate("/admin/dashboard");
+                        break;
+                    case 'Security':
+                        navigate("/security/dashboard");
+                        break;
+                    case 'IT':
+                    case 'IT_Staff':
+                        navigate("/it/dashboard");
+                        break;
+                    default:
+                        console.warn("Unknown role detected:", role);
+                        navigate("/student/dashboard");
+                }
+            }, 1000);
 
         } catch (err) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Login failed. Check your credentials.");
+            // Generic error message as requested
+            setFeedback({ type: 'error', message: t("loginFailed") });
         } finally {
             setIsLoading(false);
         }
     };
 
-    // --- 2. SIGNUP LOGIC ---
     const handleSignUpSubmit = async (e) => {
         e.preventDefault();
+        clearFeedback();
 
         if (signUpData.password !== signUpData.confirmPassword) {
-            toast.error("Passwords do not match!");
+            setFeedback({ type: 'error', message: t("passwordsDoNotMatch") });
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // --- UPDATED PAYLOAD TO SEND STUDENT ID ---
             const payload = {
                 fullName: signUpData.name,
                 username: signUpData.username,
-                studentId: signUpData.studentId, // <--- Included in payload
+                studentId: signUpData.studentId,
                 email: signUpData.email,
                 password: signUpData.password
             };
 
             await api.post('/auth/register', payload);
 
-            toast.success("Account created successfully! Please sign in.");
-            toggleMode(); 
-            setSignUpData({ name: "", username: "", studentId: "", email: "", password: "", confirmPassword: "" });
+            setFeedback({ type: 'success', message: t("accountCreatedSuccess") });
+
+            // Clear form and toggle mode after success
+            setTimeout(() => {
+                toggleMode();
+                setSignUpData({ name: "", username: "", studentId: "", email: "", password: "", confirmPassword: "" });
+                clearFeedback(); // Clear feedback when switching to login view
+            }, 1500);
 
         } catch (err) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Registration failed. Try a different username/email.");
+            setFeedback({ type: 'error', message: t("registrationFailed") });
         } finally {
             setIsLoading(false);
         }
@@ -113,9 +120,9 @@ export default function Auth() {
         setIsSignUp(!isSignUp);
         setShowPassword(false);
         setShowConfirmPassword(false);
+        clearFeedback(); // Clear feedback on toggle
     };
 
-    // --- STYLES ---
     const inputStyle = {
         width: "100%",
         height: "2.75rem",
@@ -153,6 +160,36 @@ export default function Auth() {
         transition: "color 0.25s ease"
     };
 
+    // Inline Alert Component
+    const FeedbackAlert = () => {
+        if (!feedback.message) return null;
+
+        const isError = feedback.type === 'error';
+        const bgColor = isError ? "#FEF2F2" : "#F0FDF4"; // Red-50 : Green-50
+        const borderColor = isError ? "#FECACA" : "#BBF7D0"; // Red-200 : Green-200
+        const textColor = isError ? "#991B1B" : "#166534"; // Red-800 : Green-800
+        const Icon = isError ? AlertCircle : CheckCircle2;
+
+        return (
+            <div style={{
+                backgroundColor: bgColor,
+                border: `1px solid ${borderColor}`,
+                color: textColor,
+                padding: "0.75rem 1rem",
+                borderRadius: "0.5rem",
+                marginBottom: "1.5rem",
+                fontSize: "0.875rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                animation: "fadeIn 0.3s ease-in-out"
+            }}>
+                <Icon size={18} />
+                <span>{feedback.message}</span>
+            </div>
+        );
+    };
+
     return (
         <div style={{
             minHeight: "100vh",
@@ -165,15 +202,20 @@ export default function Auth() {
             position: "relative",
             overflow: "hidden"
         }}>
+            {/* Language Switcher - top right */}
+            <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", zIndex: 50 }}>
+                <LanguageSwitcher variant="light" />
+            </div>
+
             {/* Background blobs */}
-             <div style={{ position: "absolute", top: "-150px", right: "-100px", width: "500px", height: "500px", background: "linear-gradient(135deg, rgba(0, 180, 216, 0.25) 0%, rgba(24, 100, 171, 0.15) 100%)", borderRadius: "42% 58% 70% 30% / 45% 45% 55% 55%", filter: "blur(40px)", animation: "morph 8s ease-in-out infinite", zIndex: 0 }} />
+            <div style={{ position: "absolute", top: "-150px", right: "-100px", width: "500px", height: "500px", background: "linear-gradient(135deg, rgba(0, 180, 216, 0.25) 0%, rgba(24, 100, 171, 0.15) 100%)", borderRadius: "42% 58% 70% 30% / 45% 45% 55% 55%", filter: "blur(40px)", animation: "morph 8s ease-in-out infinite", zIndex: 0 }} />
             <div style={{ position: "absolute", bottom: "-100px", left: "-80px", width: "400px", height: "400px", background: "linear-gradient(135deg, rgba(144, 224, 239, 0.2) 0%, rgba(0, 180, 216, 0.1) 100%)", borderRadius: "58% 42% 30% 70% / 55% 55% 45% 45%", filter: "blur(40px)", animation: "morph 8s ease-in-out infinite 2s", zIndex: 0 }} />
 
             {/* Main Container */}
             <div style={{
                 width: "100%",
                 maxWidth: "900px",
-                height: "650px", 
+                height: "650px",
                 backgroundColor: "#ffffff",
                 borderRadius: "1.5rem",
                 boxShadow: "0 25px 80px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.05)",
@@ -202,13 +244,13 @@ export default function Auth() {
                 }}>
                     <div style={{ textAlign: "center", position: "relative", zIndex: 2 }}>
                         <h2 style={{ fontSize: "2rem", fontWeight: 700, color: "#ffffff", marginBottom: "1rem" }}>
-                            {isSignUp ? "Welcome Back!" : "Hello, Friend!"}
+                            {isSignUp ? t("welcomeBack") : t("helloFriend")}
                         </h2>
                         <p style={{ fontSize: "1rem", color: "rgba(255, 255, 255, 0.85)", lineHeight: 1.6, marginBottom: "2rem", maxWidth: "280px" }}>
-                            {isSignUp ? "Already have an account? Sign in to continue." : "Don't have an account? Sign up to start."}
+                            {isSignUp ? t("alreadyHaveAccount") : t("dontHaveAccount")}
                         </p>
                         <button onClick={toggleMode} style={{ padding: "0.875rem 2.5rem", backgroundColor: "transparent", color: "#ffffff", border: "2px solid rgba(255, 255, 255, 0.8)", borderRadius: "2rem", fontWeight: 600, cursor: "pointer" }}>
-                            {isSignUp ? "Sign In" : "Sign Up"}
+                            {isSignUp ? t("signIn") : t("signUp")}
                         </button>
                     </div>
                 </div>
@@ -225,56 +267,58 @@ export default function Auth() {
                     transition: "all 0.4s ease",
                     pointerEvents: isSignUp ? "auto" : "none"
                 }}>
-                    <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "#111827" }}>Create Account</h1>
-                    
-                    {/* Added overflow-y-auto to allow scrolling if form gets too tall on small screens */}
-                    <form onSubmit={handleSignUpSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.6rem", overflowY: 'auto', maxHeight: '550px', paddingRight: '5px' }}>
+                    <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "#111827" }}>{t("createAccount")}</h1>
+
+                    {/* Feedback Alert for Sign Up */}
+                    <div style={{ marginBottom: feedback.message ? '1rem' : '0' }}>
+                        <FeedbackAlert />
+                    </div>
+
+                    <form onSubmit={handleSignUpSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.6rem", overflowY: 'auto', maxHeight: '500px', paddingRight: '5px' }}>
                         <div>
-                            <label style={labelStyle}>Full Name</label>
+                            <label style={labelStyle}>{t("fullName")}</label>
                             <div style={{ position: "relative" }}>
                                 <User style={iconStyle} />
-                                <input type="text" placeholder="John Doe" value={signUpData.name} onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })} required style={inputStyle} />
+                                <input type="text" placeholder={t("fullNamePlaceholder")} value={signUpData.name} onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })} required style={inputStyle} />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>Username</label>
+                            <label style={labelStyle}>{t("username")}</label>
                             <div style={{ position: "relative" }}>
                                 <AtSign style={iconStyle} />
-                                <input type="text" placeholder="johndoe123" value={signUpData.username} onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value })} required style={inputStyle} />
+                                <input type="text" placeholder={t("usernamePlaceholder")} value={signUpData.username} onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value })} required style={inputStyle} />
                             </div>
                         </div>
 
-                        {/* --- NEW STUDENT ID FIELD --- */}
                         <div>
-                            <label style={labelStyle}>Student ID</label>
+                            <label style={labelStyle}>{t("studentId")}</label>
                             <div style={{ position: "relative" }}>
                                 <CreditCard style={iconStyle} />
-                                <input 
-                                    type="text" 
-                                    placeholder="2024001" 
-                                    value={signUpData.studentId} 
-                                    onChange={(e) => setSignUpData({ ...signUpData, studentId: e.target.value })} 
-                                    required 
-                                    style={inputStyle} 
+                                <input
+                                    type="text"
+                                    placeholder={t("studentIdPlaceholder")}
+                                    value={signUpData.studentId}
+                                    onChange={(e) => setSignUpData({ ...signUpData, studentId: e.target.value })}
+                                    required
+                                    style={inputStyle}
                                 />
                             </div>
                         </div>
-                        {/* --------------------------- */}
 
                         <div>
-                            <label style={labelStyle}>Email Address</label>
+                            <label style={labelStyle}>{t("emailAddress")}</label>
                             <div style={{ position: "relative" }}>
                                 <Mail style={iconStyle} />
-                                <input type="email" placeholder="student@example.com" value={signUpData.email} onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })} required style={inputStyle} />
+                                <input type="email" placeholder={t("emailPlaceholder")} value={signUpData.email} onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })} required style={inputStyle} />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>Password</label>
+                            <label style={labelStyle}>{t("password")}</label>
                             <div style={{ position: "relative" }}>
                                 <Lock style={iconStyle} />
-                                <input type={showPassword ? "text" : "password"} placeholder="••••••••" value={signUpData.password} onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
+                                <input type={showPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={signUpData.password} onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -282,10 +326,10 @@ export default function Auth() {
                         </div>
 
                         <div>
-                            <label style={labelStyle}>Confirm Password</label>
+                            <label style={labelStyle}>{t("confirmPassword")}</label>
                             <div style={{ position: "relative" }}>
                                 <Lock style={iconStyle} />
-                                <input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" value={signUpData.confirmPassword} onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
+                                <input type={showConfirmPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={signUpData.confirmPassword} onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
                                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -293,7 +337,7 @@ export default function Auth() {
                         </div>
 
                         <button type="submit" disabled={isLoading} style={{ width: "100%", height: "2.75rem", background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)", color: "#ffffff", border: "none", borderRadius: "0.625rem", fontWeight: 600, cursor: isLoading ? "not-allowed" : "pointer", marginTop: "0.5rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-                            {isLoading ? "Creating..." : <>Create Account <ArrowRight size={18} /></>}
+                            {isLoading ? t("creating") : <>{t("createAccount")} <ArrowRight size={18} /></>}
                         </button>
                     </form>
                 </div>
@@ -311,23 +355,28 @@ export default function Auth() {
                     pointerEvents: isSignUp ? "none" : "auto",
                     marginLeft: "auto"
                 }}>
-                    <h1 style={{ fontSize: "1.875rem", fontWeight: 700, marginBottom: "0.5rem", color: "#111827" }}>Sign In</h1>
-                    <p style={{ fontSize: "0.9375rem", color: "#6b7280", marginBottom: "2rem" }}>Welcome back to Tracknity</p>
+                    <h1 style={{ fontSize: "1.875rem", fontWeight: 700, marginBottom: "0.5rem", color: "#111827" }}>{t("signIn")}</h1>
+                    <p style={{ fontSize: "0.9375rem", color: "#6b7280", marginBottom: "2rem" }}>{t("welcomeBackTracknity")}</p>
+
+                    {/* Feedback Alert for Login */}
+                    <div style={{ marginBottom: feedback.message ? '1rem' : '0' }}>
+                        <FeedbackAlert />
+                    </div>
 
                     <form onSubmit={handleLoginSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                         <div>
-                            <label style={labelStyle}>Email Address</label>
+                            <label style={labelStyle}>{t("emailAddress")}</label>
                             <div style={{ position: "relative" }}>
                                 <Mail style={iconStyle} />
-                                <input type="email" placeholder="student@example.com" value={loginData.email} onChange={(e) => setLoginData({ ...loginData, email: e.target.value })} required style={inputStyle} />
+                                <input type="email" placeholder={t("emailPlaceholder")} value={loginData.email} onChange={(e) => setLoginData({ ...loginData, email: e.target.value })} required style={inputStyle} />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>Password</label>
+                            <label style={labelStyle}>{t("password")}</label>
                             <div style={{ position: "relative" }}>
                                 <Lock style={iconStyle} />
-                                <input type={showPassword ? "text" : "password"} placeholder="••••••••" value={loginData.password} onChange={(e) => setLoginData({ ...loginData, password: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
+                                <input type={showPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={loginData.password} onChange={(e) => setLoginData({ ...loginData, password: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -336,13 +385,13 @@ export default function Auth() {
 
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <label style={{ display: "flex", alignItems: "center", color: "#6b7280", cursor: "pointer", fontSize: "0.875rem" }}>
-                                <input type="checkbox" style={{ marginRight: "0.5rem", accentColor: "#1864ab" }} /> Remember me
+                                <input type="checkbox" style={{ marginRight: "0.5rem", accentColor: "#1864ab" }} /> {t("rememberMe")}
                             </label>
-                            <Link to="/forgot-password" style={{ color: "#1864ab", textDecoration: "none", fontSize: "0.875rem", fontWeight: 600 }}>Forgot password?</Link>
+                            <Link to="/forgot-password" style={{ color: "#1864ab", textDecoration: "none", fontSize: "0.875rem", fontWeight: 600 }}>{t("forgotPassword")}</Link>
                         </div>
 
                         <button type="submit" disabled={isLoading} style={{ width: "100%", height: "3rem", background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)", color: "#ffffff", border: "none", borderRadius: "0.625rem", fontWeight: 600, cursor: isLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-                            {isLoading ? "Signing in..." : <>Sign In <ArrowRight size={18} /></>}
+                            {isLoading ? t("signingIn") : <>{t("signIn")} <ArrowRight size={18} /></>}
                         </button>
                     </form>
                 </div>

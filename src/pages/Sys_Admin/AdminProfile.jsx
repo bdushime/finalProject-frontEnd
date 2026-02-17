@@ -3,7 +3,10 @@ import AdminLayout from './components/AdminLayout';
 import { User, Mail, Shield, Smartphone, Key, Save } from 'lucide-react';
 // import { toast } from 'sonner'; // Uncomment if sonner is available
 
+import { useTranslation } from "react-i18next";
+
 const AdminProfile = () => {
+    const { t } = useTranslation(["admin", "common"]);
     // Mock Admin Data - In real app, fetch from localStorage or API
     const [formData, setFormData] = useState({
         displayName: 'System Administrator',
@@ -26,8 +29,8 @@ const AdminProfile = () => {
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">My Profile</h1>
-                <p className="text-gray-400">Manage your account settings and preferences.</p>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('profile.title')}</h1>
+                <p className="text-gray-400">{t('profile.subtitle')}</p>
             </div>
         </div>
     );
@@ -69,12 +72,12 @@ const AdminProfile = () => {
                     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
                         <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <User className="w-5 h-5 text-[#8D8DC7]" />
-                            Personal Information
+                            {t('profile.personalInfo')}
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('profile.fullName')}</label>
                                 <input
                                     name="displayName"
                                     value={formData.displayName}
@@ -83,7 +86,7 @@ const AdminProfile = () => {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('profile.phone')}</label>
                                 <div className="relative">
                                     <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                     <input
@@ -95,7 +98,7 @@ const AdminProfile = () => {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('profile.email')}</label>
                                 <div className="relative">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                     <input
@@ -104,7 +107,7 @@ const AdminProfile = () => {
                                         disabled
                                         className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed font-medium"
                                     />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-rose-500 font-bold">Locked</span>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-rose-500 font-bold">{t('profile.locked')}</span>
                                 </div>
                             </div>
                         </div>
@@ -112,10 +115,10 @@ const AdminProfile = () => {
                         <div className="pt-6 border-t border-slate-100">
                             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                                 <Key className="w-5 h-5 text-[#8D8DC7]" />
-                                Security
+                                {t('profile.security')}
                             </h3>
                             <button className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 text-sm font-bold transition-colors">
-                                Change Password
+                                {t('profile.changePassword')}
                             </button>
                         </div>
                     </div>
@@ -123,7 +126,7 @@ const AdminProfile = () => {
                     <div className="mt-6 flex justify-end">
                         <button onClick={handleSave} className="px-6 py-3 bg-[#8D8DC7] text-white rounded-xl font-bold hover:bg-[#7b7bb5] hover:shadow-lg hover:shadow-[#8D8DC7]/20 transition-all flex items-center gap-2">
                             <Save className="w-5 h-5" />
-                            Save Changes
+                            {t('profile.save')}
                         </button>
                     </div>
                 </div>
