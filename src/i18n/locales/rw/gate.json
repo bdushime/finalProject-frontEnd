@@ -1,0 +1,23 @@
+{
+    "app_title": "Tracknity Gatekeeper",
+    "gate_label": "Ushinzwe Umutekano (Ku Irembo)",
+    "scan_title": "Scana Ikarita",
+    "scan_hint": "Nyamuneka scana ikarita y'umunyeshuri cyangwa wandike nimero ye.",
+    "placeholder_id": "Andika ID y'Umunyeshuri",
+    "btn_verifying": "Biragenzurwa...",
+    "btn_verify": "Genzura",
+    "status_not_found": "NTABONETSE",
+    "not_registered": "ntabwo yanditse muri sisitemu.",
+    "hold_student": "Hagarika umunyeshuri uganire n'ubuyobozi.",
+    "btn_retry": "Gerageza Kandi",
+    "status_clear": "YEMEREWE GUSOHOKA",
+    "no_items": "Nta bikoresho afite. Agenda.",
+    "btn_next": "Umunyeshuri Ukurikira",
+    "status_stop": "HAGARARA - NTUGENDE",
+    "items_owed_by": "Ibikoresho bifitwe na",
+    "table_item": "Igikoresho",
+    "table_qty": "Ingano",
+    "table_dept": "Ishami",
+    "block_exit": "IMMA G USOHOKA",
+    "btn_scan_next": "Scana Ukurikira"
+}

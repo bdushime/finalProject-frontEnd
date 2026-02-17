@@ -1,0 +1,81 @@
+{
+    "hero": {
+        "title": "Smart Equipment Management",
+        "subtitle": "Track, manage, and optimize your institution's equipment with ease.",
+        "subtitle2": "The modern way to track, manage, and share equipment across your campus. Built by students, for students.",
+        "startFree": "Start for free",
+        "watchDemo": "Watch demo"
+    },
+    "features": {
+        "title": "Everything you need to manage equipment",
+        "subtitle": "Powerful tools designed to make equipment tracking effortless for everyone on campus.",
+        "smartInventory": "Smart Inventory",
+        "smartInventoryDesc": "AI-powered cataloguing with automatic categorization and smart search.",
+        "qrScanning": "QR Scanning",
+        "qrScanningDesc": "Instant check-in/out with QR codes. No manual entry needed.",
+        "smartAlerts": "Smart Alerts",
+        "smartAlertsDesc": "Automated reminders for due dates, maintenance, and availability.",
+        "analytics": "Analytics",
+        "analyticsDesc": "Track usage patterns, identify trends, and optimize inventory.",
+        "roleAccess": "Role Access",
+        "roleAccessDesc": "Custom permissions for students, staff, and administrators.",
+        "multiPlatform": "Multi-Platform",
+        "multiPlatformDesc": "Access from any device - desktop, tablet, or mobile."
+    },
+    "howItWorks": {
+        "title": "Simple as 1-2-3-4",
+        "subtitle": "From browsing to returning, the entire process takes just minutes.",
+        "step1": "Browse",
+        "step1Desc": "Search our smart catalogue",
+        "step2": "Request",
+        "step2Desc": "Submit with one click",
+        "step3": "Collect",
+        "step3Desc": "Scan QR at pickup",
+        "step4": "Return",
+        "step4Desc": "Drop off & confirm"
+    },
+    "users": {
+        "title": "Who uses Tracknity?",
+        "subtitle": "From students to administrators, everyone benefits from streamlined equipment management.",
+        "students": "Students",
+        "studentsDesc": "Browse, request, and track equipment with ease",
+        "lecturers": "Lecturers",
+        "lecturersDesc": "Reserve gear for classes and research projects",
+        "itStaff": "IT Staff",
+        "itStaffDesc": "Manage inventory, approvals, and maintenance",
+        "researchers": "Researchers",
+        "researchersDesc": "Schedule specialized equipment for experiments",
+        "mediaTeams": "Media Teams",
+        "mediaTeamsDesc": "Coordinate cameras, mics, and studio gear",
+        "admins": "Admins",
+        "adminsDesc": "Monitor usage trends and generate reports"
+    },
+    "testimonials": {
+        "title": "What people say"
+    },
+    "contact": {
+        "title": "Get in touch",
+        "subtitle": "Have questions? We'd love to hear from you. Send us a message!",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "message": "Message",
+        "send": "Send Message",
+        "location": "Location",
+        "followUs": "Follow us"
+    },
+    "nav": {
+        "features": "Features",
+        "howItWorks": "How it Works",
+        "users": "Users",
+        "contact": "Contact",
+        "signIn": "Sign In",
+        "getStarted": "Get Started"
+    },
+    "stats": {
+        "activeUsers": "Active Users",
+        "equipmentItems": "Equipment Items",
+        "uptime": "Uptime",
+        "support": "Support"
+    }
+}
