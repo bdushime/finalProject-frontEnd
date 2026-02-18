@@ -1,0 +1,81 @@
+{
+    "hero": {
+        "title": "Gucunga Ibikoresho",
+        "subtitle": "Kurikirana, cunga, kandi uvugurure ibikoresho by'ikigo cyawe mu buryo bworoshye.",
+        "subtitle2": "Uburyo bugezweho bwo gukurikirana, gucunga no gusangira ibikoresho mu kigo cyawe. Byakozwe n'abanyeshuri, byagenewe abanyeshuri.",
+        "startFree": "Tangira ku Buntu",
+        "watchDemo": "Reba Demo"
+    },
+    "features": {
+        "title": "Ibyo ukeneye byose ngo ucunge ibikoresho",
+        "subtitle": "Ibikoresho simusiga byagenewe korohereza buri wese mu kigo gukurikirana ibikoresho.",
+        "smartInventory": "Ububiko Bwenge",
+        "smartInventoryDesc": "Gushyira ibintu mu byiciro hifashishijwe AI no gushakisha mu buryo bwenge.",
+        "qrScanning": "Gusoma QR",
+        "qrScanningDesc": "Kwinjira/Gusohoka ako kanya ukoresheje code za QR. Nta kwandika n'intoki bikenewe.",
+        "smartAlerts": "Imenyesha Bwenge",
+        "smartAlertsDesc": "Kwibutsa mu buryo bwikora amatariki ntarengwa, gusana, no kumenya niba bihari.",
+        "analytics": "Isesengura",
+        "analyticsDesc": "Kurikirana imikoreshereze, menya ibigezweho, no kunoza ububiko.",
+        "roleAccess": "Uruhushya rwa Buri Wese",
+        "roleAccessDesc": "Uruhushya rwihariye ku banyeshuri, abakozi, n'abayobozi.",
+        "multiPlatform": "Platform Nyinshi",
+        "multiPlatformDesc": "Koresha igikoresho icyo aricyo cyose - mudasobwa, tablet, cyangwa telefoni."
+    },
+    "howItWorks": {
+        "title": "Biroroshye nka 1-2-3-4",
+        "subtitle": "Kuva ushakisha kugezaugaruye, igikorwa cyose gitwara iminota mike.",
+        "step1": "Shakisha",
+        "step1Desc": "Shakisha muri catalogue yacu",
+        "step2": "Saba",
+        "step2Desc": "Ohereza ukoresheje kanda imwe",
+        "step3": "Fata",
+        "step3Desc": "Scana QR mugihe ufata",
+        "step4": "Garura",
+        "step4Desc": "Tanga & emeza"
+    },
+    "users": {
+        "title": "Ninde ukoresha Tracknity?",
+        "subtitle": "Kuva ku banyeshuri kugera ku bayobozi, buri wese yungukira mu micungire y'ibikoresho inoze.",
+        "students": "Abanyeshuri",
+        "studentsDesc": "Shakisha, saba, kandi ukurikirane ibikoresho mu buryo bworoshye",
+        "lecturers": "Abarimu",
+        "lecturersDesc": "Bika ibikoresho by'amasomo n'imishinga y'ubushakashatsi",
+        "itStaff": "Abakozi ba IT",
+        "itStaffDesc": "Cunga ububiko, kwemeza, no gusana",
+        "researchers": "Abashakashatsi",
+        "researchersDesc": "Teganya ibikoresho byihariye by'ubushakashatsi",
+        "mediaTeams": "Amatsinda y'Itangazamakuru",
+        "mediaTeamsDesc": "Huza cameras, micro, n'ibikoresho bya studio",
+        "admins": "Abayobozi",
+        "adminsDesc": "Kurikirana imikoreshereze no gukora raporo"
+    },
+    "testimonials": {
+        "title": "Ibyo abantu bavuga"
+    },
+    "contact": {
+        "title": "Tuvugishe",
+        "subtitle": "Ufite ibibazo? Twishimiye kumva ibyo utubwira. Ohereza ubutumwa!",
+        "firstName": "Izina",
+        "lastName": "Irindi Zina",
+        "email": "Imeyili",
+        "message": "Ubutumwa",
+        "send": "Ohereza Ubutumwa",
+        "location": "Aho Duherereye",
+        "followUs": "Dukurikire"
+    },
+    "nav": {
+        "features": "Ibiranga",
+        "howItWorks": "Uko Ikora",
+        "users": "Abakoresha",
+        "contact": "Twandikire",
+        "signIn": "Injira",
+        "getStarted": "Tangira"
+    },
+    "stats": {
+        "activeUsers": "Abakoresha",
+        "equipmentItems": "Ibikoresho",
+        "uptime": "Kora Neza",
+        "support": "Ubufasha"
+    }
+}

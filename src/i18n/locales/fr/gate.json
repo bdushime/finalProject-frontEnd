@@ -1,0 +1,23 @@
+{
+    "app_title": "Tracknity Gatekeeper",
+    "gate_label": "Agent de Sécurité (Portail)",
+    "scan_title": "Scanner l'ID Étudiant",
+    "scan_hint": "Veuillez scanner la carte d'étudiant ou entrer le numéro manuellement.",
+    "placeholder_id": "Entrer ID Étudiant",
+    "btn_verifying": "Vérification...",
+    "btn_verify": "Vérifier",
+    "status_not_found": "NON TROUVÉ",
+    "not_registered": "n'est pas enregistré dans le système.",
+    "hold_student": "Veuillez retenir l'étudiant et contacter l'administration.",
+    "btn_retry": "Réessayer",
+    "status_clear": "AUTORISÉ À SORTIR",
+    "no_items": "Aucun article non rendu. C'est bon.",
+    "btn_next": "Étudiant Suivant",
+    "status_stop": "STOP - NE PAS SORTIR",
+    "items_owed_by": "Articles dus par",
+    "table_item": "Article",
+    "table_qty": "Qté",
+    "table_dept": "Département",
+    "block_exit": "BLOQUER LA SORTIE",
+    "btn_scan_next": "Scanner le Suivant"
+}
