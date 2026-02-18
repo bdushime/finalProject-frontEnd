@@ -34,7 +34,30 @@
             "lostMaint": "Lost / Maint.",
             "overdueItems": "Overdue Items"
         },
-        "systemHealth": "System Health"
+        "systemHealth": "System Health",
+        "charts": {
+            "activityTrends": "Activity Trends",
+            "monthlyActivity": "Monthly checkout and return trends",
+            "deviceTypes": "Device Types",
+            "distribution": "Distribution by device category",
+            "checkouts": "Checkouts",
+            "returns": "Returns"
+        },
+        "recentActivity": {
+            "title": "Device Usage",
+            "noActivity": "No recent activity",
+            "inUse": "{{active}} out of {{total}} devices currently in use."
+        },
+        "quickActions": {
+            "title": "Quick Actions",
+            "subtitle": "Common tasks and operations",
+            "lend": "Lend Equipment",
+            "report": "Generate Report"
+        },
+        "profileCard": {
+            "role": "IT Manager",
+            "subRole": "System Admin"
+        }
     },
     "equipment": {
         "title": "Browse Equipment",

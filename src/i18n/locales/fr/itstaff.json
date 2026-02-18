@@ -34,7 +34,26 @@
             "lostMaint": "Perdus / Maint.",
             "overdueItems": "Articles en Retard"
         },
-        "systemHealth": "Santé Système"
+        "systemHealth": "Santé Système",
+        "quickActions": {
+            "title": "Actions Rapides",
+            "subtitle": "Tâches et opérations courantes",
+            "lend": "Prêter Équipement",
+            "report": "Générer Rapport"
+        },
+        "charts": {
+            "activityTrends": "Tendances d'Activité",
+            "monthlyActivity": "Tendances mensuelles des sorties et retours",
+            "deviceTypes": "Types d'Appareils",
+            "distribution": "Distribution par catégorie d'appareil",
+            "checkouts": "Sorties",
+            "returns": "Retours"
+        },
+        "recentActivity": {
+            "title": "Utilisation des Appareils",
+            "noActivity": "Aucune activité récente",
+            "inUse": "{{active}} sur {{total}} appareils actuellement utilisés."
+        }
     },
     "equipment": {
         "title": "Parcourir l'Équipement",
