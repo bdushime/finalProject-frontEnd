@@ -26,8 +26,18 @@ export default function SimpleReports() {
         const fetchHistory = async () => {
             try {
                 const res = await api.get('/transactions/all-history');
-                setTransactions(res.data);
-                setFilteredData(res.data);
+                
+                // 👇 SAFETY CHECK: Ensure we only save arrays!
+                if (Array.isArray(res.data)) {
+                    setTransactions(res.data);
+                    setFilteredData(res.data);
+                } else if (res.data && Array.isArray(res.data.data)) {
+                    setTransactions(res.data.data);
+                    setFilteredData(res.data.data);
+                } else {
+                    setTransactions([]);
+                    setFilteredData([]);
+                }
             } catch (err) {
                 console.error("Fetch error:", err);
                 setError(t('reports.error'));
@@ -36,10 +46,12 @@ export default function SimpleReports() {
             }
         };
         fetchHistory();
-    }, []);
+    }, [t]);
 
     // --- 2. FILTER LOGIC ---
     useEffect(() => {
+        if (!Array.isArray(transactions)) return; // Safety check
+
         let result = transactions;
 
         if (search) {
@@ -58,7 +70,9 @@ export default function SimpleReports() {
 
     // --- 3. HANDLE PDF EXPORT ---
     const handleExportPDF = () => {
-        if (filteredData.length === 0) return alert(t('reports.messages.noData'));
+        if (!Array.isArray(filteredData) || filteredData.length === 0) {
+            return alert(t('reports.messages.noData'));
+        }
         // Call our utility function
         generatePDF(filteredData, currentUser);
     };
@@ -75,7 +89,7 @@ export default function SimpleReports() {
                                 <FileBarChart className="w-8 h-8" /> {t('reports.title')}
                             </span>
                         }
-                        subtitle={t('reports.subtitle', { count: filteredData.length })}
+                        subtitle={t('reports.subtitle', { count: Array.isArray(filteredData) ? filteredData.length : 0 })}
                         className="mb-0"
                     />
 
@@ -128,7 +142,7 @@ export default function SimpleReports() {
                             <AlertCircle className="w-10 h-10" />
                             <p className="font-medium">{error}</p>
                         </div>
-                    ) : filteredData.length === 0 ? (
+                    ) : !Array.isArray(filteredData) || filteredData.length === 0 ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-slate-400 gap-3">
                             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
                                 <Search className="w-8 h-8" />
