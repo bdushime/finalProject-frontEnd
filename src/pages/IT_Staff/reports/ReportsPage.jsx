@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import api from "@/utils/api";
-import { Loader2, Download, Search, AlertCircle, FileBarChart } from "lucide-react";
+import { Loader2, Download, Search, AlertCircle, FileBarChart, ChevronLeft, ChevronRight } from "lucide-react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
 
 export default function ReportsPage() {
@@ -13,13 +13,27 @@ export default function ReportsPage() {
     const [search, setSearch] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
 
+    // 👇 NEW: Pagination States
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10; 
+
     // --- 1. FETCH DATA ---
     useEffect(() => {
         const fetchHistory = async () => {
             try {
                 const res = await api.get('/transactions/all-history');
-                setTransactions(res.data);
-                setFilteredData(res.data);
+                
+                // Safety Check: Ensure we only save arrays!
+                if (Array.isArray(res.data)) {
+                    setTransactions(res.data);
+                    setFilteredData(res.data);
+                } else if (res.data && Array.isArray(res.data.data)) {
+                    setTransactions(res.data.data);
+                    setFilteredData(res.data.data);
+                } else {
+                    setTransactions([]);
+                    setFilteredData([]);
+                }
             } catch (err) {
                 console.error("Fetch error:", err);
                 setError("Failed to load report data.");
@@ -32,31 +46,55 @@ export default function ReportsPage() {
 
     // --- 2. FILTER LOGIC ---
     useEffect(() => {
+        if (!Array.isArray(transactions)) return;
+
         let result = transactions;
 
         if (search) {
-            result = result.filter(t =>
-                t.user?.username?.toLowerCase().includes(search.toLowerCase()) ||
-                t.equipment?.name?.toLowerCase().includes(search.toLowerCase())
+            result = result.filter(item =>
+                item.user?.username?.toLowerCase().includes(search.toLowerCase()) ||
+                item.equipment?.name?.toLowerCase().includes(search.toLowerCase())
             );
         }
 
         if (categoryFilter !== "All") {
-            result = result.filter(t => t.equipment?.category === categoryFilter);
+            result = result.filter(item => item.equipment?.category === categoryFilter);
         }
 
         setFilteredData(result);
+        // Reset to page 1 whenever filters change
+        setCurrentPage(1);
     }, [search, categoryFilter, transactions]);
 
-    // --- 3. EXPORT CSV (Updated with Score) ---
-    const handleExport = () => {
-        if (filteredData.length === 0) return alert("No data to export!");
+    // --- 3. PAGINATION LOGIC ---
+    // Calculate total pages
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    
+    // Get the data just for the current page
+    const paginatedData = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredData.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredData, currentPage]);
 
-        // Added Score and Due Date to CSV headers
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    };
+
+    // --- 4. EXPORT CSV ---
+    const handleExport = () => {
+        if (!Array.isArray(filteredData) || filteredData.length === 0) {
+            return alert("No data to export!");
+        }
+
         const headers = "Student,Email,Score,Equipment,Category,Date Borrowed,Due Date,Status\n";
 
-        const rows = filteredData.map(t =>
-            `${t.user?.username},${t.user?.email},${t.user?.responsibilityScore ?? 100},${t.equipment?.name},${t.equipment?.category || 'N/A'},${new Date(t.createdAt).toLocaleDateString()},${new Date(t.expectedReturnTime).toLocaleDateString()},${t.status}`
+        // Always export ALL filtered data, not just the current page
+        const rows = filteredData.map(item =>
+            `${item.user?.username},${item.user?.email},${item.user?.responsibilityScore ?? 100},${item.equipment?.name},${item.equipment?.category || 'N/A'},${new Date(item.createdAt).toLocaleDateString()},${new Date(item.expectedReturnTime).toLocaleDateString()},${item.status}`
         ).join("\n");
 
         const blob = new Blob([headers + rows], { type: 'text/csv' });
@@ -78,7 +116,7 @@ export default function ReportsPage() {
                             <FileBarChart className="w-8 h-8" /> System Reports
                         </h1>
                         <p className="text-slate-500 mt-1">
-                            Viewing {filteredData.length} records • Real-time Data
+                            Viewing {Array.isArray(filteredData) ? filteredData.length : 0} records • Real-time Data
                         </p>
                     </div>
                     <button
@@ -118,7 +156,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Main Data Table */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px] flex flex-col">
                     {loading ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-[#0b1d3a] gap-3">
                             <Loader2 className="w-10 h-10 animate-spin" />
@@ -129,7 +167,7 @@ export default function ReportsPage() {
                             <AlertCircle className="w-10 h-10" />
                             <p className="font-medium">{error}</p>
                         </div>
-                    ) : filteredData.length === 0 ? (
+                    ) : !Array.isArray(filteredData) || filteredData.length === 0 ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-slate-400 gap-3">
                             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
                                 <Search className="w-8 h-8" />
@@ -137,80 +175,100 @@ export default function ReportsPage() {
                             <p>No records found matching your filters.</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead className="bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
-                                    <tr>
-                                        <th className="p-5">Student</th>
-                                        <th className="p-5 text-center">Score</th> {/* New Column */}
-                                        <th className="p-5">Equipment</th>
-                                        <th className="p-5">Dates</th>
-                                        <th className="p-5">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {filteredData.map((t) => (
-                                        <tr key={t._id} className="hover:bg-slate-50/80 transition-colors">
-
-                                            {/* 1. Student Info */}
-                                            <td className="p-5">
-                                                <div className="font-medium text-[#0b1d3a]">{t.user?.username || "Unknown"}</div>
-                                                <div className="text-xs text-slate-500 mt-0.5">{t.user?.email}</div>
-                                            </td>
-
-                                            {/* 2. Score Column (Color Coded) */}
-                                            <td className="p-5 text-center">
-                                                <span className={`inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm
-                                                    ${(t.user?.responsibilityScore ?? 100) >= 80 ? "bg-green-100 text-green-700 border border-green-200" :
-                                                        (t.user?.responsibilityScore ?? 100) >= 50 ? "bg-yellow-100 text-yellow-700 border border-yellow-200" :
-                                                            "bg-red-100 text-red-700 border border-red-200"
-                                                    }`}>
-                                                    {t.user?.responsibilityScore ?? 100}
-                                                </span>
-                                            </td>
-
-                                            {/* 3. Equipment Info */}
-                                            <td className="p-5">
-                                                <div className="font-medium text-slate-900">{t.equipment?.name || "Deleted Item"}</div>
-                                                <div className="flex gap-2 mt-1">
-                                                    <span className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
-                                                        {t.equipment?.serialNumber}
-                                                    </span>
-                                                    <span className="text-xs text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">
-                                                        {t.equipment?.category || "General"}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            {/* 4. Dates (Borrowed & Due) */}
-                                            <td className="p-5 text-sm text-slate-600">
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide">Borrowed</div>
-                                                    <div>{new Date(t.createdAt).toLocaleDateString()}</div>
-
-                                                    <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide mt-1">Due</div>
-                                                    <div className={`${new Date() > new Date(t.expectedReturnTime) && t.status !== 'Returned' ? 'text-red-600 font-medium' : ''}`}>
-                                                        {new Date(t.expectedReturnTime).toLocaleDateString()}
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            {/* 5. Status Badge */}
-                                            <td className="p-5">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize border
-                                                    ${t.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
-                                                        t.status === 'Returned' ? 'bg-green-50 text-green-700 border-green-100' :
-                                                            t.status === 'Checked Out' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                                t.status === 'Pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
-                                                                    'bg-slate-50 text-slate-600 border-slate-100'}`}>
-                                                    {t.status}
-                                                </span>
-                                            </td>
+                        <>
+                            <div className="overflow-x-auto flex-1">
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th className="p-5">Student</th>
+                                            <th className="p-5 text-center">Score</th>
+                                            <th className="p-5">Equipment</th>
+                                            <th className="p-5">Dates</th>
+                                            <th className="p-5">Status</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {/* 👇 MAP OVER PAGINATED DATA, NOT FILTERED DATA */}
+                                        {paginatedData.map((item) => (
+                                            <tr key={item._id} className="hover:bg-slate-50/80 transition-colors">
+                                                <td className="p-5">
+                                                    <div className="font-medium text-[#0b1d3a]">{item.user?.username || "Unknown"}</div>
+                                                    <div className="text-xs text-slate-500 mt-0.5">{item.user?.email}</div>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <span className={`inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm border
+                                                        ${(item.user?.responsibilityScore ?? 100) >= 80 ? "bg-green-100 text-green-700 border-green-200" :
+                                                            (item.user?.responsibilityScore ?? 100) >= 50 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+                                                                "bg-red-100 text-red-700 border-red-200"
+                                                        }`}>
+                                                        {item.user?.responsibilityScore ?? 100}
+                                                    </span>
+                                                </td>
+                                                <td className="p-5">
+                                                    <div className="font-medium text-slate-900">{item.equipment?.name || "Deleted Item"}</div>
+                                                    <div className="flex gap-2 mt-1">
+                                                        <span className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
+                                                            {item.equipment?.serialNumber}
+                                                        </span>
+                                                        <span className="text-xs text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">
+                                                            {item.equipment?.category || "General"}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5 text-sm text-slate-600">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide">Borrowed</div>
+                                                        <div>{new Date(item.createdAt).toLocaleDateString()}</div>
+                                                        <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide mt-1">Due</div>
+                                                        <div className={`${new Date() > new Date(item.expectedReturnTime) && item.status !== 'Returned' ? 'text-red-600 font-medium' : ''}`}>
+                                                            {new Date(item.expectedReturnTime).toLocaleDateString()}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize border
+                                                        ${item.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                            item.status === 'Returned' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                                item.status === 'Checked Out' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                                    item.status === 'Pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                                                                        'bg-slate-50 text-slate-600 border-slate-100'}`}>
+                                                        {item.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* 👇 NEW: PAGINATION CONTROLS */}
+                            {totalPages > 1 && (
+                                <div className="border-t border-slate-200 bg-slate-50/50 p-4 flex items-center justify-between">
+                                    <p className="text-sm text-slate-600">
+                                        Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-semibold text-slate-900">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="font-semibold text-slate-900">{filteredData.length}</span> entries
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={handlePrevPage} 
+                                            disabled={currentPage === 1}
+                                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                        </button>
+                                        <div className="flex items-center px-4 font-medium text-sm text-slate-700">
+                                            Page {currentPage} of {totalPages}
+                                        </div>
+                                        <button 
+                                            onClick={handleNextPage} 
+                                            disabled={currentPage === totalPages}
+                                            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
