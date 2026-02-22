@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { cn } from "@/components/ui/utils";
 import MainLayout from "./layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ import {
   DollarSign,
   Tag,
   Upload,
+  Plus,
+  Activity,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
@@ -304,68 +307,103 @@ function BrowseDevices() {
     }).format(price);
   };
 
+  const HeroSection = (
+    <div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 mt-4 relative z-10">
+        <div>
+          <h1 className="text-4xl font-bold text-white mb-2">{t('browseDevices.title')}</h1>
+          <p className="text-gray-400 flex items-center gap-2 text-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
+            {t('browseDevices.showingDevices', { current: filteredDevices.length, total: deviceList.length })}
+          </p>
+        </div>
+        <div className="mt-6 md:mt-0 flex gap-3">
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold py-6 px-6 rounded-2xl shadow-lg shadow-[#8D8DC7]/20 transition-transform active:scale-95 border-none"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            {t('devices.addDevice')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsBulkUploadOpen(true)}
+            className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md font-bold py-6 px-6 rounded-2xl transition-transform active:scale-95"
+          >
+            <Upload className="h-5 w-5 mr-2" />
+            {t('browseDevices.bulkUpload')}
+          </Button>
+        </div>
+      </div>
+
+      <div className="relative z-10 max-w-4xl">
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-[#8D8DC7] transition-colors" />
+          <Input
+            placeholder={t('browseDevices.searchPlaceholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-800/50 border-slate-700/50 text-white placeholder:text-gray-500 py-7 pl-12 rounded-2xl focus:ring-2 focus:ring-[#8D8DC7]/50 transition-all backdrop-blur-sm shadow-xl"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <MainLayout>
+    <MainLayout heroContent={HeroSection}>
       <div className="space-y-6">
-        {/* Search and Filter Bar */}
-        <Card className="border border-gray-200 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder={t('browseDevices.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 rounded-full border-gray-200 shadow-sm bg-white"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+        {/* Filter Bar */}
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 flex items-center gap-1">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[180px] border-none focus:ring-0 shadow-none font-medium text-slate-600">
+                <div className="flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-[#8D8DC7]" />
+                  <SelectValue placeholder={t('browseDevices.filters.category')} />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
+                {categories.map((cat) => (
+                  <SelectItem key={cat} value={cat} className="rounded-xl focus:bg-slate-50">
+                    {cat === "All" ? t('browseDevices.filters.allCategories') : cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="w-[1px] h-6 bg-slate-100 mx-1"></div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px] border-none focus:ring-0 shadow-none font-medium text-slate-600">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-[#8D8DC7]" />
+                  <SelectValue placeholder={t('browseDevices.filters.status')} />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
+                <SelectItem value="all" className="rounded-xl focus:bg-slate-50">{t('browseDevices.filters.allStatus')}</SelectItem>
+                {statuses.map((status) => (
+                  <SelectItem key={status} value={status} className="rounded-xl focus:bg-slate-50">
+                    {t(`browseDevices.labels.${status}`) || status.charAt(0).toUpperCase() + status.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder={t('browseDevices.filters.category')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat === "All" ? t('browseDevices.filters.allCategories') : cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select >
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder={t('browseDevices.filters.status')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('browseDevices.filters.allStatus')}</SelectItem>
-                    {statuses.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {t(`browseDevices.labels.${status}`) || status.charAt(0).toUpperCase() + status.slice(1)}
-                      </SelectItem>
-                    ))}
-
-                  </SelectContent>
-                </Select>
-                {/* Bulk Upload Button */}
-                <Button
-                  variant="outline"
-                  onClick={() => setIsBulkUploadOpen(true)}
-                  className="gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  <span className="hidden sm:inline">Bulk Upload</span>
-                </Button>
-              </div >
-            </div >
-          </CardContent >
-        </Card >
-
-        {/* Device Count Summary */}
-        < div className="text-sm text-gray-600" >
-          Showing {filteredDevices.length} of {deviceList.length} devices
-        </div >
+          {(categoryFilter !== "All" || statusFilter !== "all" || searchQuery !== "") && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSearchQuery("");
+                setCategoryFilter("All");
+                setStatusFilter("all");
+              }}
+              className="text-[#8D8DC7] hover:text-[#7A7AB5] hover:bg-[#8D8DC7]/5 font-semibold rounded-2xl px-4"
+            >
+              {t('browseDevices.filters.clearFilters')}
+            </Button>
+          )}
+        </div>
 
         {/* Device Grid */}
         < div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" >
@@ -373,16 +411,16 @@ function BrowseDevices() {
             filteredDevices.map((device) => (
               <Card
                 key={device.id}
-                className="border border-gray-200 shadow-sm hover:shadow-lg hover:border-[#BEBEE0] transition-all duration-200 cursor-pointer group"
+                className="border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group bg-white rounded-[2rem] overflow-hidden"
                 onClick={() => navigateToDevice(device)}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="p-6 pb-2">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-[#1A2240]">
+                      <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-[#8D8DC7] transition-colors leading-tight">
                         {device.name}
                       </CardTitle>
-                      <p className="text-sm text-gray-500">{device.brand} {device.model}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{device.brand} {device.model}</p>
                     </div>
                     <Button
                       variant="ghost"
@@ -394,17 +432,17 @@ function BrowseDevices() {
                       }}
                       title="View Details"
                     >
-                      <Eye className="h-4 w-4 text-[#1A2240]" />
+                      <Eye className="h-5 w-5 text-slate-400 group-hover:text-[#8D8DC7]" />
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="p-6 pt-2 space-y-4">
                   {/* Status and Condition Badges */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className={getStatusColor(device.status)}>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getStatusColor(device.status))}>
                       {device.status}
                     </Badge>
-                    <Badge variant="outline" className={getConditionColor(device.condition)}>
+                    <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getConditionColor(device.condition))}>
                       {device.condition}
                     </Badge>
                   </div>
@@ -417,11 +455,13 @@ function BrowseDevices() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      <span className="truncate">{device.location || "Not specified"}</span>
+                      <span className="truncate">{device.location || t('common:notSpecified', 'Not specified')}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="h-4 w-4" />
-                      <span>{t('browseDevices.labels.sn')}: {device.serialNumber}</span>
+                    <div className="flex flex-col gap-1 items-end">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                        <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] uppercase">{t('common:browseDevices.labels.sn')}</span>
+                        <span className="font-mono text-gray-700">{device.serialNumber || 'N/A'}</span>
+                      </div>
                     </div>
                     {device.purchasePrice > 0 && (
                       <div className="flex items-center gap-2 text-gray-600">
@@ -432,7 +472,7 @@ function BrowseDevices() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-2 border-t border-gray-200 flex justify-end gap-1">
+                  <div className="pt-4 border-t border-gray-50 flex justify-end gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -443,31 +483,31 @@ function BrowseDevices() {
                       }}
                       title="View Movement"
                     >
-                      <MapPin className="h-4 w-4 text-blue-600" />
+                      <MapPin className="h-4 w-4 text-blue-500" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-9 w-9 rounded-xl hover:bg-slate-50 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         openEditDialog(device);
                       }}
                       title="Edit Device"
                     >
-                      <Edit className="h-4 w-4 text-[#1A2240]" />
+                      <Edit className="h-4 w-4 text-slate-600" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-9 w-9 rounded-xl hover:bg-red-50 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDeleteDialog(device);
                       }}
                       title="Delete Device"
                     >
-                      <Trash2 className="h-4 w-4 text-red-600" />
+                      <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
                 </CardContent>

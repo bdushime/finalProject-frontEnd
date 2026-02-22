@@ -166,7 +166,7 @@ export default function Topbar({ onMenuClick }) {
   // Get page header for IT Staff
   const itPageHeaders = getItPageHeaders();
   const currentPath = location.pathname;
-  const itPageHeader = itPageHeaders[currentPath] || 
+  const itPageHeader = itPageHeaders[currentPath] ||
     (currentPath.startsWith("/it/") ? itPageHeaders["/it/dashboard"] : null);
 
   const handleActionClick = () => {
@@ -194,156 +194,149 @@ export default function Topbar({ onMenuClick }) {
 
   return (
     <div className="">
-    <div
-      className={`w-full mt-2 px-1 flex items-center gap-2 justify-between transition-all duration-300 ${
-        isScrolled ? " rounded-b-lg" : "bg-transparent"
-      }`}
-    >
-      <Button
-        variant="outline"
-        size="icon"
-        className="sm:hidden border-none"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label="Menu"
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
-      <img
-        src={smallLogo}
-        alt="Tracknity"
-        className="block md:hidden w-12 rounded-full"
-      />
-
-      <img
-        src={logo}
-        alt="Tracknity"
-        className="hidden md:block rounded-full w-32 h-14"
-      />
       <div
-        className={`${
-          isMobileMenuOpen
-            ? "flex flex-col justify-center items-center absolute top-full left-0 right-0 rounded-b-lg bg-yellow-50 shadow-lg p-4 gap-3 z-50 w-2/3"
-            : "hidden"
-        } sm:flex sm:flex-row sm:relative sm:shadow-none sm:p-0 items-center gap-1`}
-      >
-        <header
-          className={`${
-            !isMobileMenuOpen
-              ? " rounded-full border border-gray-300 shadow-sm w-full sm:w-auto"
-              : "empty:hidden"
+        className={`w-full mt-2 px-1 flex items-center gap-2 justify-between transition-all duration-300 ${isScrolled ? " rounded-b-lg" : "bg-transparent"
           }`}
+      >
+        <Button
+          variant="outline"
+          size="icon"
+          className="sm:hidden border-none"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Menu"
         >
-          <div
-            className={`${
-              !isMobileMenuOpen
-                ? "flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-1"
-                : "empty:hidden justify-center items-center"
-            }`}
-          >
-            <nav className="flex flex-col sm:flex-row items-stretch justify-betweeen gap-1 sm:gap-0">
-              {links.map((link) => {
-                const active = isLinkActive(link.path);
+          <Menu className="h-5 w-5" />
+        </Button>
+        <img
+          src={smallLogo}
+          alt="Tracknity"
+          className="block md:hidden w-12 rounded-full"
+        />
 
-                return (
-                  <NavLink
-                    key={link.path}
-                    to={link.path}
-                    className={({ isActive }) =>
-                      [
-                        " flex w-full justify-center items-center text-sm font-medium transition-colors px-3 py-2",
-                        active || isActive
-                          ? "bg-[#1A2240] text-gray-100 shadow-sm rounded-full"
-                          : "text-slate-600 hover:bg-[#1A2240]/5 hover:rounded-full hover:text-slate-900",
-                      ].join(" ")
-                    }
-                  >
-                    <span className="truncate">{link.label}</span>
-                  </NavLink>
-                );
-              })}
-            </nav>
-          </div>
-        </header>
-        <Link to="/settings" className="w-full sm:w-auto">
-          <Button
-            variant="outline"
-            aria-label="Settings"
-            className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${
-              isMobileMenuOpen ? "justify-center border-none shadow-none" : ""
-            }`}
+        <img
+          src={logo}
+          alt="Tracknity"
+          className="hidden md:block rounded-full w-32 h-14"
+        />
+        <div
+          className={`${isMobileMenuOpen
+              ? "flex flex-col justify-center items-center absolute top-full left-0 right-0 rounded-b-lg bg-yellow-50 shadow-lg p-4 gap-3 z-50 w-2/3"
+              : "hidden"
+            } sm:flex sm:flex-row sm:relative sm:shadow-none sm:p-0 items-center gap-1`}
+        >
+          <header
+            className={`${!isMobileMenuOpen
+                ? " rounded-full border border-gray-300 shadow-sm w-full sm:w-auto"
+                : "empty:hidden"
+              }`}
           >
-            {isMobileMenuOpen ? (
-              <span className="text-sm font-medium transition-colors">
-                Settings
-              </span>
-            ) : (
-              <>
-                <Settings className="h-4 w-4" />{" "}
-                {/* <span className="text-sm font-medium ">Settings</span> */}
-              </>
-            )}
-          </Button>
-        </Link>
+            <div
+              className={`${!isMobileMenuOpen
+                  ? "flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-1"
+                  : "empty:hidden justify-center items-center"
+                }`}
+            >
+              <nav className="flex flex-col sm:flex-row items-stretch justify-betweeen gap-1 sm:gap-0">
+                {links.map((link) => {
+                  const active = isLinkActive(link.path);
 
-        {!isMobileMenuOpen && (
-          <Link to={notificationPath} className="w-full sm:w-auto">
+                  return (
+                    <NavLink
+                      key={link.path}
+                      to={link.path}
+                      className={({ isActive }) =>
+                        [
+                          " flex w-full justify-center items-center text-sm font-medium transition-colors px-3 py-2",
+                          active || isActive
+                            ? "bg-slate-100 text-black shadow-sm rounded-full border border-slate-200"
+                            : "text-slate-600 hover:bg-slate-50 hover:rounded-full hover:text-black",
+                        ].join(" ")
+                      }
+                    >
+                      <span className="truncate">{link.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </nav>
+            </div>
+          </header>
+          <Link to="/settings" className="w-full sm:w-auto">
             <Button
               variant="outline"
-              size="icon"
               aria-label="Settings"
-              className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${
-                isMobileMenuOpen ? "justify-center border-none shadow-none" : ""
-              }`}
+              className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""
+                }`}
             >
               {isMobileMenuOpen ? (
-                <span className="text-sm font-medium">Notifications</span>
+                <span className="text-sm font-medium transition-colors">
+                  Settings
+                </span>
               ) : (
-                <Bell className="h-4 w-4" />
+                <>
+                  <Settings className="h-4 w-4" />{" "}
+                  {/* <span className="text-sm font-medium ">Settings</span> */}
+                </>
               )}
             </Button>
           </Link>
-        )}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${
-                isMobileMenuOpen ? "justify-center border-none shadow-none" : ""
-              }`}
+          {!isMobileMenuOpen && (
+            <Link to={notificationPath} className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Settings"
+                className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""
+                  }`}
+              >
+                {isMobileMenuOpen ? (
+                  <span className="text-sm font-medium">Notifications</span>
+                ) : (
+                  <Bell className="h-4 w-4" />
+                )}
+              </Button>
+            </Link>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={`border-gray-300 text-sm font-medium transition-colors shadow-sm rounded-full px-6 py-5 w-full sm:w-auto ${isMobileMenuOpen ? "justify-center border-none shadow-none" : ""
+                  }`}
+              >
+                {isMobileMenuOpen ? (
+                  <span className="text-sm font-medium transition-colors ">
+                    My Account
+                  </span>
+                ) : (
+                  <Avatar>
+                    <AvatarFallback className="text-md font-bold">
+                      JS
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              className="border-none bg-[#BEBEE0] rounded-lg"
             >
-              {isMobileMenuOpen ? (
-                <span className="text-sm font-medium transition-colors ">
-                  My Account
-                </span>
-              ) : (
-                <Avatar>
-                  <AvatarFallback className="text-md font-bold">
-                    JS
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            align="end"
-            className="border-none bg-[#BEBEE0] rounded-lg"
-          >
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to={profilePath}>Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/settings">Settings</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem><Link to="/login">Logout</Link></DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to={profilePath}>Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/settings">Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem><Link to="/login">Logout</Link></DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-    </div>
 
       {/* Dynamic Page Header for IT Staff */}
       {role === "it" && itPageHeader && (
@@ -362,7 +355,7 @@ export default function Topbar({ onMenuClick }) {
                 </p>
               )}
             </div>
-            
+
             {/* Action Button */}
             {itPageHeader.actionButton && (() => {
               const IconComponent = itPageHeader.actionButton.icon;

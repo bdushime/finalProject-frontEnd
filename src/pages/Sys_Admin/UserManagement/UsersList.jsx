@@ -4,6 +4,7 @@ import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
 import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle, MessageSquare, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from "@/components/ui/utils";
 
 // Define roles
 const ROLES = ['All Roles', 'Student', 'IT_Staff', 'Security', 'Admin'];
@@ -251,19 +252,30 @@ const UsersList = () => {
     };
 
     const HeroSection = (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 mt-4 relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 mt-4 relative z-10">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">{t('users.title')}</h1>
-                <p className="text-gray-400">{t('users.subtitle')}</p>
+                <h1 className="text-4xl font-black text-white mb-2 tracking-tight">{t('users.title')}</h1>
+                <p className="text-gray-400 font-medium">{t('users.subtitle')}</p>
             </div>
-            <div className="mt-6 md:mt-0 flex space-x-3">
-                <button onClick={() => setShowFilters(!showFilters)} className={`font-medium py-3 px-6 rounded-2xl shadow-lg border transition-all flex items-center ${showFilters ? 'bg-[#8D8DC7] text-white border-[#8D8DC7]' : 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700'}`}>
+            <div className="mt-8 md:mt-0 flex gap-4">
+                <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={cn(
+                        "font-black uppercase tracking-widest text-[10px] py-4 px-6 rounded-2xl shadow-xl transition-all flex items-center border active:scale-95",
+                        showFilters
+                            ? "bg-[#8D8DC7] text-white border-[#8D8DC7] shadow-[#8D8DC7]/30"
+                            : "bg-slate-900/50 backdrop-blur-md text-white border-slate-700/50 hover:bg-slate-800"
+                    )}
+                >
                     <Filter className="w-4 h-4 mr-2" /> {t('users.filters')}
                 </button>
-                <button onClick={() => {
-                    setFormData({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '', status: 'Active', password: '' });
-                    setShowAddUserModal(true);
-                }} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-6 rounded-2xl shadow-lg shadow-[#8D8DC7]/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center">
+                <button
+                    onClick={() => {
+                        setFormData({ firstName: '', lastName: '', email: '', role: 'Student', department: '', studentId: '', status: 'Active', password: '' });
+                        setShowAddUserModal(true);
+                    }}
+                    className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-black uppercase tracking-widest text-[10px] py-4 px-8 rounded-2xl shadow-2xl shadow-[#8D8DC7]/40 transition-all active:scale-95 flex items-center"
+                >
                     <Plus className="w-5 h-5 mr-2" /> {t('users.addUser')}
                 </button>
             </div>
@@ -272,13 +284,19 @@ const UsersList = () => {
 
     return (
         <AdminLayout heroContent={HeroSection}>
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[600px]">
+            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 min-h-[600px]">
 
-                {/* Filters */}
-                <div className="flex flex-col gap-4 mb-6">
-                    <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <input type="text" placeholder={t('users.searchPlaceholder')} className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                {/* Filters Row */}
+                <div className="flex flex-col lg:flex-row gap-4 mb-8">
+                    <div className="relative flex-1 group">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 transition-colors group-focus-within:text-[#8D8DC7]" />
+                        <input
+                            type="text"
+                            placeholder={t('users.searchPlaceholder')}
+                            className="w-full pl-14 pr-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/30 focus:outline-none focus:ring-4 focus:ring-[#8D8DC7]/5 focus:border-[#8D8DC7] transition-all font-medium text-slate-800"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                     {showFilters && (
                         <div className="flex justify-end animate-in slide-in-from-top-2 fade-in duration-200">
@@ -286,7 +304,7 @@ const UsersList = () => {
                                 <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8D8DC7] cursor-pointer" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                                     {ROLES.map(role => (
                                         <option key={role} value={role}>
-                                            {role === 'All Roles' ? t('users.allRoles') : t(`common.roles.${role === 'IT_Staff' ? 'itStaff' : role.toLowerCase()}`)}
+                                            {role === 'All Roles' ? t('users.allRoles') : t(`common:roles.${role === 'IT_Staff' ? 'itStaff' : role.toLowerCase()}`)}
                                         </option>
                                     ))}
                                 </select>
@@ -297,16 +315,16 @@ const UsersList = () => {
                 </div>
 
                 {/* Users Table */}
-                <div className="overflow-x-auto">
+                <div className="overflow-hidden rounded-2xl border border-gray-50">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                <th className="p-4 pl-0">{t('users.userIdentity')}</th>
-                                <th className="p-4">{t('users.assignedRole')}</th>
-                                <th className="p-4">{t('users.status')}</th>
-                                <th className="p-4">{t('users.department')}</th>
-                                <th className="p-4">{t('users.respScore')}</th>
-                                <th className="p-4 text-right">{t('users.actions')}</th>
+                            <tr className="bg-gray-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <th className="px-6 py-5">{t('users.userIdentity')}</th>
+                                <th className="px-6 py-5">{t('users.assignedRole')}</th>
+                                <th className="px-6 py-5">{t('users.status')}</th>
+                                <th className="px-6 py-5">{t('users.department')}</th>
+                                <th className="px-6 py-5">{t('users.respScore')}</th>
+                                <th className="px-6 py-5 text-right">{t('users.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -314,42 +332,42 @@ const UsersList = () => {
                                 <tr><td colSpan="6" className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#8D8DC7]" /></td></tr>
                             ) : filteredUsers.length > 0 ? (
                                 filteredUsers.map((user) => (
-                                    <tr key={user._id} className={`hover:bg-gray-50/50 transition-colors group ${user.status === 'Suspended' ? 'bg-red-50/30' : ''}`}>
-                                        <td className="p-4 pl-0">
+                                    <tr key={user._id} className={`hover:bg-[#8D8DC7]/5 transition-all group ${user.status === 'Suspended' ? 'bg-red-50/30' : ''}`}>
+                                        <td className="px-6 py-5">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-[#8D8DC7] font-bold mr-3 border border-gray-100 uppercase">
+                                                <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] font-black mr-4 border border-indigo-100 uppercase shadow-sm group-hover:scale-110 transition-transform">
                                                     {(user.fullName || user.username || "U").charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <div className="font-semibold text-slate-800">{user.fullName || user.username}</div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {user.email}
+                                                    <div className="font-bold text-slate-900 text-base">{user.fullName || user.username}</div>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-xs text-slate-400 font-medium">{user.email}</span>
                                                         {user.role === 'Student' && user.studentId && (
-                                                            <span className="ml-2 bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-mono">#{user.studentId}</span>
+                                                            <span className="bg-gray-100 px-2 py-0.5 rounded-lg text-[10px] text-slate-500 font-black tracking-wider border border-gray-200 uppercase">#{user.studentId}</span>
                                                         )}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${getRoleBadgeColor(user.role)}`}>
-                                                {user.role === 'Admin' && <Shield className="w-3 h-3 mr-1.5" />}
-                                                {t(`common.roles.${user.role === 'IT_Staff' ? 'itStaff' : user.role.toLowerCase()}`)}
+                                        <td className="px-6 py-5">
+                                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getRoleBadgeColor(user.role)} shadow-sm`}>
+                                                {user.role === 'Admin' && <Shield className="w-3.5 h-3.5 mr-2" />}
+                                                {t(`common:roles.${user.role === 'IT_Staff' ? 'itStaff' : user.role.toLowerCase()}`)}
                                             </span>
                                         </td>
-                                        <td className="p-4">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusColor(user.status || 'Active')}`}>
+                                        <td className="px-6 py-5">
+                                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(user.status || 'Active')} shadow-sm`}>
                                                 {user.status === 'Suspended' ? t('users.suspended') : t('users.activeStatus')}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-sm text-gray-600 font-medium">{user.department || t('users.general')}</td>
-                                        <td className="p-4">
-                                            <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-sm font-bold border ${getScoreColor(user.responsibilityScore || 100)}`}>
+                                        <td className="px-6 py-5 text-sm text-slate-600 font-bold">{user.department || t('users.general')}</td>
+                                        <td className="px-6 py-5">
+                                            <span className={`inline-flex items-center justify-center min-w-[3rem] h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore || 100)} shadow-sm`}>
                                                 {user.responsibilityScore ?? 100}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-right">
-                                            <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                                        <td className="px-6 py-5 text-right">
+                                            <div className="flex items-center justify-end space-x-2">
 
                                                 {/* MESSAGE BUTTON */}
                                                 <button onClick={() => openMessageModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-blue-500 transition-colors" title="Send Message">
@@ -375,7 +393,7 @@ const UsersList = () => {
                                                 )}
 
                                                 {user.role !== 'Admin' && (
-                                                    <button onClick={() => handleDeleteUser(user._id)} className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Delete User">
+                                                    <button onClick={() => handleDeleteUser(user._id)} className="p-2.5 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-all active:scale-90" title="Delete User">
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 )}
@@ -407,10 +425,10 @@ const UsersList = () => {
                             <input type="email" placeholder={t('users.emailField')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             <div className="grid grid-cols-2 gap-5">
                                 <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
-                                    <option value="Student">{t('common.roles.student')}</option>
-                                    <option value="IT_Staff">{t('common.roles.itStaff')}</option>
-                                    <option value="Security">{t('common.roles.security')}</option>
-                                    <option value="Admin">{t('common.roles.admin')}</option>
+                                    <option value="Student">{t('common:roles.student')}</option>
+                                    <option value="IT_Staff">{t('common:roles.itStaff')}</option>
+                                    <option value="Security">{t('common:roles.security')}</option>
+                                    <option value="Admin">{t('common:roles.admin')}</option>
                                 </select>
                                 <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                                     <option value="Active">{t('users.activeStatus')}</option>
@@ -424,7 +442,7 @@ const UsersList = () => {
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
-                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">{t('common.actions.cancel')}</button>
+                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">{t('common:actions.cancel')}</button>
                                 <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800">{submitting ? t('users.creatingUser') : t('users.createUser')}</button>
                             </div>
                         </form>
@@ -450,10 +468,10 @@ const UsersList = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-5">
                                 <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
-                                    <option value="Student">{t('common.roles.student')}</option>
-                                    <option value="IT_Staff">{t('common.roles.itStaff')}</option>
-                                    <option value="Security">{t('common.roles.security')}</option>
-                                    <option value="Admin">{t('common.roles.admin')}</option>
+                                    <option value="Student">{t('common:roles.student')}</option>
+                                    <option value="IT_Staff">{t('common:roles.itStaff')}</option>
+                                    <option value="Security">{t('common:roles.security')}</option>
+                                    <option value="Admin">{t('common:roles.admin')}</option>
                                 </select>
                                 <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                                     <option value="Active">{t('users.activeStatus')}</option>
@@ -467,7 +485,7 @@ const UsersList = () => {
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
-                                <button type="button" onClick={() => setShowEditUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">{t('common.actions.cancel')}</button>
+                                <button type="button" onClick={() => setShowEditUserModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100">{t('common:actions.cancel')}</button>
                                 <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-[#8D8DC7] hover:bg-[#7b7bb5]">{submitting ? t('users.savingUser') : t('users.saveChanges')}</button>
                             </div>
                         </form>
@@ -504,7 +522,7 @@ const UsersList = () => {
                                 {t('users.saveChanges')}
                             </button>
                             <button onClick={() => setShowScoreModal(false)} className="w-full py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition-colors">
-                                {t('common.actions.cancel')}
+                                {t('common:actions.cancel')}
                             </button>
                         </div>
                     </div>
@@ -551,7 +569,7 @@ const UsersList = () => {
                             </div>
 
                             <div className="pt-4 flex gap-3">
-                                <button type="button" onClick={() => setShowMessageModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">{t('common.actions.cancel')}</button>
+                                <button type="button" onClick={() => setShowMessageModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">{t('common:actions.cancel')}</button>
                                 <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 flex items-center justify-center gap-2 shadow-lg transition-all">
                                     {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> {t('users.sendNotification')}</>}
                                 </button>

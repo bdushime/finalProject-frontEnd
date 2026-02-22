@@ -13,22 +13,30 @@ import { generatePDF } from '@/utils/pdfGenerator';
 const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
 const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
+const datePickerStyles = `
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.3);
+    padding: 2px;
+  }
+`;
+
 const ReportsPage = () => {
     const { t } = useTranslation(["admin", "common"]);
 
     const ROLES = [
         { value: "All Roles", label: t('reports.allRoles') },
-        { value: "Student", label: t('common.roles.student') },
-        { value: "IT_Staff", label: t('common.roles.itStaff') },
-        { value: "Staff", label: t('common.roles.staff') },
-        { value: "Admin", label: t('common.roles.admin') }
+        { value: "Student", label: t('common:roles.student') },
+        { value: "IT_Staff", label: t('common:roles.itStaff') },
+        { value: "Security", label: t('common:roles.security') },
+        { value: "Admin", label: t('common:roles.admin') }
     ];
 
     const STATUSES = [
         { value: "All Statuses", label: t('reports.allStatuses') },
         { value: "Active", label: t('users.activeStatus') },
-        { value: "Overdue", label: t('users.overdue') },
-        { value: "Returned", label: t('users.returned') },
+        { value: "Overdue", label: t('dashboard.status.overdue') },
+        { value: "Returned", label: t('dashboard.status.returned') },
         { value: "Maintenance", label: t('reports.maintenance') || "Maintenance" }
     ];
 
@@ -199,7 +207,7 @@ const ReportsPage = () => {
                                 }`}>{ROLES.find(r => r.value === row.role)?.label || row.role}</span>
                         )
                     },
-                    { header: t('reports.department'), accessor: "department", render: (row) => row.department || "N/A" },
+                    { header: t('reports.department'), accessor: "department", render: (row) => row.department || t('users.general') },
                     {
                         header: t('reports.score'), render: (row) => (
                             <span className={`font-bold ${!row.responsibilityScore || row.responsibilityScore >= 80 ? 'text-emerald-500' : row.responsibilityScore < 50 ? 'text-red-500' : 'text-yellow-500'}`}>
@@ -217,10 +225,10 @@ const ReportsPage = () => {
                 ];
             case 'devices':
                 return [
-                    { header: t('reports.deviceName'), render: (row) => <div className="font-bold text-slate-900">{row.name}</div> },
-                    { header: t('reports.category'), accessor: "category", render: (row) => row.category || row.type || "N/A" },
-                    { header: t('reports.serialNumber'), accessor: "serialNumber", render: (row) => <span className="font-mono text-xs">{row.serialNumber || (row.id || row._id || "").slice(-6)}</span> },
-                    { header: t('reports.location'), accessor: "location", render: (row) => row.location || t('reports.mainStorage') },
+                    { header: t('reports.deviceName'), render: (row) => <div className="font-bold text-slate-900">{row.name || row.item || row.equipment?.name || "N/A"}</div> },
+                    { header: t('reports.category'), accessor: "category", render: (row) => row.category || row.type || row.equipment?.category || row.equipment?.type || "N/A" },
+                    { header: t('reports.serialNumber'), accessor: "serialNumber", render: (row) => <span className="font-mono text-xs">{row.serialNumber || row.equipment?.serialNumber || (row.id || row._id || "").slice(-6)}</span> },
+                    { header: t('reports.location'), accessor: "location", render: (row) => row.location || row.equipment?.location || t('reports.mainStorage') },
                     {
                         header: t('reports.statusFilter'), render: (row) => (
                             <span className={`px-2 py-1 rounded-full text-xs font-bold ${(row.available > 0 || row.status === 'Available' || row.status === 'Active') ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
@@ -308,7 +316,12 @@ const ReportsPage = () => {
                             </div>
                         )
                     },
-                    { header: t('reports.date'), render: (row) => row.dateOut ? new Date(row.dateOut).toLocaleDateString() : "N/A" },
+                    {
+                        header: t('reports.date'), render: (row) => {
+                            const date = row.dateOut || row.createdAt || row.date || row.updatedAt;
+                            return date ? new Date(date).toLocaleDateString() : "N/A";
+                        }
+                    },
                     {
                         header: t('reports.statusFilter'), render: (row) => (
                             <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${row.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
@@ -337,7 +350,7 @@ const ReportsPage = () => {
             },
             user: {
                 username: row.user?.username || row.user || row.fullName || "N/A",
-                email: row.email || "N/A"
+                email: row.user?.email || row.email || "N/A"
             }
         }));
 
@@ -352,10 +365,17 @@ const ReportsPage = () => {
             const rows = filteredData.map(row => {
                 const columns = getColumns();
                 return columns.map(col => {
-                    if (col.accessor) return row[col.accessor] || "N/A";
-                    if (currentReport === 'users') return row.fullName || row.username || row.email;
-                    if (currentReport === 'devices') return row.name || row.serialNumber;
-                    return row.item || row.equipment?.name || "N/A";
+                    // Try accessor first, but apply specific fallbacks based on column type
+                    let val = col.accessor ? row[col.accessor] : null;
+
+                    if (col.header === t('reports.department')) return val || t('users.general');
+                    if (col.header === t('reports.date')) return val || row.createdAt || row.date || "N/A";
+                    if (col.header === t('reports.category')) return val || row.type || row.equipment?.category || row.equipment?.type || "N/A";
+                    if (col.header === t('reports.serialNumber')) return val || row.equipment?.serialNumber || (row.id || row._id || "").slice(-6);
+                    if (col.header === t('reports.location')) return val || row.equipment?.location || t('reports.mainStorage');
+                    if (col.header === t('reports.deviceName')) return val || row.name || row.item || row.equipment?.name || "N/A";
+
+                    return val || "N/A";
                 }).join(',');
             }).join('\n');
 
@@ -429,23 +449,27 @@ const ReportsPage = () => {
                     <div className="flex items-center gap-3">
                         {/* Date Range Picker (Now for All Reports) */}
                         <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all">
-                            <FileText className="w-4 h-4 text-slate-400" />
-                            <div className="flex items-center gap-1 text-sm font-medium text-slate-600">
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                    className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
-                                />
-                                <span className="text-slate-400">to</span>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                    className="bg-transparent border-none focus:ring-0 p-0 text-slate-700 font-bold w-[110px]"
-                                />
+                            <style>{datePickerStyles}</style>
+                            <FileText className="w-4 h-4 text-blue-500" />
+                            <div className="flex items-center gap-1 text-sm font-medium text-slate-800">
+                                <div className="flex items-center gap-1 group relative">
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="bg-transparent border-none focus:ring-0 px-1 text-slate-700 font-bold w-[135px] cursor-pointer"
+                                    />
+                                </div>
+                                <span className="text-slate-400 font-bold mx-1">{t('common:misc.to')}</span>
+                                <div className="flex items-center gap-1 group relative">
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        className="bg-transparent border-none focus:ring-0 px-1 text-slate-700 font-bold w-[135px] cursor-pointer"
+                                    />
+                                </div>
                             </div>
-                            <ChevronDown className="w-4 h-4 text-slate-400" />
                         </div>
 
                         {/* Status / Role / Category / Risk Filter based on Report */}
@@ -508,7 +532,7 @@ const ReportsPage = () => {
                             <div className="space-y-2 text-sm text-slate-700">
                                 <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
                                     <span className="font-semibold text-slate-500">{t('reports.dateRange')}</span>
-                                    <span className="font-bold">{startDate} {t('common.to')} {endDate}</span>
+                                    <span className="font-bold">{startDate} {t('common:misc.to')} {endDate}</span>
                                 </div>
                                 <div className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
                                     <span className="font-semibold text-slate-500">{t('reports.statusFilter')}</span>
@@ -552,12 +576,12 @@ const ReportsPage = () => {
                                 {loading ? (
                                     <tr><td colSpan={columns.length} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" /></td></tr>
                                 ) : filteredData.length === 0 ? (
-                                    <tr><td colSpan={columns.length} className="p-12 text-center text-slate-400">{t('common.noRecords') || "No records found."}</td></tr>
+                                    <tr><td colSpan={columns.length} className="p-12 text-center text-slate-400">{t('common:misc.noRecords') || "No records found."}</td></tr>
                                 ) : (
                                     filteredData.map((row, rIdx) => (
                                         <tr key={row.id || row._id || rIdx} className="hover:bg-slate-50 transition-colors group">
                                             {columns.map((col, cIdx) => (
-                                                <td key={cIdx} className="p-5">
+                                                <td key={cIdx} className="p-5 text-slate-700 font-medium">
                                                     {col.render ? col.render(row) : (row[col.accessor] || "N/A")}
                                                 </td>
                                             ))}

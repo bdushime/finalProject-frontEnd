@@ -29,7 +29,24 @@
         "generateReport": "Kora Raporo",
         "live": "+Ako kanya",
         "stable": "Birahagaze neza",
-        "stock": "Ububiko"
+        "stock": "Ububiko",
+        "recentActivityTable": {
+            "trackingId": "ID yo Gukurikirana",
+            "studentStaff": "Umunyeshuri / Umukozi",
+            "transactionDetails": "Ibisobanuro by'Igikorwa",
+            "borrower": "Uwatiye",
+            "viewFullHistory": "Reba Amateka Yose",
+            "loading": "Gushaka ibikorwa...",
+            "destination": "Aho Bijyanywe",
+            "notSpecified": "Ntabwo hagaragajwe"
+        },
+        "status": {
+            "checkedOut": "Iyasohotse",
+            "returned": "Iyararuwe",
+            "overdue": "Iyarenze Igihe",
+            "unknown": "Ntibizwi",
+            "deletedItem": "Igikoresho Cyasibwe"
+        }
     },
     "users": {
         "title": "Gucunga Abakoresha",
@@ -88,8 +105,9 @@
         "resetPassword": "Hindura Ijambo ry'Ibanga (siga ubusa kugirango ugumishe)",
         "updatingFor": "Guhindura amakuru ya",
         "general": "Rusange",
-        "suspended": "BIRAHAGARITSWE",
-        "activeStatus": "BIRAKORA",
+        "active": "Active",
+        "activeStatus": "Kora",
+        "suspended": "Unhagaritswe",
         "allRoles": "Imyanya Yose",
         "actions": "Ibikorwa"
     },
@@ -244,6 +262,8 @@
         "statusFilter": "Imimerere:",
         "roleFilter": "Umwanya:",
         "categoryFilter": "Icyiciro:",
+        "department": "Ishami",
+        "maintenance": "Gusanwa",
         "item": "Ikintu",
         "user": "Umukoresha",
         "date": "Itariki",
@@ -416,6 +436,14 @@
             "login": "Kwinjira:",
             "noSessions": "Nta sessions zikora zibonetse."
         }
+    },
+    "scanner": {
+        "title": "Igenzura rya QR",
+        "subtitle": "Sikana code z'ibikoresho kugirango ubone amakuru.",
+        "scanning": "Birimo gusikanwa...",
+        "itemsFound": "Ibikoresho Bibonetse",
+        "viewDetails": "Reba Ibisobanuro",
+        "scanNext": "Sikana Ikindi"
     },
     "notifications": {
         "title": "Imenyesha",

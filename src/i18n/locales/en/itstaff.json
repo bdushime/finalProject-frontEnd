@@ -1,338 +1,330 @@
 {
     "dashboard": {
         "title": "IT Staff Dashboard",
-        "activeCheckouts": "Active Checkouts",
-        "pendingReturns": "Pending Returns",
-        "equipmentAvailable": "Equipment Available",
-        "alerts": "Alerts",
+        "welcome": "Welcome back, {{name}}",
         "greetings": {
             "morning": "Good morning",
             "afternoon": "Good afternoon",
             "evening": "Good evening"
         },
-        "pendingRequests": "Pending Requests",
-        "wants": "wants",
-        "requested": "Requested:",
-        "approve": "Approve",
-        "deny": "Deny",
-        "cancel": "Cancel",
-        "confirmDenial": "Confirm Denial",
-        "denyTitle": "Deny Request",
-        "denyDesc": "Please enter the reason why you are denying this request. This will be sent to the student.",
-        "denyPlaceholder": "e.g., Item is under maintenance, Low responsibility score...",
-        "messages": {
-            "approved": "Request Approved",
-            "denied": "Request Denied",
-            "failedApprove": "Failed to approve request",
-            "failedDeny": "Failed to deny request",
-            "provideReason": "Please provide a reason for rejection.",
-            "loadError": "Failed to load dashboard data"
-        },
         "stats": {
             "totalDevices": "Total Devices",
             "activeBorrows": "Active Borrows",
-            "lostMaint": "Lost / Maint.",
-            "overdueItems": "Overdue Items"
+            "lostMaint": "Lost/Maint.",
+            "overdueItems": "Overdue Items",
+            "systemHealth": "System Health"
         },
         "systemHealth": "System Health",
+        "profileCard": {
+            "role": "IT Staff",
+            "subRole": "System Administrator"
+        },
         "charts": {
             "activityTrends": "Activity Trends",
-            "monthlyActivity": "Monthly checkout and return trends",
+            "monthlyActivity": "Monthly checkouts and returns activity",
+            "checkoutsVsReturns": "Checkouts vs Returns",
+            "inventoryUsage": "Inventory Usage",
+            "byCategory": "Distribution by Category",
             "deviceTypes": "Device Types",
-            "distribution": "Distribution by device category",
+            "distribution": "Distribution of equipment by type",
             "checkouts": "Checkouts",
             "returns": "Returns"
         },
-        "recentActivity": {
-            "title": "Device Usage",
-            "noActivity": "No recent activity",
-            "inUse": "{{active}} out of {{total}} devices currently in use."
-        },
         "quickActions": {
             "title": "Quick Actions",
-            "subtitle": "Common tasks and operations",
-            "lend": "Lend Equipment",
-            "report": "Generate Report"
+            "lend": "Lend Device",
+            "return": "Return Device",
+            "report": "Generate Report",
+            "iot": "IoT Tracker",
+            "subtitle": "Common administrative tasks"
         },
-        "profileCard": {
-            "role": "IT Manager",
-            "subRole": "System Admin"
+        "recentActivity": {
+            "title": "Recent Activity",
+            "inUse": "{{active}} items currently in use across {{total}} total inventory",
+            "noActivity": "No recent activity recorded."
+        },
+        "messages": {
+            "loadError": "Failed to load dashboard stats",
+            "approved": "Request approved successfully",
+            "failedApprove": "Failed to approve request",
+            "provideReason": "Please provide a reason",
+            "denied": "Request denied successfully",
+            "failedDeny": "Failed to deny request"
         }
     },
     "equipment": {
-        "title": "Browse Equipment",
-        "searchPlaceholder": "Search by name, brand, or description...",
+        "title": "Equipment Management",
+        "searchPlaceholder": "Search by name, category, or serial number...",
         "search": "Search",
+        "searching": "Searching inventory...",
+        "showingItems": "Showing {{count}} items",
         "category": "Category",
-        "allCategories": "All Categories",
-        "sortBy": "Sort by",
+        "sortBy": "Sort By",
         "sortOptions": {
-            "name": "Name (A-Z)",
+            "name": "Name",
             "category": "Category",
             "availability": "Availability"
         },
-        "searching": "Searching...",
-        "showingItems": "Showing {{count}} items",
-        "noEquipment": "No equipment found",
-        "adjustFilters": "Try adjusting your search filters.",
-        "details": "Details",
+        "categories": {
+            "all": "All Categories",
+            "laptop": "Laptops",
+            "projector": "Projectors",
+            "camera": "Cameras",
+            "audio": "Audio",
+            "video": "Video",
+            "tablet": "Tablets",
+            "accessories": "Accessories",
+            "microphone": "Microphones",
+            "other": "Other"
+        },
         "status": {
             "available": "Available",
             "unavailable": "Unavailable",
             "maintenance": "Maintenance",
-            "lost": "Lost"
+            "lost": "Lost",
+            "title": "Status"
         },
+        "details": "View Details",
+        "noEquipment": "No equipment found",
+        "adjustFilters": "Try adjusting your filters or search query.",
         "dialog": {
             "editTitle": "Edit Equipment",
-            "viewTitle": "Equipment Details",
-            "updateDesc": "Update the equipment details below.",
-            "viewDesc": "View detailed information and status for this item.",
+            "updateDesc": "Update details for this equipment item.",
+            "viewDesc": "Detailed information for this equipment.",
             "serialNumber": "Serial Number",
             "location": "Location",
+            "storageLocation": "Storage Location",
             "description": "Description",
             "noDescription": "No description provided.",
             "name": "Equipment Name",
-            "selectType": "Select type",
+            "selectType": "Select Category",
             "selectStatus": "Select Status",
-            "storageLocation": "Storage Location",
             "cancel": "Cancel",
             "save": "Save Changes",
             "delete": "Delete Item",
             "close": "Close",
             "edit": "Edit Details",
-            "confirmDelete": "Are you sure you want to delete this equipment? This cannot be undone."
+            "confirmDelete": "Are you sure you want to delete this equipment? This action cannot be undone.",
+            "loading": "Loading equipment details...",
+            "notFound": "Equipment not found.",
+            "availableOnline": "Available (online)",
+            "offline": "Offline",
+            "trackerId": "Tracker ID",
+            "lastSeen": "Last seen",
+            "battery": "Battery",
+            "temperature": "Temperature",
+            "humidity": "Humidity",
+            "deletedItem": "Deleted Item"
         },
         "messages": {
-            "saveSuccess": "Equipment saved successfully",
-            "saveError": "Failed to save equipment",
-            "deleteSuccess": "Equipment deleted successfully",
+            "saveError": "Failed to save equipment details",
             "deleteError": "Failed to delete equipment"
+        }
+    },
+    "reports": {
+        "title": "System Reports",
+        "subtitle": "Overview of {{count}} transactions",
+        "downloadPdf": "Download PDF Report",
+        "searchPlaceholder": "Search student or equipment...",
+        "filterBy": "Filter By:",
+        "loading": "Loading data...",
+        "error": "Failed to load report data",
+        "noRecords": "No matching records found",
+        "table": {
+            "student": "Student / User",
+            "score": "Score",
+            "equipment": "Equipment",
+            "dates": "Lending Dates",
+            "status": "Status",
+            "borrowed": "Borrowed",
+            "due": "Due"
         },
-        "categories": {
-            "all": "All Categories",
-            "laptop": "Laptop",
-            "projector": "Projector",
-            "camera": "Camera",
-            "microphone": "Microphone",
-            "tablet": "Tablet",
-            "audio": "Audio",
-            "accessories": "Accessories",
-            "other": "Other"
+        "messages": {
+            "noData": "No data available to export"
         }
     },
     "checkouts": {
-        "title": "Current Checkouts",
         "manageTransactions": "Manage Transactions",
-        "manageDesc": "Handle requests, upcoming reservations, and active loans.",
-        "newCheckout": "New Manual Checkout",
+        "manageDesc": "Approve requests, manage reservations, and track active checkouts.",
+        "newCheckout": "New Checkout",
         "tabs": {
             "requests": "Requests",
             "reservations": "Reservations",
-            "active": "Active Borrows"
+            "active": "Active"
         },
         "table": {
-            "item": "Item",
-            "date": "Date",
+            "item": "Item Name",
             "startTime": "Start Time",
+            "date": "Date",
             "status": "Status",
             "actions": "Actions",
-            "loading": "Loading data...",
-            "noItems": "No items found in this category."
+            "loading": "Loading transactions...",
+            "noItems": "No transactions found in this category."
         },
         "actions": {
             "approve": "Approve",
             "deny": "Deny",
             "checkout": "Check Out",
             "cancel": "Cancel",
-            "tooEarly": "Too early",
-            "view": "View"
+            "tooEarly": "Too early"
         },
         "dialog": {
             "denyTitle": "Deny Request",
-            "denyDesc": "Please enter the reason why you are denying this request.",
-            "reasonPlaceholder": "e.g., Item is under maintenance...",
-            "confirmDeny": "Confirm Denial",
+            "denyDesc": "Please provide a reason for denying this request.",
+            "reasonPlaceholder": "Enter reason (e.g. Item in maintenance)...",
             "cancel": "Cancel",
-            "viewDetails": "Checkout Details",
-            "reviewDetails": "Review details for this {{status}} request",
-            "borrowerInfo": "Borrower Information",
-            "trustScore": "Trust Score:",
-            "name": "Name",
-            "email": "Email",
-            "phone": "Phone",
-            "equipInfo": "Equipment Information",
-            "equipName": "Equipment Name",
-            "reqDate": "Request / Checkout Date",
-            "returnDate": "Expected Return",
-            "logistics": "Checkout Logistics",
-            "dest": "Destination / Location",
-            "purpose": "Purpose",
-            "photoTitle": "Equipment Condition Photo",
-            "photoDesc": "Photo captured before checkout to document condition.",
-            "noPhoto": "No Photo Available"
+            "confirmDeny": "Confirm Denial"
         },
         "messages": {
+            "loadError": "Failed to load checkouts",
             "statusUpdated": "Status updated successfully",
             "statusError": "Failed to update status",
-            "provideReason": "Please provide a reason.",
-            "requestDenied": "Request Denied",
+            "provideReason": "Please provide a reason",
+            "requestDenied": "Request denied successfully",
             "denyError": "Failed to deny request",
-            "reservationCancelled": "Reservation cancelled",
-            "cancelError": "Failed to cancel",
-            "loadError": "Failed to load data",
-            "confirmApprove": "Are you sure you want to approve this item?",
-            "confirmCancel": "Cancel this reservation?"
-        }
-    },
-    "reports": {
-        "title": "Reports",
-        "generateReport": "Generate Report",
-        "reportFilters": "Report Filters",
-        "reportType": "Report Type",
-        "resetFilters": "Reset Filters",
-        "noReportGenerated": "No Report Generated",
-        "useFiltersPrompt": "Use the filters above to generate a report. Click \"Generate Report\" to see the data.",
-        "reportResults": "Report Results",
-        "recordsFound": "{{count}} Records Found",
-        "exportCSV": "Export CSV",
-        "exportPDF": "Export PDF",
-        "lendingReport": "Lending Report",
-        "reservationReport": "Reservation Report",
-        "utilizationReport": "Utilization Report",
-        "subtitle": "Viewing {{count}} records • Professional Report Generation",
-        "downloadPdf": "Download PDF Report",
-        "searchPlaceholder": "Search by student, email, or equipment...",
-        "filterBy": "Filter by:",
-        "loading": "Fetching records...",
-        "error": "Failed to load report data.",
-        "noRecords": "No records found matching your filters.",
-        "table": {
-            "student": "Student",
-            "score": "Score",
-            "equipment": "Equipment",
-            "dates": "Dates",
-            "status": "Status",
-            "borrowed": "Borrowed",
-            "due": "Due"
+            "confirmApprove": "Are you sure you want to approve this request?",
+            "confirmCancel": "Are you sure you want to cancel this reservation?",
+            "reservationCancelled": "Reservation cancelled successfully",
+            "cancelError": "Failed to cancel reservation"
         },
-        "messages": {
-            "noData": "No data to export!"
-        }
-    },
-    "iot": {
-        "title": "IoT Tracker Live View",
-        "subtitle": "Real-time monitoring of trackers",
-        "liveConnection": "Live Connection Active",
-        "stats": {
-            "total": "Total Trackers",
-            "online": "Online",
-            "offline": "Offline",
-            "lowBattery": "Low Battery"
-        },
-        "filters": {
-            "searchPlaceholder": "Search by ID, equipment, or location...",
-            "statusPlaceholder": "Filter by status",
-            "allStatus": "All Status",
-            "online": "Online",
-            "offline": "Offline"
-        },
-        "map": {
-            "title": "Campus Map View",
-            "desc": "Trackers are shown on OpenStreetMap. Green = Online, Red = Offline.",
-            "warningNoGps": "Warning: {{count}} devices found, but NO GPS coordinates received!",
-            "youAreHere": "You are here",
-            "status": "Status:"
-        },
-        "table": {
-            "title": "Tracker Details",
-            "showing": "Showing {{current}} of {{total}} trackers",
-            "page": "Page {{current}} of {{total}}",
-            "headers": {
-                "equipment": "Equipment",
-                "id": "Tracker ID",
-                "location": "Location",
-                "status": "Status",
-                "battery": "Battery",
-                "temp": "Temperature",
-                "humidity": "Humidity",
-                "lastSeen": "Last Seen"
+        "flow": {
+            "steps": {
+                "select": "1. Select",
+                "scan": "2. Scan",
+                "photo": "3. Photo",
+                "details": "4. Details",
+                "sign": "5. Sign",
+                "complete": "6. Complete"
             },
-            "noTrackers": "No trackers found matching your filters",
-            "lastSeen": "Last seen: {{time}}",
-            "viewHistory": "View History",
-            "historyTitle": "Device History - {{equipment}}",
-            "trends": "Battery & Temperature Trends (Last Hour)",
-            "batteryPercent": "Battery %",
-            "tempCelcius": "Temperature °C",
-            "currentBattery": "Current Battery",
-            "currentTemp": "Current Temperature"
-        },
-        "alerts": {
-            "offlineMessage": "Device {{equipment}} ({{id}}) went OFFLINE!",
-            "alertPrefix": "ALERT: {{message}}",
-            "offlineTitle": "Device Offline Alert"
+            "scan": {
+                "title": "Verify Item",
+                "scanning": "Scanning: {{name}}",
+                "align": "Align QR Code...",
+                "verified": "Verified!",
+                "back": "Back",
+                "next": "Next"
+            },
+            "photo": {
+                "title": "Capture Photo",
+                "desc": "Document condition of {{name}}",
+                "captured": "Photo Captured",
+                "click": "Click to take photo"
+            },
+            "details": {
+                "title": "Borrow Details",
+                "desc": "Enter borrower and return info",
+                "studentId": "Student ID / User ID",
+                "studentIdPlaceholder": "Enter User ID",
+                "destination": "Destination / Class",
+                "destinationPlaceholder": "e.g. Media Lab, Room 304",
+                "purpose": "Purpose",
+                "purposePlaceholder": "e.g. Class Project",
+                "returnDate": "Return Date",
+                "returnTime": "Return Time",
+                "required": "Please fill required fields"
+            },
+            "sign": {
+                "title": "Digital Signature",
+                "desc": "Borrower must sign below",
+                "signed": "Signed",
+                "clickToSign": "Click to Sign",
+                "clear": "Clear",
+                "complete": "Complete Checkout",
+                "failed": "Checkout Failed"
+            },
+            "confirmation": {
+                "title": "Checkout Successful!",
+                "desc": "The transaction has been logged.",
+                "print": "Print Receipt",
+                "dashboard": "Go to Dashboard"
+            }
         }
     },
-    "profile": {
-        "title": "My Profile",
-        "account": {
-            "title": "Account",
-            "desc": "Basic information",
-            "uploadAvatar": "Upload Avatar"
+    "history": {
+        "title": "Borrowing History",
+        "noRecords": "No borrowing records found for this equipment.",
+        "table": {
+            "borrower": "Borrower",
+            "borrowedAt": "Borrowed At",
+            "dueDate": "Due Date",
+            "returnedAt": "Returned At",
+            "status": "Status"
         },
-        "personal": {
-            "title": "Personal Info",
-            "desc": "Update your profile details",
-            "firstName": "First name",
-            "lastName": "Last name",
-            "email": "Email",
-            "saveChanges": "Save changes"
-        }
-    },
-    "notifications": {
-        "title": "Notifications",
-        "unread": "{{count}} Unread",
-        "desc": "Stay updated with alerts and requests.",
-        "markAll": "Mark all as read",
-        "noNotifications": "No notifications yet",
-        "noNotificationsDesc": "We'll alert you when important events happen.",
-        "critical": "CRITICAL",
-        "viewDetails": "View Details",
-        "justNow": "Just now",
-        "messages": {
-            "loadError": "Could not load notifications",
-            "updateError": "Failed to update notification",
-            "markAllSuccess": "All notifications marked as read",
-            "markAllError": "Failed to mark all as read"
-        }
+        "notReturned": "Not yet returned",
+        "borrowed": "Borrowed:",
+        "due": "Due:",
+        "returned": "Returned:"
     },
     "classrooms": {
-        "title": "Classroom Management",
-        "pageTitle": "Classrooms",
-        "description": "Manage room equipment and availability.",
+        "pageTitle": "Classroom Management",
+        "description": "Monitor and manage IT equipment status across various classrooms.",
         "addClassroom": "Add Classroom",
         "addNewTitle": "Add New Classroom",
-        "addNewDesc": "Add a classroom to the system and define its equipment.",
+        "addNewDesc": "Enter the details for the new classroom.",
         "roomName": "Room Name",
-        "roomNamePlaceholder": "e.g. Room 304",
-        "hasScreen": "Has Screen?",
-        "screenYes": "Yes, TV/Screen installed",
-        "screenNo": "No screen available",
-        "save": "Save Classroom",
+        "roomNamePlaceholder": "e.g. Room 101",
+        "hasScreen": "Screen / Projector?",
+        "screenYes": "Screen Installed",
+        "screenNo": "Standard Room",
         "cancel": "Cancel",
+        "save": "Save Classroom",
+        "saving": "Saving...",
         "table": {
             "classroom": "Classroom",
-            "equipStatus": "Equipment Status",
-            "actions": "Quick Actions",
-            "noClassrooms": "No classrooms found. Add one to get started.",
+            "equipStatus": "IT Equipment Status",
+            "actions": "Actions",
+            "noClassrooms": "No classrooms added yet.",
             "screenInstalled": "Screen Installed",
             "standardRoom": "Standard Room"
         },
         "messages": {
             "addSuccess": "Classroom added successfully",
-            "updateSuccess": "Classroom updated",
-            "deleteSuccess": "Classroom deleted",
-            "confirmDelete": "Are you sure you want to delete this classroom?"
+            "addError": "Failed to add classroom",
+            "updateSuccess": "Classroom updated successfully",
+            "updateError": "Failed to update classroom",
+            "confirmDelete": "Are you sure you want to delete this classroom?",
+            "deleteSuccess": "Classroom deleted successfully",
+            "deleteError": "Failed to delete classroom"
+        }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "unread": "{{count}} unread",
+        "desc": "Recent system alerts and borrow requests.",
+        "markAll": "Mark all as read",
+        "noNotifications": "All caught up!",
+        "noNotificationsDesc": "No new notifications for you right now.",
+        "justNow": "Just now",
+        "critical": "Critical",
+        "viewDetails": "View Details",
+        "messages": {
+            "loadError": "Failed to load notifications",
+            "updateError": "Failed to update notification",
+            "markAllSuccess": "All notifications marked as read",
+            "markAllError": "Failed to mark all as read"
+        }
+    },
+    "iot": {
+        "title": "IoT Tracker",
+        "subtitle": "Live equipment location and status monitoring",
+        "liveConnection": "Live Connection",
+        "alerts": {
+            "offlineTitle": "Device Offline",
+            "offlineMessage": "Equipment {{equipment}} (ID: {{id}}) has gone offline.",
+            "alertPrefix": "🚨 SYSTEM ALERT: {{message}}"
+        },
+        "stats": {
+            "total": "Total Devices",
+            "online": "Online",
+            "offline": "Offline",
+            "lowBattery": "Low Battery"
+        },
+        "map": {
+            "title": "Live Movement Map",
+            "desc": "Real-time tracking of all tagged equipment",
+            "youAreHere": "You are here",
+            "status": "Status:",
+            "warningNoGps": "Warning: {{count}} devices reporting without valid GPS coordinates."
         }
     }
 }

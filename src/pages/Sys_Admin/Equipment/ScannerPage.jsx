@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { Camera, RefreshCw, XCircle, CheckCircle, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const ScannerPage = () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
     const [scanning, setScanning] = useState(true);
     const [scanned, setScanned] = useState(false);
@@ -23,8 +25,8 @@ const ScannerPage = () => {
     const HeroSection = (
         <div className="flex justify-between items-center mb-6 mt-4 relative z-10 w-full">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">QR Scanner</h1>
-                <p className="text-gray-400">Scan equipment tags for check-in or info.</p>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('scanner.title')}</h1>
+                <p className="text-gray-400">{t('scanner.subtitle')}</p>
             </div>
         </div>
     );
@@ -51,7 +53,7 @@ const ScannerPage = () => {
                                     {/* Scan Line */}
                                     <div className="absolute top-0 w-full h-1 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.8)] animate-[scan_2s_ease-in-out_infinite]"></div>
                                 </div>
-                                <p className="mt-8 text-white font-mono text-sm uppercase tracking-widest animate-pulse">Scanning...</p>
+                                <p className="mt-8 text-white font-mono text-sm uppercase tracking-widest animate-pulse">{t('scanner.scanning')}</p>
                             </>
                         )}
                     </div>
@@ -63,7 +65,7 @@ const ScannerPage = () => {
                                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <CheckCircle className="w-8 h-8 text-green-600" />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-1">Items Found</h3>
+                                <h3 className="text-xl font-bold text-slate-900 mb-1">{t('scanner.itemsFound')}</h3>
                                 <p className="text-sm text-gray-500 mb-6">Dell Latitude 5420 (Tag #2941)</p>
 
                                 <div className="space-y-3">
@@ -71,13 +73,13 @@ const ScannerPage = () => {
                                         onClick={() => navigate('/admin/reports')} // Mock action
                                         className="w-full bg-[#8D8DC7] text-white py-3 rounded-xl font-bold hover:bg-[#7b7bb5] transition-colors"
                                     >
-                                        View Details
+                                        {t('scanner.viewDetails')}
                                     </button>
                                     <button
                                         onClick={() => { setScanned(false); setScanning(true); }}
                                         className="w-full bg-gray-50 text-slate-700 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors"
                                     >
-                                        Scan Next
+                                        {t('scanner.scanNext')}
                                     </button>
                                 </div>
                             </div>

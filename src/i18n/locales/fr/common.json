@@ -87,7 +87,11 @@
         "all": "Tous",
         "total": "Total",
         "na": "N/A",
-        "equipment": "Équipement"
+        "equipment": "Équipement",
+        "notSpecified": "Non spécifié",
+        "unknownUser": "Utilisateur Inconnu",
+        "unknownItem": "Article Inconnu",
+        "comparedTo": "Par rapport à {{value}}"
     },
     "roles": {
         "student": "Étudiant",
@@ -115,5 +119,82 @@
         "rw": "Kinyarwanda",
         "fr": "Français",
         "switchLanguage": "Langue"
+    },
+    "reports": {
+        "filters": {
+            "title": "Filtres du Rapport",
+            "description": "Personnalisez votre rapport en sélectionnant les filtres ci-dessous",
+            "type": "Type de Rapport",
+            "dateRange": "Plage de Dates",
+            "startDate": "Date de Début",
+            "endDate": "Date de Fin",
+            "category": "Catégorie d'Équipement",
+            "status": "Statut de l'Équipement",
+            "borrower": "Emprunteur (Personnel/Utilisateur)",
+            "borrowerPlaceholder": "Rechercher par nom ou email...",
+            "deviceId": "ID de l'Appareil",
+            "eventType": "Type d'Événement",
+            "allDevices": "Tous les Appareils",
+            "allStatus": "Tous les Statuts",
+            "allEvents": "Tous les Types",
+            "allCategories": "Toutes les Catégories"
+        },
+        "actions": {
+            "generate": "Générer le Rapport",
+            "generating": "Génération...",
+            "reset": "Réinitialiser"
+        },
+        "results": {
+            "title": "Résultats du Rapport",
+            "summary": "Affichage de {{current}} sur {{total}} enregistrements",
+            "pageInfo": "(Page {{current}} sur {{total}})",
+            "export": "Exporter le Rapport",
+            "exportDesc": "Télécharger le rapport complet dans votre format préféré",
+            "downloadCsv": "Télécharger CSV",
+            "downloadPdf": "Télécharger PDF"
+        },
+        "emptyState": {
+            "noDataTitle": "Aucune donnée trouvée",
+            "noDataDesc": "Aucun enregistrement ne correspond à vos critères de filtrage actuels. Essayez d'ajuster vos filtres.",
+            "noReportTitle": "Aucun rapport généré",
+            "noReportDesc": "Utilisez les filtres ci-dessus pour générer un rapport."
+        },
+        "presets": {
+            "today": "Aujourd'hui",
+            "last7days": "7 derniers jours",
+            "last30days": "30 derniers jours",
+            "custom": "Période personnalisée"
+        },
+        "columns": {
+            "equipmentName": "Nom de l'Équipement",
+            "serialNumber": "Numéro de Série",
+            "category": "Catégorie",
+            "location": "Emplacement",
+            "status": "Statut",
+            "condition": "État",
+            "purchaseDate": "Date d'Achat",
+            "borrowerName": "Nom de l'Emprunteur",
+            "lendingDate": "Date de Prêt",
+            "dueDate": "Date d'Échéance",
+            "reservationStart": "Début Réservation",
+            "reservationEnd": "Fin Réservation",
+            "damageDate": "Date de Dommage",
+            "remarks": "Remarques",
+            "lossDate": "Date de Perte",
+            "lastKnownLocation": "Dernier Emplacement Connu",
+            "totalCheckouts": "Total Sorties",
+            "utilizationRate": "Taux d'Utilisation",
+            "currentStatus": "Statut Actuel",
+            "deviceName": "Nom de l'Appareil",
+            "deviceId": "ID de l'Appareil",
+            "eventType": "Type d'Événement",
+            "user": "Utilisateur",
+            "timestamp": "Horodatage"
+        }
+    },
+    "browseDevices": {
+        "labels": {
+            "sn": "N/S"
+        }
     }
 }

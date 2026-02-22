@@ -123,274 +123,202 @@ export default function Auth() {
         clearFeedback(); // Clear feedback on toggle
     };
 
-    const inputStyle = {
-        width: "100%",
-        height: "2.75rem",
-        paddingLeft: "2.75rem",
-        paddingRight: "1rem",
-        border: "2px solid #e5e7eb",
-        borderRadius: "0.625rem",
-        fontSize: "0.9375rem",
-        color: "#1a1a2e",
-        backgroundColor: "#ffffff",
-        fontFamily: "inherit",
-        outline: "none",
-        transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-        boxSizing: "border-box"
-    };
-
-    const labelStyle = {
-        display: "block",
-        marginBottom: "0.375rem",
-        fontSize: "0.8125rem",
-        fontWeight: 600,
-        color: "#374151",
-        letterSpacing: "0.01em"
-    };
-
-    const iconStyle = {
-        position: "absolute",
-        left: "1rem",
-        top: "50%",
-        transform: "translateY(-50%)",
-        width: "18px",
-        height: "18px",
-        color: "#9ca3af",
-        zIndex: 1,
-        transition: "color 0.25s ease"
-    };
-
     // Inline Alert Component
     const FeedbackAlert = () => {
         if (!feedback.message) return null;
 
         const isError = feedback.type === 'error';
-        const bgColor = isError ? "#FEF2F2" : "#F0FDF4"; // Red-50 : Green-50
-        const borderColor = isError ? "#FECACA" : "#BBF7D0"; // Red-200 : Green-200
-        const textColor = isError ? "#991B1B" : "#166534"; // Red-800 : Green-800
-        const Icon = isError ? AlertCircle : CheckCircle2;
 
         return (
-            <div style={{
-                backgroundColor: bgColor,
-                border: `1px solid ${borderColor}`,
-                color: textColor,
-                padding: "0.75rem 1rem",
-                borderRadius: "0.5rem",
-                marginBottom: "1.5rem",
-                fontSize: "0.875rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                animation: "fadeIn 0.3s ease-in-out"
-            }}>
-                <Icon size={18} />
+            <div className={`flex items-center gap-2 p-3 rounded-xl text-sm mb-4 ${isError
+                    ? 'bg-red-50 border border-red-200 text-red-800'
+                    : 'bg-green-50 border border-green-200 text-green-800'
+                }`}>
+                {isError ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
                 <span>{feedback.message}</span>
             </div>
         );
     };
 
     return (
-        <div style={{
-            minHeight: "100vh",
-            background: "#FAFAF8",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "2rem",
-            fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
-            position: "relative",
-            overflow: "hidden"
-        }}>
+        <div className="min-h-screen bg-[#FAFAF8] flex justify-center items-center p-4 sm:p-8 relative overflow-hidden font-['DM_Sans',sans-serif]">
             {/* Language Switcher - top right */}
-            <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", zIndex: 50 }}>
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50">
                 <LanguageSwitcher variant="light" />
             </div>
 
             {/* Background blobs */}
-            <div style={{ position: "absolute", top: "-150px", right: "-100px", width: "500px", height: "500px", background: "linear-gradient(135deg, rgba(0, 180, 216, 0.25) 0%, rgba(24, 100, 171, 0.15) 100%)", borderRadius: "42% 58% 70% 30% / 45% 45% 55% 55%", filter: "blur(40px)", animation: "morph 8s ease-in-out infinite", zIndex: 0 }} />
-            <div style={{ position: "absolute", bottom: "-100px", left: "-80px", width: "400px", height: "400px", background: "linear-gradient(135deg, rgba(144, 224, 239, 0.2) 0%, rgba(0, 180, 216, 0.1) 100%)", borderRadius: "58% 42% 30% 70% / 55% 55% 45% 45%", filter: "blur(40px)", animation: "morph 8s ease-in-out infinite 2s", zIndex: 0 }} />
+            <div className="absolute -top-[150px] -right-[100px] w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-[42%_58%_70%_30%/45%_45%_55%_55%] blur-[40px] z-0"
+                style={{ background: "linear-gradient(135deg, rgba(0, 180, 216, 0.25) 0%, rgba(24, 100, 171, 0.15) 100%)" }} />
+            <div className="absolute -bottom-[100px] -left-[80px] w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] rounded-[58%_42%_30%_70%/55%_55%_45%_45%] blur-[40px] z-0"
+                style={{ background: "linear-gradient(135deg, rgba(144, 224, 239, 0.2) 0%, rgba(0, 180, 216, 0.1) 100%)" }} />
 
             {/* Main Container */}
-            <div style={{
-                width: "100%",
-                maxWidth: "900px",
-                height: "650px",
-                backgroundColor: "#ffffff",
-                borderRadius: "1.5rem",
-                boxShadow: "0 25px 80px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.05)",
-                display: "flex",
-                position: "relative",
-                overflow: "hidden",
-                zIndex: 1,
-                border: "1px solid rgba(0, 0, 0, 0.04)"
-            }}>
-                {/* Sliding Overlay Panel */}
-                <div style={{
-                    position: "absolute",
-                    top: 0,
-                    left: isSignUp ? "50%" : "0",
-                    width: "50%",
-                    height: "100%",
-                    background: "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)",
-                    transition: "left 0.6s cubic-bezier(0.68, -0.15, 0.32, 1.15)",
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    padding: "3rem",
-                    boxSizing: "border-box"
-                }}>
-                    <div style={{ textAlign: "center", position: "relative", zIndex: 2 }}>
-                        <h2 style={{ fontSize: "2rem", fontWeight: 700, color: "#ffffff", marginBottom: "1rem" }}>
+            <div className="w-full max-w-[900px] bg-white rounded-2xl sm:rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.08)] relative overflow-hidden z-10 border border-black/[0.04] flex flex-col md:flex-row md:h-[650px]">
+
+                {/* ===== SLIDING OVERLAY  — hidden on mobile, visible md+ ===== */}
+                <div
+                    className="hidden md:flex absolute top-0 w-1/2 h-full flex-col justify-center items-center p-8 lg:p-12 z-10 transition-[left] duration-[600ms] ease-[cubic-bezier(0.68,-0.15,0.32,1.15)]"
+                    style={{
+                        left: isSignUp ? "50%" : "0",
+                        background: "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)"
+                    }}
+                >
+                    <div className="text-center relative z-[2]">
+                        <h2 className="text-2xl lg:text-[2rem] font-bold text-white mb-4">
                             {isSignUp ? t("welcomeBack") : t("helloFriend")}
                         </h2>
-                        <p style={{ fontSize: "1rem", color: "rgba(255, 255, 255, 0.85)", lineHeight: 1.6, marginBottom: "2rem", maxWidth: "280px" }}>
+                        <p className="text-base text-white/85 leading-relaxed mb-8 max-w-[280px]">
                             {isSignUp ? t("alreadyHaveAccount") : t("dontHaveAccount")}
                         </p>
-                        <button onClick={toggleMode} style={{ padding: "0.875rem 2.5rem", backgroundColor: "transparent", color: "#ffffff", border: "2px solid rgba(255, 255, 255, 0.8)", borderRadius: "2rem", fontWeight: 600, cursor: "pointer" }}>
+                        <button onClick={toggleMode} className="py-3.5 px-10 bg-transparent text-white border-2 border-white/80 rounded-full font-semibold hover:bg-white/10 transition-colors cursor-pointer">
                             {isSignUp ? t("signIn") : t("signUp")}
                         </button>
                     </div>
                 </div>
 
-                {/* --- SIGN UP FORM --- */}
-                <div style={{
-                    width: "50%",
-                    padding: "2rem 3rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    opacity: isSignUp ? 1 : 0,
-                    transform: isSignUp ? "translateX(0)" : "translateX(-20px)",
-                    transition: "all 0.4s ease",
-                    pointerEvents: isSignUp ? "auto" : "none"
-                }}>
-                    <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "#111827" }}>{t("createAccount")}</h1>
-
-                    {/* Feedback Alert for Sign Up */}
-                    <div style={{ marginBottom: feedback.message ? '1rem' : '0' }}>
-                        <FeedbackAlert />
+                {/* ===== MOBILE MODE TOGGLE — visible only on mobile ===== */}
+                <div className="md:hidden p-6 pb-0 text-center"
+                    style={{ background: isSignUp ? "transparent" : "transparent" }}
+                >
+                    <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+                        <button
+                            onClick={() => { if (isSignUp) toggleMode(); }}
+                            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${!isSignUp
+                                    ? 'bg-white shadow-sm text-gray-900'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            {t("signIn")}
+                        </button>
+                        <button
+                            onClick={() => { if (!isSignUp) toggleMode(); }}
+                            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${isSignUp
+                                    ? 'bg-white shadow-sm text-gray-900'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            {t("signUp")}
+                        </button>
                     </div>
+                </div>
 
-                    <form onSubmit={handleSignUpSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.6rem", overflowY: 'auto', maxHeight: '500px', paddingRight: '5px' }}>
+                {/* ===== SIGN UP FORM ===== */}
+                <div className={`w-full md:w-1/2 p-6 sm:p-8 lg:p-12 flex flex-col justify-center transition-all duration-400 ${isSignUp ? 'block' : 'hidden md:flex'
+                    } ${isSignUp ? 'opacity-100' : 'md:opacity-0 md:pointer-events-none'}`}>
+                    <h1 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900">{t("createAccount")}</h1>
+
+                    <FeedbackAlert />
+
+                    <form onSubmit={handleSignUpSubmit} className="flex flex-col gap-3 overflow-y-auto max-h-[60vh] md:max-h-[500px] pr-1">
                         <div>
-                            <label style={labelStyle}>{t("fullName")}</label>
-                            <div style={{ position: "relative" }}>
-                                <User style={iconStyle} />
-                                <input type="text" placeholder={t("fullNamePlaceholder")} value={signUpData.name} onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })} required style={inputStyle} />
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("fullName")}</label>
+                            <div className="relative">
+                                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type="text" placeholder={t("fullNamePlaceholder")} value={signUpData.name} onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-4 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>{t("username")}</label>
-                            <div style={{ position: "relative" }}>
-                                <AtSign style={iconStyle} />
-                                <input type="text" placeholder={t("usernamePlaceholder")} value={signUpData.username} onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value })} required style={inputStyle} />
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("username")}</label>
+                            <div className="relative">
+                                <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type="text" placeholder={t("usernamePlaceholder")} value={signUpData.username} onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-4 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>{t("studentId")}</label>
-                            <div style={{ position: "relative" }}>
-                                <CreditCard style={iconStyle} />
-                                <input
-                                    type="text"
-                                    placeholder={t("studentIdPlaceholder")}
-                                    value={signUpData.studentId}
-                                    onChange={(e) => setSignUpData({ ...signUpData, studentId: e.target.value })}
-                                    required
-                                    style={inputStyle}
-                                />
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("studentId")}</label>
+                            <div className="relative">
+                                <CreditCard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type="text" placeholder={t("studentIdPlaceholder")} value={signUpData.studentId} onChange={(e) => setSignUpData({ ...signUpData, studentId: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-4 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>{t("emailAddress")}</label>
-                            <div style={{ position: "relative" }}>
-                                <Mail style={iconStyle} />
-                                <input type="email" placeholder={t("emailPlaceholder")} value={signUpData.email} onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })} required style={inputStyle} />
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("emailAddress")}</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type="email" placeholder={t("emailPlaceholder")} value={signUpData.email} onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-4 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>{t("password")}</label>
-                            <div style={{ position: "relative" }}>
-                                <Lock style={iconStyle} />
-                                <input type={showPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={signUpData.password} onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("password")}</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type={showPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={signUpData.password} onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-12 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-400 hover:text-gray-600 transition-colors">
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>{t("confirmPassword")}</label>
-                            <div style={{ position: "relative" }}>
-                                <Lock style={iconStyle} />
-                                <input type={showConfirmPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={signUpData.confirmPassword} onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
-                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("confirmPassword")}</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type={showConfirmPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={signUpData.confirmPassword} onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-12 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
+                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-400 hover:text-gray-600 transition-colors">
                                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
                         </div>
 
-                        <button type="submit" disabled={isLoading} style={{ width: "100%", height: "2.75rem", background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)", color: "#ffffff", border: "none", borderRadius: "0.625rem", fontWeight: 600, cursor: isLoading ? "not-allowed" : "pointer", marginTop: "0.5rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                        <button type="submit" disabled={isLoading}
+                            className="w-full h-11 text-white border-none rounded-[10px] font-semibold cursor-pointer mt-2 flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)" }}>
                             {isLoading ? t("creating") : <>{t("createAccount")} <ArrowRight size={18} /></>}
                         </button>
                     </form>
                 </div>
 
-                {/* --- SIGN IN FORM --- */}
-                <div style={{
-                    width: "50%",
-                    padding: "3rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    opacity: isSignUp ? 0 : 1,
-                    transform: isSignUp ? "translateX(20px)" : "translateX(0)",
-                    transition: "all 0.4s ease",
-                    pointerEvents: isSignUp ? "none" : "auto",
-                    marginLeft: "auto"
-                }}>
-                    <h1 style={{ fontSize: "1.875rem", fontWeight: 700, marginBottom: "0.5rem", color: "#111827" }}>{t("signIn")}</h1>
-                    <p style={{ fontSize: "0.9375rem", color: "#6b7280", marginBottom: "2rem" }}>{t("welcomeBackTracknity")}</p>
+                {/* ===== SIGN IN FORM ===== */}
+                <div className={`w-full md:w-1/2 p-6 sm:p-8 lg:p-12 flex flex-col justify-center transition-all duration-400 md:ml-auto ${!isSignUp ? 'block' : 'hidden md:flex'
+                    } ${!isSignUp ? 'opacity-100' : 'md:opacity-0 md:pointer-events-none'}`}>
+                    <h1 className="text-2xl sm:text-[1.875rem] font-bold mb-2 text-gray-900">{t("signIn")}</h1>
+                    <p className="text-[15px] text-gray-500 mb-6 sm:mb-8">{t("welcomeBackTracknity")}</p>
 
-                    {/* Feedback Alert for Login */}
-                    <div style={{ marginBottom: feedback.message ? '1rem' : '0' }}>
-                        <FeedbackAlert />
-                    </div>
+                    <FeedbackAlert />
 
-                    <form onSubmit={handleLoginSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                    <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5">
                         <div>
-                            <label style={labelStyle}>{t("emailAddress")}</label>
-                            <div style={{ position: "relative" }}>
-                                <Mail style={iconStyle} />
-                                <input type="email" placeholder={t("emailPlaceholder")} value={loginData.email} onChange={(e) => setLoginData({ ...loginData, email: e.target.value })} required style={inputStyle} />
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("emailAddress")}</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type="email" placeholder={t("emailPlaceholder")} value={loginData.email} onChange={(e) => setLoginData({ ...loginData, email: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-4 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
                             </div>
                         </div>
 
                         <div>
-                            <label style={labelStyle}>{t("password")}</label>
-                            <div style={{ position: "relative" }}>
-                                <Lock style={iconStyle} />
-                                <input type={showPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={loginData.password} onChange={(e) => setLoginData({ ...loginData, password: e.target.value })} required style={{ ...inputStyle, paddingRight: "3rem" }} />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af" }}>
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("password")}</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
+                                <input type={showPassword ? "text" : "password"} placeholder={t("passwordPlaceholder")} value={loginData.password} onChange={(e) => setLoginData({ ...loginData, password: e.target.value })} required
+                                    className="w-full h-11 pl-11 pr-12 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-400 hover:text-gray-600 transition-colors">
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
                         </div>
 
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <label style={{ display: "flex", alignItems: "center", color: "#6b7280", cursor: "pointer", fontSize: "0.875rem" }}>
-                                <input type="checkbox" style={{ marginRight: "0.5rem", accentColor: "#1864ab" }} /> {t("rememberMe")}
+                        <div className="flex justify-between items-center">
+                            <label className="flex items-center text-gray-500 cursor-pointer text-sm">
+                                <input type="checkbox" className="mr-2 accent-[#1864ab]" /> {t("rememberMe")}
                             </label>
-                            <Link to="/forgot-password" style={{ color: "#1864ab", textDecoration: "none", fontSize: "0.875rem", fontWeight: 600 }}>{t("forgotPassword")}</Link>
+                            <Link to="/forgot-password" className="text-[#1864ab] no-underline text-sm font-semibold hover:underline">{t("forgotPassword")}</Link>
                         </div>
 
-                        <button type="submit" disabled={isLoading} style={{ width: "100%", height: "3rem", background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)", color: "#ffffff", border: "none", borderRadius: "0.625rem", fontWeight: 600, cursor: isLoading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                        <button type="submit" disabled={isLoading}
+                            className="w-full h-12 text-white border-none rounded-[10px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)" }}>
                             {isLoading ? t("signingIn") : <>{t("signIn")} <ArrowRight size={18} /></>}
                         </button>
                     </form>
