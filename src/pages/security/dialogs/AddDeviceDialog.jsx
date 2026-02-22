@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -21,27 +21,14 @@ import {
 } from "@/components/ui/select";
 import { AlertCircle, Loader2 } from "lucide-react";
 
-// Import centralized role configuration
 import {
-    CategorySpecifications,
     isFieldHidden,
     isFieldRequired,
     getDefaultValues,
-    getSpecsForCategory,
     validateDeviceData,
     UserRoles,
 } from "@/config/roleConfig";
 
-/**
- * AddDeviceDialog - REFACTORED
- * 
- * Key Changes:
- * 1. Role-aware form fields (hides status/department for Security Officers)
- * 2. Dynamic specifications based on category selection
- * 3. Price validation (required for Security Officers)
- * 4. Structured specifications stored as key-value pairs
- * 5. No more quantity/available/total fields
- */
 function AddDeviceDialog({
     isOpen,
     onOpenChange,
@@ -52,11 +39,10 @@ function AddDeviceDialog({
     statuses,
     onSubmit,
     onCancel,
-    userRole = UserRoles.SECURITY, // Default to Security for backwards compatibility
+    userRole = UserRoles.SECURITY,
     isLoading = false,
 }) {
     const [validationErrors, setValidationErrors] = useState({});
-    const [specifications, setSpecifications] = useState({});
 
     // Get role-specific defaults on mount
     useEffect(() => {
@@ -67,59 +53,28 @@ function AddDeviceDialog({
                 ...defaults,
             }));
             setValidationErrors({});
-            setSpecifications({});
         }
-    }, [isOpen, userRole]);
-
-    // Get dynamic spec fields for selected category
-    const specFields = useMemo(() => {
-        return getSpecsForCategory(formData.category);
-    }, [formData.category]);
-
-    // Reset specifications when category changes
-    useEffect(() => {
-        if (formData.category) {
-            setSpecifications({});
-        }
-    }, [formData.category]);
-
-    // Handle specification field change
-    const handleSpecChange = (key, value) => {
-        setSpecifications((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
-    };
+    }, [isOpen, userRole, setFormData]);
 
     // Validate and submit
     const handleSubmit = () => {
-        // Clear previous errors
         setValidationErrors({});
 
-        // Build the complete form data with specifications
-        const completeData = {
-            ...formData,
-            specifications: specifications,
-        };
-
         // Validate using role configuration
-        const errors = validateDeviceData(userRole, completeData);
+        const errors = validateDeviceData(userRole, formData);
 
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
             return;
         }
 
-        // Call parent submit with specifications included
-        onSubmit(completeData);
+        onSubmit(formData);
     };
 
-    // Check if field should be shown
     const shouldShowField = (fieldName) => {
         return !isFieldHidden(userRole, fieldName);
     };
 
-    // Check if field is required
     const fieldRequired = (fieldName) => {
         return isFieldRequired(userRole, fieldName);
     };
@@ -139,7 +94,6 @@ function AddDeviceDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* Validation Errors Alert */}
                 {Object.keys(validationErrors).length > 0 && (
                     <Alert variant="destructive" className="mb-4">
                         <AlertCircle className="h-4 w-4" />
@@ -164,7 +118,7 @@ function AddDeviceDialog({
                                 id="name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder='e.g., MacBook Pro 16"'
+                                placeholder='e.g., Epson Projector X5'
                                 className={validationErrors.name ? "border-red-500" : ""}
                             />
                         </div>
@@ -180,47 +134,15 @@ function AddDeviceDialog({
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {categories
-                                        .filter((c) => c !== "All")
-                                        .map((cat) => (
-                                            <SelectItem key={cat} value={cat}>
-                                                {cat}
-                                            </SelectItem>
-                                        ))}
+                                    {categories.filter((c) => c !== "All").map((cat) => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
-                    {/* Row 2: Brand & Model */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="brand">
-                                Brand {fieldRequired("brand") && <span className="text-red-500">*</span>}
-                            </Label>
-                            <Input
-                                id="brand"
-                                value={formData.brand}
-                                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                placeholder="e.g., Apple"
-                                className={validationErrors.brand ? "border-red-500" : ""}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="model">
-                                Model {fieldRequired("model") && <span className="text-red-500">*</span>}
-                            </Label>
-                            <Input
-                                id="model"
-                                value={formData.model}
-                                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                                placeholder='e.g., MacBook Pro 16" M3 Pro'
-                                className={validationErrors.model ? "border-red-500" : ""}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Row 3: Serial Number & Condition */}
+                    {/* Row 2: Serial Number & IoT Tag */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="serialNumber">
@@ -230,8 +152,35 @@ function AddDeviceDialog({
                                 id="serialNumber"
                                 value={formData.serialNumber}
                                 onChange={(e) => setFormData({ ...formData, serialNumber: e.target.value })}
-                                placeholder="e.g., SN-MBP-001"
+                                placeholder="e.g., SN-PROJ-001"
                                 className={validationErrors.serialNumber ? "border-red-500" : ""}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="iotTag">
+                                IoT Tracking Tag
+                            </Label>
+                            <Input
+                                id="iotTag"
+                                value={formData.iotTag}
+                                onChange={(e) => setFormData({ ...formData, iotTag: e.target.value })}
+                                placeholder="e.g., TAG-987654"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Row 3: Location & Condition */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="location">
+                                Location {fieldRequired("location") && <span className="text-red-500">*</span>}
+                            </Label>
+                            <Input
+                                id="location"
+                                value={formData.location}
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                placeholder="e.g., Main Storage"
+                                className={validationErrors.location ? "border-red-500" : ""}
                             />
                         </div>
                         <div className="space-y-2">
@@ -254,22 +203,8 @@ function AddDeviceDialog({
                         </div>
                     </div>
 
-                    {/* Row 4: Location & Status (Status hidden for Security) */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="location">
-                                Location {fieldRequired("location") && <span className="text-red-500">*</span>}
-                            </Label>
-                            <Input
-                                id="location"
-                                value={formData.location}
-                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                placeholder="e.g., Building A, Room 101"
-                                className={validationErrors.location ? "border-red-500" : ""}
-                            />
-                        </div>
-
-                        {/* Status field - HIDDEN for Security Officers */}
+                    {/* Row 4: Status (Hidden for Security by default) & Description */}
+                    <div className="grid grid-cols-1 gap-4">
                         {shouldShowField("status") && (
                             <div className="space-y-2">
                                 <Label htmlFor="status">Status</Label>
@@ -290,104 +225,17 @@ function AddDeviceDialog({
                                 </Select>
                             </div>
                         )}
-
-                        {/* Department field - HIDDEN for Security Officers */}
-                        {shouldShowField("department") && (
-                            <div className="space-y-2">
-                                <Label htmlFor="department">Department</Label>
-                                <Input
-                                    id="department"
-                                    value={formData.department}
-                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                    placeholder="e.g., IT Department"
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Row 5: Purchase Price & Dates */}
-                    {/* REFACTORED: Removed available/total fields, purchasePrice is mandatory for Security */}
-                    <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="purchasePrice">
-                                Purchase Price ($) {fieldRequired("purchasePrice") && <span className="text-red-500">*</span>}
-                            </Label>
-                            <Input
-                                id="purchasePrice"
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={formData.purchasePrice}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        purchasePrice: e.target.value,
-                                    })
-                                }
-                                placeholder="e.g., 1299.99"
-                                className={validationErrors.purchasePrice ? "border-red-500" : ""}
-                            />
-                            {validationErrors.purchasePrice && (
-                                <p className="text-xs text-red-500">{validationErrors.purchasePrice}</p>
-                            )}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="purchaseDate">Purchase Date</Label>
-                            <Input
-                                id="purchaseDate"
-                                type="date"
-                                value={formData.purchaseDate}
-                                onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="warrantyExpiry">Warranty Expiry</Label>
-                            <Input
-                                id="warrantyExpiry"
-                                type="date"
-                                value={formData.warrantyExpiry}
-                                onChange={(e) => setFormData({ ...formData, warrantyExpiry: e.target.value })}
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="Enter device description..."
+                                rows={3}
                             />
                         </div>
                     </div>
-
-                    {/* Description */}
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                            id="description"
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            placeholder="Enter device description..."
-                            rows={2}
-                        />
-                    </div>
-
-                    {/* Dynamic Specifications Section */}
-                    {formData.category && specFields.length > 0 && (
-                        <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <Label className="text-sm font-semibold text-gray-700">
-                                {formData.category} Specifications
-                            </Label>
-                            <div className="grid grid-cols-2 gap-3">
-                                {specFields.map((spec) => (
-                                    <div key={spec.key} className="space-y-1">
-                                        <Label htmlFor={spec.key} className="text-xs text-gray-600">
-                                            {spec.label}
-                                        </Label>
-                                        <Input
-                                            id={spec.key}
-                                            type={spec.type}
-                                            value={specifications[spec.key] || ""}
-                                            onChange={(e) => handleSpecChange(spec.key, e.target.value)}
-                                            placeholder={spec.placeholder}
-                                            className="text-sm"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <DialogFooter>
