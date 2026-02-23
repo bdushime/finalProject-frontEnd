@@ -37,17 +37,8 @@ import BulkUploadDialog from "./dialogs/BulkUploadDialog";
 
 import api from "@/utils/api";
 import { UserRoles } from "@/config/roleConfig";
+import { toast } from "sonner";
 
-/**
- * BrowseDevices - REFACTORED
- * 
- * Key Changes:
- * 1. Removed quantity/available/total display (asset-level tracking)
- * 2. Added bulk upload integration
- * 3. Passes userRole to AddDeviceDialog for role-specific behavior
- * 4. Updated handleAddDevice to work with new form structure
- * 5. Each card now represents ONE physical device
- */
 function BrowseDevices() {
   const { t } = useTranslation(["security", "common"]);
   const navigate = useNavigate();
@@ -111,12 +102,10 @@ function BrowseDevices() {
     };
     fetchOptionsAndDevices();
 
-    // Listen for the "Add Device" button click from the Topbar
     const handleOpenAddDialog = () => {
       setIsAddDialogOpen(true);
     };
 
-    // Listen for the "Bulk Upload" button click from the Topbar
     const handleOpenBulkUpload = () => {
       setIsBulkUploadOpen(true);
     };
@@ -124,14 +113,12 @@ function BrowseDevices() {
     window.addEventListener("openAddDeviceDialog", handleOpenAddDialog);
     window.addEventListener("openBulkUploadDialog", handleOpenBulkUpload);
 
-    // Cleanup listener on unmount
     return () => {
       window.removeEventListener("openAddDeviceDialog", handleOpenAddDialog);
       window.removeEventListener("openBulkUploadDialog", handleOpenBulkUpload);
     };
   }, []);
 
-  // REFACTORED: Initial form data without quantity fields
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -169,14 +156,12 @@ function BrowseDevices() {
     });
   }, [deviceList, searchQuery, categoryFilter, statusFilter]);
 
-  // REFACTORED: handleAddDevice now works with structured specifications
   const handleAddDevice = async (completeData) => {
     setIsLoading(true);
     try {
-      // Prepare the device data for the backend
       const newDeviceData = {
         name: completeData.name,
-        type: completeData.category, // Backend uses 'type' for category
+        type: completeData.category,
         description: completeData.description,
         serialNumber: completeData.serialNumber,
         status: completeData.status || 'Available',
@@ -207,7 +192,7 @@ function BrowseDevices() {
       const errorMessage = err.response?.data?.errors?.join(", ") ||
         err.response?.data?.message ||
         "Failed to add device. Please check your input and try again.";
-      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -543,7 +528,6 @@ function BrowseDevices() {
           )
         }
 
-        {/* Add Device Dialog - REFACTORED: Now receives userRole */}
         <AddDeviceDialog
           isOpen={isAddDialogOpen}
           onOpenChange={setIsAddDialogOpen}

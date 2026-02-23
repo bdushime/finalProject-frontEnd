@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/common/Page";
 // 👇 IMPORT THE NEW GENERATOR
 import { generatePDF } from "@/utils/pdfGenerator";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export default function SimpleReports() {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -58,7 +59,7 @@ export default function SimpleReports() {
 
     // --- 3. HANDLE PDF EXPORT ---
     const handleExportPDF = () => {
-        if (filteredData.length === 0) return alert(t('reports.messages.noData'));
+        if (filteredData.length === 0) return toast.warning(t('reports.messages.noData'));
         // Call our utility function
         generatePDF(filteredData, currentUser);
     };
@@ -158,45 +159,45 @@ export default function SimpleReports() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {filteredData.map((t) => (
-                                        <tr key={t._id} className="hover:bg-slate-50/80 transition-colors">
+                                    {filteredData.map((tx) => (
+                                        <tr key={tx._id} className="hover:bg-slate-50/80 transition-colors">
                                             <td className="p-5">
-                                                <span className="text-sm font-medium text-slate-900 group-hover:text-blue-700 transition-colors">{t.user?.username || t('common:unknownUser')}</span>
-                                                <div className="text-xs text-slate-500 mt-0.5">{t.user?.email}</div>
+                                                <span className="text-sm font-medium text-slate-900 group-hover:text-blue-700 transition-colors">{tx.user?.username || t('common:unknownUser')}</span>
+                                                <div className="text-xs text-slate-500 mt-0.5">{tx.user?.email}</div>
                                             </td>
                                             <td className="p-5 text-center">
                                                 <span className={`inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm border
-                                                    ${(t.user?.responsibilityScore ?? 100) >= 80 ? "bg-green-100 text-green-700 border-green-200" :
-                                                        (t.user?.responsibilityScore ?? 100) >= 50 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+                                                    ${(tx.user?.responsibilityScore ?? 100) >= 80 ? "bg-green-100 text-green-700 border-green-200" :
+                                                        (tx.user?.responsibilityScore ?? 100) >= 50 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
                                                             "bg-red-100 text-red-700 border-red-200"
                                                     }`}>
-                                                    {t.user?.responsibilityScore ?? 100}
+                                                    {tx.user?.responsibilityScore ?? 100}
                                                 </span>
                                             </td>
                                             <td className="p-5">
-                                                <div className="text-sm font-medium text-slate-900">{t.equipment?.name || t('equipment.dialog.deletedItem', 'Deleted Item')}</div>
+                                                <div className="text-sm font-medium text-slate-900">{tx.equipment?.name || t('equipment.dialog.deletedItem', 'Deleted Item')}</div>
                                                 <div className="flex gap-2 mt-1">
                                                     <span className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
-                                                        {t.equipment?.serialNumber}
+                                                        {tx.equipment?.serialNumber}
                                                     </span>
                                                     <span className="text-xs text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">
-                                                        {t.equipment?.category || "General"}
+                                                        {tx.equipment?.category || "General"}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="p-5 text-sm text-slate-600">
                                                 <div className="flex flex-col gap-1">
                                                     <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide">{t('reports.table.borrowed')}</div>
-                                                    <div>{new Date(t.createdAt).toLocaleDateString()}</div>
+                                                    <div>{new Date(tx.createdAt).toLocaleDateString()}</div>
                                                     <div className="text-xs uppercase text-slate-400 font-semibold tracking-wide mt-1">{t('reports.table.due')}</div>
-                                                    <div className={`${new Date() > new Date(t.expectedReturnTime) && t.status !== 'Returned' ? 'text-red-600 font-medium' : ''}`}>
-                                                        {new Date(t.expectedReturnTime).toLocaleDateString()}
+                                                    <div className={`${new Date() > new Date(tx.expectedReturnTime) && tx.status !== 'Returned' ? 'text-red-600 font-medium' : ''}`}>
+                                                        {new Date(tx.expectedReturnTime).toLocaleDateString()}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="p-5">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm ${getStatusColor(t.status)}`}>
-                                                    {t(`equipment.status.${t.status.toLowerCase()}`, t.status)}
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm ${getStatusColor(tx.status)}`}>
+                                                    {t(`equipment.status.${tx.status.toLowerCase()}`, tx.status)}
                                                 </span>
                                             </td>
                                         </tr>

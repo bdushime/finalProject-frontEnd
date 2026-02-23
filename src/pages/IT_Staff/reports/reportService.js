@@ -1,5 +1,6 @@
 import api from "@/utils/api";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 export async function generateReportData(filters) {
   try {
@@ -105,7 +106,7 @@ export async function generateReportData(filters) {
 
 // Keep export functions
 export function exportToCSV(data, columns, getRowData, filename) {
-  if (!data || data.length === 0) { alert('No data to export'); return; }
+  if (!data || data.length === 0) { toast.warning('No data to export'); return; }
   const header = columns.join(',');
   const rows = data.map(item => {
     const rowData = getRowData(item);
@@ -124,7 +125,7 @@ export function exportToCSV(data, columns, getRowData, filename) {
 }
 
 export function exportToPDF(data, columns, getRowData, reportType, startDate, endDate, filename) {
-  if (!data || data.length === 0) { alert('No data to export'); return; }
+  if (!data || data.length === 0) { toast.warning('No data to export'); return; }
   const printWindow = window.open('', '_blank');
   const tableRows = data.map(item => {
     const rowData = getRowData(item);

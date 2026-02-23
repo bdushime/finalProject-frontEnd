@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import api from "@/utils/api";
 import { Loader2, Download, Search, AlertCircle, FileBarChart } from "lucide-react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
+import { toast } from "sonner";
 
 export default function ReportsPage() {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -52,7 +53,7 @@ export default function ReportsPage() {
 
     // --- 3. EXPORT CSV (Updated with Score) ---
     const handleExport = () => {
-        if (filteredData.length === 0) return alert(t('reports.messages.noData'));
+        if (filteredData.length === 0) return toast.warning("No data to export!");
 
         // Added Score and Due Date to CSV headers
         const headers = "Student,Email,Score,Equipment,Category,Date Borrowed,Due Date,Status\n";

@@ -7,16 +7,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download, FileText, Search, Filter, RefreshCw, Loader2, FileBarChart2 } from "lucide-react";
 import { generateReportData, exportToCSV, exportToPDF } from "./reportService";
+import { toast } from "sonner";
 
-export default function ReportsContent({ 
-  reportTypes = [], 
-  defaultReportType = "lending", 
-  exportFilenamePrefix = "report" 
+export default function ReportsContent({
+  reportTypes = [],
+  defaultReportType = "lending",
+  exportFilenamePrefix = "report"
 }) {
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState([]); // Initialize as empty array [] to prevent crashes
   const [hasGenerated, setHasGenerated] = useState(false); // Track if we have tried to generate yet
-  
+
   // Filter States
   const defaultFilters = {
     reportType: defaultReportType,
@@ -26,18 +27,16 @@ export default function ReportsContent({
     status: "all",
     borrower: ""
   };
-  
+
   const [filters, setFilters] = useState(defaultFilters);
 
-  // --- 1. ASYNC GENERATE FUNCTION ---
   const handleGenerateReport = async () => {
     setLoading(true);
-    setReportData([]); 
-    
+    setReportData([]);
+
     try {
-      // Async call to the service
       const data = await generateReportData(filters);
-      
+
       // Safety check: Ensure data is an array
       if (Array.isArray(data)) {
         setReportData(data);
@@ -48,7 +47,7 @@ export default function ReportsContent({
       setHasGenerated(true);
     } catch (error) {
       console.error("Report generation failed:", error);
-      alert("Failed to generate report. Please try again.");
+      toast.error("Failed to generate report. Please try again.");
       setReportData([]);
     } finally {
       setLoading(false);
@@ -77,7 +76,7 @@ export default function ReportsContent({
     const headers = getTableHeaders();
     // Use the first item keys to map data
     const keys = Object.keys(reportData[0] || {}).filter(k => k !== 'id');
-    
+
     exportToCSV(reportData, headers, (item) => keys.map(k => item[k]), `${exportFilenamePrefix}-csv`);
   };
 
@@ -91,14 +90,14 @@ export default function ReportsContent({
 
   return (
     <div className="space-y-6 p-6 min-h-screen bg-slate-50/50">
-      
+
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#0b1d3a]">Reports</h1>
           <p className="text-slate-500">Generate and view detailed reports on equipment usage and activity.</p>
         </div>
-        
+
         {/* Export Buttons */}
         {reportData.length > 0 && (
           <div className="flex gap-2">
@@ -119,15 +118,15 @@ export default function ReportsContent({
             <Filter className="h-5 w-5" /> Report Filters
           </CardTitle>
         </CardHeader>
-        
+
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
+
             {/* Report Type */}
             <div className="space-y-2">
               <Label>Report Type <span className="text-red-500">*</span></Label>
-              <Select 
-                value={filters.reportType} 
+              <Select
+                value={filters.reportType}
                 onValueChange={(val) => setFilters(prev => ({ ...prev, reportType: val }))}
               >
                 <SelectTrigger className="bg-white">
@@ -145,13 +144,13 @@ export default function ReportsContent({
             <div className="space-y-2">
               <Label>Date Range <span className="text-red-500">*</span></Label>
               <div className="grid grid-cols-2 gap-2">
-                <Input 
-                  type="date" 
+                <Input
+                  type="date"
                   value={filters.startDate}
                   onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
                 />
-                <Input 
-                  type="date" 
+                <Input
+                  type="date"
                   value={filters.endDate}
                   onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
                 />
@@ -161,8 +160,8 @@ export default function ReportsContent({
             {/* Category */}
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select 
-                value={filters.category} 
+              <Select
+                value={filters.category}
                 onValueChange={(val) => setFilters(prev => ({ ...prev, category: val }))}
               >
                 <SelectTrigger className="bg-white">
@@ -183,9 +182,9 @@ export default function ReportsContent({
               <Label>Borrower (Name)</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-                <Input 
-                  placeholder="Search name..." 
-                  className="pl-9 bg-white" 
+                <Input
+                  placeholder="Search name..."
+                  className="pl-9 bg-white"
                   value={filters.borrower}
                   onChange={(e) => setFilters(prev => ({ ...prev, borrower: e.target.value }))}
                 />
@@ -210,22 +209,22 @@ export default function ReportsContent({
         {!hasGenerated ? (
           // EMPTY STATE (Default)
           <div className="bg-[#fff9e6] border border-yellow-100 rounded-xl p-12 flex flex-col items-center justify-center text-center">
-             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                <FileBarChart2 className="h-8 w-8 text-slate-300" />
-             </div>
-             <h3 className="text-lg font-semibold text-slate-700 mb-1">No Report Generated</h3>
-             <p className="text-slate-500 max-w-md">
-               Use the filters above to generate a report. Click "Generate Report" to see the data.
-             </p>
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+              <FileBarChart2 className="h-8 w-8 text-slate-300" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-700 mb-1">No Report Generated</h3>
+            <p className="text-slate-500 max-w-md">
+              Use the filters above to generate a report. Click "Generate Report" to see the data.
+            </p>
           </div>
         ) : (
           // DATA TABLE STATE
           <Card className="border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4">
             <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
-               <h3 className="font-bold text-[#0b1d3a]">Report Results</h3>
-               <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
-                 {reportData.length} Records Found
-               </span>
+              <h3 className="font-bold text-[#0b1d3a]">Report Results</h3>
+              <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
+                {reportData.length} Records Found
+              </span>
             </div>
             <div className="overflow-x-auto">
               <Table>
@@ -252,13 +251,13 @@ export default function ReportsContent({
                         {Object.entries(row).filter(([k]) => k !== 'id').map(([key, value], i) => (
                           <TableCell key={i} className="whitespace-nowrap text-sm text-slate-600">
                             {key === 'status' ? (
-                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                 ${value === 'Overdue' ? 'bg-red-100 text-red-800' : 
-                                   value === 'Checked Out' ? 'bg-blue-100 text-blue-800' :
-                                   value === 'Returned' ? 'bg-green-100 text-green-800' : 
-                                   'bg-slate-100 text-slate-800'}`}>
-                                 {value}
-                               </span>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                                 ${value === 'Overdue' ? 'bg-red-100 text-red-800' :
+                                  value === 'Checked Out' ? 'bg-blue-100 text-blue-800' :
+                                    value === 'Returned' ? 'bg-green-100 text-green-800' :
+                                      'bg-slate-100 text-slate-800'}`}>
+                                {value}
+                              </span>
                             ) : (
                               value
                             )}
