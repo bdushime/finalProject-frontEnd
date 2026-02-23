@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/common/Page";
 // 👇 IMPORT THE NEW GENERATOR
 import { generatePDF } from "@/utils/pdfGenerator";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export default function SimpleReports() {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -58,7 +59,7 @@ export default function SimpleReports() {
 
     // --- 3. HANDLE PDF EXPORT ---
     const handleExportPDF = () => {
-        if (filteredData.length === 0) return alert(t('reports.messages.noData'));
+        if (filteredData.length === 0) return toast.warning(t('reports.messages.noData'));
         // Call our utility function
         generatePDF(filteredData, currentUser);
     };

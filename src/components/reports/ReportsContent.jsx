@@ -29,6 +29,7 @@ import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/common/PaginationControls";
 import { generateReportData, exportToCSV, exportToPDF } from "@/pages/IT_Staff/reports/reportService";
 import PropTypes from "prop-types";
+import { toast } from "sonner";
 
 const DATE_PRESETS = [
   { value: "today", label: "Today" },
@@ -257,8 +258,8 @@ export default function ReportsContent({
               item.status === "AVAILABLE"
                 ? "default"
                 : item.status === "DAMAGED" || item.status === "LOST"
-                ? "destructive"
-                : "secondary"
+                  ? "destructive"
+                  : "secondary"
             }
           >
             {item.status}
@@ -383,7 +384,7 @@ export default function ReportsContent({
   // Handle download
   const handleDownload = async (format) => {
     if (reportData.length === 0) {
-      alert("No data to export. Please generate a report first.");
+      toast.warning("No data to export. Please generate a report first.");
       return;
     }
 
@@ -407,7 +408,7 @@ export default function ReportsContent({
       }
     } catch (error) {
       console.error("Export failed:", error);
-      alert("Failed to export report. Please try again.");
+      toast.error("Failed to export report. Please try again.");
     }
   };
 
@@ -480,151 +481,151 @@ export default function ReportsContent({
                   </SelectContent>
                 </Select>
               </div>
-            
 
-            {/* Custom Date Range */}
-            {datePreset === "custom" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="border-gray-300 shadow-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="border-gray-300 shadow-sm"
-                  />
-                </div>
-              </div>
-            )}
 
-            {/* Optional Filters */}
-            {reportType === "logs" ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Device ID
-                  </label>
-                  <Select value={deviceId} onValueChange={setDeviceId}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue placeholder="All Devices" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All Devices</SelectItem>
-                      {DEVICE_IDS.map((id) => (
-                        <SelectItem key={id} value={id}>
-                          {id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Event Type
-                  </label>
-                  <Select value={eventType} onValueChange={setEventType}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EVENT_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LOG_STATUSES.map((stat) => (
-                        <SelectItem key={stat.value} value={stat.value}>
-                          {stat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Equipment Category <span className="text-red-500">*</span>
-                  </label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem
-                          key={cat}
-                          value={cat === "All Categories" ? "all" : cat}
-                        >
-                          {cat}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Equipment Status
-                  </label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EQUIPMENT_STATUSES.map((stat) => (
-                        <SelectItem key={stat.value} value={stat.value}>
-                          {stat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {showBorrowerFilter && (
+              {/* Custom Date Range */}
+              {datePreset === "custom" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Borrower (Staff/User)
+                      Start Date <span className="text-red-500">*</span>
                     </label>
                     <Input
-                      type="text"
-                      placeholder="Search by name or email..."
-                      value={borrower}
-                      onChange={(e) => setBorrower(e.target.value)}
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
                       className="border-gray-300 shadow-sm"
                     />
                   </div>
-                )}
-              </div>
-            )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      End Date <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="border-gray-300 shadow-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Optional Filters */}
+              {reportType === "logs" ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Device ID
+                    </label>
+                    <Select value={deviceId} onValueChange={setDeviceId}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue placeholder="All Devices" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Devices</SelectItem>
+                        {DEVICE_IDS.map((id) => (
+                          <SelectItem key={id} value={id}>
+                            {id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Event Type
+                    </label>
+                    <Select value={eventType} onValueChange={setEventType}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EVENT_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Status
+                    </label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LOG_STATUSES.map((stat) => (
+                          <SelectItem key={stat.value} value={stat.value}>
+                            {stat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Equipment Category <span className="text-red-500">*</span>
+                    </label>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem
+                            key={cat}
+                            value={cat === "All Categories" ? "all" : cat}
+                          >
+                            {cat}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Equipment Status
+                    </label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EQUIPMENT_STATUSES.map((stat) => (
+                          <SelectItem key={stat.value} value={stat.value}>
+                            {stat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {showBorrowerFilter && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Borrower (Staff/User)
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="Search by name or email..."
+                        value={borrower}
+                        onChange={(e) => setBorrower(e.target.value)}
+                        className="border-gray-300 shadow-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -704,11 +705,10 @@ export default function ReportsContent({
                         return (
                           <TableCell
                             key={cellIdx}
-                            className={`px-6 py-4 text-left font-medium ${
-                              isStatus
+                            className={`px-6 py-4 text-left font-medium ${isStatus
                                 ? "text-gray-900 font-bold uppercase"
                                 : "text-gray-700"
-                            }`}
+                              }`}
                           >
                             {cell}
                           </TableCell>

@@ -10,6 +10,7 @@ import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export default function HelpSupport() {
     const { t } = useTranslation("student");
@@ -54,7 +55,7 @@ export default function HelpSupport() {
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             console.error("Failed to send ticket:", err);
-            alert(t("help.ticketFailed"));
+            toast.error(t("help.ticketFailed"));
         } finally {
             setIsSubmitting(false);
         }

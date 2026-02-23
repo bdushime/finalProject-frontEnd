@@ -1,5 +1,5 @@
 import React from 'react'
-import MainLayout from '@/components/layout/MainLayout'
+import MainLayout from '../layout/MainLayout'
 import StatCard from '@/components/security/StatCard'
 import AccessLogsTable from '@/components/security/AccessLogsTable'
 import { useTranslation } from 'react-i18next'

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import api from "@/utils/api";
+import { toast } from "sonner";
 
 function Progress() {
     return (
@@ -39,11 +40,11 @@ export default function DigitalSignature() {
             };
 
             await api.post('/transactions/checkout', payload);
-            
+
             navigate('/it/checkout/confirmation');
         } catch (err) {
             console.error("Checkout failed", err);
-            alert("Checkout Failed: " + (err.response?.data?.message || "Server Error"));
+            toast.error("Checkout Failed: " + (err.response?.data?.message || "Server Error"));
         } finally {
             setLoading(false);
         }
@@ -61,7 +62,7 @@ export default function DigitalSignature() {
                     </CardHeader>
                     <CardContent>
                         {/* Simulation of a Canvas Pad */}
-                        <div 
+                        <div
                             className="h-56 rounded-xl bg-neutral-100 border-2 border-dashed border-gray-300 grid place-items-center cursor-crosshair"
                             onClick={() => setSigned(true)}
                         >

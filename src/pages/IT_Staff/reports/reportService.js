@@ -1,5 +1,6 @@
 import api from "@/utils/api";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 export async function generateReportData(filters) {
   try {
@@ -10,14 +11,14 @@ export async function generateReportData(filters) {
     // 2. Prepare Filters
     const startDate = filters.startDate ? new Date(filters.startDate) : new Date('2020-01-01');
     const endDate = filters.endDate ? new Date(filters.endDate) : new Date();
-    endDate.setHours(23, 59, 59, 999); 
+    endDate.setHours(23, 59, 59, 999);
 
     // 3. Filter Logic
     const filterCommon = (tx) => {
       // Date Check
-      const txDate = new Date(tx.createdAt); 
+      const txDate = new Date(tx.createdAt);
       const dateMatch = txDate >= startDate && txDate <= endDate;
-      
+
       // Category Check
       // If filter is empty OR 'all', allow everything. Otherwise, match exact category.
       const categoryMatch = (!filters.category || filters.category === "all")
@@ -70,7 +71,7 @@ export async function generateReportData(filters) {
         allTransactions.forEach(tx => {
           if (!tx.equipment) return;
           const eqId = tx.equipment._id;
-          
+
           if (!utilizationMap[eqId]) {
             utilizationMap[eqId] = {
               id: `UTIL-${eqId}`,
@@ -78,7 +79,7 @@ export async function generateReportData(filters) {
               serialNumber: tx.equipment.serialNumber,
               category: tx.equipment.category || "General",
               totalCheckouts: 0,
-              currentStatus: tx.equipment.status || 'Unknown' 
+              currentStatus: tx.equipment.status || 'Unknown'
             };
           }
           utilizationMap[eqId].totalCheckouts += 1;
@@ -88,7 +89,7 @@ export async function generateReportData(filters) {
         if (filters.category && filters.category !== "all") {
           utilData = utilData.filter(item => item.category === filters.category);
         }
-        
+
         return utilData.map(item => ({
           ...item,
           utilizationRate: Math.min(100, item.totalCheckouts * 5)
@@ -105,7 +106,7 @@ export async function generateReportData(filters) {
 
 // Keep export functions
 export function exportToCSV(data, columns, getRowData, filename) {
-  if (!data || data.length === 0) { alert('No data to export'); return; }
+  if (!data || data.length === 0) { toast.warning('No data to export'); return; }
   const header = columns.join(',');
   const rows = data.map(item => {
     const rowData = getRowData(item);
@@ -124,7 +125,7 @@ export function exportToCSV(data, columns, getRowData, filename) {
 }
 
 export function exportToPDF(data, columns, getRowData, reportType, startDate, endDate, filename) {
-  if (!data || data.length === 0) { alert('No data to export'); return; }
+  if (!data || data.length === 0) { toast.warning('No data to export'); return; }
   const printWindow = window.open('', '_blank');
   const tableRows = data.map(item => {
     const rowData = getRowData(item);
