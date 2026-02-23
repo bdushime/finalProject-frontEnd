@@ -29,38 +29,7 @@ import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/common/PaginationControls";
 import { generateReportData, exportToCSV, exportToPDF } from "@/pages/IT_Staff/reports/reportService";
 import PropTypes from "prop-types";
-
-const DATE_PRESETS = [
-  { value: "today", label: "Today" },
-  { value: "last7days", label: "Last 7 Days" },
-  { value: "last30days", label: "Last 30 Days" },
-  { value: "custom", label: "Custom Range" },
-];
-
-const EQUIPMENT_STATUSES = [
-  { value: "all", label: "All Statuses" },
-  { value: "AVAILABLE", label: "Available" },
-  { value: "LENT", label: "Lent" },
-  { value: "RESERVED", label: "Reserved" },
-  { value: "DAMAGED", label: "Damaged" },
-  { value: "LOST", label: "Lost" },
-];
-
-const LOG_STATUSES = [
-  { value: "all", label: "All Statuses" },
-  { value: "active", label: "Active" },
-  { value: "completed", label: "Completed" },
-  { value: "violation", label: "Violation" },
-  { value: "resolved", label: "Resolved" },
-];
-
-const EVENT_TYPES = [
-  { value: "all", label: "All Event Types" },
-  { value: "checkout", label: "Checkout" },
-  { value: "return", label: "Return" },
-  { value: "movement", label: "Movement" },
-  { value: "geofence_violation", label: "Geofence Violation" },
-];
+import { useTranslation } from "react-i18next";
 
 const DEVICE_IDS = [
   "TTGO-001", "TTGO-002", "TTGO-003", "TTGO-004", "TTGO-005", "TTGO-006",
@@ -73,6 +42,40 @@ export default function ReportsContent({
   showBorrowerFilter = true,
   exportFilenamePrefix = "equipment-report",
 }) {
+  const { t } = useTranslation(["common", "itstaff", "security"]);
+
+  const DATE_PRESETS = [
+    { value: "today", label: t('reports.presets.today') },
+    { value: "last7days", label: t('reports.presets.last7days') },
+    { value: "last30days", label: t('reports.presets.last30days') },
+    { value: "custom", label: t('reports.presets.custom') },
+  ];
+
+  const EQUIPMENT_STATUSES = [
+    { value: "all", label: t('reports.filters.allStatus') },
+    { value: "AVAILABLE", label: t('itstaff:equipment.status.available') },
+    { value: "LENT", label: t('common:status.borrowed') },
+    { value: "RESERVED", label: t('common:status.pending') },
+    { value: "DAMAGED", label: t('itstaff:equipment.status.maintenance') },
+    { value: "LOST", label: t('itstaff:equipment.status.lost') },
+  ];
+
+  const LOG_STATUSES = [
+    { value: "all", label: t('reports.filters.allStatus') },
+    { value: "active", label: t('common:status.active') },
+    { value: "completed", label: t('common:status.returned') },
+    { value: "violation", label: t('common:status.overdue') },
+    { value: "resolved", label: t('itstaff:equipment.status.returned') },
+  ];
+
+  const EVENT_TYPES = [
+    { value: "all", label: t('reports.filters.allEvents') },
+    { value: "checkout", label: t('security:browseDevices.labels.checkout', 'Checkout') },
+    { value: "return", label: t('security:browseDevices.labels.return', 'Return') },
+    { value: "movement", label: t('security:browseDevices.labels.movement', 'Movement') },
+    { value: "geofence_violation", label: t('security:browseDevices.labels.violation', 'Violation') },
+  ];
+
   const [reportType, setReportType] = useState(defaultReportType || reportTypes[0]?.value || "lending");
   const [datePreset, setDatePreset] = useState("last30days");
   const [startDate, setStartDate] = useState("");
@@ -170,72 +173,72 @@ export default function ReportsContent({
     switch (reportType) {
       case "inventory":
         return [
-          "Equipment Name",
-          "Serial Number",
-          "Category",
-          "Location",
-          "Status",
-          "Condition",
-          "Purchase Date",
+          t('reports.columns.equipmentName'),
+          t('reports.columns.serialNumber'),
+          t('reports.columns.category'),
+          t('reports.columns.location'),
+          t('reports.columns.status'),
+          t('reports.columns.condition'),
+          t('reports.columns.purchaseDate'),
         ];
       case "lending":
         return [
-          "Equipment Name",
-          "Serial Number",
-          "Category",
-          "Borrower Name",
-          "Lending Date",
-          "Due Date",
-          "Status",
+          t('reports.columns.equipmentName'),
+          t('reports.columns.serialNumber'),
+          t('reports.columns.category'),
+          t('reports.columns.borrowerName'),
+          t('reports.columns.lendingDate'),
+          t('reports.columns.dueDate'),
+          t('reports.columns.status'),
         ];
       case "reservation":
         return [
-          "Equipment Name",
-          "Serial Number",
-          "Category",
-          "Borrower Name",
-          "Reservation Start",
-          "Reservation End",
-          "Status",
+          t('reports.columns.equipmentName'),
+          t('reports.columns.serialNumber'),
+          t('reports.columns.category'),
+          t('reports.columns.borrowerName'),
+          t('reports.columns.reservationStart'),
+          t('reports.columns.reservationEnd'),
+          t('reports.columns.status'),
         ];
       case "damaged":
         return [
-          "Equipment Name",
-          "Serial Number",
-          "Category",
-          "Damage Date",
-          "Condition",
-          "Remarks",
-          "Status",
+          t('reports.columns.equipmentName'),
+          t('reports.columns.serialNumber'),
+          t('reports.columns.category'),
+          t('reports.columns.damageDate'),
+          t('reports.columns.condition'),
+          t('reports.columns.remarks'),
+          t('reports.columns.status'),
         ];
       case "lost":
         return [
-          "Equipment Name",
-          "Serial Number",
-          "Category",
-          "Loss Date",
-          "Last Known Location",
-          "Remarks",
-          "Status",
+          t('reports.columns.equipmentName'),
+          t('reports.columns.serialNumber'),
+          t('reports.columns.category'),
+          t('reports.columns.lossDate'),
+          t('reports.columns.lastKnownLocation'),
+          t('reports.columns.remarks'),
+          t('reports.columns.status'),
         ];
       case "utilization":
         return [
-          "Equipment Name",
-          "Serial Number",
-          "Category",
-          "Total Checkouts",
-          "Utilization Rate",
-          "Current Status",
+          t('reports.columns.equipmentName'),
+          t('reports.columns.serialNumber'),
+          t('reports.columns.category'),
+          t('reports.columns.totalCheckouts'),
+          t('reports.columns.utilizationRate'),
+          t('reports.columns.currentStatus'),
         ];
       case "logs":
         return [
-          "Device Name",
-          "Device ID",
-          "Event Type",
-          "Location",
-          "User",
-          "Timestamp",
-          "Status",
+          t('reports.columns.deviceName'),
+          t('reports.columns.deviceId'),
+          t('reports.columns.eventType'),
+          t('reports.columns.location'),
+          t('reports.columns.user'),
+          t('reports.columns.timestamp'),
+          t('reports.columns.status'),
         ];
       default:
         return [];
@@ -257,11 +260,11 @@ export default function ReportsContent({
               item.status === "AVAILABLE"
                 ? "default"
                 : item.status === "DAMAGED" || item.status === "LOST"
-                ? "destructive"
-                : "secondary"
+                  ? "destructive"
+                  : "secondary"
             }
           >
-            {item.status}
+            {t(`itstaff:equipment.status.${item.status.toLowerCase()}`, item.status)}
           </Badge>,
           item.condition,
           item.purchaseDate,
@@ -278,7 +281,7 @@ export default function ReportsContent({
             key="status"
             variant={item.status === "LENT" ? "default" : "secondary"}
           >
-            {item.status}
+            {t(`common:status.${item.status.toLowerCase()}`, item.status)}
           </Badge>,
         ];
       case "reservation":
@@ -293,7 +296,7 @@ export default function ReportsContent({
             key="status"
             variant={item.status === "RESERVED" ? "default" : "secondary"}
           >
-            {item.status}
+            {t(`common:status.${item.status.toLowerCase()}`, item.status)}
           </Badge>,
         ];
       case "damaged":
@@ -305,7 +308,7 @@ export default function ReportsContent({
           item.condition,
           item.remarks,
           <Badge key="status" variant="destructive">
-            {item.status}
+            {t(`itstaff:equipment.status.${item.status.toLowerCase()}`, item.status)}
           </Badge>,
         ];
       case "lost":
@@ -317,7 +320,7 @@ export default function ReportsContent({
           item.lastKnownLocation,
           item.remarks,
           <Badge key="status" variant="destructive">
-            {item.status}
+            {t(`itstaff:equipment.status.${item.status.toLowerCase()}`, item.status)}
           </Badge>,
         ];
       case "utilization":
@@ -333,7 +336,7 @@ export default function ReportsContent({
               item.currentStatus === "AVAILABLE" ? "default" : "secondary"
             }
           >
-            {item.currentStatus}
+            {t(`itstaff:equipment.status.${item.currentStatus.toLowerCase()}`, item.currentStatus)}
           </Badge>,
         ];
       case "logs":
@@ -383,7 +386,7 @@ export default function ReportsContent({
   // Handle download
   const handleDownload = async (format) => {
     if (reportData.length === 0) {
-      alert("No data to export. Please generate a report first.");
+      alert(t('common:export.noDataToExport'));
       return;
     }
 
@@ -407,14 +410,14 @@ export default function ReportsContent({
       }
     } catch (error) {
       console.error("Export failed:", error);
-      alert("Failed to export report. Please try again.");
+      alert(t('common:export.exportFailed'));
     }
   };
 
   // Get categories from equipment data
   const categories = useMemo(() => {
     return [
-      "All Categories",
+      t('reports.filters.allCategories'),
       "Laptop",
       "Tablet",
       "Camera",
@@ -428,28 +431,32 @@ export default function ReportsContent({
   return (
     <div className="space-y-3">
       {/* Filters Section */}
-      <Card className="mb-6 border-gray-200 shadow-sm space-y-4">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-600" />
-            <CardTitle className="text-xl font-bold">
-              Report Filters
-            </CardTitle>
+      <Card className="mb-8 border-gray-100 shadow-sm bg-white rounded-[2rem] overflow-hidden">
+        <CardHeader className="p-8 pb-4">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="p-2.5 bg-slate-50 rounded-xl text-slate-400 group-hover:text-[#8D8DC7] transition-colors">
+              <Filter className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold text-slate-900">
+                {t('reports.filters.title')}
+              </CardTitle>
+            </div>
           </div>
-          <CardDescription className="text-sm text-gray-500">
-            Customize your report by selecting filters below
+          <CardDescription className="text-sm font-medium text-slate-400">
+            {t('reports.filters.description')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-8 pb-8 pt-0">
           <div className="space-y-4">
             {/* Report Type */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Report Type <span className="text-red-500">*</span>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 ml-1">
+                  {t('reports.filters.type')} <span className="text-red-500">*</span>
                 </label>
                 <Select value={reportType} onValueChange={setReportType}>
-                  <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                  <SelectTrigger className="w-full h-12 bg-slate-50/50 border-slate-100 rounded-xl font-bold text-slate-900 focus:ring-[#8D8DC7]/20 transition-all">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -464,11 +471,11 @@ export default function ReportsContent({
 
               {/* Date Preset */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date Range <span className="text-red-500">*</span>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 ml-1">
+                  {t('reports.filters.dateRange')} <span className="text-red-500">*</span>
                 </label>
                 <Select value={datePreset} onValueChange={setDatePreset}>
-                  <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                  <SelectTrigger className="w-full h-12 bg-slate-50/50 border-slate-100 rounded-xl font-bold text-slate-900 focus:ring-[#8D8DC7]/20 transition-all">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -480,169 +487,169 @@ export default function ReportsContent({
                   </SelectContent>
                 </Select>
               </div>
-            
 
-            {/* Custom Date Range */}
-            {datePreset === "custom" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="border-gray-300 shadow-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="border-gray-300 shadow-sm"
-                  />
-                </div>
-              </div>
-            )}
 
-            {/* Optional Filters */}
-            {reportType === "logs" ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Device ID
-                  </label>
-                  <Select value={deviceId} onValueChange={setDeviceId}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue placeholder="All Devices" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All Devices</SelectItem>
-                      {DEVICE_IDS.map((id) => (
-                        <SelectItem key={id} value={id}>
-                          {id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Event Type
-                  </label>
-                  <Select value={eventType} onValueChange={setEventType}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EVENT_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LOG_STATUSES.map((stat) => (
-                        <SelectItem key={stat.value} value={stat.value}>
-                          {stat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Equipment Category <span className="text-red-500">*</span>
-                  </label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem
-                          key={cat}
-                          value={cat === "All Categories" ? "all" : cat}
-                        >
-                          {cat}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Equipment Status
-                  </label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EQUIPMENT_STATUSES.map((stat) => (
-                        <SelectItem key={stat.value} value={stat.value}>
-                          {stat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {showBorrowerFilter && (
+              {/* Custom Date Range */}
+              {datePreset === "custom" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Borrower (Staff/User)
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 ml-1">
+                      {t('reports.filters.startDate')} <span className="text-red-500">*</span>
                     </label>
                     <Input
-                      type="text"
-                      placeholder="Search by name or email..."
-                      value={borrower}
-                      onChange={(e) => setBorrower(e.target.value)}
-                      className="border-gray-300 shadow-sm"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full h-12 bg-slate-50/50 border-slate-100 rounded-xl font-bold text-slate-900 focus:ring-[#8D8DC7]/20 transition-all"
                     />
                   </div>
-                )}
-              </div>
-            )}
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 ml-1">
+                      {t('reports.filters.endDate')} <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full h-12 bg-slate-50/50 border-slate-100 rounded-xl font-bold text-slate-900 focus:ring-[#8D8DC7]/20 transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Optional Filters */}
+              {reportType === "logs" ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('reports.filters.deviceId')}
+                    </label>
+                    <Select value={deviceId} onValueChange={setDeviceId}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue placeholder={t('reports.filters.allDevices')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">{t('reports.filters.allDevices')}</SelectItem>
+                        {DEVICE_IDS.map((id) => (
+                          <SelectItem key={id} value={id}>
+                            {id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('reports.filters.eventType')}
+                    </label>
+                    <Select value={eventType} onValueChange={setEventType}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EVENT_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('reports.filters.status')}
+                    </label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LOG_STATUSES.map((stat) => (
+                          <SelectItem key={stat.value} value={stat.value}>
+                            {stat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('reports.filters.category')} <span className="text-red-500">*</span>
+                    </label>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem
+                            key={cat}
+                            value={cat === t('reports.filters.allCategories') ? "all" : cat}
+                          >
+                            {cat}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('reports.filters.status')}
+                    </label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EQUIPMENT_STATUSES.map((stat) => (
+                          <SelectItem key={stat.value} value={stat.value}>
+                            {stat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {showBorrowerFilter && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('reports.filters.borrower')}
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder={t('reports.filters.borrowerPlaceholder')}
+                        value={borrower}
+                        onChange={(e) => setBorrower(e.target.value)}
+                        className="border-gray-300 shadow-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col justify-end sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col justify-end sm:flex-row gap-3 pt-6 border-t border-gray-50">
               <Button
                 onClick={handleGenerateReport}
                 disabled={loading || !startDate || !endDate}
-                className="flex-1 text-white sm:flex-initial bg-[#343264] hover:bg-[#2a2751]"
+                className="flex-1 text-white sm:flex-initial bg-slate-900 hover:bg-slate-800 h-12 px-10 rounded-xl font-bold shadow-xl shadow-slate-900/10 transition-transform active:scale-95 border-none"
               >
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating...
+                    {t('reports.actions.generating')}
                   </>
                 ) : (
                   <>
                     <Filter className="h-4 w-4 mr-2" />
-                    Generate Report
+                    {t('reports.actions.generate')}
                   </>
                 )}
               </Button>
@@ -650,10 +657,10 @@ export default function ReportsContent({
                 variant="outline"
                 onClick={handleResetFilters}
                 disabled={loading}
-                className="flex-1 sm:flex-initial border-gray-300"
+                className="flex-1 sm:flex-initial border-slate-200 h-12 px-8 rounded-xl font-bold text-slate-600 hover:bg-slate-50"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Reset Filters
+                {t('reports.actions.reset')}
               </Button>
             </div>
           </div>
@@ -661,139 +668,139 @@ export default function ReportsContent({
       </Card>
 
       {/* Results Section */}
-      {reportData.length > 0 && (
-        <Card className="mb-6 border-gray-200 shadow-sm space-y-4">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <CardTitle className="text-xl font-bold">
-                  Report Results
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-500">
-                  Showing {currentData.length} of {reportData.length} records
-                  {totalPages > 1 &&
-                    ` (Page ${currentPage} of ${totalPages})`}
-                </CardDescription>
+      {
+        reportData.length > 0 && (
+          <Card className="mb-8 border-gray-100 shadow-md bg-white rounded-[2rem] overflow-hidden">
+            <CardHeader className="p-8 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <CardTitle className="text-2xl font-bold text-slate-900">
+                    {t('reports.results.title')}
+                  </CardTitle>
+                  <CardDescription className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                    {t('reports.results.summary', { current: currentData.length, total: reportData.length })}
+                    {totalPages > 1 &&
+                      ` • ${t('reports.results.pageInfo', { current: currentPage, total: totalPages })}`}
+                  </CardDescription>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-              <Table className="w-full text-sm">
-                <TableHeader className="bg-gray-100/50">
-                  <TableRow className="hover:bg-transparent border-b border-gray-200">
-                    {getTableColumns().map((column) => (
-                      <TableHead
-                        key={column}
-                        className="h-12 px-6 text-left text-xs font-semibold uppercase tracking-wider text-gray-600"
-                      >
-                        {column}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentData.map((item, idx) => (
-                    <TableRow
-                      key={item.id || idx}
-                      className="border-b border-gray-100 last:border-0 hover:bg-gray-50 even:bg-gray-50/30"
-                    >
-                      {getRowData(item).map((cell, cellIdx) => {
-                        const isStatus =
-                          cellIdx === getRowData(item).length - 1;
-                        return (
-                          <TableCell
-                            key={cellIdx}
-                            className={`px-6 py-4 text-left font-medium ${
-                              isStatus
-                                ? "text-gray-900 font-bold uppercase"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {cell}
-                          </TableCell>
-                        );
-                      })}
+            </CardHeader>
+            <CardContent className="px-8 pb-8 pt-0">
+              <div className="overflow-hidden rounded-[1.5rem] border border-gray-50 bg-white shadow-sm">
+                <Table className="w-full text-sm">
+                  <TableHeader className="bg-gray-50/50">
+                    <TableRow className="hover:bg-transparent border-b border-gray-50">
+                      {getTableColumns().map((column) => (
+                        <TableHead
+                          key={column}
+                          className="h-14 px-6 text-left text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        >
+                          {column}
+                        </TableHead>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {currentData.map((item, idx) => (
+                      <TableRow
+                        key={item.id || idx}
+                        className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
+                      >
+                        {getRowData(item).map((cell, cellIdx) => {
+                          const isStatus =
+                            cellIdx === getRowData(item).length - 1;
+                          return (
+                            <TableCell
+                              key={cellIdx}
+                              className={`px-6 py-5 text-left ${isStatus
+                                ? "font-black"
+                                : "text-slate-600 font-bold"
+                                }`}
+                            >
+                              {cell}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-            {/* Download Section */}
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-gray-200/60">
-              <div>
-                <h3 className="text-base font-bold text-gray-900">
-                  Export Report
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Download the complete report in your preferred format
-                </p>
+              {/* Download Section */}
+              <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pt-8 border-t border-gray-50">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    {t('reports.results.export')}
+                  </h3>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    {t('reports.results.exportDesc')}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={() => handleDownload("csv")}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-slate-900/10 transition-transform active:scale-95"
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    {t('reports.results.downloadCsv')}
+                  </Button>
+                  <Button
+                    onClick={() => handleDownload("pdf")}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-slate-900/10 transition-transform active:scale-95"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {t('reports.results.downloadPdf')}
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  onClick={() => handleDownload("csv")}
-                  className="bg-[#23214a] hover:bg-[#1a1838] text-white font-medium shadow-sm transition-all"
-                >
-                  <FileDown className="h-4 w-4 mr-2" />
-                  Download CSV
-                </Button>
-                <Button
-                  onClick={() => handleDownload("pdf")}
-                  className="bg-[#23214a] hover:bg-[#1a1838] text-white font-medium shadow-sm transition-all"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
-              </div>
-            </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-6 border-t border-gray-100 pt-4">
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setPage}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-6 border-t border-gray-100 pt-4">
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )
+      }
 
       {/* Empty State */}
-      {!loading && reportData.length === 0 && (
-        <Card className="border-gray-200 shadow-sm">
-          <CardContent className="py-12 text-center">
-            {reportGenerated ? (
-              <>
-                <FileDown className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No Data Found
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  No records match your current filter criteria. Try adjusting your filters
-                  (date range, category, status{showBorrowerFilter ? ", or borrower" : ""}) and generate the report again.
-                </p>
-              </>
-            ) : (
-              <>
-                <FileDown className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No Report Generated
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Use the filters above to generate a report. Select your report
-                  type, date range, and any optional filters, then click "Generate
-                  Report".
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      )}
-    </div>
+      {
+        !loading && reportData.length === 0 && (
+          <Card className="border-gray-200 shadow-sm">
+            <CardContent className="py-12 text-center">
+              {reportGenerated ? (
+                <>
+                  <FileDown className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t('reports.emptyState.noDataTitle')}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    {t('reports.emptyState.noDataDesc')}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t('reports.emptyState.noReportTitle')}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    {t('reports.emptyState.noReportDesc')}
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )
+      }
+    </div >
   );
 }
 

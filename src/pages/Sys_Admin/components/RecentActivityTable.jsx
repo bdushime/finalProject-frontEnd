@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MoreHorizontal, ArrowUpRight, MapPin, X, User, Calendar, Box, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '@/utils/api'; // Ensure this path matches your project
 
 const getStatusStyles = (status) => {
@@ -14,6 +15,7 @@ const getStatusStyles = (status) => {
 };
 
 const RecentActivityTable = () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ const RecentActivityTable = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center py-10 text-gray-400">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading live feeds...
+                <Loader2 className="w-6 h-6 animate-spin mr-2" /> {t('dashboard.recentActivityTable.loading')}
             </div>
         );
     }
@@ -46,7 +48,7 @@ const RecentActivityTable = () => {
     if (activities.length === 0) {
         return (
             <div className="text-center py-10 text-gray-400">
-                No recent activity found.
+                {t('dashboard.noRecentActivity')}
             </div>
         );
     }
@@ -56,12 +58,12 @@ const RecentActivityTable = () => {
             <table className="w-full text-left border-collapse">
                 <thead>
                     <tr className="text-xs text-gray-400 font-medium border-b border-gray-50">
-                        <th className="py-3 px-4 pl-0 font-normal">Tracking ID</th>
-                        <th className="py-3 px-4 font-normal">Student / Staff</th>
-                        <th className="py-3 px-4 font-normal">Equipment</th>
-                        <th className="py-3 px-4 font-normal">Location</th>
-                        <th className="py-3 px-4 font-normal">Status</th>
-                        <th className="py-3 px-4 font-normal text-right">Details</th>
+                        <th className="py-3 px-4 pl-0 font-normal">{t('dashboard.recentActivityTable.trackingId')}</th>
+                        <th className="py-3 px-4 font-normal">{t('dashboard.recentActivityTable.studentStaff')}</th>
+                        <th className="py-3 px-4 font-normal">{t('reports.item')}</th>
+                        <th className="py-3 px-4 font-normal">{t('reports.location')}</th>
+                        <th className="py-3 px-4 font-normal">{t('reports.statusFilter')}</th>
+                        <th className="py-3 px-4 font-normal text-right">{t('monitoring.logs.details')}</th>
                     </tr>
                 </thead>
                 <tbody className="text-sm">
@@ -90,12 +92,12 @@ const RecentActivityTable = () => {
                             <td className="py-4 px-4 text-gray-500">
                                 <div className="flex items-center">
                                     <MapPin className="w-3 h-3 mr-1 text-gray-400" />
-                                    {activity.destination || "General Use"}
+                                    {activity.destination || t('dashboard.recentActivityTable.notSpecified')}
                                 </div>
                             </td>
                             <td className="py-4 px-4">
                                 <span className={`px-3 py-1 rounded-lg text-xs font-bold ${getStatusStyles(activity.status)}`}>
-                                    {activity.status}
+                                    {t(`dashboard.status.${activity.status.toLowerCase().replace(' ', '')}`) || activity.status}
                                 </span>
                             </td>
                             <td className="py-4 px-4 text-right">
@@ -117,7 +119,7 @@ const RecentActivityTable = () => {
                     <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-start mb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900">Transaction Details</h3>
+                                <h3 className="text-xl font-bold text-slate-900">{t('dashboard.recentActivityTable.transactionDetails')}</h3>
                                 <p className="text-gray-400 text-xs font-mono mt-1">ID: {selectedActivity._id}</p>
                             </div>
                             <button
@@ -134,7 +136,7 @@ const RecentActivityTable = () => {
                                     <User className="w-6 h-6 text-[#8D8DC7]" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400">Borrower</p>
+                                    <p className="text-xs text-gray-400">{t('dashboard.recentActivityTable.borrower')}</p>
                                     <p className="font-bold text-slate-900">{selectedActivity.user?.username}</p>
                                     <p className="text-xs text-gray-500">{selectedActivity.user?.email}</p>
                                 </div>
@@ -145,7 +147,7 @@ const RecentActivityTable = () => {
                                     <Box className="w-6 h-6 text-[#8D8DC7]" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400">Equipment</p>
+                                    <p className="text-xs text-gray-400">{t('reports.item')}</p>
                                     <p className="font-bold text-slate-900">{selectedActivity.equipment?.name}</p>
                                     <p className="text-xs text-gray-500">SN: {selectedActivity.equipment?.serialNumber}</p>
                                 </div>
@@ -156,8 +158,8 @@ const RecentActivityTable = () => {
                                     <MapPin className="w-6 h-6 text-[#8D8DC7]" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400">Destination</p>
-                                    <p className="font-bold text-slate-900">{selectedActivity.destination || "Not specified"}</p>
+                                    <p className="text-xs text-gray-400">{t('dashboard.recentActivityTable.destination')}</p>
+                                    <p className="font-bold text-slate-900">{selectedActivity.destination || t('dashboard.recentActivityTable.notSpecified')}</p>
                                     <p className="text-xs text-green-600 font-bold">
                                         {new Date(selectedActivity.createdAt).toLocaleString()}
                                     </p>
@@ -167,10 +169,10 @@ const RecentActivityTable = () => {
 
                         <div className="flex gap-3 mt-6">
                             <button onClick={() => navigate('/admin/reports')} className="flex-1 bg-[#8D8DC7] text-white py-3 rounded-xl font-bold hover:bg-[#7b7bb5] transition-colors">
-                                View Full History
+                                {t('dashboard.recentActivityTable.viewFullHistory')}
                             </button>
                             <button onClick={() => setSelectedActivity(null)} className="flex-1 border border-gray-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition-colors">
-                                Close
+                                {t('common:actions.close')}
                             </button>
                         </div>
                     </div>

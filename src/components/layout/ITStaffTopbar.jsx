@@ -121,8 +121,8 @@ export default function ITStaffTopbar({ onMenuClick }) {
                                         key={link.path}
                                         to={link.path}
                                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
-                                            ? "bg-[#0b1d3a] text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                            ? "bg-slate-100 text-black border border-slate-200"
+                                            : "text-slate-600 hover:text-black hover:bg-slate-50"
                                             }`}
                                     >
                                         {link.name}
@@ -141,9 +141,9 @@ export default function ITStaffTopbar({ onMenuClick }) {
                             className="relative h-11 w-11 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#0b1d3a] hover:bg-white/60 transition-all hover:shadow-sm hover:scale-110"
                             aria-label={t("nav.notifications")}
                         >
-                            <Bell className="h-5 w-5 text-[#0b1d3a]" />
+                            <Bell className="h-5 w-5 text-black" />
                             {unreadCount > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[1.25rem] px-1 rounded-full bg-slate-100 text-black text-[10px] font-bold flex items-center justify-center border border-slate-200">
                                     {unreadCount}
                                 </span>
                             )}
@@ -151,9 +151,9 @@ export default function ITStaffTopbar({ onMenuClick }) {
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="h-11 pl-1.5 pr-5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 flex items-center gap-3 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-[1.02]">
-                                    <div className="h-9 w-9 rounded-full bg-[#126dd5] flex items-center justify-center shadow-sm border border-white/50">
-                                        <span className="text-white font-bold text-sm">{user.initial}</span>
+                                <button className="h-11 pl-1.5 pr-5 rounded-full bg-white/40 backdrop-blur-md border border-slate-200 flex items-center gap-3 hover:bg-white/60 transition-all hover:shadow-sm group hover:scale-[1.02]">
+                                    <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center shadow-sm border border-slate-200">
+                                        <span className="text-black font-bold text-sm">{user.initial}</span>
                                     </div>
                                     <div className="text-left leading-tight hidden sm:block">
                                         <p className="text-sm font-bold text-[#0b1d3a] group-hover:text-[#126dd5] transition-colors">
@@ -199,8 +199,8 @@ export default function ITStaffTopbar({ onMenuClick }) {
                                         key={link.path}
                                         to={link.path}
                                         className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-                                            ? "bg-[#0b1d3a] text-white"
-                                            : "text-gray-600 hover:bg-gray-100"
+                                            ? "bg-slate-100 text-black border border-slate-200"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-black"
                                             }`}
                                     >
                                         {link.name}

@@ -29,7 +29,24 @@
         "generateReport": "Générer un Rapport",
         "live": "+En Direct",
         "stable": "Stable",
-        "stock": "Stock"
+        "stock": "Stock",
+        "recentActivityTable": {
+            "trackingId": "ID de Suivi",
+            "studentStaff": "Étudiant / Personnel",
+            "transactionDetails": "Détails de la Transaction",
+            "borrower": "Emprunteur",
+            "viewFullHistory": "Voir l'Historique Complet",
+            "loading": "Chargement des flux...",
+            "destination": "Destination",
+            "notSpecified": "Non spécifié"
+        },
+        "status": {
+            "checkedOut": "Sortie",
+            "returned": "Retourné",
+            "overdue": "En Retard",
+            "unknown": "Inconnu",
+            "deletedItem": "Article Supprimé"
+        }
     },
     "users": {
         "title": "Gestion des Utilisateurs",
@@ -88,8 +105,9 @@
         "resetPassword": "Réinitialiser le mot de passe (laisser vide pour conserver)",
         "updatingFor": "Mise à jour des détails de",
         "general": "Général",
-        "suspended": "SUSPENDU",
-        "activeStatus": "ACTIF",
+        "active": "Actif",
+        "activeStatus": "Actif",
+        "suspended": "Suspendu",
         "allRoles": "Tous les Rôles",
         "actions": "Actions"
     },
@@ -244,6 +262,8 @@
         "statusFilter": "Statut :",
         "roleFilter": "Rôle :",
         "categoryFilter": "Catégorie :",
+        "department": "Département",
+        "maintenance": "Maintenance",
         "item": "Élément",
         "user": "Utilisateur",
         "date": "Date",
@@ -416,6 +436,14 @@
             "login": "Connexion:",
             "noSessions": "Aucune session active trouvée."
         }
+    },
+    "scanner": {
+        "title": "Scanner QR",
+        "subtitle": "Scannez les étiquettes pour l'enregistrement ou les infos.",
+        "scanning": "Balayage en cours...",
+        "itemsFound": "Articles Trouvés",
+        "viewDetails": "Voir Détails",
+        "scanNext": "Scanner Suivant"
     },
     "notifications": {
         "title": "Notifications",

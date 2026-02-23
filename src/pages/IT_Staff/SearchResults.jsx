@@ -31,7 +31,7 @@ export default function SearchResults() {
 							onChange={(e) => setStatus(e.target.value)}
 							options={[{ label: "All", value: "" }, ...Object.values(EquipmentStatus).map((s) => ({ label: s, value: s }))]}
 						/>
-						<Button className="bg-linear-to-r from-blue-600 to-purple-600 text-white">
+						<Button className="bg-slate-100 text-black border border-slate-200">
 							<Filter className="mr-2 h-4 w-4" /> Apply
 						</Button>
 					</div>

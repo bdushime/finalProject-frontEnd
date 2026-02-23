@@ -97,15 +97,8 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
   // Higher zoom when tracking user (approx 500m view)
   const activeZoom = userLocation ? 15 : DEFAULT_ZOOM;
 
-  const showDataWarning = filteredTrackers.length > 0 && validTrackers.length === 0;
-
   return (
     <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow h-full w-full flex flex-col relative">
-      {showDataWarning && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded shadow-sm text-xs font-bold">
-          {t('iot.map.warningNoGps', { count: filteredTrackers.length })}
-        </div>
-      )}
       <CardHeader
         className={`${onNavigate ? "cursor-pointer" : ""} pb-2 sm:pb-4`}
         onClick={onNavigate}

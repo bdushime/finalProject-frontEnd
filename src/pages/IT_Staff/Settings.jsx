@@ -85,7 +85,7 @@ export default function ITStaffSettings() {
 							</div>
 							<div className="mt-4 flex justify-end gap-3">
 								<Button variant="outline" className="bg-red-600 text-white hover:bg-red-700">Cancel</Button>
-								<Button className="bg-blue-600 text-white hover:bg-blue-700">Update Password</Button>
+								<Button className="bg-blue-100 text-black border border-blue-200 hover:bg-blue-200 font-bold">Update Password</Button>
 							</div>
 						</CardContent>
 					</Card>

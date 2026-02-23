@@ -87,7 +87,11 @@
         "all": "Byose",
         "total": "Igiteranyo",
         "na": "N/A",
-        "equipment": "Ibikoresho"
+        "equipment": "Igikoresho",
+        "notSpecified": "Ntabwo byashyizweho",
+        "unknownUser": "Umunyandiko Utazwi",
+        "unknownItem": "Igikoresho Kitazwi",
+        "comparedTo": "Ugereranyije na {{value}}"
     },
     "roles": {
         "student": "Umunyeshuri",
@@ -115,5 +119,82 @@
         "rw": "Ikinyarwanda",
         "fr": "Igifaransa",
         "switchLanguage": "Ururimi"
+    },
+    "reports": {
+        "filters": {
+            "title": "Akayunguruzo ka Raporo",
+            "description": "Hitamo uko ushaka ko raporo imera alapho hepfo",
+            "type": "Ubwoko bwa Raporo",
+            "dateRange": "Amatariki",
+            "startDate": "Itariki Itangira",
+            "endDate": "Itariki Isoreza",
+            "category": "Icyiciro cy'Igikoresho",
+            "status": "Imimerere y'Igikoresho",
+            "borrower": "Uwatiye (Umukozi/Ukoresha)",
+            "borrowerPlaceholder": "Shakisha ku zina cyangwa imeyili...",
+            "deviceId": "ID y'Igikoresho",
+            "eventType": "Ubwoko bw'Ibyabaye",
+            "allDevices": "Ibikoresho Byose",
+            "allStatus": "Imimerere Yose",
+            "allEvents": "Ubwoko Byose",
+            "allCategories": "Ibyiciro Byose"
+        },
+        "actions": {
+            "generate": "Kora Raporo",
+            "generating": "Irimo gukorwa...",
+            "reset": "Subiza ku miterere isanzwe"
+        },
+        "results": {
+            "title": "Ibyavuye muri Raporo",
+            "summary": "Herekanywe {{current}} muri {{total}} nyandiko",
+            "pageInfo": "(Ipaji ya {{current}} kuri {{total}})",
+            "export": "Ohereza Raporo",
+            "exportDesc": "Manura raporo yuzuye mu buryo bwifuzwa",
+            "downloadCsv": "Manura CSV",
+            "downloadPdf": "Manura PDF"
+        },
+        "emptyState": {
+            "noDataTitle": "Nta makuru zabonetse",
+            "noDataDesc": "Nta nyandiko zijyanye n'ibyo washatse. Gerageza guhindura akayunguruzo.",
+            "noReportTitle": "Nta raporo yakozwe",
+            "noReportDesc": "Koresha akayunguruzo ko haruguru wandike raporo."
+        },
+        "presets": {
+            "today": "Uyu Munsi",
+            "last7days": "Iminsi 7 ishize",
+            "last30days": "Iminsi 30 ishize",
+            "custom": "Amatariki Wahisemo"
+        },
+        "columns": {
+            "equipmentName": "Izina ry'Igikoresho",
+            "serialNumber": "Serial Number",
+            "category": "Icyiciro",
+            "location": "Ahari",
+            "status": "Imimerere",
+            "condition": "Imirere",
+            "purchaseDate": "Itariki cyaguzwe",
+            "borrowerName": "Izina ry'Uwatiye",
+            "lendingDate": "Itariki cyatijwe",
+            "dueDate": "Itariki cyagombaga kugarurwa",
+            "reservationStart": "Kugitangira Kugitira",
+            "reservationEnd": "Kugihagarika Kugitira",
+            "damageDate": "Itariki cyangirikiyemo",
+            "remarks": "Andi Makuru",
+            "lossDate": "Itariki cyaburiyeho",
+            "lastKnownLocation": "Aho cyari giherereye",
+            "totalCheckouts": "Gusohoka Kwose",
+            "utilizationRate": "Ikoreshwa",
+            "currentStatus": "Imimerere y'Ubu",
+            "deviceName": "Izina ry'Igikoresho",
+            "deviceId": "ID y'Igikoresho",
+            "eventType": "Ubwoko bw'Ibyabaye",
+            "user": "Ukoresha",
+            "timestamp": "Igihe"
+        }
+    },
+    "browseDevices": {
+        "labels": {
+            "sn": "S/N"
+        }
     }
 }

@@ -187,7 +187,7 @@ export function Dashboard() {
                                     <div className="flex gap-2 w-full sm:w-auto">
                                         <Button
                                             onClick={() => handleApprove(req._id)}
-                                            className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white gap-2"
+                                            className="flex-1 sm:flex-none bg-green-100 hover:bg-green-200 text-black border border-green-200 gap-2 font-bold"
                                         >
                                             <CheckCircle className="w-4 h-4" /> {t('dashboard.approve')}
                                         </Button>

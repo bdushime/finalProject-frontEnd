@@ -3,7 +3,7 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion } from "framer-motion";
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Loader2, Plus, Check, X, Calendar, Clock, LogIn } from "lucide-react"; 
+import { Eye, Loader2, Plus, Check, X, Calendar, Clock } from "lucide-react";
 import CheckoutDetailsDialog from "./checkout/CheckoutDetailsDialog";
 import api from "@/utils/api";
 import { format } from "date-fns";
@@ -32,6 +32,9 @@ export default function CurrentCheckouts() {
     // Tabs state: 'requests' | 'reservations' | 'active'
     const [currentTab, setCurrentTab] = useState('requests');
 
+    //     // Tabs state: 'requests' | 'reservations' | 'active'
+    //     const [currentTab, setCurrentTab] = useState('requests');
+
     // --- REJECTION LOGIC STATE ---
     const [isRejectOpen, setIsRejectOpen] = useState(false);
     const [rejectId, setRejectId] = useState(null);
@@ -42,13 +45,12 @@ export default function CurrentCheckouts() {
     const fetchActive = async () => {
         setLoading(true);
         try {
-            // This endpoint now returns Pending, Checked Out, Reserved, AND Pending Return items
+            // This endpoint now returns Pending, Checked Out, AND Reserved items
             const res = await api.get('/transactions/active');
 
             const mappedData = res.data.map(tx => ({
                 checkoutId: tx._id,
                 equipmentName: tx.equipment?.name || "Unknown Item",
-                equipmentId: tx.equipment?._id, // Needed for checkin
                 dateDisplay: tx.status === 'Reserved'
                     ? format(new Date(tx.startTime), 'MMM dd, HH:mm')
                     : format(new Date(tx.createdAt), 'MMM dd, HH:mm'),
@@ -83,8 +85,7 @@ export default function CurrentCheckouts() {
         } else if (currentTab === 'reservations') {
             result = allTransactions.filter(t => t.status === 'Reserved');
         } else if (currentTab === 'active') {
-            // Includes 'Pending Return' in the active tab view
-            result = allTransactions.filter(t => ['Checked Out', 'Overdue', 'Pending Return'].includes(t.status));
+            result = allTransactions.filter(t => ['Checked Out', 'Overdue'].includes(t.status));
         }
         setFilteredData(result);
     }, [currentTab, allTransactions]);
@@ -112,6 +113,7 @@ export default function CurrentCheckouts() {
         if (!confirm(t('checkouts.messages.confirmApprove'))) return;
 
         try {
+            // 'Approve' on a Reservation converts it to 'Checked Out'
             await api.put(`/transactions/${id}/respond`, { action });
             toast.success(t('checkouts.messages.statusUpdated'));
             fetchActive();
@@ -120,6 +122,8 @@ export default function CurrentCheckouts() {
             toast.error(t('checkouts.messages.statusError'));
         }
     };
+
+
 
     // Submit Rejection Reason
     const handleRejectSubmit = async () => {
@@ -158,44 +162,13 @@ export default function CurrentCheckouts() {
             toast.error(t('checkouts.messages.cancelError'));
         }
     };
-    
-    // Helper: Is reservation ready?
+    // Helper: Is reservation ready? (Within 30 mins of start time)
     const isReservationReady = (startTimeString) => {
         if (!startTimeString) return false;
         const start = new Date(startTimeString);
         const now = new Date();
         const diffMinutes = (start - now) / 1000 / 60;
         return diffMinutes <= 30;
-    };
-
-    // 👇 NEW: Direct API Call for Return with Optimistic Update
-    const handleCheckIn = async (e, row) => {
-        e.stopPropagation();
-        
-        if (!confirm(`Are you sure you want to approve the return for the ${row.equipmentName}?`)) return;
-
-        setProcessing(true);
-        try {
-            // 1. Hit your backend checkin route directly
-            await api.post('/transactions/checkin', {
-                userId: row.fullData.user._id,
-                equipmentId: row.equipmentId,
-                condition: 'Good' // Defaulting to good condition for quick return
-            });
-            
-            // 2. Show Success Notification
-            toast.success(`${row.equipmentName} has been checked in successfully!`);
-            
-            // 3. OPTIMISTIC UPDATE: Instantly remove the item from the screen
-            setAllTransactions(prev => prev.filter(t => t.checkoutId !== row.checkoutId));
-            setFilteredData(prev => prev.filter(t => t.checkoutId !== row.checkoutId));
-
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to process the return.");
-        } finally {
-            setProcessing(false);
-        }
     };
 
     return (
@@ -208,21 +181,12 @@ export default function CurrentCheckouts() {
                         <h2 className="text-2xl font-bold tracking-tight text-gray-900">{t('checkouts.manageTransactions')}</h2>
                         <p className="text-gray-500 text-sm">{t('checkouts.manageDesc')}</p>
                     </div>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => navigate('/it/return/select-item')}
-                            className="bg-white"
-                        >
-                            <LogIn className="mr-2 h-4 w-4" /> Quick Check-In
-                        </Button>
-                        <Button
-                            onClick={() => navigate('/it/checkout/select')}
-                            className="bg-[#0b1d3a] hover:bg-[#1a2f55]"
-                        >
-                            <Plus className="mr-2 h-4 w-4" /> {t('checkouts.newCheckout')}
-                        </Button>
-                    </div>
+                    <Button
+                        onClick={() => navigate('/it/checkout/select')}
+                        className="bg-[#0b1d3a] hover:bg-[#1a2f55]"
+                    >
+                        <Plus className="mr-2 h-4 w-4" /> {t('checkouts.newCheckout')}
+                    </Button>
                 </div>
 
                 {/* TABS */}
@@ -250,10 +214,6 @@ export default function CurrentCheckouts() {
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'active' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
                         {t('checkouts.tabs.active')}
-                        {/* Red badge if there are returns waiting to be processed */}
-                        {allTransactions.filter(t => t.status === 'Pending Return').length > 0 &&
-                            <span className="ml-2 bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full shadow-sm animate-pulse">{allTransactions.filter(t => t.status === 'Pending Return').length} Returns</span>
-                        }
                     </button>
                 </div>
 
@@ -261,8 +221,8 @@ export default function CurrentCheckouts() {
                 <div className="rounded-2xl shadow-sm bg-white overflow-hidden border border-gray-100 min-h-[400px]">
                     <div className="overflow-x-auto">
                         <Table className="w-full text-sm">
-                            <TableHeader className="bg-[#0b1d3a] border-b border-gray-100">
-                                <tr className="text-white">
+                            <TableHeader className="bg-slate-50 border-b border-slate-200">
+                                <tr className="text-black">
                                     <th className="px-6 py-4 font-semibold text-left">{t('checkouts.table.item')}</th>
                                     <th className="px-6 py-4 font-semibold text-left">
                                         {currentTab === 'reservations' ? t('checkouts.table.startTime') : t('checkouts.table.date')}
@@ -299,13 +259,11 @@ export default function CurrentCheckouts() {
                                             {/* ITEM NAME */}
                                             <td className="px-0 font-medium text-gray-900 relative">
                                                 <div className="flex items-center h-full">
-                                                    <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${
-                                                        row.status === 'Pending' ? 'bg-yellow-500' :
-                                                        row.status === 'Pending Return' ? 'bg-orange-500' :
+                                                    <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${row.status === 'Pending' ? 'bg-yellow-500' :
                                                         row.status === 'Reserved' ? 'bg-purple-600' :
-                                                        row.status === 'Overdue' ? 'bg-red-600' :
-                                                        'bg-[#0b1d3a]'
-                                                    }`}></div>
+                                                            row.status === 'Overdue' ? 'bg-red-600' :
+                                                                'bg-slate-500'
+                                                        }`}></div>
                                                     <span className="pl-6">{row.equipmentName}</span>
                                                 </div>
                                             </td>
@@ -318,21 +276,17 @@ export default function CurrentCheckouts() {
                                             </td>
 
                                             <td className="px-6 py-5">
-                                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
-                                                    row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                    row.status === 'Pending Return' ? 'bg-orange-100 text-orange-700 ring-1 ring-orange-500' : 
+                                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
                                                     row.status === 'Reserved' ? 'bg-purple-100 text-purple-700' :
-                                                    row.status === 'Overdue' ? 'bg-red-100 text-red-700' :
-                                                    'bg-blue-100 text-blue-700'
-                                                }`}>
+                                                        row.status === 'Overdue' ? 'bg-red-100 text-red-700' :
+                                                            'bg-blue-100 text-blue-700'
+                                                    }`}>
                                                     {row.status}
                                                 </span>
                                             </td>
 
                                             <td className="px-6 py-5">
                                                 <div className="flex gap-2">
-                                                    
-                                                    {/* REQUESTS ACTION */}
                                                     {row.status === 'Pending' && (
                                                         <>
                                                             <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 px-3"
@@ -346,7 +300,6 @@ export default function CurrentCheckouts() {
                                                         </>
                                                     )}
 
-                                                    {/* RESERVATIONS ACTION */}
                                                     {row.status === 'Reserved' && (
                                                         <>
                                                             {isReservationReady(row.startTime) ? (
@@ -364,19 +317,6 @@ export default function CurrentCheckouts() {
                                                                 {t('checkouts.actions.cancel')}
                                                             </Button>
                                                         </>
-                                                    )}
-
-                                                    {/* RETURN ACTION */}
-                                                    {row.status === 'Pending Return' && (
-                                                        <Button 
-                                                            size="sm" 
-                                                            className="bg-orange-600 hover:bg-orange-700 text-white h-8 px-3 animate-bounce"
-                                                            onClick={(e) => handleCheckIn(e, row)}
-                                                            disabled={processing}
-                                                        >
-                                                            {processing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <LogIn className="h-4 w-4 mr-1" />}
-                                                            Process Return
-                                                        </Button>
                                                     )}
 
                                                     <Button variant="ghost" size="sm" className="h-8 px-2"
@@ -401,7 +341,7 @@ export default function CurrentCheckouts() {
                     />
                 )}
 
-                {/* REJECTION REASON DIALOG */}
+                {/* 4. REJECTION REASON DIALOG */}
                 <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
                     <DialogContent className="bg-white sm:max-w-md border border-gray-200 shadow-lg">
                         <DialogHeader>

@@ -12,11 +12,11 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
     const doc = new jsPDF();
 
     // --- 1. HEADER SECTION ---
-    
+
     // Add Logo
     try {
-        const logoUrl = '/auca_logo.png'; 
-        doc.addImage(logoUrl, 'PNG', 14, 10, 25, 25); 
+        const logoUrl = '/auca_logo.png';
+        doc.addImage(logoUrl, 'PNG', 14, 10, 25, 25);
     } catch (e) {
         console.warn("Logo not found, skipping image.");
     }
@@ -40,7 +40,7 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
     doc.line(14, 35, 196, 35);
 
     // --- 2. REPORT METADATA ---
-    
+
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 0, 0);
@@ -71,12 +71,12 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
     doc.setFont("helvetica", "bold");
     doc.text("Status:", 120, 61);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 128, 0); 
+    doc.setTextColor(0, 128, 0);
     doc.text("VERIFIED", 150, 61);
-    doc.setTextColor(0, 0, 0); 
+    doc.setTextColor(0, 0, 0);
 
     // --- 3. DYNAMIC DATA TABLE ---
-    
+
     const tableColumn = ["No.", "Equipment Name", "Serial No.", "Category", "Borrowed Date", "Student/User", "Status"];
     const tableRows = [];
 
@@ -99,8 +99,8 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
         startY: 75,
         theme: 'grid',
         headStyles: {
-            fillColor: [66, 66, 66], 
-            textColor: [255, 255, 255],
+            fillColor: [240, 240, 240],
+            textColor: [0, 0, 0],
             fontSize: 9,
             halign: 'center',
             fontStyle: 'bold'
@@ -114,7 +114,7 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
         },
         columnStyles: {
             1: { halign: 'left' },
-            5: { halign: 'left' } 
+            5: { halign: 'left' }
         },
         alternateRowStyles: {
             fillColor: [245, 245, 245]
@@ -122,12 +122,12 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
     });
 
     // --- 4. SIGNATURE FOOTER ---
-    
-    const finalY = doc.lastAutoTable.finalY + 20; 
+
+    const finalY = doc.lastAutoTable.finalY + 20;
 
     if (finalY > 250) {
         doc.addPage();
-        doc.text("", 14, 20); 
+        doc.text("", 14, 20);
     }
 
     doc.setFontSize(10);
@@ -146,7 +146,7 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
     doc.text("Date: ______________________", 120, finalY + 28);
 
     const pageCount = doc.internal.getNumberOfPages();
-    for(let i = 1; i <= pageCount; i++) {
+    for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);

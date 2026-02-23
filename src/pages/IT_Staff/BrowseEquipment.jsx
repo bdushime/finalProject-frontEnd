@@ -141,7 +141,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
-                    <SelectValue placeholder="Category" />
+                    <SelectValue placeholder={t('equipment.category')} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200">
                     {STATIC_CATEGORIES.map(category => (
@@ -154,7 +154,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
 
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-full sm:w-[200px] rounded-full border-gray-300 shadow-sm">
-                    <SelectValue placeholder="Sort by" />
+                    <SelectValue placeholder={t('equipment.sortBy')} />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200">
                     <SelectItem value="name">{t('equipment.sortOptions.name')}</SelectItem>
@@ -225,7 +225,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     </Badge>
                   </div>
                   <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
-                  <CardDescription className="text-xs font-mono">SN: {item.serialNumber || item.id.substring(0, 8)}</CardDescription>
+                  <CardDescription className="text-xs font-mono"><span className="text-xs font-semibold text-gray-500">{t('common:browseDevices.labels.sn')}:</span> {item.serialNumber || item.id.substring(0, 8)}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col">
                   <p className="text-sm text-gray-600 mb-4 line-clamp-2">
@@ -267,7 +267,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                         </Badge>
                       </div>
                       <h3 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h3>
-                      <p className="text-sm text-gray-500 mb-2">SN: {item.serialNumber || item.id}</p>
+                      <p className="text-sm text-gray-500 mb-2"><span className="text-xs font-semibold text-gray-500">{t('common:browseDevices.labels.sn')}:</span> {item.serialNumber || item.id}</p>
                       <div className="flex items-center gap-4 text-sm mt-2">
                         <div className="flex items-center">
                           <Package className="h-4 w-4 mr-2 text-gray-400" />

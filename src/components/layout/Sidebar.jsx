@@ -28,15 +28,15 @@ export default function Sidebar({ isOpen, onClose }) {
                 animate={{ x: isOpen ? 0 : -260, opacity: isOpen ? 1 : 0.9 }}
                 exit={{ x: -260, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 30 }}
-                className="fixed left-0 top-0 h-screen w-64 z-40 bg-[#0a1b35] text-white shadow-2xl"
+                className="fixed left-0 top-0 h-screen w-64 z-40 bg-white text-black shadow-2xl border-r border-slate-200"
                 aria-label="Sidebar"
             >
                 <div className="h-full flex flex-col">
-                    <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10 bg-[#0a1b35]">
+                    <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100 bg-white">
                         <img src={logo} alt="Tracknity logo" className="h-10 w-10 object-contain drop-shadow-sm" />
                         <div>
-                            <div className="text-white font-semibold text-lg leading-tight">{t("misc.tracknity")}</div>
-                            <p className="text-xs text-slate-200/80">{t("misc.studentPortal")}</p>
+                            <div className="text-black font-semibold text-lg leading-tight">{t("misc.tracknity")}</div>
+                            <p className="text-xs text-slate-500">{t("misc.studentPortal")}</p>
                         </div>
                     </div>
 
@@ -58,8 +58,8 @@ export default function Sidebar({ isOpen, onClose }) {
                                     className={({ isActive: navIsActive }) => {
                                         const active = navIsActive || isActive;
                                         return `relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${active
-                                            ? "bg-white/10 text-white shadow-[0_12px_30px_-18px_rgba(59,130,246,0.8)] border border-white/10"
-                                            : "text-white/80 hover:bg-white/5 hover:text-white"
+                                            ? "bg-slate-100 text-black shadow-sm border border-slate-200"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-black"
                                             }`;
                                     }}
                                 >
@@ -75,15 +75,15 @@ export default function Sidebar({ isOpen, onClose }) {
                         <button
                             type="button"
                             onClick={() => navigate("/login")}
-                            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/5 hover:bg-sky-500/15 text-white text-sm font-semibold transition-all duration-300 shadow-[0_12px_28px_-18px_rgba(59,130,246,0.6)]"
+                            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-black text-sm font-semibold transition-all duration-300 border border-slate-200"
                         >
                             <span className="flex items-center gap-3">
-                                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 border border-white/10">
-                                    <LogOut className="h-4 w-4 text-sky-100" />
+                                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 border border-slate-100">
+                                    <LogOut className="h-4 w-4 text-slate-700" />
                                 </span>
                                 {t("auth.logOut")}
                             </span>
-                            <span className="text-xs text-slate-200/80">{t("misc.exit")}</span>
+                            <span className="text-xs text-slate-500">{t("misc.exit")}</span>
                         </button>
                     </div>
                 </div>
