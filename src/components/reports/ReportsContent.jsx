@@ -520,63 +520,7 @@ export default function ReportsContent({
                   </SelectContent>
                 </Select>
               </div>
-
-
-              {/* Custom Date Range */}
-              {datePreset === "custom" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Start Date <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="border-gray-300 shadow-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      End Date <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="border-gray-300 shadow-sm"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Optional Filters */}
-              {reportType === "logs" ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Device ID
-                    </label>
-                    <Select value={deviceId} onValueChange={setDeviceId}>
-                      <SelectTrigger className="w-full border-gray-300 shadow-sm">
-                        <SelectValue placeholder="All Devices" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">All Devices</SelectItem>
-                        {DEVICE_IDS.map((id) => (
-                          <SelectItem key={id} value={id}>
-                            {id}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Event Type
-
-
+              
               {/* Custom Date Range */}
               {datePreset === "custom" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
