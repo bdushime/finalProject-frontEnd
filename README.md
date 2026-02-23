@@ -35,6 +35,7 @@ Create a `.env` file in the root directory and point it to your backend API:
 \`\`\`env
 # Use localhost for development, or your live Render URL for production
 VITE_API_URL=http://localhost:5000/api
+Netlify link: https://tracknity.netlify.app
 \`\`\`
 
 ### 4. Run the development server
