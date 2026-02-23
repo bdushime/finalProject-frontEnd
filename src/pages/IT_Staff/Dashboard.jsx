@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Textarea } from "@/components/ui/textarea";
 
 export function Dashboard() {
-    const { t } = useTranslation(["itstaff", "common"]);
+    const { t, i18n } = useTranslation(["itstaff", "common"]);
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -143,7 +143,11 @@ export function Dashboard() {
                         <h1 className="text-4xl md:text-5xl font-light text-[#0b1d3a] tracking-tight mb-2">
                             {getGreeting()}, <span className="font-medium">{user.name}</span>
                         </h1>
-                        <p className="text-slate-500 text-lg font-light">{formattedDate}</p>
+                        <p className="text-slate-500 text-lg font-light">
+                            {new Intl.DateTimeFormat(i18n.language === 'fr' ? 'fr-FR' : i18n.language === 'rw' ? 'rw-RW' : 'en-US', {
+                                weekday: "long", month: "long", day: "numeric", year: "numeric",
+                            }).format(new Date())}
+                        </p>
                         <div className="mt-2">
                             <SystemHealth />
                         </div>
@@ -172,9 +176,9 @@ export function Dashboard() {
                                 <div key={req._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg bg-gray-50 gap-4">
                                     <div>
                                         <p className="font-semibold text-gray-900">
-                                            {req.user?.username || "Unknown User"}
+                                            {req.user?.username || t('common.unknownUser')}
                                             <span className="font-normal text-gray-500"> {t('dashboard.wants')} </span>
-                                            {req.equipment?.name || "Unknown Item"}
+                                            {req.equipment?.name || t('common.unknownItem')}
                                         </p>
                                         <p className="text-sm text-gray-500">
                                             {t('dashboard.requested')} {format(new Date(req.createdAt), "MMM d, h:mm a")}
@@ -183,7 +187,7 @@ export function Dashboard() {
                                     <div className="flex gap-2 w-full sm:w-auto">
                                         <Button
                                             onClick={() => handleApprove(req._id)}
-                                            className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white gap-2"
+                                            className="flex-1 sm:flex-none bg-green-100 hover:bg-green-200 text-black border border-green-200 gap-2 font-bold"
                                         >
                                             <CheckCircle className="w-4 h-4" /> {t('dashboard.approve')}
                                         </Button>

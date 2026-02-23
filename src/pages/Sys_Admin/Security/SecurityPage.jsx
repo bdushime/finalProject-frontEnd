@@ -134,7 +134,7 @@ const SecurityPage = () => {
                                 <Shield className="w-6 h-6 text-[#8D8DC7]" />
                             </div>
                             <span className={`px-2 py-1 rounded-full text-xs font-bold ${item.status === 'Compliant' ? 'bg-green-100 text-green-700' :
-                                    item.status === 'Critical' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                                item.status === 'Critical' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
                                 }`}>
                                 {item.status}
                             </span>
@@ -179,7 +179,7 @@ const SecurityPage = () => {
                             </div>
                         </div>
                         <button className="w-full mt-4 bg-gray-50 text-red-600 font-medium py-2 rounded-lg text-sm hover:bg-red-50 hover:text-red-700 transition-colors opacity-0 group-hover:opacity-100">
-                            Revoke Access
+                            {t('security.sessions.revoke')}
                         </button>
                     </div>
                 ))}
@@ -204,8 +204,8 @@ const SecurityPage = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex-grow md:flex-grow-0 text-center ${activeTab === tab.id
-                                    ? 'bg-[#8D8DC7] text-white shadow-lg shadow-[#8D8DC7]/20'
-                                    : 'text-gray-500 hover:text-[#8D8DC7] hover:bg-gray-50'
+                                ? 'bg-[#8D8DC7] text-white shadow-lg shadow-[#8D8DC7]/20'
+                                : 'text-gray-500 hover:text-[#8D8DC7] hover:bg-gray-50'
                                 }`}
                         >
                             {tab.label}

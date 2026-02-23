@@ -221,8 +221,8 @@ export default function CurrentCheckouts() {
                 <div className="rounded-2xl shadow-sm bg-white overflow-hidden border border-gray-100 min-h-[400px]">
                     <div className="overflow-x-auto">
                         <Table className="w-full text-sm">
-                            <TableHeader className="bg-[#0b1d3a] border-b border-gray-100">
-                                <tr className="text-white">
+                            <TableHeader className="bg-slate-50 border-b border-slate-200">
+                                <tr className="text-black">
                                     <th className="px-6 py-4 font-semibold text-left">{t('checkouts.table.item')}</th>
                                     <th className="px-6 py-4 font-semibold text-left">
                                         {currentTab === 'reservations' ? t('checkouts.table.startTime') : t('checkouts.table.date')}
@@ -262,7 +262,7 @@ export default function CurrentCheckouts() {
                                                     <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${row.status === 'Pending' ? 'bg-yellow-500' :
                                                         row.status === 'Reserved' ? 'bg-purple-600' :
                                                             row.status === 'Overdue' ? 'bg-red-600' :
-                                                                'bg-[#0b1d3a]'
+                                                                'bg-slate-500'
                                                         }`}></div>
                                                     <span className="pl-6">{row.equipmentName}</span>
                                                 </div>

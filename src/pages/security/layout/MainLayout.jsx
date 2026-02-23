@@ -6,73 +6,46 @@ import Topbar from "./Topbar";
 
 const DESKTOP_BREAKPOINT = 640; // matches `sm:` in Tailwind config
 
-export default function MainLayout({ children }) {
-  // Controls visibility on mobile; on desktop the sidebar is always visible
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    try {
-      if (typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT) {
-        return true;
-      }
-      const stored = localStorage.getItem("sidebarOpen");
-      if (stored !== null) {
-        return stored === "1";
-      }
-      return false;
-    } catch {
-      return false;
-    }
-  });
-
-  // Current sidebar width (0 / 64 / 240) used to offset main content on desktop
-  // const [sidebarWidth, setSidebarWidth] = useState(0);
-
-  // useEffect(() => {
-  //   try {
-  //     localStorage.setItem("sidebarOpen", sidebarOpen ? "1" : "0");
-  //   } catch {
-  //     // ignore storage errors
-  //   }
-  // }, [sidebarOpen]);
+export default function MainLayout({ children, heroContent }) {
+  // Controls visibility on mobile
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= DESKTOP_BREAKPOINT) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
+      // Logic for mobile menu state if needed
     };
-    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const location = useLocation();
-  useEffect(() => {
-    if (window.innerWidth < DESKTOP_BREAKPOINT) {
-      setSidebarOpen(false);
-    }
-  }, [location.pathname]);
-
-  const isDesktop = typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT;
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {sidebarOpen && !isDesktop && (
-        <div
-          className="fixed inset-0 bg-black/30 sm:hidden z-30"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden
-        />
-      )}
+    <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 transition-all duration-300">
 
-      <div
-        className="flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out"
-      >
+      {/* Floating Dark Container - Header + Hero */}
+      <div className="bg-slate-900 rounded-[2rem] text-white shadow-2xl relative mb-8 overflow-hidden">
+        {/* Background Glow Effect */}
+        <div className="absolute inset-0 overflow-hidden rounded-[2rem] pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#8D8DC7] opacity-20 blur-[100px] rounded-full -mr-20 -mt-20"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-slate-500 opacity-10 blur-[80px] rounded-full -ml-10 -mb-10"></div>
+        </div>
+
         <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
-        <main className="flex-1 max-w-[1920px] mx-auto w-full px-4 sm:px-6 py-6">
-          {children}
-        </main>
+
+        {/* Hero Content Slot */}
+        {heroContent && (
+          <div className="px-6 pb-8 pt-2 relative z-10 animate-in fade-in slide-in-from-top-4 duration-500">
+            {heroContent}
+          </div>
+        )}
+      </div>
+
+      <main className="px-2 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {children}
+      </main>
+
+      {/* Footer */}
+      <div className="w-full text-center text-gray-400 text-xs py-4 mt-auto">
+        Tracknity &copy; {new Date().getFullYear()}
       </div>
     </div>
   );

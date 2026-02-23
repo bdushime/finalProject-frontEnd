@@ -9,21 +9,21 @@ export default function ActionButton({
   className,
 }) {
   const variants = {
-    primary: "bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white",
-    secondary: "bg-[#1A2240] hover:bg-[#0A1128] text-white",
+    primary: "bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white shadow-lg shadow-[#8D8DC7]/20",
+    secondary: "bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md",
   };
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center gap-3 p-8 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md",
+        "flex flex-col items-center justify-center gap-4 p-8 rounded-3xl transition-all duration-300 active:scale-95 group",
         variants[variant],
         className
       )}
     >
-      {Icon && <Icon className="h-8 w-8" />}
-      <span className="text-lg font-semibold">{label}</span>
+      {Icon && <Icon className="h-10 w-10 transition-transform group-hover:scale-110" />}
+      <span className="text-xl font-bold tracking-tight">{label}</span>
     </button>
   );
 }

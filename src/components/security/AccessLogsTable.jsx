@@ -105,15 +105,16 @@ const actionConfig = {
   Return: { label: "Return", className: "bg-green-500 text-white border-none rounded-full" },
 };
 
-export default function AccessLogsTable({ data = mockAccessLogs }) {
+export default function AccessLogsTable({ data, loading = false }) {
   const { t } = useTranslation(["security", "common"]);
+  const displayData = data && data.length > 0 ? data : (loading ? [] : mockAccessLogs);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("today");
 
   const filteredData = useMemo(() => {
-    return data.filter((log) => {
+    return displayData.filter((log) => {
       const matchesSearch =
         searchQuery === "" ||
         log.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -126,7 +127,7 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
 
       return matchesSearch && matchesStatus && matchesAction;
     });
-  }, [data, searchQuery, statusFilter, actionFilter]);
+  }, [displayData, searchQuery, statusFilter, actionFilter]);
 
   const getInitials = (name) => {
     return name
@@ -138,69 +139,68 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
   };
 
   return (
-    <Card className="border border-gray-200 shadow-sm bg-white rounded-xl">
-      <CardHeader>
+    <Card className="border border-gray-100 shadow-sm bg-white rounded-[2rem] overflow-hidden">
+      <CardHeader className="p-8 pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2">
             <div>
-              <CardTitle className="text-xl font-bold text-gray-900">
+              <CardTitle className="text-xl font-bold text-slate-900 leading-none mb-2">
                 {t('accessLogs.title')}
               </CardTitle>
-              <CardDescription className="text-sm text-gray-500 mt-1">
+              <CardDescription className="text-sm font-medium text-slate-400">
                 {t('accessLogs.subtitle')}
               </CardDescription>
             </div>
-
           </div>
           <div className="flex items-center gap-2">
             <Select value={timeFilter} onValueChange={setTimeFilter} >
-              <SelectTrigger className="w-[100px] h-9 border border-gray-300 rounded-lg shadow-sm bg-white">
+              <SelectTrigger className="w-[120px] h-9 border border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#BEBEE0] text-gray-700 border-none">
+              <SelectContent className="bg-white text-slate-700 border border-slate-200">
                 <SelectItem value="today">{t('accessLogs.filters.today')}</SelectItem>
                 <SelectItem value="week">{t('accessLogs.filters.week')}</SelectItem>
                 <SelectItem value="month">{t('accessLogs.filters.month')}</SelectItem>
                 <SelectItem value="all">{t('accessLogs.filters.allTime')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" className="gap-2 border border-gray-300 rounded-lg shadow-sm bg-white">
+            <Button variant="outline" size="sm" className="gap-2 border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
               <Download className="h-4 w-4" />
               {t('common:actions.export')}
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-8 pt-0">
         {/* Filters and Search */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder={t('accessLogs.filters.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border border-gray-300 rounded-lg shadow-sm bg-white"
+              className="pl-10 border-slate-200 rounded-lg shadow-sm bg-white transition-all focus:ring-2 focus:ring-[#8D8DC7]/20"
             />
           </div>
           <div className="flex gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px] border border-gray-300 rounded-lg shadow-sm bg-white">
+              <SelectTrigger className="w-[140px] border border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
                 <SelectValue placeholder={t('accessLogs.filters.status')} />
               </SelectTrigger>
-              <SelectContent className="bg-[#BEBEE0] text-gray-700 border-none">
+              <SelectContent className="bg-white text-slate-700 border border-slate-200">
                 <SelectItem value="all">{t('accessLogs.filters.allStatus')}</SelectItem>
-                <SelectItem value="success">{t('accessLogs.status.success')}</SelectItem>
-                <SelectItem value="failed">{t('accessLogs.status.failed')}</SelectItem>
-                <SelectItem value="pending">{t('accessLogs.status.pending')}</SelectItem>
-                <SelectItem value="suspicious">{t('accessLogs.status.suspicious')}</SelectItem>
+                <SelectItem value="success">{t('accessLogs.status.success') || "Success"}</SelectItem>
+                <SelectItem value="failed">{t('accessLogs.status.failed') || "Failed"}</SelectItem>
+                <SelectItem value="pending">{t('accessLogs.status.pending') || "Pending"}</SelectItem>
+                <SelectItem value="suspicious">{t('accessLogs.status.suspicious') || "Suspicious"}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={actionFilter} onValueChange={setActionFilter}>
-              <SelectTrigger className="w-[140px] border border-gray-300 rounded-lg shadow-sm bg-white">
+              <SelectTrigger className="w-[140px] border border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
                 <SelectValue placeholder={t('accessLogs.filters.action')} />
               </SelectTrigger>
-              <SelectContent className="bg-[#BEBEE0] text-gray-700 border-none">
+              <SelectContent className="bg-white text-slate-700 border border-slate-200">
                 <SelectItem value="all">{t('accessLogs.filters.allActions')}</SelectItem>
                 <SelectItem value="Checkout">{t('accessLogs.actions.checkout')}</SelectItem>
                 <SelectItem value="Return">{t('accessLogs.actions.return')}</SelectItem>
@@ -210,83 +210,100 @@ export default function AccessLogsTable({ data = mockAccessLogs }) {
         </div>
 
         {/* Table */}
-
-        <div className="rounded-lg border border-gray-200 overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-[#BEBEE0] hover:bg-[#BEBEE0]">
-                <TableHead className="font-semibold text-white">{t('accessLogs.table.logId')}</TableHead>
-                <TableHead className="font-semibold text-white">{t('accessLogs.table.user')}</TableHead>
-                <TableHead className="font-semibold text-white">{t('accessLogs.table.action')}</TableHead>
-                <TableHead className="font-semibold text-white">{t('accessLogs.table.equipment')}</TableHead>
-                <TableHead className="font-semibold text-white">{t('accessLogs.table.location')}</TableHead>
-                <TableHead className="font-semibold text-white">{t('accessLogs.table.timestamp')}</TableHead>
-                <TableHead className="font-semibold text-white">{t('accessLogs.table.status')}</TableHead>
-                <TableHead className="font-semibold text-white"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                    {t('accessLogs.table.noLogs')}
-                  </TableCell>
+        <div className="rounded-[1.5rem] border border-gray-50 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <Table className="min-w-[800px]">
+              <TableHeader>
+                <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b border-gray-50">
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.logId')}</TableHead>
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.user')}</TableHead>
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.action')}</TableHead>
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.equipment')}</TableHead>
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.location')}</TableHead>
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.timestamp')}</TableHead>
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.status')}</TableHead>
+                  <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest"></TableHead>
                 </TableRow>
-              ) : (
-                filteredData.map((log) => (
-                  <TableRow key={log.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900">
-                      {log.id}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                            {getInitials(log.user)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium text-gray-900">{log.user}</div>
-                          <div className="text-sm text-gray-500">{log.email}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`border ${actionConfig[log.action]?.className || "bg-gray-100 text-gray-800"}`}
-                      >
-                        {t(`accessLogs.actions.${actionConfig[log.action]?.label?.toLowerCase()}`) || log.action}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-700">{log.equipment}</TableCell>
-                    <TableCell className="text-gray-600">{log.location}</TableCell>
-                    <TableCell className="text-gray-600">{log.timestamp}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`border ${statusConfig[log.status]?.className || statusConfig.pending.className}`}
-                      >
-                        {t(`accessLogs.status.${statusConfig[log.status]?.label?.toLowerCase() || log.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-md bg-[#1A2240] hover:bg-[#0A1128] text-white"
-                      >
-                        <ArrowUpRight className="h-4 w-4" />
-                      </Button>
+              </TableHeader>
+
+              <TableBody>
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={`skeleton-${i}`}>
+                      {Array.from({ length: 8 }).map((_, j) => (
+                        <TableCell key={j} className="px-4 py-4">
+                          <div className="h-4 bg-slate-100 rounded-md animate-pulse w-3/4"></div>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : filteredData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12 text-gray-300 font-medium">
+                      {t('accessLogs.table.noLogs')}
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  filteredData.map((log) => (
+                    <TableRow key={log.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+                      <TableCell className="px-4 py-4 font-bold text-slate-900 font-mono text-xs">
+                        {log.id}
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9 ring-2 ring-slate-50 shadow-sm transition-transform group-hover:scale-105">
+                            <AvatarFallback className="bg-slate-100 text-[#8D8DC7] text-[10px] font-black underline underline-offset-2">
+                              {getInitials(log.user)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="font-extrabold text-slate-900 text-sm whitespace-nowrap">{log.user}</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{log.email}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
+                        <Badge
+                          variant="outline"
+                          className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-widest border-none shadow-sm ${actionConfig[log.action]?.className || "bg-gray-100 text-gray-800"}`}
+                        >
+                          {t(`accessLogs.actions.${actionConfig[log.action]?.label?.toLowerCase()}`) || log.action}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></div>
+                          <span className="text-sm font-bold text-slate-700">{log.equipment}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-xs font-bold text-slate-500">{log.location}</TableCell>
+                      <TableCell className="px-4 py-4 text-xs font-bold text-slate-400">{log.timestamp}</TableCell>
+                      <TableCell className="px-4 py-4">
+                        <Badge
+                          variant="outline"
+                          className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-widest border-none shadow-sm ${statusConfig[log.status]?.className || statusConfig.pending.className}`}
+                        >
+                          {t(`accessLogs.status.${statusConfig[log.status]?.label?.toLowerCase() || log.status}`)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-4 py-4 text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-xl bg-slate-900 hover:bg-[#8D8DC7] text-white shadow-lg shadow-slate-900/10 transition-all hover:-rotate-12 hover:scale-110"
+                        >
+                          <ArrowUpRight className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-        <Link to="/security/logs" className="flex items-center gap-2 mt-2 p-4 justify-end border-t border-gray-200 ">
-          <Button variant="outline" size="sm" className="gap-2 border-gray-400">
+        <Link to="/security/logs" className="flex items-center gap-2 mt-6 p-4 justify-end border-t border-gray-50">
+          <Button variant="outline" size="sm" className="gap-2 border-slate-200 text-slate-600 hover:text-black hover:bg-slate-50 rounded-xl font-bold px-6">
             <Eye className="h-4 w-4" />
             {t('accessLogs.viewAll')}
           </Button>
@@ -313,4 +330,3 @@ AccessLogsTable.propTypes = {
     })
   ),
 };
-

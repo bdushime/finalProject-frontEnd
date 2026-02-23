@@ -11,7 +11,9 @@ import {
     Filter,
     Loader2,
     ChevronDown,
-    ArrowLeft
+    ArrowLeft,
+    ChevronLeft, // 👈 Added for pagination
+    ChevronRight // 👈 Added for pagination
 } from "lucide-react";
 import api from "@/utils/api";
 import logo from "@/assets/logo_tracknity.png";
@@ -29,6 +31,10 @@ export default function Report() {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation("student");
+
+    // 👇 NEW: Pagination States
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // --- FETCH DATA ---
     useEffect(() => {
@@ -48,10 +54,13 @@ export default function Report() {
         // Check for incoming filter from Dashboard
         if (location.state?.filter) {
             setTimeRange(location.state.filter);
-            // Clear state so it doesn't persist on refresh/back if desired, 
-            // but for now keeping it simple is fine.
         }
     }, [location.state]);
+
+    // Reset pagination to page 1 whenever a filter is changed
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, timeRange, statusFilter]);
 
     // --- FILTER LOGIC ---
     const filteredData = useMemo(() => {
@@ -112,6 +121,24 @@ export default function Report() {
             };
         });
     }, [historyData, timeRange, statusFilter, searchTerm]);
+
+
+    // --- PAGINATION LOGIC ---
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    
+    const paginatedData = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredData.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredData, currentPage]);
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    };
+
 
     // --- PDF EXPORT (EXACT REFERENCE MATCH) ---
     const handleDownloadPDF = () => {
@@ -202,14 +229,15 @@ export default function Report() {
             "Status"
         ];
 
+        // Always export ALL filtered data, not just the paginated slice
         const tableRows = filteredData.map(item => [
             item.no,
             item.equipmentName,
-            item.serialNumber, // added
+            item.serialNumber, 
             item.category,
             item.displayDate,
             item.displayDuration.replace(" - ", "\nto\n"), // Stack times: "9:00 AM" newline "5:00 PM"
-            item.location, // added
+            item.location, 
             item.status
         ]);
 
@@ -294,6 +322,8 @@ export default function Report() {
     // --- CSV EXPORT ---
     const handleExportCSV = () => {
         const headers = ["No.", "Equipment", "Serial Number", "Category", "Borrowed Date", "Duration", "Location", "Status"];
+        
+        // Export all filtered data
         const rows = filteredData.map(item => [
             item.no,
             item.equipmentName,
@@ -420,14 +450,14 @@ export default function Report() {
                         </div>
                     </div>
 
-                    {/* UI TABLE (WEB VIEW - SIMPLIFIED) */}
-                    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    {/* UI TABLE */}
+                    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
                             <h2 className="font-bold text-[#0b1d3a]">{t("report.dataPreview")}</h2>
                             <span className="text-xs font-medium text-slate-400">{filteredData.length} {t("report.recordsFound")}</span>
                         </div>
 
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto flex-1">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
@@ -441,9 +471,10 @@ export default function Report() {
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {filteredData.length > 0 ? (
-                                        filteredData.map((item, idx) => (
+                                        // 👇 MAPPING OVER PAGINATED DATA
+                                        paginatedData.map((item, idx) => (
                                             <tr key={item._id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="p-4 pl-6 text-slate-400 text-sm font-mono">{idx + 1}</td>
+                                                <td className="p-4 pl-6 text-slate-400 text-sm font-mono">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                                                 <td className="p-4 font-bold text-[#0b1d3a]">
                                                     <div className="flex flex-col">
                                                         <span>{item.equipmentName}</span>
@@ -486,6 +517,35 @@ export default function Report() {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* 👇 PAGINATION CONTROLS */}
+                        {totalPages > 1 && (
+                            <div className="border-t border-slate-100 bg-slate-50/30 p-4 flex items-center justify-between">
+                                <p className="text-sm text-slate-500">
+                                    Showing <span className="font-semibold text-slate-700">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-semibold text-slate-700">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="font-semibold text-slate-700">{filteredData.length}</span> entries
+                                </p>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={handlePrevPage} 
+                                        disabled={currentPage === 1}
+                                        className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                    </button>
+                                    <div className="flex items-center px-4 font-medium text-sm text-slate-600">
+                                        Page {currentPage} of {totalPages}
+                                    </div>
+                                    <button 
+                                        onClick={handleNextPage} 
+                                        disabled={currentPage === totalPages}
+                                        className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </PageContainer>

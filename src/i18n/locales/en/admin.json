@@ -29,7 +29,24 @@
         "generateReport": "Generate Report",
         "live": "+Live",
         "stable": "Stable",
-        "stock": "Stock"
+        "stock": "Stock",
+        "recentActivityTable": {
+            "trackingId": "Tracking ID",
+            "studentStaff": "Student / Staff",
+            "transactionDetails": "Transaction Details",
+            "borrower": "Borrower",
+            "viewFullHistory": "View Full History",
+            "loading": "Loading live feeds...",
+            "destination": "Destination",
+            "notSpecified": "Not specified"
+        },
+        "status": {
+            "checkedOut": "Checked Out",
+            "returned": "Returned",
+            "overdue": "Overdue",
+            "unknown": "Unknown",
+            "deletedItem": "Deleted Item"
+        }
     },
     "users": {
         "title": "User Management",
@@ -88,8 +105,9 @@
         "resetPassword": "Reset Password (leave empty to keep)",
         "updatingFor": "Updating details for",
         "general": "General",
-        "suspended": "SUSPENDED",
-        "activeStatus": "ACTIVE",
+        "active": "Active",
+        "activeStatus": "Active",
+        "suspended": "Suspended",
         "allRoles": "All Roles",
         "actions": "Actions"
     },
@@ -244,7 +262,10 @@
         "statusFilter": "Status:",
         "roleFilter": "Role:",
         "categoryFilter": "Category:",
+        "department": "Department",
+        "maintenance": "Maintenance",
         "item": "Item",
+        "equipment": "Equipment",
         "user": "User",
         "date": "Date",
         "riskLevel": "Risk Level",
@@ -416,6 +437,14 @@
             "login": "Login:",
             "noSessions": "No active sessions found."
         }
+    },
+    "scanner": {
+        "title": "QR Scanner",
+        "subtitle": "Scan equipment tags for check-in or info.",
+        "scanning": "Scanning...",
+        "itemsFound": "Items Found",
+        "viewDetails": "View Details",
+        "scanNext": "Scan Next"
     },
     "notifications": {
         "title": "Notifications",

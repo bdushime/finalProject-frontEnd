@@ -131,7 +131,7 @@ export default function EquipmentDetailsDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between text-xl font-bold">
-            {isEditing ? "Edit Equipment" : equipment.name}
+            {isEditing ? t('equipment.dialog.editTitle') : equipment.name}
 
             {!isEditing && (
               <Badge
@@ -141,7 +141,7 @@ export default function EquipmentDetailsDialog({
                     : "bg-red-100 text-red-700 hover:bg-red-200"
                 }
               >
-                {formData.status}
+                {t(`equipment.status.${formData.status.toLowerCase()}`, formData.status)}
               </Badge>
             )}
           </DialogTitle>
@@ -186,7 +186,7 @@ export default function EquipmentDetailsDialog({
               {/* Description */}
               <div>
                 <h4 className="text-sm font-medium text-slate-700 mb-2">
-                  Description
+                  {t('equipment.dialog.description')}
                 </h4>
                 <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
                   {formData.description || t('equipment.dialog.noDescription')}
@@ -249,7 +249,7 @@ export default function EquipmentDetailsDialog({
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status">{t('equipment.status.title')}</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(val) =>

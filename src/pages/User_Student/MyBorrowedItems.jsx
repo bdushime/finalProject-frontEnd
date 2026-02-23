@@ -16,6 +16,7 @@ import { toast } from "sonner";
 export default function MyBorrowedItems() {
     const navigate = useNavigate();
     const { t } = useTranslation("student");
+    
     // --- REAL DATA STATE ---
     const [pendingRequests, setPendingRequests] = useState([]);
     const [activeBorrows, setActiveBorrows] = useState([]);
@@ -36,14 +37,15 @@ export default function MyBorrowedItems() {
                     api.get('/transactions/my-history')
                 ]);
 
-                // 1. FILTER PENDING
+                // 1. FILTER PENDING (Initial Checkout Requests)
                 const pending = activeRes.data.filter(t => t.status === 'Pending');
 
-                // 2. FILTER ACTIVE BORROWS
+                // 2. FILTER ACTIVE BORROWS (Now includes 'Pending Return')
                 const borrowed = activeRes.data.filter(t =>
                     t.status === 'Borrowed' ||
                     t.status === 'Checked Out' ||
-                    t.status === 'Overdue'
+                    t.status === 'Overdue' ||
+                    t.status === 'Pending Return' // 👈 Added this status
                 );
 
                 // 3. FILTER RESERVED
@@ -76,6 +78,7 @@ export default function MyBorrowedItems() {
         const diff = new Date(dueDate) - new Date();
         return Math.ceil(diff / (1000 * 60 * 60 * 24));
     };
+    
     const getCountdown = (dueDate) => {
         if (!dueDate) return null;
         const diffMs = new Date(dueDate) - new Date();
@@ -86,8 +89,24 @@ export default function MyBorrowedItems() {
         return { hours, mins, overdue: false };
     };
 
-    const handleReturn = (item) => {
-        navigate(`/student/return?itemId=${item.equipment?._id}`);
+    // --- NEW: REQUEST RETURN LOGIC ---
+    const handleRequestReturn = async (transactionId) => {
+        if (!confirm("Are you sure you want to request a return? IT Staff will need to approve this.")) return;
+        
+        try {
+            // Send request to backend to update status
+            await api.put(`/transactions/${transactionId}/request-return`);
+            
+            toast.success("Return request sent successfully!");
+            
+            // Optimistically update the UI so the button changes immediately
+            setActiveBorrows(prev => prev.map(item => 
+                item._id === transactionId ? { ...item, status: 'Pending Return' } : item
+            ));
+        } catch (err) {
+            console.error("Return request failed:", err);
+            toast.error("Failed to request return. Please try again.");
+        }
     };
 
     const handleExtend = (item) => {
@@ -240,6 +259,7 @@ export default function MyBorrowedItems() {
                                             const isOverdue = daysLeft < 0;
                                             const isDueSoon = daysLeft <= 1 && daysLeft >= 0;
                                             const countdown = getCountdown(item.expectedReturnTime);
+                                            const isPendingReturn = item.status === 'Pending Return';
 
                                             return (
                                                 <div
@@ -324,7 +344,7 @@ export default function MyBorrowedItems() {
                                                                 <Clock className="w-3.5 h-3.5" />
                                                                 {t("borrowed.status")}
                                                             </div>
-                                                            <p className={`text-sm font-bold ${isOverdue ? 'text-rose-700' : 'text-[#0b1d3a]'
+                                                            <p className={`text-sm font-bold ${isOverdue ? 'text-rose-700' : isPendingReturn ? 'text-yellow-600' : 'text-[#0b1d3a]'
                                                                 }`}>
                                                                 {item.status}
                                                             </p>
@@ -332,12 +352,23 @@ export default function MyBorrowedItems() {
                                                     </div>
 
                                                     <div className="flex gap-3">
-                                                        <Button
-                                                            className="flex-1 bg-[#0b1d3a] hover:bg-[#2c3e50] text-white font-semibold h-10 rounded-xl shadow-sm"
-                                                            onClick={() => handleReturn(item)}
-                                                        >
-                                                            {t("borrowed.returnItem")}
-                                                        </Button>
+                                                        {/* 👇 DYNAMIC BUTTON LOGIC 👇 */}
+                                                        {isPendingReturn ? (
+                                                            <Button
+                                                                disabled
+                                                                className="flex-1 bg-yellow-100 text-yellow-700 font-semibold h-10 rounded-xl cursor-not-allowed"
+                                                            >
+                                                                Return Requested
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                className="flex-1 bg-[#0b1d3a] hover:bg-[#2c3e50] text-white font-semibold h-10 rounded-xl shadow-sm"
+                                                                onClick={() => handleRequestReturn(item._id)}
+                                                            >
+                                                                Request Return
+                                                            </Button>
+                                                        )}
+                                                        
                                                         <Button
                                                             variant="outline"
                                                             className="px-4 border-slate-200 hover:bg-slate-50 hover:text-[#0b1d3a] rounded-xl"

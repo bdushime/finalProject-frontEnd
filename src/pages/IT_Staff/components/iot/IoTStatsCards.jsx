@@ -12,25 +12,25 @@ export default function IoTStatsCards({
 
   const items = [
     {
-      label: t('iot.stats.total'),
+      label: t('itstaff:iot.stats.total'),
       value: totalTrackers,
       icon: MapPin,
       colorClass: "text-primary",
     },
     {
-      label: t('iot.stats.online'),
+      label: t('itstaff:iot.stats.online'),
       value: onlineCount,
       icon: Wifi,
       colorClass: "text-green-500",
     },
     {
-      label: t('iot.stats.offline'),
+      label: t('itstaff:iot.stats.offline'),
       value: offlineCount,
       icon: WifiOff,
       colorClass: "text-red-500",
     },
     {
-      label: t('iot.stats.lowBattery'),
+      label: t('itstaff:iot.stats.lowBattery'),
       value: lowBatteryCount,
       icon: Battery,
       colorClass: "text-orange-500",
@@ -45,11 +45,11 @@ export default function IoTStatsCards({
             <item.icon
               className={`w-5 h-5 ${item.colorClass} transition-colors`}
             />
-            <span className="text-3xl md:text-4xl font-light text-[#0b1d3a] tracking-tight">
+            <span className="text-3xl md:text-4xl font-light text-black tracking-tight">
               {item.value}
             </span>
           </div>
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wide pl-7">
+          <span className="text-xs font-medium text-black uppercase tracking-wide pl-7">
             {item.label}
           </span>
         </div>

@@ -46,147 +46,175 @@ export default function SecurityNotifications() {
 
 	const violationCount = items.filter(isGeofenceViolation).length;
 
-	return (
-		<MainLayout>
-			<div className="p-4 sm:p-6 lg:p-8">
-				<div className="flex items-center justify-between mb-6">
-					<div>
-						<h2 className="text-2xl font-bold text-gray-900">{t('notifications.title')}</h2>
-						<p className="text-sm text-gray-600 mt-1">{t('notifications.subtitle')}</p>
-					</div>
+	const HeroSection = (
+		<div>
+			<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 mt-4 relative z-10">
+				<div>
+					<h1 className="text-4xl font-bold text-white mb-2">{t('notifications.title')}</h1>
+					<p className="text-gray-400 flex items-center gap-2 text-sm">
+						<span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
+						{t('notifications.subtitle')}
+					</p>
+				</div>
+				<div className="mt-6 md:mt-0 flex gap-3">
 					{violationCount > 0 && (
-						<Badge variant="destructive" className="bg-red-600 text-white px-4 py-2 text-sm">
-							<ShieldAlert className="h-4 w-4 mr-2" />
-							{violationCount} {t('notifications.activeViolations')}
-						</Badge>
+						<div className="bg-red-500/20 backdrop-blur-md border border-red-500/50 text-white px-6 py-4 rounded-2xl flex items-center gap-3 animate-pulse shadow-lg shadow-red-500/10">
+							<ShieldAlert className="h-6 w-6 text-red-400" />
+							<div className="text-left">
+								<p className="text-xs font-bold uppercase tracking-wider text-red-300 leading-none mb-1">Alert</p>
+								<p className="text-sm font-bold">{violationCount} {t('notifications.activeViolations')}</p>
+							</div>
+						</div>
 					)}
 				</div>
+			</div>
 
-				{/* Geofence Violations Summary Card */}
-				{violationCount > 0 && (
-					<motion.div
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="mb-6 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4"
-					>
-						<div className="flex items-center gap-3">
-							<div className="bg-red-100 rounded-lg p-3">
-								<AlertTriangle className="h-6 w-6 text-red-600" />
-							</div>
-							<div className="flex-1">
-								<h3 className="font-semibold text-red-900">{t('notifications.violationSummary.title')}</h3>
-								<p className="text-sm text-red-700">
-									{t('notifications.violationSummary.text', { count: violationCount })}
-								</p>
-							</div>
-							<Button
-								variant="outline"
-								onClick={() => navigate("/security/logs")}
-								className="border-red-300 text-red-700 hover:bg-red-100"
-							>
-								{t('notifications.violationSummary.viewLogs')}
-							</Button>
+			{violationCount > 0 && (
+				<motion.div
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					className="relative z-10 bg-slate-800/50 backdrop-blur-md border border-slate-700/50 rounded-3xl p-6 shadow-xl"
+				>
+					<div className="flex items-center gap-4">
+						<div className="bg-red-500/20 rounded-2xl p-4">
+							<AlertTriangle className="h-8 w-8 text-red-400" />
 						</div>
-					</motion.div>
-				)}
+						<div className="flex-1">
+							<h3 className="font-bold text-white text-lg">{t('notifications.violationSummary.title')}</h3>
+							<p className="text-gray-400 text-sm mt-1 leading-relaxed">
+								{t('notifications.violationSummary.text', { count: violationCount })}
+							</p>
+						</div>
+						<Button
+							onClick={() => navigate("/security/logs")}
+							className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold py-6 px-8 rounded-2xl border-none shadow-lg shadow-[#8D8DC7]/20 transition-all"
+						>
+							{t('notifications.violationSummary.viewLogs')}
+						</Button>
+					</div>
+				</motion.div>
+			)}
+		</div>
+	);
 
-				<div className="rounded-2xl shadow-lg bg-white border border-gray-200 divide-y divide-gray-200">
+	return (
+		<MainLayout heroContent={HeroSection}>
+			<div className="mt-4">
+				<div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
 					{items.length === 0 ? (
-						<div className="p-8 text-center text-gray-500">
-							<Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-							<p>{t('notifications.empty')}</p>
+						<div className="p-20 text-center text-slate-400">
+							<div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+								<Bell className="h-10 w-10 text-slate-300" />
+							</div>
+							<p className="text-xl font-bold text-slate-900">{t('notifications.empty')}</p>
+							<p className="text-sm mt-2">{t('notifications.subtitle')}</p>
 						</div>
 					) : (
-						items.map((n) => {
-							const isViolation = isGeofenceViolation(n);
-							return (
-								<motion.div
-									key={n.id}
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									className={`p-5 flex items-start gap-4 border-b border-gray-200 transition-colors ${isViolation && n.severity === "critical"
-											? "bg-red-50/50 border-red-300 hover:bg-red-50"
-											: isViolation
-												? "bg-orange-50/30 border-orange-200 hover:bg-orange-50"
-												: "hover:bg-gray-50"
-										}`}
-								>
-									<div className={`mt-0.5 rounded-xl p-3 ${getIconBgColor(n)}`}>
-										{isViolation ? (
-											<AlertTriangle className="h-5 w-5" />
-										) : (
-											<Bell className="h-5 w-5" />
+						<div className="divide-y divide-slate-50">
+							{items.map((n, idx) => {
+								const isViolation = isGeofenceViolation(n);
+								return (
+									<motion.div
+										key={n.id}
+										initial={{ opacity: 0, x: -20 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ delay: idx * 0.05 }}
+										className={`p-6 flex items-start gap-5 transition-all w-full relative group ${isViolation && n.severity === "critical"
+												? "bg-red-50/30 hover:bg-red-50/50"
+												: "hover:bg-slate-50/50"
+											}`}
+									>
+										{isViolation && n.severity === "critical" && (
+											<div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 rounded-full my-4"></div>
 										)}
-									</div>
-									<div className="flex-1 min-w-0">
-										<div className="flex items-start justify-between gap-3">
-											<div className="flex-1 min-w-0">
-												<div className="flex items-center gap-2 mb-1">
-													<p className={`font-semibold ${isViolation ? "text-red-900" : "text-gray-900"}`}>
-														{n.title}
-													</p>
-													{isViolation && (
-														<Badge
-															variant="outline"
-															className={`${getSeverityColor(n.severity)} text-xs font-bold`}
-														>
-															{n.severity.toUpperCase()}
-														</Badge>
-													)}
-												</div>
-												<p className={`text-sm mt-1 ${isViolation ? "text-gray-800" : "text-gray-600"}`}>
-													{n.description}
-												</p>
-												{isViolation && (
-													<div className="mt-3 space-y-2 p-3 bg-white/60 rounded-lg border border-gray-200">
-														<div className="flex items-center gap-2 text-xs">
-															<MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
-															<span className="text-gray-700">
-																<strong className="text-gray-900">{t('notifications.details.currentLocation')}</strong> {n.currentLocation}
-															</span>
-														</div>
-														<div className="flex items-center gap-2 text-xs">
-															<MapPin className="h-4 w-4 text-green-600 flex-shrink-0" />
-															<span className="text-gray-700">
-																<strong className="text-gray-900">{t('notifications.details.authorizedZone')}</strong> {n.authorizedZone}
-															</span>
-														</div>
-														<div className="text-xs text-gray-600 mt-2">
-															<strong>{t('notifications.details.violationType')}</strong> {n.violationType?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-														</div>
-													</div>
-												)}
-												<div className="mt-3 flex items-center gap-1 text-xs text-gray-500">
-													<Clock className="h-3.5 w-3.5" /> {n.time}
-												</div>
-											</div>
-											{isViolation && (
-												<div className="flex flex-col gap-2 ml-2">
-													<Button
-														variant="outline"
-														size="sm"
-														onClick={() => handleViewDevice(n.equipmentId)}
-														className="flex items-center gap-1 border-red-300 text-red-700 hover:bg-red-50"
-													>
-														<ExternalLink className="h-3.5 w-3.5" />
-														{t('notifications.actions.device')}
-													</Button>
-													<Button
-														variant="outline"
-														size="sm"
-														onClick={() => handleViewLogs(n.equipmentId)}
-														className="flex items-center gap-1"
-													>
-														<MapPin className="h-3.5 w-3.5" />
-														{t('notifications.actions.logs')}
-													</Button>
-												</div>
+
+										<div className={`mt-1 rounded-[1.25rem] p-4 flex-shrink-0 transition-transform group-hover:scale-105 ${isViolation
+												? (n.severity === "critical" ? "bg-red-100 text-red-600 shadow-sm shadow-red-100" : "bg-orange-100 text-orange-600")
+												: "bg-slate-100 text-slate-600"
+											}`}>
+											{isViolation ? (
+												<AlertTriangle className="h-6 w-6" />
+											) : (
+												<Bell className="h-6 w-6" />
 											)}
 										</div>
-									</div>
-								</motion.div>
-							);
-						})
+
+										<div className="flex-1 min-w-0">
+											<div className="flex items-start justify-between gap-4">
+												<div className="flex-1">
+													<div className="flex flex-wrap items-center gap-3 mb-2">
+														<h4 className={`text-lg font-bold tracking-tight ${isViolation ? "text-red-900" : "text-slate-900"}`}>
+															{n.title}
+														</h4>
+														{isViolation && (
+															<Badge
+																variant="outline"
+																className={`rounded-lg px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest border-none ${getSeverityColor(n.severity)}`}
+															>
+																{n.severity}
+															</Badge>
+														)}
+														<span className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 ml-auto md:ml-0">
+															<Clock className="h-3.5 w-3.5" /> {n.time}
+														</span>
+													</div>
+
+													<p className={`text-sm leading-relaxed max-w-2xl ${isViolation ? "text-red-700/80" : "text-slate-500"}`}>
+														{n.description}
+													</p>
+
+													{isViolation && (
+														<div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+															<div className="p-4 bg-white/60 rounded-[1.5rem] border border-red-100 shadow-sm flex items-center gap-3">
+																<div className="p-2 bg-red-100/50 rounded-xl">
+																	<MapPin className="h-4 w-4 text-red-600" />
+																</div>
+																<div>
+																	<p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-0.5">{t('notifications.details.currentLocation')}</p>
+																	<p className="text-sm font-bold text-slate-900 truncate">{n.currentLocation}</p>
+																</div>
+															</div>
+															<div className="p-4 bg-white/60 rounded-[1.5rem] border border-green-100 shadow-sm flex items-center gap-3">
+																<div className="p-2 bg-green-100/50 rounded-xl">
+																	<MapPin className="h-4 w-4 text-green-600" />
+																</div>
+																<div>
+																	<p className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-0.5">{t('notifications.details.authorizedZone')}</p>
+																	<p className="text-sm font-bold text-slate-900 truncate">{n.authorizedZone}</p>
+																</div>
+															</div>
+														</div>
+													)}
+												</div>
+
+												{isViolation && (
+													<div className="flex flex-col gap-2 shrink-0 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+														<Button
+															variant="outline"
+															size="sm"
+															onClick={() => handleViewDevice(n.equipmentId)}
+															className="h-10 px-4 rounded-xl border-slate-200 text-slate-700 font-bold hover:bg-slate-50 bg-white shadow-sm flex items-center gap-2"
+														>
+															<ExternalLink className="h-4 w-4 text-[#8D8DC7]" />
+															{t('notifications.actions.device')}
+														</Button>
+														<Button
+															variant="outline"
+															size="sm"
+															onClick={() => handleViewLogs(n.equipmentId)}
+															className="h-10 px-4 rounded-xl border-slate-200 text-slate-700 font-bold hover:bg-slate-50 bg-white shadow-sm flex items-center gap-2"
+														>
+															<ShieldAlert className="h-4 w-4 text-slate-400" />
+															{t('notifications.actions.logs')}
+														</Button>
+													</div>
+												)}
+											</div>
+										</div>
+									</motion.div>
+								);
+							})}
+						</div>
 					)}
 				</div>
 			</div>

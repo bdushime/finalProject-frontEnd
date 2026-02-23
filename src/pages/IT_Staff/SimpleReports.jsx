@@ -64,6 +64,16 @@ export default function SimpleReports() {
         generatePDF(filteredData, currentUser);
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Overdue': return 'bg-red-50 text-red-700 border-red-100';
+            case 'Returned': return 'bg-green-50 text-green-700 border-green-100';
+            case 'Checked Out': return 'bg-blue-50 text-blue-700 border-blue-100';
+            case 'Pending': return 'bg-yellow-50 text-yellow-700 border-yellow-100';
+            default: return 'bg-slate-50 text-slate-600 border-slate-100';
+        }
+    };
+
     return (
         <ITStaffLayout>
             <div className="space-y-6">
@@ -83,7 +93,7 @@ export default function SimpleReports() {
                     {/* BUTTON NOW USES PDF GENERATOR */}
                     <button
                         onClick={handleExportPDF}
-                        className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium shadow-sm transition-all"
+                        className="bg-green-100 hover:bg-green-200 text-black border border-green-200 px-5 py-2.5 rounded-lg flex items-center gap-2 font-bold shadow-sm transition-all"
                     >
                         <Download className="w-4 h-4" /> {t('reports.downloadPdf')}
                     </button>
@@ -152,7 +162,7 @@ export default function SimpleReports() {
                                     {filteredData.map((t) => (
                                         <tr key={t._id} className="hover:bg-slate-50/80 transition-colors">
                                             <td className="p-5">
-                                                <div className="font-medium text-[#0b1d3a]">{t.user?.username || "Unknown"}</div>
+                                                <span className="text-sm font-medium text-slate-900 group-hover:text-blue-700 transition-colors">{t.user?.username || t('common:unknownUser')}</span>
                                                 <div className="text-xs text-slate-500 mt-0.5">{t.user?.email}</div>
                                             </td>
                                             <td className="p-5 text-center">
@@ -165,7 +175,7 @@ export default function SimpleReports() {
                                                 </span>
                                             </td>
                                             <td className="p-5">
-                                                <div className="font-medium text-slate-900">{t.equipment?.name || "Deleted Item"}</div>
+                                                <div className="text-sm font-medium text-slate-900">{t.equipment?.name || t('equipment.dialog.deletedItem', 'Deleted Item')}</div>
                                                 <div className="flex gap-2 mt-1">
                                                     <span className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
                                                         {t.equipment?.serialNumber}
@@ -186,13 +196,8 @@ export default function SimpleReports() {
                                                 </div>
                                             </td>
                                             <td className="p-5">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize border
-                                                    ${t.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100' :
-                                                        t.status === 'Returned' ? 'bg-green-50 text-green-700 border-green-100' :
-                                                            t.status === 'Checked Out' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                                t.status === 'Pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
-                                                                    'bg-slate-50 text-slate-600 border-slate-100'}`}>
-                                                    {t.status}
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm ${getStatusColor(t.status)}`}>
+                                                    {t(`equipment.status.${t.status.toLowerCase()}`, t.status)}
                                                 </span>
                                             </td>
                                         </tr>

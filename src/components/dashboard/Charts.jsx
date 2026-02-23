@@ -33,7 +33,10 @@ const COLORS = {
 };
 
 // UPDATE: Added 'metrics' to the props list
+import { useTranslation } from "react-i18next";
+
 export default function Charts({ chartData, recentActivityData, metrics }) {
+  const { t } = useTranslation(["itstaff"]);
   const [trackers, setTrackers] = useState([]);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   const navigate = useNavigate();
@@ -117,9 +120,9 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
         <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex items-center justify-between text-white">
           <div>
             <h3 className="text-base sm:text-xl font-bold leading-tight">
-              IT Manager
+              {t('dashboard.profileCard.role')}
             </h3>
-            <p className="text-xs sm:text-sm opacity-80">System Admin</p>
+            <p className="text-xs sm:text-sm opacity-80">{t('dashboard.profileCard.subRole')}</p>
           </div>
         </div>
       </Card>
@@ -128,9 +131,9 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
       <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
           <CardTitle className="text-base sm:text-lg font-bold">
-            Activity Trends
+            {t('dashboard.charts.activityTrends')}
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">Monthly checkout and return trends</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">{t('dashboard.charts.monthlyActivity')}</CardDescription>
         </CardHeader>
         <CardContent className="pb-0">
           <ResponsiveContainer className="overflow-hidden" width="100%" height={getChartHeight()}>
@@ -141,8 +144,8 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
               <Tooltip
                 contentStyle={{ backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e5e7eb" }}
               />
-              <Line type="monotone" dataKey="checkouts" stroke={COLORS.blue} strokeWidth={2} name="Checkouts" dot={{ r: 2 }} />
-              <Line type="monotone" dataKey="returns" stroke={COLORS.green} strokeWidth={2} name="Returns" dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="checkouts" stroke={COLORS.blue} strokeWidth={2} name={t('dashboard.charts.checkouts')} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="returns" stroke={COLORS.green} strokeWidth={2} name={t('dashboard.charts.returns')} dot={{ r: 2 }} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -151,8 +154,8 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
       {/* 3. DEVICE TYPES CHART (Bar) */}
       <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
-          <CardTitle className="text-base sm:text-lg font-bold">Device Types</CardTitle>
-          <CardDescription className="text-xs sm:text-sm">Distribution by device category</CardDescription>
+          <CardTitle className="text-base sm:text-lg font-bold">{t('dashboard.charts.deviceTypes')}</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">{t('dashboard.charts.distribution')}</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <ResponsiveContainer className="overflow-hidden" width="100%" height={getChartHeight()}>

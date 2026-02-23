@@ -36,16 +36,6 @@ import {
     UserRoles,
 } from "@/config/roleConfig";
 
-/**
- * BulkUploadDialog - Bulk Device Upload Component
- * 
- * REFACTOR NOTES:
- * 1. Each row creates ONE physical device (asset-level tracking)
- * 2. Removed quantity/available/total columns
- * 3. Status is auto-set to "Available" for Security Officers
- * 4. Department is excluded for Security Officers
- * 5. Purchase price validation for Security Officers
- */
 function BulkUploadDialog({
     isOpen,
     onOpenChange,
@@ -55,39 +45,30 @@ function BulkUploadDialog({
     const [file, setFile] = useState(null);
     const [previewData, setPreviewData] = useState([]);
     const [validationResults, setValidationResults] = useState([]);
-    const [uploadStatus, setUploadStatus] = useState("idle"); // idle, validating, valid, invalid, uploading, complete, error
+    const [uploadStatus, setUploadStatus] = useState("idle"); 
     const [uploadResults, setUploadResults] = useState(null);
     const [dragActive, setDragActive] = useState(false);
 
-    // Get role-specific configuration
     const uploadConfig = useMemo(() => {
         return BulkUploadConfig[userRole] || BulkUploadConfig[UserRoles.SECURITY];
     }, [userRole]);
 
-    // Template columns based on role
     const templateColumns = useMemo(() => {
         return [...uploadConfig.requiredColumns, ...uploadConfig.optionalColumns];
     }, [uploadConfig]);
 
-    // Download template CSV/Excel
     const handleDownloadTemplate = () => {
-        // Create template data with headers and example row
         const headers = templateColumns;
         const exampleRow = {
-            name: "Dell Latitude 5540",
-            category: "Laptop",
-            brand: "Dell",
-            model: "Latitude 5540",
-            serialNumber: "SN-DELL-001",
-            location: "Building A, Room 101",
-            purchasePrice: "1299.99",
+            name: "Epson Projector X5",
+            category: "Projector",
+            serialNumber: "SN-PROJ-001",
+            location: "Main Storage",
             condition: "Good",
-            purchaseDate: "2024-01-15",
-            warrantyExpiry: "2027-01-15",
-            description: "Business laptop with 16GB RAM",
+            description: "High brightness projector",
+            iotTag: "TAG-001"
         };
 
-        // Filter to only include columns relevant to role
         const templateData = [
             headers.reduce((acc, col) => {
                 acc[col] = exampleRow[col] || "";
@@ -95,17 +76,14 @@ function BulkUploadDialog({
             }, {}),
         ];
 
-        // Create workbook
         const ws = XLSX.utils.json_to_sheet(templateData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Devices");
 
-        // Add header row styling note
         const roleLabel = userRole === UserRoles.SECURITY ? "Security_Officer" : userRole;
         XLSX.writeFile(wb, `Device_Bulk_Upload_Template_${roleLabel}.xlsx`);
     };
 
-    // Handle file drop
     const handleDrag = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -132,7 +110,6 @@ function BulkUploadDialog({
         }
     };
 
-    // Process uploaded file
     const processFile = async (selectedFile) => {
         setFile(selectedFile);
         setUploadStatus("validating");
@@ -143,7 +120,7 @@ function BulkUploadDialog({
             const data = await readFileData(selectedFile);
             const validated = validateData(data);
 
-            setPreviewData(data.slice(0, 10)); // Show first 10 rows
+            setPreviewData(data.slice(0, 10)); 
             setValidationResults(validated);
 
             const hasErrors = validated.some(v => v.errors.length > 0);
@@ -155,7 +132,6 @@ function BulkUploadDialog({
         }
     };
 
-    // Read file data
     const readFileData = (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -168,7 +144,6 @@ function BulkUploadDialog({
                     const worksheet = workbook.Sheets[sheetName];
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
-                    // Normalize column names (lowercase, trim)
                     const normalizedData = jsonData.map(row => {
                         const normalized = {};
                         Object.keys(row).forEach(key => {
@@ -176,9 +151,7 @@ function BulkUploadDialog({
                                 .replace(/\s+/g, '')
                                 .replace('serialno', 'serialNumber')
                                 .replace('serialnumber', 'serialNumber')
-                                .replace('purchaseprice', 'purchasePrice')
-                                .replace('purchasedate', 'purchaseDate')
-                                .replace('warrantyexpiry', 'warrantyExpiry');
+                                .replace('iottag', 'iotTag');
                             normalized[normalizedKey] = row[key];
                         });
                         return normalized;
@@ -195,7 +168,6 @@ function BulkUploadDialog({
         });
     };
 
-    // Validate data based on role configuration
     const validateData = (data) => {
         const results = [];
 
@@ -203,7 +175,6 @@ function BulkUploadDialog({
             const errors = [];
             const warnings = [];
 
-            // Check required fields
             uploadConfig.requiredColumns.forEach(col => {
                 const value = row[col] || row[col.toLowerCase()];
                 if (!value || (typeof value === "string" && value.trim() === "")) {
@@ -211,17 +182,6 @@ function BulkUploadDialog({
                 }
             });
 
-            // Validate purchase price for Security Officers
-            if (userRole === UserRoles.SECURITY) {
-                const price = parseFloat(row.purchasePrice || row.purchaseprice);
-                if (isNaN(price)) {
-                    errors.push("Purchase price must be a valid number");
-                } else if (price < 0) {
-                    errors.push("Purchase price cannot be negative");
-                }
-            }
-
-            // Check for excluded fields (should not be in upload)
             uploadConfig.excludedColumns.forEach(col => {
                 if (row[col] !== undefined && row[col] !== "") {
                     warnings.push(`Field "${col}" is ignored for ${userRole} uploads`);
@@ -229,7 +189,7 @@ function BulkUploadDialog({
             });
 
             results.push({
-                row: index + 2, // +2 for 1-indexed and header row
+                row: index + 2, 
                 data: row,
                 errors,
                 warnings,
@@ -240,46 +200,35 @@ function BulkUploadDialog({
         return results;
     };
 
-    // Upload devices to backend
     const handleUpload = async () => {
         if (uploadStatus !== "valid") return;
 
         setUploadStatus("uploading");
 
         try {
-            // Prepare devices for upload
             const devices = validationResults
                 .filter(v => v.isValid)
                 .map(v => {
                     const device = { ...v.data };
 
-                    // Apply defaults
                     Object.entries(uploadConfig.defaultValues).forEach(([key, value]) => {
                         if (!device[key]) {
                             device[key] = value;
                         }
                     });
 
-                    // Remove excluded columns
                     uploadConfig.excludedColumns.forEach(col => {
                         delete device[col];
                     });
 
-                    // Parse price
-                    if (device.purchasePrice) {
-                        device.purchasePrice = parseFloat(device.purchasePrice);
-                    }
-
                     return device;
                 });
 
-            // Call bulk upload API
             const response = await api.post("/equipment/bulk", { devices });
 
             setUploadResults(response.data);
             setUploadStatus("complete");
 
-            // Notify parent
             if (onUploadComplete) {
                 onUploadComplete(response.data);
             }
@@ -293,7 +242,6 @@ function BulkUploadDialog({
         }
     };
 
-    // Reset dialog
     const handleReset = () => {
         setFile(null);
         setPreviewData([]);
@@ -307,7 +255,6 @@ function BulkUploadDialog({
         onOpenChange(false);
     };
 
-    // Get validation summary
     const validationSummary = useMemo(() => {
         const validCount = validationResults.filter(v => v.isValid).length;
         const invalidCount = validationResults.filter(v => !v.isValid).length;
@@ -324,11 +271,9 @@ function BulkUploadDialog({
                     </DialogTitle>
                     <DialogDescription>
                         Upload multiple devices at once using a CSV or Excel file.
-                        Each row creates one device record.
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* Role-specific info */}
                 <Alert className="bg-blue-50 border-blue-200">
                     <Info className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="text-blue-800">
@@ -336,9 +281,8 @@ function BulkUploadDialog({
                             <>
                                 <strong>Security Officer Upload Rules:</strong>
                                 <ul className="list-disc ml-5 mt-1 text-sm">
-                                    <li>All devices will be set to "Available" status automatically</li>
-                                    <li>Purchase price is required for each device</li>
-                                    <li>Department field is not required</li>
+                                    <li>All devices will be set to "Available" automatically</li>
+                                    <li>You may attach IoT Tags inside the spreadsheet</li>
                                 </ul>
                             </>
                         ) : (
@@ -349,7 +293,6 @@ function BulkUploadDialog({
                     </AlertDescription>
                 </Alert>
 
-                {/* Upload Area */}
                 {uploadStatus === "idle" && (
                     <div className="space-y-4">
                         <div
@@ -395,7 +338,6 @@ function BulkUploadDialog({
                     </div>
                 )}
 
-                {/* Validating State */}
                 {uploadStatus === "validating" && (
                     <div className="text-center py-8">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3 text-[#343264]" />
@@ -403,10 +345,8 @@ function BulkUploadDialog({
                     </div>
                 )}
 
-                {/* Preview & Validation Results */}
                 {(uploadStatus === "valid" || uploadStatus === "invalid") && (
                     <div className="space-y-4">
-                        {/* File Info */}
                         <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                             <div className="flex items-center gap-2">
                                 <FileSpreadsheet className="h-5 w-5 text-gray-500" />
@@ -417,7 +357,6 @@ function BulkUploadDialog({
                             </Button>
                         </div>
 
-                        {/* Validation Summary */}
                         <div className="flex gap-4">
                             <div className="flex items-center gap-2">
                                 <CheckCircle className="h-5 w-5 text-green-500" />
@@ -431,7 +370,6 @@ function BulkUploadDialog({
                             )}
                         </div>
 
-                        {/* Error List */}
                         {validationResults.filter(v => !v.isValid).length > 0 && (
                             <Alert variant="destructive">
                                 <AlertCircle className="h-4 w-4" />
@@ -456,7 +394,6 @@ function BulkUploadDialog({
                             </Alert>
                         )}
 
-                        {/* Preview Table */}
                         <div className="border rounded-lg overflow-hidden">
                             <div className="bg-gray-50 px-4 py-2 border-b">
                                 <span className="text-sm font-medium">Preview (first 10 rows)</span>
@@ -470,7 +407,7 @@ function BulkUploadDialog({
                                             <TableHead>Name</TableHead>
                                             <TableHead>Category</TableHead>
                                             <TableHead>Serial No.</TableHead>
-                                            <TableHead>Price</TableHead>
+                                            <TableHead>IoT Tag</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -490,11 +427,7 @@ function BulkUploadDialog({
                                                     <TableCell>{row.name}</TableCell>
                                                     <TableCell>{row.category}</TableCell>
                                                     <TableCell>{row.serialNumber || row.serialnumber}</TableCell>
-                                                    <TableCell>
-                                                        {row.purchasePrice || row.purchaseprice
-                                                            ? `$${row.purchasePrice || row.purchaseprice}`
-                                                            : "-"}
-                                                    </TableCell>
+                                                    <TableCell>{row.iotTag || row.iottag || "-"}</TableCell>
                                                 </TableRow>
                                             );
                                         })}
@@ -505,7 +438,6 @@ function BulkUploadDialog({
                     </div>
                 )}
 
-                {/* Uploading State */}
                 {uploadStatus === "uploading" && (
                     <div className="text-center py-8">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3 text-[#343264]" />
@@ -513,7 +445,6 @@ function BulkUploadDialog({
                     </div>
                 )}
 
-                {/* Complete State */}
                 {uploadStatus === "complete" && uploadResults && (
                     <div className="space-y-4">
                         <Alert className="bg-green-50 border-green-200">
@@ -546,7 +477,6 @@ function BulkUploadDialog({
                     </div>
                 )}
 
-                {/* Error State */}
                 {uploadStatus === "error" && (
                     <Alert variant="destructive">
                         <AlertCircle className="h-4 w-4" />

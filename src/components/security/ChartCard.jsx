@@ -21,16 +21,16 @@ export default function ChartCard({
 }) {
   return (
     <Card className={cn(
-      "border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-xl",
+      "border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-[2rem]",
       className
     )}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-8">
         <div>
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-xl font-bold text-slate-900 leading-none mb-2">
             {title}
           </CardTitle>
           {description && (
-            <CardDescription className="text-sm text-gray-500 mt-1">
+            <CardDescription className="text-sm font-medium text-slate-400">
               {description}
             </CardDescription>
           )}

@@ -132,7 +132,7 @@ export function exportToPDF(data, columns, getRowData, reportType, startDate, en
     const textData = rowData.map(cell => String(cell || ''));
     return `<tr>${textData.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
   }).join('');
-  const htmlContent = `<!DOCTYPE html><html><head><title>${reportType}</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#0b1d3a;color:white;padding:10px}td{padding:8px;border:1px solid #ddd;text-align:center}tr:nth-child(even){background:#f2f2f2}</style></head><body><h1>${reportType}</h1><p>Generated: ${new Date().toLocaleString()}</p><table><thead><tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table><script>window.onload=function(){window.print();}</script></body></html>`;
+  const htmlContent = `<!DOCTYPE html><html><head><title>${reportType}</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#f8fafc;color:black;padding:10px;border:1px solid #ddd}td{padding:8px;border:1px solid #ddd;text-align:center}tr:nth-child(even){background:#f2f2f2}h1{color:black}</style></head><body><h1>${reportType}</h1><p>Generated: ${new Date().toLocaleString()}</p><table><thead><tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table><script>window.onload=function(){window.print();}</script></body></html>`;
   printWindow.document.write(htmlContent);
   printWindow.document.close();
 }

@@ -3,22 +3,24 @@ import { Button } from "@components/ui/button";
 import { Plus, Calendar, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+import { useTranslation } from "react-i18next";
 
 export default function QuickActions() {
+    const { t } = useTranslation(["itstaff"]);
     const navigate = useNavigate();
     const buttonActions = [
-        { label: "Lend Equipment", icon: Calendar, onClick: () => navigate("/it/browse")},
-        { label: "Generate Report", icon: FileText, onClick: () => navigate("/it/reports") },
+        { label: t('dashboard.quickActions.lend'), icon: Calendar, onClick: () => navigate("/it/browse") },
+        { label: t('dashboard.quickActions.report'), icon: FileText, onClick: () => navigate("/it/reports") },
     ];
     return (
         <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow h-full flex flex-col w-full">
             <CardHeader>
-                <CardTitle className="text-base sm:text-lg lg:text-xl font-bold">Quick Actions</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Common tasks and operations</CardDescription>
+                <CardTitle className="text-base sm:text-lg lg:text-xl font-bold">{t('dashboard.quickActions.title')}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">{t('dashboard.quickActions.subtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex items-center justify-center">
                 <div className="flex gap-2 sm:gap-4 justify-center items-center flex-col sm:flex-row flex-wrap px-2 sm:px-4 w-full">
-                    
+
 
                     {buttonActions.map((action) => {
                         const Icon = action.icon;

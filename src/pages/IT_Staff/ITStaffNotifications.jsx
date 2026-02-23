@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-    Bell, Clock, AlertTriangle, CheckCircle,
+    Bell, Clock, AlertTriangle, CheckCircle, 
     ExternalLink, CheckCheck, Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-// Removed PageHeader import
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
@@ -25,7 +24,9 @@ export default function ITStaffNotifications() {
     const fetchNotifications = async () => {
         try {
             const res = await api.get('/notifications');
-            setNotifications(res.data);
+            // 👇 FIX 1: Only keep notifications that are NOT read
+            const unreadOnly = res.data.filter(n => !n.read);
+            setNotifications(unreadOnly);
         } catch (err) {
             console.error("Failed to load notifications", err);
             toast.error(t('notifications.messages.loadError'));
@@ -39,8 +40,6 @@ export default function ITStaffNotifications() {
     }, []);
 
     // --- 2. HELPERS ---
-
-    // Map backend 'type' to UI severity styles
     const getSeverity = (type) => {
         if (type === 'error') return 'critical';
         if (type === 'warning') return 'high';
@@ -55,7 +54,6 @@ export default function ITStaffNotifications() {
         }
     };
 
-    // 👇 ADDED MISSING FUNCTION HERE
     const getIconBgColor = (type) => {
         if (type === 'error') return 'bg-red-100';
         if (type === 'warning') return 'bg-orange-100';
@@ -72,15 +70,19 @@ export default function ITStaffNotifications() {
 
     // --- 3. ACTIONS ---
     const handleMarkRead = async (e, id, relatedId = null) => {
-        if (e) e.stopPropagation();
+        if (e && typeof e.stopPropagation === 'function') {
+            e.stopPropagation();
+        }
+        
         try {
-            // Optimistic Update
-            setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+            // 👇 FIX 2: Remove the notification from the list entirely
+            setNotifications(prev => prev.filter(n => n._id !== id));
 
             await api.put(`/notifications/${id}/read`);
 
+            // Navigate when View Details is clicked
             if (relatedId) {
-                navigate('/it/current-checkouts');
+                navigate('/it/current-checkouts'); 
             }
         } catch (err) {
             console.error(err);
@@ -91,8 +93,8 @@ export default function ITStaffNotifications() {
     const handleMarkAllRead = async () => {
         setMarkingAll(true);
         try {
-            // Optimistic Update
-            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            // 👇 FIX 3: Clear the list entirely
+            setNotifications([]);
 
             await api.put('/notifications/mark-all-read');
             toast.success(t('notifications.messages.markAllSuccess'));
@@ -105,8 +107,8 @@ export default function ITStaffNotifications() {
         }
     };
 
-    // Count unread
-    const unreadCount = notifications.filter(n => !n.read).length;
+    // Because we filter out read notifications, the total count is just the array length
+    const unreadCount = notifications.length;
 
     if (loading) {
         return (
@@ -121,7 +123,6 @@ export default function ITStaffNotifications() {
     return (
         <ITStaffLayout>
             <div>
-                {/* FIXED HEADER: Replaced PageHeader with standard HTML */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-3">
@@ -164,11 +165,12 @@ export default function ITStaffNotifications() {
                             return (
                                 <motion.div
                                     key={n._id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className={`p-5 flex items-start gap-4 transition-colors hover:bg-gray-50 ${!n.read ? "bg-blue-50/30" : ""}`}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="p-5 flex items-start gap-4 transition-colors hover:bg-gray-50 bg-blue-50/30"
                                 >
-                                    {/* Icon Box - NOW WORKS because getIconBgColor exists */}
+                                    {/* Icon Box */}
                                     <div className={`mt-1 rounded-xl p-2.5 flex-shrink-0 ${getIconBgColor(n.type)}`}>
                                         {getIcon(n.type)}
                                     </div>
@@ -177,7 +179,7 @@ export default function ITStaffNotifications() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
-                                                <h4 className={`text-sm font-semibold ${n.read ? 'text-gray-700' : 'text-gray-900'}`}>
+                                                <h4 className="text-sm font-semibold text-gray-900">
                                                     {n.title}
                                                 </h4>
                                                 <p className="text-sm text-gray-600 mt-1 leading-relaxed">
@@ -205,7 +207,7 @@ export default function ITStaffNotifications() {
                                                     size="sm"
                                                     variant="outline"
                                                     className="shrink-0 mt-2 sm:mt-0 text-xs h-8 border-gray-200 text-gray-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
-                                                    onClick={() => handleMarkRead(n._id, n.relatedId)}
+                                                    onClick={(e) => handleMarkRead(e, n._id, n.relatedId)}
                                                 >
                                                     <ExternalLink className="h-3 w-3 mr-1.5" />
                                                     {t('notifications.viewDetails')}

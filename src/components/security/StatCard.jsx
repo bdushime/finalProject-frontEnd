@@ -1,56 +1,88 @@
 import PropTypes from "prop-types";
-import { Card, CardContent } from "@components/ui/card";
-import { cn } from "@components/ui/utils";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { cn } from "@/components/ui/utils";
 
 export default function StatCard({
   title,
   value,
-  comparison,
+  subtext,
   change,
-  changeType,
+  changeType = "neutral",
+  icon: Icon,
+  isAlert = false,
+  onClick,
   className,
+  loading = false
 }) {
   const isPositive = changeType === "positive";
-  const isNegative = changeType === "negative";
 
   return (
-    <Card className={cn(
-      "border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-xl h-full",
-      className
-    )}>
-      <CardContent className="p-6 flex flex-col justify-between h-full">
-        <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-        {comparison && (
-          <p className="text-xs text-gray-500 mb-2">Compared to ({comparison})</p>
-        )}
-        <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
-        {change !== undefined && (
-          <div className="flex items-center gap-1.5 mt-auto">
-            {isPositive && <TrendingUp className="h-4 w-4 text-[#BEBEE0]" />}
-            {isNegative && <TrendingDown className="h-4 w-4 text-[#BEBEE0]" />}
-            <span
-              className={cn(
-                "text-sm font-medium",
-                isPositive && "text-[#BEBEE0]",
-                isNegative && "text-[#BEBEE0]",
-                !isPositive && !isNegative && "text-gray-600"
+    <div
+      onClick={!loading ? onClick : undefined}
+      className={cn(
+        "bg-white p-6 rounded-[2rem] shadow-lg relative overflow-hidden group transition-all duration-300 border border-gray-100",
+        onClick && !loading ? "cursor-pointer hover:-translate-y-1 hover:shadow-xl" : "",
+        className
+      )}
+    >
+      <div className="relative z-10">
+        {/* Header: Title */}
+        <div className="flex justify-between items-start mb-4">
+          <p className="text-sm font-bold text-gray-400 tracking-wide uppercase">{title}</p>
+        </div>
+
+        {/* Body: Value & Badge */}
+        <div className="flex items-end space-x-3 min-h-[40px]">
+          {loading ? (
+            <div className="space-y-2 w-full animate-pulse">
+              <div className="h-8 bg-slate-200 rounded-md w-1/2"></div>
+              <div className="h-4 bg-slate-100 rounded-md w-1/3"></div>
+            </div>
+          ) : (
+            <>
+              <h3 className="text-4xl font-black text-slate-900 tracking-tight">{value}</h3>
+
+              {change && (
+                <div className={cn(
+                  "flex items-center px-2 py-1 rounded-lg text-xs font-bold mb-1 border",
+                  isPositive
+                    ? "bg-green-50 text-green-700 border-green-100"
+                    : isAlert
+                      ? "bg-red-50 text-red-600 border-red-100"
+                      : "bg-orange-50 text-orange-600 border-orange-100"
+                )}>
+                  {isPositive ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
+                  {change}
+                </div>
               )}
-            >
-              {change}
-            </span>
-          </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer: Subtext */}
+        {!loading && subtext && (
+          <p className="text-xs text-gray-400 mt-2 font-medium">{subtext}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Decorative Background Blob */}
+      <div className={cn(
+        "absolute -bottom-6 -right-6 w-32 h-32 rounded-full transition-colors duration-500 opacity-20 pointer-events-none",
+        isAlert ? "bg-red-200" : "bg-[#8D8DC7]"
+      )}></div>
+    </div>
   );
 }
 
 StatCard.propTypes = {
   title: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  comparison: PropTypes.string,
+  subtext: PropTypes.string,
   change: PropTypes.string,
   changeType: PropTypes.oneOf(["positive", "negative", "neutral"]),
+  icon: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+  isAlert: PropTypes.bool,
+  onClick: PropTypes.func,
   className: PropTypes.string,
+  loading: PropTypes.bool,
 };

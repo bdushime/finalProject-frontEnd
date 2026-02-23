@@ -396,10 +396,10 @@ export default function Landing() {
                     <div className="absolute bottom-40 left-1/4 w-20 h-20 rounded-3xl bg-blue-400/20 dark:bg-rose-700/20 -rotate-12 float hidden lg:block" />
 
                     <div className="max-w-6xl mx-auto px-6 py-12">
-                        <div className="grid lg:grid-cols-2 gap-10 items-center">
-                            {/* Left Content - removed badge and social proof */}
+                        <div className="flex flex-col items-center text-center">
+                            {/* Left Content - centered */}
                             <div className={`slide-up ${heroInView ? 'visible' : ''}`}>
-                                <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold font-display leading-[1.1] mb-4 text-slate-800 dark:text-white">
+                                <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold font-display leading-[1.1] mb-6 text-slate-800 dark:text-white">
                                     {t('hero.title')}{' '}
                                     <span className="relative inline-block">
                                         <span className="gradient-text">{t('hero.subtitle').split(' ').slice(-1)[0]}</span>
@@ -409,12 +409,12 @@ export default function Landing() {
                                     </span>
                                 </h1>
 
-                                <p className="text-lg text-slate-600 dark:text-slate-400 mb-6 max-w-lg leading-relaxed">
+                                <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto leading-relaxed">
                                     {t('hero.subtitle2')}
                                 </p>
 
                                 {/* CTA Buttons */}
-                                <div className="flex flex-wrap gap-4">
+                                <div className="flex flex-wrap justify-center gap-4">
                                     <Link
                                         to="/signup"
                                         className="btn-primary group flex items-center gap-2 px-7 py-4 text-base font-semibold text-white rounded-2xl"
@@ -433,85 +433,12 @@ export default function Landing() {
                                     </button>
                                 </div>
                             </div>
-
-                            {/* Right - Hero Card */}
-                            <div className={`relative slide-up ${heroInView ? 'visible' : ''}`} style={{ transitionDelay: '0.2s' }}>
-                                <div className="relative z-10 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/30 p-6 border border-slate-100 dark:border-slate-800">
-                                    {/* Card Header */}
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1864ab] to-[#2196F3] flex items-center justify-center">
-                                                <Package className="w-5 h-5 text-white" />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-slate-800 dark:text-white">Equipment Overview</p>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">Real-time dashboard</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-1.5">
-                                            <div className="w-3 h-3 rounded-full bg-rose-400" />
-                                            <div className="w-3 h-3 rounded-full bg-amber-400" />
-                                            <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                                        </div>
-                                    </div>
-
-                                    {/* Stats Grid */}
-                                    <div className="grid grid-cols-3 gap-3 mb-6">
-                                        {[
-                                            { label: "Available", value: "847", color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400" },
-                                            { label: "Borrowed", value: "156", color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" },
-                                            { label: "Overdue", value: "12", color: "bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400" },
-                                        ].map((stat, i) => (
-                                            <div key={i} className={`${stat.color} rounded-2xl p-4 text-center`}>
-                                                <p className="text-2xl font-bold">{stat.value}</p>
-                                                <p className="text-xs font-medium opacity-80">{stat.label}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Animated Chart */}
-                                    <AnimatedChart />
-
-                                    {/* Recent Activity */}
-                                    <div className="space-y-2 mt-4">
-                                        {[
-                                            { action: "Laptop checked out", user: "Sarah M.", time: "2m ago", emoji: "💻" },
-                                            { action: "Camera returned", user: "James K.", time: "15m ago", emoji: "📷" },
-                                        ].map((item, i) => (
-                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/30">
-                                                <span className="text-xl">{item.emoji}</span>
-                                                <div className="flex-1">
-                                                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{item.action}</p>
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400">{item.user} • {item.time}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Floating Elements */}
-                                <div className="absolute -top-6 -right-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-4 float border border-slate-100 dark:border-slate-700">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                                            <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-slate-800 dark:text-white">Return confirmed!</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">Score +10 pts</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="absolute -bottom-4 -left-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg px-4 py-3 float-delayed border border-slate-100 dark:border-slate-700">
-                                    <p className="text-sm font-medium text-slate-800 dark:text-white">🎉 99.9% Uptime</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </section>
 
                 {/* Stats Banner */}
-                <section className="py-12 bg-gradient-to-r from-[#1864ab] to-[#2196F3] dark:from-[#0d3a5c] dark:to-[#1565C0] relative overflow-hidden">
+                <section className="py-12 bg-gradient-to-r from-[#1864ab] to-[#2196F3] dark:from-[#0d3a5c] dark:to-[#1565C0] relative overflow-hidden" >
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 left-0 w-full h-full" style={{
                             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
@@ -538,7 +465,7 @@ export default function Landing() {
                 </section>
 
                 {/* Features Section */}
-                <section id="features" ref={featuresRef} className="py-14 relative">
+                <section id="features" ref={featuresRef} className="py-14 relative" >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${featuresInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
@@ -569,7 +496,7 @@ export default function Landing() {
                 </section>
 
                 {/* How It Works */}
-                <section id="how-it-works" ref={howRef} className="py-14 bg-slate-50 dark:bg-slate-900/50">
+                <section id="how-it-works" ref={howRef} className="py-14 bg-slate-50 dark:bg-slate-900/50" >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${howInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
@@ -603,7 +530,7 @@ export default function Landing() {
                 </section>
 
                 {/* Who Can Use */}
-                <section id="users" ref={usersRef} className="py-14">
+                <section id="users" ref={usersRef} className="py-14" >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${usersInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
@@ -634,7 +561,7 @@ export default function Landing() {
                 </section>
 
                 {/* Testimonials */}
-                <section ref={testimonialsRef} className="py-14 bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-cyan-950/30">
+                <section ref={testimonialsRef} className="py-14 bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-cyan-950/30" >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${testimonialsInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
@@ -681,7 +608,7 @@ export default function Landing() {
                 </section>
 
                 {/* Contact Section - Redesigned */}
-                <section id="contact" className="py-14">
+                <section id="contact" className="py-14" >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-8">
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
@@ -808,8 +735,7 @@ export default function Landing() {
                 {/* Scroll to Top Button - Floating Circle */}
                 <button
                     onClick={scrollToTop}
-                    className={`fixed bottom-24 right-8 z-40 w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-[#1864ab] dark:hover:text-cyan-400 hover:border-[#1864ab] dark:hover:border-cyan-700 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
-                        }`}
+                    className={`fixed bottom-24 right-8 z-40 w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-[#1864ab] dark:hover:text-cyan-400 hover:border-[#1864ab] dark:hover:border-cyan-700 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
                     aria-label="Scroll to top"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}>

@@ -100,30 +100,27 @@ const Dashboard = () => {
                     title={t("dashboard.activeBorrowed")}
                     value={data.stats.activeBorrowed}
                     change={t("dashboard.live")}
-                    trend="positive"
+                    changeType="positive"
                     subtext={t("dashboard.studentsWithItems")}
                     icon={Package}
-                    dark
                     onClick={() => navigate('/admin/reports')}
                 />
                 <StatsCard
                     title={t("dashboard.totalUsers")}
                     value={data.stats.totalUsers}
                     change={t("dashboard.stable")}
-                    trend="positive"
+                    changeType="positive"
                     subtext={t("dashboard.registeredAccounts")}
                     icon={Wifi}
-                    dark
                     onClick={() => navigate('/admin/users')}
                 />
                 <StatsCard
                     title={t("dashboard.atRiskItems")}
                     value={data.stats.atRiskItems}
                     change={t("dashboard.actionReq")}
-                    trend={data.stats.atRiskItems > 0 ? "negative" : "positive"}
+                    changeType={data.stats.atRiskItems > 0 ? "negative" : "positive"}
                     subtext={t("dashboard.overdueItemsDesc")}
                     icon={AlertTriangle}
-                    dark
                     isAlert={data.stats.atRiskItems > 0}
                     onClick={() => navigate('/admin/reports')}
                 />
@@ -131,9 +128,9 @@ const Dashboard = () => {
                     title={t("dashboard.availableEquip")}
                     value={data.stats.availableEquipment}
                     change={t("dashboard.stock")}
-                    trend="positive"
+                    changeType="positive"
                     subtext={t("dashboard.readyForCheckout")}
-                    icon={Activity} // Changed icon
+                    icon={Activity}
                     onClick={() => navigate('/admin/data')}
                 />
             </div>
@@ -145,20 +142,20 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 {/* Left Column: Recent Activity Table */}
                 <div className="xl:col-span-2 space-y-6 h-full">
-                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                        <div className="flex justify-between items-center mb-4 px-2">
-                            <h3 className="text-lg font-bold text-slate-900">{t("dashboard.recentTransactions")}</h3>
-                            <button onClick={() => navigate('/admin/reports')} className="text-sm text-[#8D8DC7] font-medium hover:underline">{t("dashboard.viewAll")}</button>
+                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
+                        <div className="flex justify-between items-center mb-8 px-2">
+                            <h3 className="text-xl font-bold text-slate-900 tracking-tight">{t("dashboard.recentTransactions")}</h3>
+                            <button onClick={() => navigate('/admin/reports')} className="text-sm font-black uppercase tracking-widest text-[#8D8DC7] hover:underline px-4 py-2 bg-slate-50 rounded-xl transition-colors">{t("dashboard.viewAll")}</button>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left text-gray-600">
-                                <thead className="text-xs text-gray-400 uppercase bg-gray-50/50">
+                        <div className="overflow-hidden rounded-2xl border border-gray-50 bg-white">
+                            <table className="w-full text-sm text-left">
+                                <thead className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-gray-50/50">
                                     <tr>
-                                        <th className="px-4 py-3">{t("reports.user")}</th>
-                                        <th className="px-4 py-3">{t("reports.equipment")}</th>
-                                        <th className="px-4 py-3">{t("reports.date")}</th>
-                                        <th className="px-4 py-3">{t("reports.statusFilter")}</th>
+                                        <th className="px-6 py-4">{t("reports.user")}</th>
+                                        <th className="px-6 py-4">{t("reports.equipment")}</th>
+                                        <th className="px-6 py-4">{t("reports.date")}</th>
+                                        <th className="px-6 py-4 text-center">{t("reports.statusFilter")}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -166,16 +163,19 @@ const Dashboard = () => {
                                         <tr><td colSpan="4" className="text-center py-4">{t("dashboard.noRecentActivity")}</td></tr>
                                     ) : (
                                         data.recentActivity.map((tx) => (
-                                            <tr key={tx._id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                                                <td className="px-4 py-3 font-medium text-slate-900">{tx.user?.username || 'Unknown'}</td>
-                                                <td className="px-4 py-3">{tx.equipment?.name || 'Deleted Item'}</td>
-                                                <td className="px-4 py-3">{new Date(tx.createdAt).toLocaleDateString()}</td>
-                                                <td className="px-4 py-3">
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${tx.status === 'Checked Out' ? 'bg-blue-100 text-blue-700' :
-                                                        tx.status === 'Returned' ? 'bg-green-100 text-green-700' :
-                                                            'bg-red-100 text-red-700'
+                                            <tr key={tx._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-4 font-bold text-slate-900">{tx.user?.username || t('dashboard.status.unknown')}</td>
+                                                <td className="px-6 py-4 font-medium text-slate-600">{tx.equipment?.name || t('dashboard.status.deletedItem')}</td>
+                                                <td className="px-6 py-4 text-slate-500 font-medium">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${tx.status === 'Checked Out' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                        tx.status === 'Returned' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                            'bg-red-50 text-red-600 border-red-100'
                                                         }`}>
-                                                        {tx.status}
+                                                        {tx.status === 'Checked Out' ? t('dashboard.status.checkedOut') :
+                                                            tx.status === 'Returned' ? t('dashboard.status.returned') :
+                                                                tx.status === 'Overdue' ? t('dashboard.status.overdue') :
+                                                                    tx.status}
                                                     </span>
                                                 </td>
                                             </tr>
@@ -187,19 +187,19 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Right Column: Quick Actions (Static for now) */}
+                {/* Right Column: Quick Actions */}
                 <div className="space-y-6 h-full">
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                        <h3 className="text-lg font-bold text-slate-900 mb-4">{t("dashboard.quickActions")}</h3>
-                        <div className="space-y-3">
-                            <button onClick={() => navigate('/admin/users')} className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-700 font-medium transition-colors">
-                                👥 {t("dashboard.manageUsers")}
+                    <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                        <h3 className="text-xl font-bold text-slate-900 mb-6 tracking-tight">{t("dashboard.quickActions")}</h3>
+                        <div className="space-y-4">
+                            <button onClick={() => navigate('/admin/users')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
+                                <span className="p-2 bg-white rounded-lg shadow-sm">👥</span> {t("dashboard.manageUsers")}
                             </button>
-                            <button onClick={() => navigate('/admin/config')} className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-700 font-medium transition-colors">
-                                ⚙️ {t("dashboard.systemConfig")}
+                            <button onClick={() => navigate('/admin/config')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
+                                <span className="p-2 bg-white rounded-lg shadow-sm">⚙️</span> {t("dashboard.systemConfig")}
                             </button>
-                            <button onClick={() => navigate('/admin/reports')} className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-700 font-medium transition-colors">
-                                📊 {t("dashboard.generateReport")}
+                            <button onClick={() => navigate('/admin/reports')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
+                                <span className="p-2 bg-white rounded-lg shadow-sm">📊</span> {t("dashboard.generateReport")}
                             </button>
                         </div>
                     </div>
