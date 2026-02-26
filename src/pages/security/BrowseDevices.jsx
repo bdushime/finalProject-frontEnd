@@ -36,7 +36,6 @@ import BulkUploadDialog from "./dialogs/BulkUploadDialog";
 import api from "@/utils/api";
 import { UserRoles } from "@/config/roleConfig";
 
-// Default fallback arrays so dropdowns never break
 const DEFAULT_CATEGORIES = ['Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Electronics', 'Other'];
 const DEFAULT_CONDITIONS = ['Excellent', 'Good', 'Fair', 'Poor', 'Damaged'];
 const DEFAULT_STATUSES = ['Available', 'Checked Out', 'Maintenance', 'Lost'];
@@ -90,13 +89,20 @@ function BrowseDevices() {
     const fetchOptionsAndDevices = async () => {
       try {
         const optionsRes = await api.get('/config/options');
-        if (optionsRes.data && optionsRes.data.categories && optionsRes.data.categories.length > 0) {
-          setCategories(["All", ...optionsRes.data.categories]);
-          setConditions(optionsRes.data.conditions);
-          setStatuses(optionsRes.data.statuses);
+        // 👇 BULLETPROOF FIX: Only override defaults if arrays are actually returned and not empty
+        if (optionsRes.data) {
+          if (Array.isArray(optionsRes.data.categories) && optionsRes.data.categories.length > 0) {
+              setCategories(["All", ...optionsRes.data.categories]);
+          }
+          if (Array.isArray(optionsRes.data.conditions) && optionsRes.data.conditions.length > 0) {
+              setConditions(optionsRes.data.conditions);
+          }
+          if (Array.isArray(optionsRes.data.statuses) && optionsRes.data.statuses.length > 0) {
+              setStatuses(optionsRes.data.statuses);
+          }
         }
       } catch (err) {
-        console.warn("Failed to fetch config options, using defaults.", err);
+        console.warn("Failed to fetch config options, safely using defaults.", err);
       }
       await fetchDevices();
     };
@@ -115,7 +121,6 @@ function BrowseDevices() {
     };
   }, []);
 
-  // 👇 FIX: Form data now EXACTLY matches the Mongoose Schema
   const [formData, setFormData] = useState({
     name: "",
     category: "", 
@@ -150,7 +155,6 @@ function BrowseDevices() {
   const handleAddDevice = async (completeData) => {
     setIsLoading(true);
     try {
-      // 👇 FIX: Payload matches schema, no brand/price/etc.
       const newDeviceData = {
         name: completeData.name,
         type: completeData.category,
@@ -331,7 +335,7 @@ function BrowseDevices() {
                   <SelectValue placeholder={t('browseDevices.filters.category')} />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
+              <SelectContent className="rounded-2xl border-slate-100 shadow-xl z-[100]">
                 {categories.map((cat) => (
                   <SelectItem key={cat} value={cat} className="rounded-xl focus:bg-slate-50">
                     {cat === "All" ? t('browseDevices.filters.allCategories') : cat}
@@ -347,7 +351,7 @@ function BrowseDevices() {
                   <SelectValue placeholder={t('browseDevices.filters.status')} />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
+              <SelectContent className="rounded-2xl border-slate-100 shadow-xl z-[100]">
                 <SelectItem value="all" className="rounded-xl focus:bg-slate-50">{t('browseDevices.filters.allStatus')}</SelectItem>
                 {statuses.map((status) => (
                   <SelectItem key={status} value={status} className="rounded-xl focus:bg-slate-50">
@@ -433,7 +437,6 @@ function BrowseDevices() {
                     </div>
                   </div>
 
-                  {/* IoT Stats (if available) */}
                   {device.trackingStatus && device.trackingStatus !== 'Unknown' && (
                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
                        <Activity className={`h-4 w-4 ${device.trackingStatus === 'Safe' ? 'text-green-500' : 'text-red-500'}`} />
@@ -470,18 +473,20 @@ function BrowseDevices() {
                   >
                     <Edit className="h-4 w-4 text-slate-600" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-xl hover:bg-red-50 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDeleteDialog(device);
-                    }}
-                    title="Delete Device"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                  {currentUser.role === 'Admin' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-xl hover:bg-red-50 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteDialog(device);
+                      }}
+                      title="Delete Device"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -489,14 +494,14 @@ function BrowseDevices() {
         </div>
 
         {filteredDevices.length === 0 && (
-          <Card className="border border-gray-200 shadow-sm">
+          <Card className="border border-gray-200 shadow-sm mt-6">
             <CardContent className="py-12 text-center">
               <Search className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {t('browseDevices.emptyState.title')}
+                {t('browseDevices.emptyState.title', 'No devices found')}
               </h3>
               <p className="text-gray-600 mb-4">
-                {t('browseDevices.emptyState.description')}
+                {t('browseDevices.emptyState.description', 'Adjust your filters or add a new device.')}
               </p>
               <Button
                 onClick={() => {
@@ -506,7 +511,7 @@ function BrowseDevices() {
                 }}
                 variant="outline"
               >
-                {t('browseDevices.filters.clearFilters')}
+                {t('browseDevices.filters.clearFilters', 'Clear Filters')}
               </Button>
             </CardContent>
           </Card>

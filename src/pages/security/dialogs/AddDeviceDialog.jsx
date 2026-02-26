@@ -34,9 +34,9 @@ function AddDeviceDialog({
     onOpenChange,
     formData,
     setFormData,
-    categories,
-    conditions,
-    statuses,
+    categories = [],
+    conditions = [],
+    statuses = [],
     onSubmit,
     onCancel,
     userRole = UserRoles.SECURITY,
@@ -44,7 +44,6 @@ function AddDeviceDialog({
 }) {
     const [validationErrors, setValidationErrors] = useState({});
 
-    // Get role-specific defaults on mount
     useEffect(() => {
         if (isOpen) {
             const defaults = getDefaultValues(userRole);
@@ -76,12 +75,14 @@ function AddDeviceDialog({
         return isFieldRequired(userRole, fieldName);
     };
 
+    const inputClass = "w-full h-12 px-4 rounded-xl border border-gray-200 bg-white text-gray-900 focus:ring-2 focus:ring-[#8D8DC7]/50 focus:border-[#8D8DC7] transition-all shadow-sm";
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
                 <DialogHeader>
-                    <DialogTitle>Add New Device</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-2xl font-bold text-slate-900">Add New Device</DialogTitle>
+                    <DialogDescription className="text-gray-500">
                         Enter the details for the new equipment device.
                         {userRole === UserRoles.SECURITY && (
                             <span className="block mt-1 text-[#8D8DC7] font-medium">
@@ -92,7 +93,7 @@ function AddDeviceDialog({
                 </DialogHeader>
 
                 {Object.keys(validationErrors).length > 0 && (
-                    <Alert variant="destructive" className="mb-4">
+                    <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200 text-red-600">
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription>
                             <ul className="list-disc pl-4 mt-2 text-sm">
@@ -104,11 +105,11 @@ function AddDeviceDialog({
                     </Alert>
                 )}
 
-                <div className="grid gap-4 py-4">
-                    {/* Row 1: Name & Category */}
-                    <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-5 py-4">
+                    {/* Row 1 */}
+                    <div className="grid grid-cols-2 gap-5">
                         <div className="space-y-2">
-                            <Label htmlFor="name">
+                            <Label htmlFor="name" className="text-sm font-semibold text-slate-700">
                                 Device Name {fieldRequired("name") && <span className="text-red-500">*</span>}
                             </Label>
                             <Input
@@ -116,33 +117,33 @@ function AddDeviceDialog({
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder='e.g., Epson Projector X5'
-                                className={validationErrors.name ? "border-red-500" : ""}
+                                className={`${inputClass} ${validationErrors.name ? "border-red-500 ring-red-100" : ""}`}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="category">
+                            <Label htmlFor="category" className="text-sm font-semibold text-slate-700">
                                 Category {fieldRequired("category") && <span className="text-red-500">*</span>}
                             </Label>
                             <Select
                                 value={formData.category}
                                 onValueChange={(value) => setFormData({ ...formData, category: value })}
                             >
-                                <SelectTrigger className={validationErrors.category ? "border-red-500" : ""}>
+                                <SelectTrigger className={`${inputClass} ${validationErrors.category ? "border-red-500 ring-red-100" : ""}`}>
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    {categories.filter((c) => c !== "All").map((cat) => (
-                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                <SelectContent className="z-[100] bg-white rounded-xl shadow-lg border-gray-100">
+                                    {(categories || []).filter((c) => c !== "All").map((cat) => (
+                                        <SelectItem key={cat} value={cat} className="rounded-lg focus:bg-gray-50">{cat}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
-                    {/* Row 2: Serial Number & IoT Tag */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Row 2 */}
+                    <div className="grid grid-cols-2 gap-5">
                         <div className="space-y-2">
-                            <Label htmlFor="serialNumber">
+                            <Label htmlFor="serialNumber" className="text-sm font-semibold text-slate-700">
                                 Serial Number {fieldRequired("serialNumber") && <span className="text-red-500">*</span>}
                             </Label>
                             <Input
@@ -150,24 +151,27 @@ function AddDeviceDialog({
                                 value={formData.serialNumber}
                                 onChange={(e) => setFormData({ ...formData, serialNumber: e.target.value })}
                                 placeholder="e.g., SN-PROJ-001"
-                                className={validationErrors.serialNumber ? "border-red-500" : ""}
+                                className={`${inputClass} ${validationErrors.serialNumber ? "border-red-500 ring-red-100" : ""}`}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="iotTag">IoT Tracking Tag</Label>
+                            <Label htmlFor="iotTag" className="text-sm font-semibold text-slate-700">
+                                IoT Tracking Tag
+                            </Label>
                             <Input
                                 id="iotTag"
                                 value={formData.iotTag}
                                 onChange={(e) => setFormData({ ...formData, iotTag: e.target.value })}
                                 placeholder="e.g., TAG-987654"
+                                className={inputClass}
                             />
                         </div>
                     </div>
 
-                    {/* Row 3: Location & Condition */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Row 3 */}
+                    <div className="grid grid-cols-2 gap-5">
                         <div className="space-y-2">
-                            <Label htmlFor="location">
+                            <Label htmlFor="location" className="text-sm font-semibold text-slate-700">
                                 Location {fieldRequired("location") && <span className="text-red-500">*</span>}
                             </Label>
                             <Input
@@ -175,21 +179,21 @@ function AddDeviceDialog({
                                 value={formData.location}
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                 placeholder="e.g., Main Storage"
-                                className={validationErrors.location ? "border-red-500" : ""}
+                                className={`${inputClass} ${validationErrors.location ? "border-red-500 ring-red-100" : ""}`}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="condition">Condition</Label>
+                            <Label htmlFor="condition" className="text-sm font-semibold text-slate-700">Condition</Label>
                             <Select
                                 value={formData.condition}
                                 onValueChange={(value) => setFormData({ ...formData, condition: value })}
                             >
-                                <SelectTrigger>
-                                    <SelectValue />
+                                <SelectTrigger className={inputClass}>
+                                    <SelectValue placeholder="Select condition" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    {conditions.map((cond) => (
-                                        <SelectItem key={cond} value={cond}>
+                                <SelectContent className="z-[100] bg-white rounded-xl shadow-lg border-gray-100">
+                                    {(conditions || []).map((cond) => (
+                                        <SelectItem key={cond} value={cond} className="rounded-lg focus:bg-gray-50">
                                             {cond.charAt(0).toUpperCase() + cond.slice(1)}
                                         </SelectItem>
                                     ))}
@@ -198,21 +202,21 @@ function AddDeviceDialog({
                         </div>
                     </div>
 
-                    {/* Row 4: Status (Hidden for Security) & Description */}
-                    <div className="grid grid-cols-1 gap-4">
+                    {/* Row 4 */}
+                    <div className="grid grid-cols-1 gap-5">
                         {shouldShowField("status") && (
                             <div className="space-y-2">
-                                <Label htmlFor="status">Status</Label>
+                                <Label htmlFor="status" className="text-sm font-semibold text-slate-700">Status</Label>
                                 <Select
                                     value={formData.status}
                                     onValueChange={(value) => setFormData({ ...formData, status: value })}
                                 >
-                                    <SelectTrigger>
-                                        <SelectValue />
+                                    <SelectTrigger className={inputClass}>
+                                        <SelectValue placeholder="Select status" />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                        {statuses.map((status) => (
-                                            <SelectItem key={status} value={status}>
+                                    <SelectContent className="z-[100] bg-white rounded-xl shadow-lg border-gray-100">
+                                        {(statuses || []).map((status) => (
+                                            <SelectItem key={status} value={status} className="rounded-lg focus:bg-gray-50">
                                                 {status.charAt(0).toUpperCase() + status.slice(1)}
                                             </SelectItem>
                                         ))}
@@ -221,25 +225,26 @@ function AddDeviceDialog({
                             </div>
                         )}
                         <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description" className="text-sm font-semibold text-slate-700">Description</Label>
                             <Textarea
                                 id="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 placeholder="Enter device description..."
                                 rows={3}
+                                className="w-full p-4 rounded-xl border border-gray-200 bg-white text-gray-900 focus:ring-2 focus:ring-[#8D8DC7]/50 focus:border-[#8D8DC7] transition-all shadow-sm"
                             />
                         </div>
                     </div>
                 </div>
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={onCancel} disabled={isLoading}>
+                <DialogFooter className="mt-4 gap-3">
+                    <Button variant="outline" onClick={onCancel} disabled={isLoading} className="h-12 px-6 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50">
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white"
+                        className="h-12 px-8 rounded-xl bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold shadow-md shadow-[#8D8DC7]/20"
                         disabled={isLoading}
                     >
                         {isLoading ? (
