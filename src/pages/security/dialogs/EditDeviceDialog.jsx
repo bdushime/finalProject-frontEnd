@@ -17,6 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 function EditDeviceDialog({
     isOpen,
@@ -29,6 +30,7 @@ function EditDeviceDialog({
     selectedDevice,
     onSubmit,
     onCancel,
+    isLoading = false
 }) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -145,11 +147,11 @@ function EditDeviceDialog({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onCancel}>
+                    <Button variant="outline" onClick={onCancel} disabled={isLoading}>
                         Cancel
                     </Button>
-                    <Button onClick={onSubmit} className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white">
-                        Save Changes
+                    <Button onClick={onSubmit} className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white" disabled={isLoading}>
+                        {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : "Save Changes"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

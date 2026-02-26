@@ -56,11 +56,8 @@ function AddDeviceDialog({
         }
     }, [isOpen, userRole, setFormData]);
 
-    // Validate and submit
     const handleSubmit = () => {
         setValidationErrors({});
-
-        // Validate using role configuration
         const errors = validateDeviceData(userRole, formData);
 
         if (Object.keys(errors).length > 0) {
@@ -87,7 +84,7 @@ function AddDeviceDialog({
                     <DialogDescription>
                         Enter the details for the new equipment device.
                         {userRole === UserRoles.SECURITY && (
-                            <span className="block mt-1 text-blue-600">
+                            <span className="block mt-1 text-[#8D8DC7] font-medium">
                                 Status will be automatically set to "Available"
                             </span>
                         )}
@@ -98,7 +95,7 @@ function AddDeviceDialog({
                     <Alert variant="destructive" className="mb-4">
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription>
-                            <ul className="list-disc pl-4 mt-2">
+                            <ul className="list-disc pl-4 mt-2 text-sm">
                                 {Object.entries(validationErrors).map(([field, message]) => (
                                     <li key={field}>{message}</li>
                                 ))}
@@ -108,7 +105,7 @@ function AddDeviceDialog({
                 )}
 
                 <div className="grid gap-4 py-4">
-                    {/* Row 1: Device Name & Category */}
+                    {/* Row 1: Name & Category */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">
@@ -157,9 +154,7 @@ function AddDeviceDialog({
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="iotTag">
-                                IoT Tracking Tag
-                            </Label>
+                            <Label htmlFor="iotTag">IoT Tracking Tag</Label>
                             <Input
                                 id="iotTag"
                                 value={formData.iotTag}
@@ -203,7 +198,7 @@ function AddDeviceDialog({
                         </div>
                     </div>
 
-                    {/* Row 4: Status (Hidden for Security by default) & Description */}
+                    {/* Row 4: Status (Hidden for Security) & Description */}
                     <div className="grid grid-cols-1 gap-4">
                         {shouldShowField("status") && (
                             <div className="space-y-2">
@@ -244,14 +239,11 @@ function AddDeviceDialog({
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        className="bg-[#BEBEE0] hover:bg-[#a8a8d0] text-white"
+                        className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white"
                         disabled={isLoading}
                     >
                         {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Adding...
-                            </>
+                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</>
                         ) : (
                             "Add Device"
                         )}
