@@ -9,21 +9,15 @@
     "features": {
         "title": "Tout ce dont vous avez besoin pour gérer l'équipement",
         "subtitle": "Des outils puissants conçus pour rendre le suivi des équipements facile pour tout le monde sur le campus.",
-        "smartInventory": "Inventaire Intelligent",
-        "smartInventoryDesc": "Catalogage assisté par IA avec catégorisation automatique et recherche intelligente.",
-        "qrScanning": "Scan QR",
-        "qrScanningDesc": "Enregistrement/sortie instantané avec codes QR. Aucune saisie manuelle requise.",
-        "smartAlerts": "Alertes Intelligentes",
-        "smartAlertsDesc": "Rappels automatisés pour les dates d'échéance, la maintenance et la disponibilité.",
-        "analytics": "Analytique",
-        "analyticsDesc": "Suivez les modèles d'utilisation, identifiez les tendances et optimisez l'inventaire.",
-        "roleAccess": "Accès par Rôle",
-        "roleAccessDesc": "Permissions personnalisées pour les étudiants, le personnel et les administrateurs.",
-        "multiPlatform": "Multi-Plateforme",
-        "multiPlatformDesc": "Accès depuis n'importe quel appareil - bureau, tablette ou mobile."
+        "iotTracking": "Suivi à distance IoT",
+        "iotTrackingDesc": "Surveillance en temps réel et alertes automatisées lorsque les appareils sont retirés au-delà des locaux autorisés.",
+        "qrScanning": "Responsabilité Numérique",
+        "qrScanningDesc": "Enregistrement/sortie sécurisé avec codes QR, documentation photographique et relevés de chaîne de possession.",
+        "riskAnalytics": "Analyses & Évaluation des Risques",
+        "riskAnalyticsDesc": "Informations basées sur des données, rapports automatisés et contrôles préventifs pour réduire les risques de vol."
     },
     "howItWorks": {
-        "title": "Simple comme 1-2-3-4",
+        "title": "Simple comme",
         "subtitle": "De la navigation au retour, tout le processus ne prend que quelques minutes.",
         "step1": "Naviguer",
         "step1Desc": "Chercher dans notre catalogue intelligent",
@@ -35,7 +29,7 @@
         "step4Desc": "Déposer et confirmer"
     },
     "users": {
-        "title": "Qui utilise Tracknity ?",
+        "title": "Qui utilise",
         "subtitle": "Des étudiants aux administrateurs, tout le monde profite d'une gestion rationalisée des équipements.",
         "students": "Étudiants",
         "studentsDesc": "Parcourir, demander et suivre l'équipement facilement",
@@ -43,10 +37,10 @@
         "lecturersDesc": "Réserver du matériel pour les cours et les projets de recherche",
         "itStaff": "Personnel IT",
         "itStaffDesc": "Gérer l'inventaire, les approbations et la maintenance",
-        "researchers": "Chercheurs",
-        "researchersDesc": "Planifier l'équipement spécialisé pour les expériences",
-        "mediaTeams": "Équipes Média",
-        "mediaTeamsDesc": "Coordonner caméras, micros et matériel de studio",
+        "security": "Agents de Sécurité",
+        "securityDesc": "Surveiller les alertes, suivre les appareils manquants et assurer la sécurité du campus",
+        "gatekeepers": "Gardiens",
+        "gatekeepersDesc": "Vérifier l'équipement, scanner les codes QR à la sortie et gérer l'accès",
         "admins": "Administrateurs",
         "adminsDesc": "Surveiller les tendances d'utilisation et générer des rapports"
     },
