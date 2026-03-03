@@ -41,10 +41,6 @@ function DeviceDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [categories, setCategories] = useState([]);
-    const [conditions, setConditions] = useState([]);
-    const [statuses, setStatuses] = useState([]);
-
     const [formData, setFormData] = useState({
         name: "", category: "", brand: "", model: "", serialNumber: "",
         condition: "excellent", status: "available", location: "",
@@ -56,13 +52,6 @@ function DeviceDetails() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const optionsRes = await api.get('/config/options');
-                if (optionsRes.data) {
-                    setCategories(optionsRes.data.categories || []);
-                    setConditions(optionsRes.data.conditions || []);
-                    setStatuses(optionsRes.data.statuses || []);
-                }
-
                 const deviceRes = await api.get(`/equipment/${deviceId}`);
                 if (deviceRes.data) {
                     const d = deviceRes.data;

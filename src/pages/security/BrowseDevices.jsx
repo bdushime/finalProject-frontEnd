@@ -35,7 +35,10 @@ import BulkUploadDialog from "./dialogs/BulkUploadDialog";
 
 import api from "@/utils/api";
 import { UserRoles } from "@/config/roleConfig";
-import { toast } from "sonner";
+
+const DEFAULT_CATEGORIES = ['Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Electronics', 'Other'];
+const DEFAULT_CONDITIONS = ['Excellent', 'Good', 'Fair', 'Poor', 'Damaged'];
+const DEFAULT_STATUSES = ['Available', 'Checked Out', 'Maintenance', 'Lost'];
 
 function BrowseDevices() {
   const { t } = useTranslation(["security", "common"]);
@@ -130,6 +133,7 @@ function BrowseDevices() {
   });
 
   const navigateToDevice = (device) => {
+    console.log("Navigating to device:", device.id);
     navigate(`/security/device/${device.id}`);
   };
 
@@ -175,7 +179,7 @@ function BrowseDevices() {
       const errorMessage = err.response?.data?.errors?.join(", ") ||
         err.response?.data?.message ||
         "Failed to add device. Please check your input and try again.";
-      toast.error(errorMessage);
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
