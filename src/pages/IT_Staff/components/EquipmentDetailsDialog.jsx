@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export default function EquipmentDetailsDialog({
   equipment,
@@ -75,8 +76,7 @@ export default function EquipmentDetailsDialog({
     // 1. STOP the default browser refresh
     if (e) e.preventDefault();
 
-    console.log("🖱️ Save Button Clicked!");
-    console.log("📦 Sending Data:", formData);
+
 
     setLoading(true);
     try {
@@ -90,7 +90,7 @@ export default function EquipmentDetailsDialog({
         serialNumber: formData.serialNumber,
       });
 
-      console.log("✅ API Success:", res.data);
+
 
       // 3. Success! Close and Refresh
       onOpenChange(false);
@@ -98,7 +98,7 @@ export default function EquipmentDetailsDialog({
     } catch (err) {
       console.error("❌ Request Failed:", err);
       // Alert user if something goes wrong so they know
-      alert(t('equipment.messages.saveError') + ". Check F12 Console for details.");
+      toast.error(t('equipment.messages.saveError'));
     } finally {
       setLoading(false);
     }
@@ -118,7 +118,7 @@ export default function EquipmentDetailsDialog({
       window.location.reload();
     } catch (err) {
       console.error("Delete failed", err);
-      alert(t('equipment.messages.deleteError'));
+      toast.error(t('equipment.messages.deleteError'));
     }
   };
 

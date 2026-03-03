@@ -133,6 +133,7 @@ function BrowseDevices() {
   });
 
   const navigateToDevice = (device) => {
+    console.log("Navigating to device:", device.id);
     navigate(`/security/device/${device.id}`);
   };
 

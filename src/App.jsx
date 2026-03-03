@@ -29,7 +29,7 @@ import Report from "./pages/User_Student/Report";
 // IT Staff Pages
 import { Dashboard as ITStaffDashboard } from "./pages/IT_Staff/Dashboard";
 import BrowseEquipment from "./pages/IT_Staff/BrowseEquipment";
-import SimpleReports from "./pages/IT_Staff/SimpleReports"; 
+import SimpleReports from "./pages/IT_Staff/SimpleReports";
 import ITStaffProfile from "./pages/IT_Staff/Profile";
 import ITStaffSettings from "./pages/IT_Staff/Settings";
 import ITStaffNotifications from "./pages/IT_Staff/ITStaffNotifications";
@@ -71,6 +71,7 @@ import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
 import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
 import AdminNotifications from "./pages/Sys_Admin/AdminNotifications";
 import AdminProfile from "./pages/Sys_Admin/AdminProfile";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
     return (
@@ -165,7 +166,7 @@ export default function App() {
                 </Route>
 
                 {/* 3. Fallback Route (Redirect unknown links to Home) */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     );

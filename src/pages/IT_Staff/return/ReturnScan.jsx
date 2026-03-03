@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { QrCode, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import api from "@/utils/api";
+import { toast } from "sonner";
 
 // Helper Component for the Progress Bar
 function Progress({ step }) {
@@ -52,7 +53,7 @@ export default function ReturnScan() {
             setSuccess(true); // Move to Step 3
         } catch (err) {
             console.error("Return failed", err);
-            alert("Failed to process return. Check console.");
+            toast.error("Failed to process return. Please try again.");
         } finally {
             setSubmitting(false);
         }
@@ -84,7 +85,7 @@ export default function ReturnScan() {
                             </div>
                             <h3 className="text-xl font-bold text-green-800">Return Successful!</h3>
                             <p className="text-green-700 text-center max-w-md">
-                                <strong>{state.equipmentName}</strong> has been marked as returned. 
+                                <strong>{state.equipmentName}</strong> has been marked as returned.
                                 The inventory and student responsibility score have been updated.
                             </p>
                             <Button onClick={() => navigate('/it/dashboard')} className="mt-4 bg-green-600 hover:bg-green-700">
@@ -113,7 +114,7 @@ export default function ReturnScan() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid md:grid-cols-2 gap-6">
-                        
+
                         {/* Left Side: Camera/Scanner Simulation */}
                         <div className="aspect-[4/3] rounded-xl bg-neutral-900 grid place-items-center relative overflow-hidden">
                             {isScanning ? (
@@ -145,8 +146,8 @@ export default function ReturnScan() {
                                 <Button variant="outline" onClick={() => navigate(-1)} disabled={submitting}>
                                     Cancel
                                 </Button>
-                                <Button 
-                                    className="flex-1" 
+                                <Button
+                                    className="flex-1"
                                     disabled={!scanComplete || submitting}
                                     onClick={handleConfirmReturn}
                                 >
@@ -166,7 +167,7 @@ export default function ReturnScan() {
                     </CardContent>
                 </Card>
             </div>
-            
+
             {/* Simple CSS animation for the scanner line */}
             <style>{`
                 @keyframes scan {

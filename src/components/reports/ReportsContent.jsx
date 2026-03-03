@@ -29,6 +29,39 @@ import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/common/PaginationControls";
 import { generateReportData, exportToCSV, exportToPDF } from "@/pages/IT_Staff/reports/reportService";
 import PropTypes from "prop-types";
+import { toast } from "sonner";
+
+const DATE_PRESETS = [
+  { value: "today", label: "Today" },
+  { value: "last7days", label: "Last 7 Days" },
+  { value: "last30days", label: "Last 30 Days" },
+  { value: "custom", label: "Custom Range" },
+];
+
+const EQUIPMENT_STATUSES = [
+  { value: "all", label: "All Statuses" },
+  { value: "AVAILABLE", label: "Available" },
+  { value: "LENT", label: "Lent" },
+  { value: "RESERVED", label: "Reserved" },
+  { value: "DAMAGED", label: "Damaged" },
+  { value: "LOST", label: "Lost" },
+];
+
+const LOG_STATUSES = [
+  { value: "all", label: "All Statuses" },
+  { value: "active", label: "Active" },
+  { value: "completed", label: "Completed" },
+  { value: "violation", label: "Violation" },
+  { value: "resolved", label: "Resolved" },
+];
+
+const EVENT_TYPES = [
+  { value: "all", label: "All Event Types" },
+  { value: "checkout", label: "Checkout" },
+  { value: "return", label: "Return" },
+  { value: "movement", label: "Movement" },
+  { value: "geofence_violation", label: "Geofence Violation" },
+];
 import { useTranslation } from "react-i18next";
 
 const DEVICE_IDS = [
@@ -386,7 +419,7 @@ export default function ReportsContent({
   // Handle download
   const handleDownload = async (format) => {
     if (reportData.length === 0) {
-      alert(t('common:export.noDataToExport'));
+      toast.warning("No data to export. Please generate a report first.");
       return;
     }
 
@@ -410,7 +443,7 @@ export default function ReportsContent({
       }
     } catch (error) {
       console.error("Export failed:", error);
-      alert(t('common:export.exportFailed'));
+      toast.error("Failed to export report. Please try again.");
     }
   };
 
@@ -487,8 +520,7 @@ export default function ReportsContent({
                   </SelectContent>
                 </Select>
               </div>
-
-
+              
               {/* Custom Date Range */}
               {datePreset === "custom" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

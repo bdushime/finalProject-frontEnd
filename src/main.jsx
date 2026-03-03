@@ -7,13 +7,16 @@ import 'leaflet/dist/leaflet.css'
 import App from './App.jsx'
 import { AuthProvider } from './pages/auth/AuthContext.jsx'
 import { ThemeProvider } from './contexts/ThemeProvider'
+import ErrorBoundary from './components/ErrorBoundary'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ThemeProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

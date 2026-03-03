@@ -5,6 +5,7 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { PageHeader } from "@/components/common/Page";
 import { generatePDF } from "@/utils/pdfGenerator";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export default function SimpleReports() {
     const { t } = useTranslation(["itstaff", "common"]);

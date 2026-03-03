@@ -11,7 +11,7 @@ import ExtendModal from "@/components/ui/extendmodal";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner"; // Assuming you use sonner for toasts
+import { toast } from "sonner";
 
 export default function MyBorrowedItems() {
     const navigate = useNavigate();
@@ -231,7 +231,7 @@ export default function MyBorrowedItems() {
                                                     <Button
                                                         variant="outline"
                                                         className="w-full text-xs h-8 border-purple-200 text-purple-700 hover:bg-purple-100"
-                                                        onClick={() => alert("Please ask Admin to check out this item.")}
+                                                        onClick={() => toast.info("Please ask Admin to check out this item.")}
                                                     >
                                                         {t("borrowed.checkInPickUp")}
                                                     </Button>
@@ -475,7 +475,7 @@ export default function MyBorrowedItems() {
                         isOpen={extendModalOpen}
                         onClose={() => setExtendModalOpen(false)}
                         item={selectedItemForExtend}
-                        onConfirm={() => { alert("Extend request sent!"); setExtendModalOpen(false); }}
+                        onConfirm={() => { toast.success("Extend request sent!"); setExtendModalOpen(false); }}
                     />
                 )}
             </PageContainer>
