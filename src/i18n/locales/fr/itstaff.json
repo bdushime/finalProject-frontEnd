@@ -39,10 +39,12 @@
             "subtitle": "Tâches administratives courantes"
         },
         "recentActivity": {
-            "title": "Activité Récente",
             "inUse": "{{active}} articles actuellement utilisés sur un inventaire total de {{total}}",
             "noActivity": "Aucune activité récente enregistrée."
         },
+        "wants": "veut emprunter",
+        "returning": "retourne",
+        "requested": "Demandé le",
         "messages": {
             "loadError": "Échec du chargement des statistiques",
             "approved": "Demande approuvée avec succès",
@@ -50,7 +52,8 @@
             "provideReason": "Veuillez fournir un motif",
             "denied": "Demande refusée avec succès",
             "failedDeny": "Échec du refus"
-        }
+        },
+        "pendingReturns": "Demandes de Retour en Attente"
     },
     "equipment": {
         "title": "Gestion du Matériel",
@@ -150,6 +153,7 @@
         "tabs": {
             "requests": "Demandes",
             "reservations": "Réservations",
+            "returns": "Retours",
             "active": "Actif"
         },
         "table": {
@@ -164,6 +168,7 @@
         "actions": {
             "approve": "Approuver",
             "deny": "Refuser",
+            "approveReturn": "Approuver le Retour",
             "checkout": "Prêter",
             "cancel": "Annuler",
             "tooEarly": "Trop tôt"

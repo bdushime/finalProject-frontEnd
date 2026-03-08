@@ -29,10 +29,10 @@ export default function ExtendModal({ isOpen, onClose, item, onConfirm }) {
 
     // Max extension is 30 mins.
     const presets = [
-        { label: "10 min", minutes: 10 },
-        { label: "20 min", minutes: 20 },
-        { label: "25 min", minutes: 25 },
+        { label: "15 min", minutes: 15 },
         { label: "30 min", minutes: 30 },
+        { label: "45 min", minutes: 45 },
+        { label: "1 hour", minutes: 60 },
     ];
 
     const calculateNewEndTime = () => {
@@ -80,9 +80,9 @@ export default function ExtendModal({ isOpen, onClose, item, onConfirm }) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         if (onConfirm) {
-            onConfirm({
-                itemId: item.id,
-                equipmentId: item.equipmentId,
+            await onConfirm({
+                itemId: item._id,
+                equipmentId: item.equipment?._id,
                 newEndTime: newEndTime.toISOString(),
                 reason: reason.trim(),
             });
@@ -131,7 +131,7 @@ export default function ExtendModal({ isOpen, onClose, item, onConfirm }) {
                             </div>
                             <div>
                                 <h2 className="text-lg font-bold text-[#0b1d3a]">Extend Session</h2>
-                                <p className="text-xs text-slate-500 font-medium">Max extension: 30 minutes</p>
+                                <p className="text-xs text-slate-500 font-medium">Max extension: 1 hour</p>
                             </div>
                         </div>
                         <button
@@ -152,13 +152,13 @@ export default function ExtendModal({ isOpen, onClose, item, onConfirm }) {
                                     <Package className="h-5 w-5 text-slate-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-[#0b1d3a]">{item.equipmentName}</p>
-                                    <p className="text-[11px] text-slate-500 font-medium tracking-wide">ID: {item.equipmentId}</p>
+                                    <p className="text-sm font-bold text-[#0b1d3a]">{item.equipment?.name || "Unknown Item"}</p>
+                                    <p className="text-[11px] text-slate-500 font-medium tracking-wide">SN: {item.equipment?.serialNumber || "N/A"}</p>
                                 </div>
                             </div>
                             <div className="text-right">
                                 <p className="text-[10px] uppercase text-slate-400 font-bold mb-0.5">Current Due</p>
-                                <p className="text-sm font-bold text-[#0b1d3a]">{formatTime(currentDue)}</p>
+                                <p className="text-sm font-bold text-[#0b1d3a]">{formatTime(item.expectedReturnTime ? new Date(item.expectedReturnTime) : null)}</p>
                             </div>
                         </div>
 
@@ -171,8 +171,8 @@ export default function ExtendModal({ isOpen, onClose, item, onConfirm }) {
                                         key={preset.label}
                                         onClick={() => setSelectedPreset(index)}
                                         className={`py-2.5 px-1 rounded-xl text-xs font-semibold transition-all border ${selectedPreset === index
-                                                ? "bg-[#0b1d3a] border-[#0b1d3a] text-white shadow-md shadow-slate-900/10"
-                                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                                            ? "bg-[#0b1d3a] border-[#0b1d3a] text-white shadow-md shadow-slate-900/10"
+                                            : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                                             }`}
                                     >
                                         {preset.label}
@@ -180,15 +180,15 @@ export default function ExtendModal({ isOpen, onClose, item, onConfirm }) {
                                 ))}
                             </div>
                             <p className="text-[10px] text-slate-400 text-center">
-                                *Max extension per session is 30 minutes.
+                                *Max extension per session is 1 hour.
                             </p>
                         </div>
 
                         {/* Conflict/Success Status */}
                         {newEndTime && (
                             <div className={`p-4 rounded-xl border ${availability.available
-                                    ? "bg-emerald-50/50 border-emerald-100"
-                                    : "bg-amber-50/50 border-amber-100"
+                                ? "bg-emerald-50/50 border-emerald-100"
+                                : "bg-amber-50/50 border-amber-100"
                                 }`}>
                                 <div className="flex items-start gap-3">
                                     {availability.available ? (
@@ -220,7 +220,7 @@ export default function ExtendModal({ isOpen, onClose, item, onConfirm }) {
                                 value={reason}
                                 onChange={(e) => setReason(e.target.value)}
                                 placeholder="Reason for extension..."
-                                className="rounded-xl border-slate-200 focus:border-[#126dd5] focus:ring-0 min-h-[60px] text-sm resize-none bg-slate-50/50 focus:bg-white transition-colors"
+                                className="rounded-xl border-slate-200 focus:border-[#126dd5] focus:ring-0 min-h-[100px] text-sm resize-none bg-slate-50/50 focus:bg-white transition-colors text-[#0b1d3a] font-medium"
                             />
                         </div>
                     </div>

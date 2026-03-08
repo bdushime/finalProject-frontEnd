@@ -4,14 +4,16 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, MapPin, Calendar, QrCode, Loader2, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Package } from "lucide-react";
 import { PageContainer } from "@/components/common/Page";
-import api from "@/utils/api"; 
+import api from "@/utils/api";
+import { useTranslation } from "react-i18next";
 
 export default function EquipmentDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
-    
+    const { t } = useTranslation('student');
+
     // State for Real Data
     const [equipment, setEquipment] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -72,11 +74,11 @@ export default function EquipmentDetails() {
         <StudentLayout>
             <PageContainer>
                 {/* Back Button */}
-                <button 
+                <button
                     onClick={() => navigate('/student/browse')}
                     className="flex items-center text-slate-500 hover:text-[#0b1d3a] transition-colors mb-6 text-sm font-medium"
                 >
-                    <ArrowLeft className="w-4 h-4 mr-1" /> Back to Catalogue
+                    <ArrowLeft className="w-4 h-4 mr-1" /> {t('equipment.backToCatalog', 'Back to Catalogue')}
                 </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -89,23 +91,22 @@ export default function EquipmentDetails() {
                                     <div>
                                         <div className="flex items-center gap-3 mb-3">
                                             {/* Dynamic Status Badge */}
-                                            <Badge className={`uppercase tracking-wide ${
-                                                equipment.status === 'Available' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : 
-                                                equipment.status === 'Checked Out' ? 'bg-rose-100 text-rose-700 hover:bg-rose-100' :
-                                                'bg-slate-100 text-slate-500 hover:bg-slate-100'
-                                            }`}>
-                                                {equipment.status}
+                                            <Badge className={`uppercase tracking-wide ${equipment.status?.toLowerCase() === 'available' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' :
+                                                equipment.status?.toLowerCase() === 'checked out' ? 'bg-rose-100 text-rose-700 hover:bg-rose-100' :
+                                                    'bg-slate-100 text-slate-500 hover:bg-slate-100'
+                                                }`}>
+                                                {t(`equipment.${equipment.status.toLowerCase().replace(/\s+/g, '') === 'checkedout' ? 'checkedOut' : equipment.status.toLowerCase()}`, equipment.status)}
                                             </Badge>
                                             {/* Category Badge */}
                                             <span className="text-xs font-bold text-slate-400 uppercase border border-slate-200 px-2 py-0.5 rounded-md">
-                                                {equipment.category || "General"}
+                                                {t(`equipment.category_${(equipment.category || 'general').toLowerCase().replace(/\s+/g, '')}`, equipment.category || "General")}
                                             </span>
                                         </div>
                                         <CardTitle className="text-3xl md:text-4xl font-bold text-[#0b1d3a] mb-2">
                                             {equipment.name}
                                         </CardTitle>
                                         <CardDescription className="text-base text-slate-500 font-mono">
-                                            Serial Number: {equipment.serialNumber || "N/A"}
+                                            {t('equipment.serialNumber', 'Serial Number')}: {equipment.serialNumber || "N/A"}
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -114,17 +115,17 @@ export default function EquipmentDetails() {
                                 {/* Description */}
                                 <div>
                                     <h3 className="font-semibold text-[#0b1d3a] mb-3 flex items-center gap-2">
-                                        Description
+                                        {t('equipment.description', 'Description')}
                                     </h3>
                                     <p className="text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
-                                        {equipment.description || "No specific description provided for this item."}
+                                        {equipment.description || t('equipment.noDescription', "No specific description provided for this item.")}
                                     </p>
                                 </div>
 
                                 {/* Specifications Grid (If exists in DB) */}
                                 {equipment.specs && Object.keys(equipment.specs).length > 0 && (
                                     <div>
-                                        <h3 className="font-semibold text-[#0b1d3a] mb-3">Technical Specifications</h3>
+                                        <h3 className="font-semibold text-[#0b1d3a] mb-3">{t('equipment.techSpecs', 'Technical Specifications')}</h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {Object.entries(equipment.specs).map(([key, value]) => (
                                                 <div key={key} className="flex justify-between items-center p-3 bg-white border border-slate-200 rounded-lg">
@@ -143,7 +144,7 @@ export default function EquipmentDetails() {
                     <div className="space-y-6">
                         <Card className="border border-slate-200 shadow-lg shadow-slate-200/50 sticky top-6">
                             <CardHeader className="bg-slate-50 border-b border-slate-100">
-                                <CardTitle className="font-bold text-[#0b1d3a] text-lg">Quick Info</CardTitle>
+                                <CardTitle className="font-bold text-[#0b1d3a] text-lg">{t('equipment.quickInfo', 'Quick Info')}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6 pt-6">
                                 {/* Location */}
@@ -152,8 +153,8 @@ export default function EquipmentDetails() {
                                         <MapPin className="h-5 w-5" />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-slate-400 uppercase font-bold">Location</div>
-                                        <div className="font-medium text-[#0b1d3a]">{equipment.location || "IT Department"}</div>
+                                        <div className="text-xs text-slate-400 uppercase font-bold">{t('equipment.location', 'Location')}</div>
+                                        <div className="font-medium text-[#0b1d3a]">{equipment.status === 'Available' ? t('equipment.itDepartment', 'IT Office') : (equipment.location || t('equipment.inUse', "In Use"))}</div>
                                     </div>
                                 </div>
 
@@ -163,32 +164,19 @@ export default function EquipmentDetails() {
                                         <Package className="h-5 w-5" />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-slate-400 uppercase font-bold">Condition</div>
-                                        <div className="font-medium text-[#0b1d3a] capitalize">{equipment.condition || "Good"}</div>
+                                        <div className="text-xs text-slate-400 uppercase font-bold">{t('equipment.condition', 'Condition')}</div>
+                                        <div className="font-medium text-[#0b1d3a] capitalize">{equipment.condition || t('equipment.good', "Good")}</div>
                                     </div>
                                 </div>
 
-                                <div className="pt-6 border-t border-slate-100 space-y-3">
-                                    {/* REQUEST BUTTON - GOES TO FORM */}
-                                    <Button 
-                                        className="w-full bg-[#0b1d3a] hover:bg-[#1a3b6e] text-white font-bold h-12 rounded-xl shadow-md transition-all active:scale-95"
-                                        disabled={equipment.status !== 'Available'}
-                                        onClick={() => navigate(`/student/borrow-request?equipmentId=${equipment._id}`)}
-                                    >
-                                        {equipment.status === 'Available' ? 'Proceed to Request' : 'Item Unavailable'}
-                                    </Button>
-
-                                    {/* QR Code Button (Future Feature) */}
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full h-12 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50"
-                                        disabled={true} 
-                                    >
-                                        <QrCode className="h-4 w-4 mr-2" />
-                                        Scan QR Code
-                                    </Button>
-                                    <p className="text-[10px] text-center text-slate-400">QR Scanning coming in v2.0</p>
-                                </div>
+                                {/* REQUEST BUTTON - GOES TO FORM */}
+                                <Button
+                                    className="w-full bg-[#0b1d3a] hover:bg-[#1a3b6e] text-white font-bold h-12 rounded-xl shadow-md transition-all active:scale-95"
+                                    disabled={equipment.status !== 'Available'}
+                                    onClick={() => navigate(`/student/borrow-request?equipmentId=${equipment._id}`)}
+                                >
+                                    {equipment.status === 'Available' ? t('equipment.proceedToRequest', 'Proceed to Request') : t('equipment.unavailable', 'Item Unavailable')}
+                                </Button>
                             </CardContent>
                         </Card>
                     </div>

@@ -75,4 +75,3 @@ Calendar.propTypes = {
 };
 
 export { Calendar };
-

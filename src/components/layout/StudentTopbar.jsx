@@ -19,7 +19,7 @@ import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 export default function StudentTopbar({ onMenuClick }) {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const unreadCount = 0;
+    const [unreadCount, setUnreadCount] = useState(0);
     const { t } = useTranslation("common");
     const { t: tStudent } = useTranslation("student");
 
@@ -41,12 +41,18 @@ export default function StudentTopbar({ onMenuClick }) {
 
     // --- 1. FETCH NOTIFICATIONS LOGIC ---
     const fetchUnreadCount = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
         try {
             const res = await api.get('/notifications');
             const count = res.data.filter(n => !n.read).length;
-            // setUnreadCount(count); // uncomment when state is wired
+            setUnreadCount(count);
         } catch (err) {
-            console.error("Failed to fetch notification count", err);
+            // Only log if it's not a 401/403 (unauthorized) error to keep console clean
+            if (err.response?.status !== 401 && err.response?.status !== 403) {
+                console.error("Failed to fetch notification count", err);
+            }
         }
     };
 

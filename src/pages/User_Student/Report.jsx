@@ -26,6 +26,7 @@ export default function Report() {
     const [searchTerm, setSearchTerm] = useState("");
     const [timeRange, setTimeRange] = useState("View All Time");
     const [statusFilter, setStatusFilter] = useState("All Status");
+    const [categoryFilter, setCategoryFilter] = useState("All Categories");
     const [historyData, setHistoryData] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -60,7 +61,7 @@ export default function Report() {
     // Reset pagination to page 1 whenever a filter is changed
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, timeRange, statusFilter]);
+    }, [searchTerm, timeRange, statusFilter, categoryFilter]);
 
     // --- FILTER LOGIC ---
     const filteredData = useMemo(() => {
@@ -86,25 +87,34 @@ export default function Report() {
                 matchesStatus = item.status === statusFilter;
             }
 
-            // 3. Search
+            // 3. Category Filter
+            let matchesCategory = true;
+            if (categoryFilter !== "All Categories") {
+                matchesCategory = (item.equipment?.category || "General") === categoryFilter;
+            }
+
+            // 4. Search
             const searchLower = searchTerm.toLowerCase();
             const equipmentName = (item.equipment?.name || "Unknown").toLowerCase();
-            const category = (item.equipment?.category || "General").toLowerCase();
-            const matchesSearch = equipmentName.includes(searchLower) || category.includes(searchLower);
+            const categoryAttr = (item.equipment?.category || "General").toLowerCase();
+            const matchesSearch = equipmentName.includes(searchLower) || categoryAttr.includes(searchLower);
 
-            return matchesTime && matchesStatus && matchesSearch;
+            return matchesTime && matchesStatus && matchesCategory && matchesSearch;
         }).map((item, index) => {
             // Calculate Display Values
             const start = new Date(item.createdAt);
             const displayDate = start.toLocaleDateString();
 
             const startTimeStr = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const endTimeStr = item.returnTime ?
-                new Date(item.returnTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
-                "Active";
+            let endTimeStr = "Active";
+            if (item.returnTime) {
+                endTimeStr = new Date(item.returnTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
 
-            // "09:00 AM - 05:00 PM"
-            const displayDuration = `${startTimeStr} - ${endTimeStr}`;
+            const itemStatus = item.status ? item.status.toUpperCase() : "UNKNOWN";
+
+            // "09:00 AM - 05:00 PM" or "Cancelled"
+            const displayDuration = itemStatus === 'CANCELLED' ? "Cancelled" : `${startTimeStr} - ${endTimeStr}`;
 
             return {
                 ...item,
@@ -125,7 +135,7 @@ export default function Report() {
 
     // --- PAGINATION LOGIC ---
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    
+
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredData.slice(startIndex, startIndex + itemsPerPage);
@@ -146,76 +156,63 @@ export default function Report() {
 
         // 1. HEADER LOGO
         try {
-            const imgProps = doc.getImageProperties(logo);
-            const imgWidth = 22; // Slightly smaller logo
-            const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-            doc.addImage(logo, 'PNG', 20, 10, imgWidth, imgHeight);
+            // Using the wide logo that already contains "ADVENTIST UNIVERSITY OF CENTRAL AFRICA" and the address
+            doc.addImage('/auca_logo_wide.png', 'PNG', 10, 10, 190, 42); // Maximum width: 190 wide, 42 high
         } catch (e) {
             console.warn("Logo error", e);
         }
 
-        // 2. HEADER TEXT (Centers aligned)
-        // Main University Name
-        doc.setFontSize(16);
-        doc.setTextColor(11, 29, 58); // Dark Blue #0b1d3a
-        doc.setFont("helvetica", "bold");
-        doc.text("ADVENTIST UNIVERSITY", 70, 18);
-        doc.text("OF CENTRAL AFRICA", 70, 25);
-
-        // Address Lines
-        doc.setFontSize(9);
-        doc.setTextColor(100); // Gray
-        doc.setFont("helvetica", "normal");
-        // Centered below title
-        doc.text("Gishushu Campus | P.O. Box 2461 Remera, Kigali, Rwanda", 105, 33, { align: "center" });
-        doc.text("Phone: +250 788 888 888 | Email: info@auca.ac.rw", 105, 38, { align: "center" });
+        let currentY = 58;
 
         // Report Title
         doc.setFontSize(14);
         doc.setTextColor(59, 130, 246); // Bright Blue (like reference)
         doc.setFont("helvetica", "bold");
-        doc.text("EQUIPMENT REPORT", 105, 50, { align: "center" });
+        doc.text("EQUIPMENT REPORT", 105, currentY, { align: "center" });
+
+        currentY += 5;
 
         // 3. METADATA BOX
         // Draw Rounded Rectangle
         doc.setDrawColor(226, 232, 240); // slate-200
         doc.setFillColor(248, 250, 252); // slate-50 (Very light gray)
-        doc.roundedRect(14, 55, 182, 32, 2, 2, 'FD');
+        doc.roundedRect(14, currentY, 182, 32, 2, 2, 'FD');
 
         // Fields inside the box
+        const boxLabelYStart = currentY + 8;
         doc.setFontSize(9);
         doc.setTextColor(0);
 
         // Col 1 Labels
         doc.setFont("helvetica", "bold");
-        doc.text("Report ID:", 20, 63);
-        doc.text("Prepared By:", 20, 70);
-        doc.text("Generated On:", 20, 77);
+        doc.text("Report ID:", 20, boxLabelYStart);
+        doc.text("Prepared By:", 20, boxLabelYStart + 7);
+        doc.text("Generated On:", 20, boxLabelYStart + 14);
 
         // Col 1 Values
         doc.setFont("helvetica", "normal");
-        doc.text(`RPT-${Math.floor(10000000 + Math.random() * 90000000)}`, 50, 63);
-        doc.text("Juls (Student)", 50, 70); // Placeholder or dynamic if user context exists
-        doc.text(new Date().toLocaleDateString(), 50, 77);
+        doc.text(`RPT-${Math.floor(10000000 + Math.random() * 90000000)}`, 50, boxLabelYStart);
+        doc.text("Student Report", 50, boxLabelYStart + 7);
+        doc.text(new Date().toLocaleDateString(), 50, boxLabelYStart + 14);
 
         // Col 2 Labels (Right aligned roughly)
         doc.setFont("helvetica", "bold");
-        doc.text("Period:", 120, 63);
-        doc.text("Total Records:", 120, 70);
-        doc.text("Status:", 120, 77);
+        doc.text("Period:", 120, boxLabelYStart);
+        doc.text("Total Records:", 120, boxLabelYStart + 7);
+        doc.text("Status:", 120, boxLabelYStart + 14);
 
         // Col 2 Values
         doc.setFont("helvetica", "normal");
-        doc.text(timeRange, 150, 63); // "View All Time"
-        doc.text(filteredData.length.toString(), 150, 70);
+        doc.text(timeRange, 150, boxLabelYStart); // "View All Time"
+        doc.text(filteredData.length.toString(), 150, boxLabelYStart + 7);
 
         // Status "VERIFIED" Badge simulated
         doc.setFillColor(220, 252, 231); // Green-100
-        doc.rect(148, 73, 22, 6, 'F');
+        doc.rect(148, boxLabelYStart - 4, 23, 6, 'F');
         doc.setTextColor(22, 163, 74); // Green-600
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
-        doc.text("VERIFIED", 151, 77);
+        doc.text("VERIFIED", 150, boxLabelYStart + 0.5);
 
         // 4. TABLE
         const tableColumn = [
@@ -233,35 +230,38 @@ export default function Report() {
         const tableRows = filteredData.map(item => [
             item.no,
             item.equipmentName,
-            item.serialNumber, 
+            item.serialNumber,
             item.category,
             item.displayDate,
-            item.displayDuration.replace(" - ", "\nto\n"), // Stack times: "9:00 AM" newline "5:00 PM"
-            item.location, 
+            item.displayDuration, // Duration text
+            item.location,
             item.status
         ]);
 
         autoTable(doc, {
-            startY: 92,
+            startY: currentY + 38,
             head: [tableColumn],
             body: tableRows,
             theme: 'grid', // Required for Reference Look
             headStyles: {
-                fillColor: [11, 29, 58], // Dark Blue Header
-                textColor: 255,
+                fillColor: [248, 250, 252], // Light Blue/Gray to match metadata box
+                textColor: [0, 0, 0],
                 fontStyle: 'bold',
                 halign: 'center',
                 valign: 'middle',
-                fontSize: 8,
-                cellPadding: 3
+                fontSize: 7,
+                cellPadding: 3,
+                lineWidth: 0.1,
+                lineColor: [226, 232, 240]
             },
             bodyStyles: {
-                fontSize: 8,
+                fontSize: 7,
                 textColor: 50,
                 cellPadding: 3,
                 halign: 'center',
                 valign: 'middle',
-                lineColor: 220
+                lineWidth: 0.1,
+                lineColor: [226, 232, 240]
             },
             columnStyles: {
                 0: { cellWidth: 10 },               // No
@@ -322,7 +322,7 @@ export default function Report() {
     // --- CSV EXPORT ---
     const handleExportCSV = () => {
         const headers = ["No.", "Equipment", "Serial Number", "Category", "Borrowed Date", "Duration", "Location", "Status"];
-        
+
         // Export all filtered data
         const rows = filteredData.map(item => [
             item.no,
@@ -411,14 +411,24 @@ export default function Report() {
                                     <option>Returned</option>
                                     <option>Active</option>
                                     <option>Overdue</option>
+                                    <option>Cancelled</option>
                                 </select>
                                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             </div>
 
-                            {/* Disabled Filters */}
+                            {/* Category Filters */}
                             <div className="relative">
-                                <select className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg py-2.5 pl-3 pr-8 outline-none cursor-not-allowed opacity-60 min-w-[130px]" disabled>
-                                    <option>All Conditions</option>
+                                <select
+                                    className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg py-2.5 pl-3 pr-8 focus:border-[#126dd5] outline-none cursor-pointer min-w-[130px]"
+                                    value={categoryFilter}
+                                    onChange={e => setCategoryFilter(e.target.value)}
+                                >
+                                    <option>All Categories</option>
+                                    <option>Projector</option>
+                                    <option>Laptop</option>
+                                    <option>Camera</option>
+                                    <option>Audio</option>
+                                    <option>General</option>
                                 </select>
                                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             </div>
@@ -495,7 +505,8 @@ export default function Report() {
                                                 <td className="p-4 text-right pr-6">
                                                     <Badge className={`font-bold border-0 shadow-sm ${item.status === 'RETURNED' || item.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' :
                                                         item.status === 'OVERDUE' || item.status === 'Overdue' ? 'bg-rose-50 text-rose-600 hover:bg-rose-100' :
-                                                            'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                            item.status === 'CANCELLED' || item.status === 'Cancelled' ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' :
+                                                                'bg-blue-50 text-blue-600 hover:bg-blue-100'
                                                         }`}>
                                                         {item.status}
                                                     </Badge>
@@ -525,8 +536,8 @@ export default function Report() {
                                     Showing <span className="font-semibold text-slate-700">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-semibold text-slate-700">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="font-semibold text-slate-700">{filteredData.length}</span> entries
                                 </p>
                                 <div className="flex gap-2">
-                                    <button 
-                                        onClick={handlePrevPage} 
+                                    <button
+                                        onClick={handlePrevPage}
                                         disabled={currentPage === 1}
                                         className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
@@ -535,8 +546,8 @@ export default function Report() {
                                     <div className="flex items-center px-4 font-medium text-sm text-slate-600">
                                         Page {currentPage} of {totalPages}
                                     </div>
-                                    <button 
-                                        onClick={handleNextPage} 
+                                    <button
+                                        onClick={handleNextPage}
                                         disabled={currentPage === totalPages}
                                         className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >

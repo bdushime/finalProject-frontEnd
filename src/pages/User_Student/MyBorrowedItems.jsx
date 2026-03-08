@@ -3,7 +3,7 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package, Loader2, CalendarClock, Clock, AlertCircle, CheckCircle, ArrowRight, History, MoreVertical, Calendar } from "lucide-react";
+import { Package, Loader2, CalendarClock, Clock, AlertCircle, CheckCircle, ArrowRight, History, MoreVertical, Calendar, Timer } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PageContainer } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
@@ -12,11 +12,13 @@ import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner"; // Assuming you use sonner for toasts
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function MyBorrowedItems() {
     const navigate = useNavigate();
     const { t } = useTranslation("student");
-    
+
     // --- REAL DATA STATE ---
     const [pendingRequests, setPendingRequests] = useState([]);
     const [activeBorrows, setActiveBorrows] = useState([]);
@@ -28,6 +30,24 @@ export default function MyBorrowedItems() {
     const [selectedItemForExtend, setSelectedItemForExtend] = useState(null);
     const [activeTab, setActiveTab] = useState('active'); // active | history
 
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        description: "",
+        onConfirm: () => { },
+        variant: "default"
+    });
+
+    const openConfirm = (title, description, onConfirm, variant = "default") => {
+        setConfirmModal({
+            isOpen: true,
+            title,
+            description,
+            onConfirm,
+            variant
+        });
+    };
+
     // --- FETCH DATA ---
     useEffect(() => {
         const fetchData = async () => {
@@ -38,25 +58,29 @@ export default function MyBorrowedItems() {
                 ]);
 
                 // 1. FILTER PENDING (Initial Checkout Requests)
-                const pending = activeRes.data.filter(t => t.status === 'Pending');
+                const pending = activeRes.data.filter(t => t.status?.toLowerCase() === 'pending');
 
                 // 2. FILTER ACTIVE BORROWS (Now includes 'Pending Return')
-                const borrowed = activeRes.data.filter(t =>
-                    t.status === 'Borrowed' ||
-                    t.status === 'Checked Out' ||
-                    t.status === 'Overdue' ||
-                    t.status === 'Pending Return' // 👈 Added this status
-                );
+                const borrowed = activeRes.data.filter(t => {
+                    const status = t.status?.toLowerCase();
+                    return (status === 'borrowed' ||
+                        status === 'checked out' ||
+                        status === 'overdue' ||
+                        status === 'pending return') &&
+                        status !== 'returned';
+                });
 
                 // 3. FILTER RESERVED
-                const reserved = activeRes.data.filter(t => t.status === 'Reserved');
+                const reserved = activeRes.data.filter(t => t.status?.toLowerCase() === 'reserved');
 
                 setPendingRequests(pending);
                 setActiveBorrows(borrowed);
                 setReservations(reserved);
 
-                const returnedOnly = historyRes.data.filter(item => item.status === 'Returned');
-                setHistoryList(returnedOnly);
+                // 4. FILTER HISTORY (Includes returned, cancelled, and denied)
+                const historyStatuses = ['returned', 'cancelled', 'denied', 'rejected'];
+                const history = historyRes.data.filter(t => historyStatuses.includes(t.status?.toLowerCase()));
+                setHistoryList(history);
 
             } catch (err) {
                 console.error("Failed to fetch borrows:", err);
@@ -78,7 +102,7 @@ export default function MyBorrowedItems() {
         const diff = new Date(dueDate) - new Date();
         return Math.ceil(diff / (1000 * 60 * 60 * 24));
     };
-    
+
     const getCountdown = (dueDate) => {
         if (!dueDate) return null;
         const diffMs = new Date(dueDate) - new Date();
@@ -90,23 +114,27 @@ export default function MyBorrowedItems() {
     };
 
     // --- NEW: REQUEST RETURN LOGIC ---
-    const handleRequestReturn = async (transactionId) => {
-        if (!confirm("Are you sure you want to request a return? IT Staff will need to approve this.")) return;
-        
-        try {
-            // Send request to backend to update status
-            await api.put(`/transactions/${transactionId}/request-return`);
-            
-            toast.success("Return request sent successfully!");
-            
-            // Optimistically update the UI so the button changes immediately
-            setActiveBorrows(prev => prev.map(item => 
-                item._id === transactionId ? { ...item, status: 'Pending Return' } : item
-            ));
-        } catch (err) {
-            console.error("Return request failed:", err);
-            toast.error("Failed to request return. Please try again.");
-        }
+    const handleRequestReturn = (transactionId) => {
+        openConfirm(
+            t("borrowed.confirmReturnTitle"),
+            t("borrowed.confirmReturnDesc"),
+            async () => {
+                try {
+                    // Send request to backend to update status
+                    await api.put(`/transactions/${transactionId}/request-return`);
+
+                    toast.success("Return request sent successfully!");
+
+                    // Optimistically update the UI so the button changes immediately
+                    setActiveBorrows(prev => prev.map(item =>
+                        item._id === transactionId ? { ...item, status: 'Pending Return' } : item
+                    ));
+                } catch (err) {
+                    console.error("Return request failed:", err);
+                    toast.error("Failed to request return. Please try again.");
+                }
+            }
+        );
     };
 
     const handleExtend = (item) => {
@@ -115,16 +143,22 @@ export default function MyBorrowedItems() {
     };
 
     // --- CANCEL LOGIC ---
-    const handleCancelReservation = async (id) => {
-        if (!confirm("Are you sure you want to cancel this reservation?")) return;
-        try {
-            await api.post(`/transactions/cancel/${id}`);
-            setReservations(prev => prev.filter(item => item._id !== id));
-            toast.success(t("borrowed.cancelSuccess"));
-        } catch (err) {
-            console.error("Cancel failed:", err);
-            toast.error(t("borrowed.cancelFailed"));
-        }
+    const handleCancelReservation = (id) => {
+        openConfirm(
+            t("borrowed.confirmCancelTitle"),
+            t("borrowed.confirmCancelDesc"),
+            async () => {
+                try {
+                    await api.post(`/transactions/cancel/${id}`);
+                    setReservations(prev => prev.filter(item => item._id !== id));
+                    toast.success(t("borrowed.cancelSuccess"));
+                } catch (err) {
+                    console.error("Cancel failed:", err);
+                    toast.error(t("borrowed.cancelFailed"));
+                }
+            },
+            "destructive"
+        );
     };
 
     if (loading) {
@@ -227,20 +261,20 @@ export default function MyBorrowedItems() {
                                                     </div>
                                                     <Badge className="bg-purple-100 text-purple-700 border-purple-200">{t("equipment.reserved")}</Badge>
                                                 </div>
-                                                <div className="flex gap-2">
+                                                <div className="mt-4 flex flex-col sm:flex-row gap-2">
                                                     <Button
                                                         variant="outline"
-                                                        className="w-full text-xs h-8 border-purple-200 text-purple-700 hover:bg-purple-100"
-                                                        onClick={() => alert("Please ask Admin to check out this item.")}
+                                                        className="w-full sm:w-auto text-xs h-8 border-purple-200 text-purple-700 hover:bg-purple-100"
+                                                        onClick={() => toast.info("Please ask IT Staff to check out this item.")}
                                                     >
                                                         {t("borrowed.checkInPickUp")}
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
-                                                        className="w-auto text-xs h-8 text-rose-600 hover:bg-rose-50"
+                                                        className="w-full sm:w-auto text-xs h-8 text-rose-600 hover:bg-rose-50"
                                                         onClick={() => handleCancelReservation(res._id)}
                                                     >
-                                                        {t("profile.cancel")}
+                                                        {t("borrowed.cancelReservation")}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -276,21 +310,6 @@ export default function MyBorrowedItems() {
                                                                 <p className="text-sm text-slate-500 font-medium">{item.equipment?.serialNumber || "N/A"}</p>
                                                             </div>
                                                         </div>
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-[#0b1d3a]">
-                                                                    <MoreVertical className="w-5 h-5" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end" className="w-48">
-                                                                <DropdownMenuItem onClick={() => navigate('/student/help')}>
-                                                                    {t("borrowed.reportIssue")}
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-rose-600" onClick={() => handleExtend(item)}>
-                                                                    {t("borrowed.requestExtension")}
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
                                                     </div>
 
                                                     {/* Progress Bar and Timer */}
@@ -298,7 +317,7 @@ export default function MyBorrowedItems() {
                                                         <div className="flex justify-between text-xs font-semibold mb-2">
                                                             <span className="text-slate-500">Due: {formatDate(item.expectedReturnTime)}</span>
                                                             <span className={`${isOverdue ? 'text-rose-600' : isDueSoon ? 'text-amber-600' : 'text-[#126dd5]'}`}>
-                                                                {isOverdue ? t("borrowed.overdue") : `${daysLeft} ${t("borrowed.daysLeft")}`}
+                                                                {isOverdue && t("borrowed.overdue")}
                                                             </span>
                                                         </div>
                                                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-4">
@@ -356,25 +375,26 @@ export default function MyBorrowedItems() {
                                                         {isPendingReturn ? (
                                                             <Button
                                                                 disabled
-                                                                className="flex-1 bg-yellow-100 text-yellow-700 font-semibold h-10 rounded-xl cursor-not-allowed"
+                                                                className="flex-1 bg-yellow-100 text-yellow-700 font-semibold h-11 rounded-xl cursor-not-allowed"
                                                             >
                                                                 Return Requested
                                                             </Button>
                                                         ) : (
                                                             <Button
-                                                                className="flex-1 bg-[#0b1d3a] hover:bg-[#2c3e50] text-white font-semibold h-10 rounded-xl shadow-sm"
+                                                                className="flex-1 bg-[#0b1d3a] hover:bg-[#2c3e50] text-white font-semibold h-11 rounded-xl shadow-sm transition-all"
                                                                 onClick={() => handleRequestReturn(item._id)}
                                                             >
                                                                 Request Return
                                                             </Button>
                                                         )}
-                                                        
+
                                                         <Button
                                                             variant="outline"
-                                                            className="px-4 border-slate-200 hover:bg-slate-50 hover:text-[#0b1d3a] rounded-xl"
-                                                            onClick={() => navigate(`/student/equipment/${item.equipment?._id || ''}`)}
+                                                            className="flex-1 border-[#126dd5]/20 text-[#126dd5] hover:bg-blue-50 hover:border-[#126dd5] h-11 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+                                                            onClick={() => handleExtend(item)}
                                                         >
-                                                            {t("equipment.details")}
+                                                            <Timer className="w-4 h-4" />
+                                                            {t("borrowed.requestExtension")}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -383,7 +403,7 @@ export default function MyBorrowedItems() {
 
                                         {/* Add New Item Card */}
                                         <div
-                                            onClick={() => navigate('/student/equipment')}
+                                            onClick={() => navigate('/student/browse')}
                                             className="group bg-slate-50 rounded-2xl p-6 border-2 border-dashed border-slate-200 hover:border-[#126dd5] hover:bg-[#126dd5]/5 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[300px]"
                                         >
                                             <div className="w-16 h-16 rounded-full bg-white border border-slate-200 group-hover:border-[#126dd5] flex items-center justify-center mb-4 transition-colors shadow-sm">
@@ -407,7 +427,7 @@ export default function MyBorrowedItems() {
                                         <Button
                                             variant="outline"
                                             className="mt-4"
-                                            onClick={() => navigate('/student/equipment')}
+                                            onClick={() => navigate('/student/browse')}
                                         >
                                             {t("borrowed.browseCatalog")}
                                         </Button>
@@ -441,10 +461,17 @@ export default function MyBorrowedItems() {
                                         </div>
                                         <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
                                             <div className="text-right">
-                                                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">{t("borrowed.duration")}</p>
+                                                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">{t("borrowed.borrowedOn", "Borrowed On")}</p>
                                                 <p className="text-sm font-bold text-[#0b1d3a]">
-                                                    {item.returnTime && item.createdAt
-                                                        ? `${Math.ceil((new Date(item.returnTime) - new Date(item.createdAt)) / (1000 * 60 * 60 * 24))} ${t("borrowed.days")}`
+                                                    {item.createdAt
+                                                        ? new Date(item.createdAt).toLocaleString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric',
+                                                            hour: 'numeric',
+                                                            minute: '2-digit',
+                                                            hour12: true
+                                                        })
                                                         : "N/A"
                                                     }
                                                 </p>
@@ -475,9 +502,40 @@ export default function MyBorrowedItems() {
                         isOpen={extendModalOpen}
                         onClose={() => setExtendModalOpen(false)}
                         item={selectedItemForExtend}
-                        onConfirm={() => { alert("Extend request sent!"); setExtendModalOpen(false); }}
+                        onConfirm={async (data) => {
+                            try {
+                                await api.put(`/transactions/${data.itemId}/extend`, {
+                                    newEndTime: data.newEndTime,
+                                    reason: data.reason
+                                });
+                                toast.success("Extension request sent successfully!");
+                                // Refresh data
+                                const res = await api.get('/transactions/my-borrowed');
+                                setActiveBorrows(res.data.filter(t =>
+                                    t.status === 'Borrowed' ||
+                                    t.status === 'Checked Out' ||
+                                    t.status === 'Overdue' ||
+                                    t.status === 'Pending Return'
+                                ));
+                            } catch (err) {
+                                console.error("Extension failed:", err);
+                                toast.error(err.response?.data?.message || "Failed to extend time.");
+                            }
+                            setExtendModalOpen(false);
+                        }}
                     />
                 )}
+
+                <ConfirmationModal
+                    isOpen={confirmModal.isOpen}
+                    onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                    onConfirm={confirmModal.onConfirm}
+                    title={confirmModal.title}
+                    description={confirmModal.description}
+                    confirmText={t("borrowed.confirm")}
+                    cancelText={t("borrowed.cancel")}
+                    variant={confirmModal.variant}
+                />
             </PageContainer>
         </StudentLayout>
     );

@@ -863,7 +863,8 @@ import {
     ArrowRight, BookOpen, Clock, Shield, Users,
     Zap, Star, Rocket, ChevronRight, Play, MapPin,
     Mail, Phone, Send, Check, Moon, Sun, Menu, X,
-    Laptop, QrCode, Bell, BarChart3, Package, UserCheck
+    Laptop, QrCode, Bell, BarChart3, Package, UserCheck,
+    GraduationCap, Presentation, Terminal, ShieldCheck, DoorOpen, Settings
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import logo from "@/assets/images/logo 8cc.jpg";
@@ -1065,21 +1066,18 @@ export default function Landing() {
     };
 
     const features = [
-        { icon: <Package />, title: t('features.smartInventory'), desc: t('features.smartInventoryDesc'), color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
+        { icon: <MapPin />, title: t('features.iotTracking'), desc: t('features.iotTrackingDesc'), color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
         { icon: <QrCode />, title: t('features.qrScanning'), desc: t('features.qrScanningDesc'), color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" },
-        { icon: <Bell />, title: t('features.smartAlerts'), desc: t('features.smartAlertsDesc'), color: "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" },
-        { icon: <BarChart3 />, title: t('features.analytics'), desc: t('features.analyticsDesc'), color: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" },
-        { icon: <UserCheck />, title: t('features.roleAccess'), desc: t('features.roleAccessDesc'), color: "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400" },
-        { icon: <Laptop />, title: t('features.multiPlatform'), desc: t('features.multiPlatformDesc'), color: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" },
+        { icon: <Shield />, title: t('features.riskAnalytics'), desc: t('features.riskAnalyticsDesc'), color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
     ];
 
     const users = [
-        { emoji: "🎓", title: t('users.students'), desc: t('users.studentsDesc') },
-        { emoji: "👨‍🏫", title: t('users.lecturers'), desc: t('users.lecturersDesc') },
-        { emoji: "💼", title: t('users.itStaff'), desc: t('users.itStaffDesc') },
-        { emoji: "🔬", title: t('users.researchers'), desc: t('users.researchersDesc') },
-        { emoji: "🎬", title: t('users.mediaTeams'), desc: t('users.mediaTeamsDesc') },
-        { emoji: "📊", title: t('users.admins'), desc: t('users.adminsDesc') },
+        { icon: <GraduationCap className="w-7 h-7" />, color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400", title: t('users.students'), desc: t('users.studentsDesc') },
+        { icon: <Presentation className="w-7 h-7" />, color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400", title: t('users.lecturers'), desc: t('users.lecturersDesc') },
+        { icon: <Terminal className="w-7 h-7" />, color: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400", title: t('users.itStaff'), desc: t('users.itStaffDesc') },
+        { icon: <ShieldCheck className="w-7 h-7" />, color: "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400", title: t('users.security'), desc: t('users.securityDesc') },
+        { icon: <DoorOpen className="w-7 h-7" />, color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400", title: t('users.gatekeepers'), desc: t('users.gatekeepersDesc') },
+        { icon: <Settings className="w-7 h-7" />, color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300", title: t('users.admins'), desc: t('users.adminsDesc') },
     ];
 
     const testimonials = [
@@ -1329,8 +1327,8 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${featuresInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                {t('features.title')}{' '}
-                                <span className="gradient-text">{t('features.title').split(' ').slice(0, 2).join(' ')}</span>
+                                {t('features.title').split(' ').slice(0, -2).join(' ')}{' '}
+                                <span className="gradient-text">{t('features.title').split(' ').slice(-2).join(' ')}</span>
                             </h2>
                             <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
                                 {t('features.subtitle')}
@@ -1409,7 +1407,9 @@ export default function Landing() {
                                     className={`card-hover flex items-start gap-4 bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 slide-up ${usersInView ? 'visible' : ''}`}
                                     style={{ transitionDelay: `${i * 0.08}s` }}
                                 >
-                                    <span className="text-4xl">{user.emoji}</span>
+                                    <div className={`p-3 rounded-xl shrink-0 flex items-center justify-center ${user.color}`}>
+                                        {user.icon}
+                                    </div>
                                     <div>
                                         <h3 className="font-bold text-slate-800 dark:text-white mb-1">{user.title}</h3>
                                         <p className="text-sm text-slate-600 dark:text-slate-400">{user.desc}</p>
@@ -1425,8 +1425,8 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className={`text-center mb-8 slide-up ${testimonialsInView ? 'visible' : ''}`}>
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                {t('testimonials.title')}{' '}
-                                <span className="gradient-text">{t('testimonials.title').split(' ').slice(0, 1)}</span>
+                                {t('testimonials.title').split(' ').slice(0, -1).join(' ')}{' '}
+                                <span className="gradient-text">{t('testimonials.title').split(' ').slice(-1)}</span>
                             </h2>
                         </div>
 
@@ -1472,7 +1472,7 @@ export default function Landing() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-8">
                             <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                {t('contact.title')}{' '}
+                                {t('contact.title').split(' ').slice(0, -1).join(' ')}{' '}
                                 <span className="gradient-text">{t('contact.title').split(' ').slice(-1)}</span>
                             </h2>
                             <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
