@@ -25,6 +25,9 @@ export default function Dashboard() {
     // --- 1. FETCH DATA ---
     useEffect(() => {
         const fetchData = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
             try {
                 // A. Profile
                 const profileRes = await api.get('/users/profile');
@@ -35,7 +38,10 @@ export default function Dashboard() {
 
                 // B. Borrows & History
                 const borrowsRes = await api.get('/transactions/my-borrowed');
-                setBorrows(borrowsRes.data);
+                // Only include statuses that represent an active or pending transaction
+                const activeStatuses = ['borrowed', 'checked out', 'overdue', 'pending return', 'reserved', 'pending'];
+                const activeOnly = borrowsRes.data.filter(l => activeStatuses.includes(l.status?.toLowerCase()));
+                setBorrows(activeOnly);
 
                 const historyRes = await api.get('/transactions/my-history');
                 setHistory(historyRes.data);
@@ -47,17 +53,21 @@ export default function Dashboard() {
 
                 // D. Stats
                 setStats({
-                    activeBorrows: borrowsRes.data.length,
-                    pending: borrowsRes.data.filter(l => l.status === 'Pending').length,
-                    overdue: borrowsRes.data.filter(l => new Date() > new Date(l.expectedReturnTime)).length
+                    activeBorrows: activeOnly.length,
+                    pending: activeOnly.filter(l => l.status?.toLowerCase() === 'pending').length,
+                    overdue: activeOnly.filter(l => {
+                        const status = l.status?.toLowerCase();
+                        return status === 'overdue' || (new Date() > new Date(l.expectedReturnTime) && status !== 'pending return');
+                    }).length
                 });
 
             } catch (err) {
-                console.error("Dashboard Data Error:", err);
+                if (err.response?.status !== 401 && err.response?.status !== 403) {
+                    console.error("Dashboard Data Error:", err);
+                }
             }
         };
 
-        fetchData();
         fetchData();
     }, []);
 
@@ -188,7 +198,7 @@ export default function Dashboard() {
                                 <span className="text-lg font-medium text-[#0b1d3a]">{t("dashboard.availableDevices")}</span>
                                 <button className="text-xs font-bold text-[#126dd5]">{t("dashboard.viewAll")}</button>
                             </div>
-                            <div className="space-y-3 flex-1 overflow-y-auto pr-1 scrollbar-hide">
+                            <div className="space-y-3 flex-1 pr-1 scrollbar-hide">
                                 {devices.length > 0 ? (
                                     devices.map((device) => (
                                         <div key={device._id} className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center group cursor-pointer hover:border-[#126dd5]/30 transition-all">

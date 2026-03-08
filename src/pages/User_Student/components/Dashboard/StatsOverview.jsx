@@ -7,8 +7,8 @@ export default function StatsOverview({ stats }) {
 
     const items = [
         {
-            label: t("dashboard.activeLoans"),
-            value: stats?.activeLoans || 0,
+            label: t("dashboard.activeBorrows"),
+            value: stats?.activeBorrows || 0,
             icon: Package
         },
         {

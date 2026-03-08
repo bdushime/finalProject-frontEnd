@@ -13,31 +13,18 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
 
     // --- 1. HEADER SECTION ---
 
-    // Add Logo
+    // Add Wide Logo
     try {
-        const logoUrl = '/auca_logo.png';
-        doc.addImage(logoUrl, 'PNG', 14, 10, 25, 25);
+        const logoUrl = '/auca_logo_wide.png';
+        doc.addImage(logoUrl, 'PNG', 10, 10, 190, 42); // Maximum width: 190 wide, 42 high
     } catch (e) {
         console.warn("Logo not found, skipping image.");
     }
 
-    // University Name
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(40, 40, 40);
-    doc.text("ADVENTIST UNIVERSITY OF CENTRAL AFRICA", 115, 18, { align: "center" });
-
-    // Address Line
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text("Gishushu Campus | P.O. Box 2461 Remera, Kigali, Rwanda", 115, 24, { align: "center" });
-    doc.text("Phone: +250 788 888 888 | Email: info@auca.ac.rw", 115, 29, { align: "center" });
-
     // Divider Line
     doc.setLineWidth(0.5);
     doc.setDrawColor(200, 200, 200);
-    doc.line(14, 35, 196, 35);
+    doc.line(10, 56, 200, 56);
 
     // --- 2. REPORT METADATA ---
 
@@ -45,34 +32,34 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 0, 0);
     // Use dynamic title
-    doc.text(reportTitle, 14, 45);
+    doc.text(reportTitle, 14, 66);
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text("Report ID:", 14, 55);
+    doc.text("Report ID:", 14, 76);
     doc.setFont("helvetica", "normal");
-    doc.text(`RPT-${Math.floor(10000000 + Math.random() * 90000000)}`, 45, 55);
+    doc.text(`RPT-${Math.floor(10000000 + Math.random() * 90000000)}`, 45, 76);
 
     doc.setFont("helvetica", "bold");
-    doc.text("Prepared By:", 14, 61);
+    doc.text("Prepared By:", 14, 82);
     doc.setFont("helvetica", "normal");
-    doc.text(`${currentUser.username || "Staff"} (${currentUser.role || "User"})`, 45, 61);
+    doc.text(`${currentUser.username || "Staff"} (${currentUser.role || "User"})`, 45, 82);
 
     doc.setFont("helvetica", "bold");
-    doc.text("Generated On:", 14, 67);
+    doc.text("Generated On:", 14, 88);
     doc.setFont("helvetica", "normal");
-    doc.text(new Date().toLocaleDateString(), 45, 67);
+    doc.text(new Date().toLocaleDateString(), 45, 88);
 
     doc.setFont("helvetica", "bold");
-    doc.text("Total Records:", 120, 55);
+    doc.text("Total Records:", 120, 76);
     doc.setFont("helvetica", "normal");
-    doc.text(String(reportData.length), 150, 55);
+    doc.text(String(reportData.length), 150, 76);
 
     doc.setFont("helvetica", "bold");
-    doc.text("Status:", 120, 61);
+    doc.text("Status:", 120, 82);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 128, 0);
-    doc.text("VERIFIED", 150, 61);
+    doc.text("VERIFIED", 150, 82);
     doc.setTextColor(0, 0, 0);
 
     // --- 3. DYNAMIC DATA TABLE ---
@@ -96,21 +83,24 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
     autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
-        startY: 75,
+        startY: 96,
         theme: 'grid',
         headStyles: {
-            fillColor: [240, 240, 240],
+            fillColor: [248, 250, 252], // Light Blue/Gray to match metadata box
             textColor: [0, 0, 0],
-            fontSize: 9,
+            fontSize: 8,
             halign: 'center',
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            lineWidth: 0.1,
+            lineColor: [226, 232, 240]
         },
         styles: {
-            fontSize: 8,
+            fontSize: 7,
             cellPadding: 3,
             valign: 'middle',
             halign: 'center',
-            lineColor: [200, 200, 200]
+            lineWidth: 0.1,
+            lineColor: [226, 232, 240]
         },
         columnStyles: {
             1: { halign: 'left' },

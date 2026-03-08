@@ -16,7 +16,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { format, endOfWeek, isBefore, startOfDay, startOfWeek } from "date-fns";
+import { format, endOfWeek, isBefore, startOfDay } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/components/ui/utils";
 import {
@@ -31,18 +31,16 @@ import {
     ChevronLeft,
     Camera,
     Loader2,
-    Clock,
-    AlertTriangle,
-    Calendar as CalendarIcon,
-    ChevronRight,
-    X
+    Clock, // NEW
+    AlertTriangle, // Used for the warning UI
+    Calendar as CalendarIcon
 } from "lucide-react";
 import api from "@/utils/api";
 import PropTypes from "prop-types";
 import EquipmentScanAndPhotoUpload from "@/components/EquipmentScanAndPhotoUpload";
 
 export default function BorrowRequestForm({ onSuccess }) {
-    const { t } = useTranslation('student');
+    const { t } = useTranslation();
     const { user } = useAuth();
     const studentName = user?.fullName || user?.username || "Student";
     const navigate = useNavigate();
@@ -61,18 +59,20 @@ export default function BorrowRequestForm({ onSuccess }) {
 
     // Data States
     const [equipmentList, setEquipmentList] = useState([]);
-    const [classroomList, setClassroomList] = useState([]);
-    const [equipment, setEquipment] = useState(null);
+    const [classroomList, setClassroomList] = useState([]); // <--- NEW: Store API classrooms
+    const [equipment, setEquipment] = useState(null);       // Selected item object
 
     // Form Data
     const [formData, setFormData] = useState({
         equipmentId: equipmentIdParam || "",
         course: "",
-        courseName: "",
-        lecturer: "",
+        courseName: "", // NEW
+        lecturer: "", // NEW
         purpose: "",
         location: "",
+        // Borrow fields
         sessionDateTime: "",
+        // Reserve fields
         reservationDate: "",
         reservationTime: "",
         notes: "",
@@ -84,34 +84,35 @@ export default function BorrowRequestForm({ onSuccess }) {
     const [timeSlots, setTimeSlots] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
-    const [statusModal, setStatusModal] = useState(null);
+    const [statusModal, setStatusModal] = useState(null); // { type: 'success'|'pending', message: string }
 
     // Exception State
-    const [isException, setIsException] = useState(false);
+    const [isException, setIsException] = useState(false); // <--- NEW: Tracks Projector vs Screen conflict
     const [showRoomAlert, setShowRoomAlert] = useState(false);
-
-    // --- NEW: Modal State for Date & Time Pickers ---
-    const [showDateModal, setShowDateModal] = useState(false);
-    const [showTimeModal, setShowTimeModal] = useState(false);
-    const [calendarMonth, setCalendarMonth] = useState(new Date());
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
 
     // --- 1. INITIAL DATA FETCHING ---
     useEffect(() => {
         const loadInitialData = async () => {
             try {
+                // 1. Get all equipment
                 const eqRes = await api.get('/equipment');
+                // Filter only available items for borrowing
                 const availableItems = eqRes.data.filter(item => item.status === 'Available');
                 setEquipmentList(availableItems);
 
+                // 2. Get Classrooms (For validation)
                 try {
                     const roomRes = await api.get('/classrooms');
                     setClassroomList(roomRes.data);
                 } catch (roomErr) {
                     console.warn("Could not load classrooms (Permission issue?)", roomErr);
+                    // Fallback to local storage if API fails
                     const { getClassrooms } = await import("@/utils/classroomStorage");
                     setClassroomList(getClassrooms());
                 }
 
+                // 3. Pre-select if ID is in URL
                 if (equipmentIdParam) {
                     const found = eqRes.data.find(e => e._id === equipmentIdParam);
                     if (found) {
@@ -192,24 +193,12 @@ export default function BorrowRequestForm({ onSuccess }) {
         setErrors(prev => ({ ...prev, [field]: null }));
     };
 
-    // --- NEW: Date Selection Handler ---
-    const handleDateSelect = (day) => {
-        const selected = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
-        const dateStr = format(selected, "yyyy-MM-dd");
-        handleInputChange("reservationDate", dateStr);
-        setShowDateModal(false);
-    };
-
-    // --- NEW: Time Selection Handler ---
-    const handleTimeSelect = (time) => {
-        handleInputChange("reservationTime", time);
-        setShowTimeModal(false);
-    };
-
     // --- REAL-TIME EXCEPTION CHECK ---
     useEffect(() => {
+        // Only run check if we are in the details step (3), we have an item, and a location is typed
         if (step === 2 && equipment && formData.location) {
             const checkException = () => {
+                // 1. Is Equipment a Projector?
                 const isProjector = equipment.name.toLowerCase().includes('projector') ||
                     (equipment.category && equipment.category.toLowerCase().includes('projector'));
 
@@ -218,17 +207,21 @@ export default function BorrowRequestForm({ onSuccess }) {
                     return;
                 }
 
+                // 2. Does Room have a screen?
+                // Normalize input: "Room 101" -> "room101" to match database fuzzy search
                 const normalize = (str) => str.toLowerCase().replace(/\s+/g, '');
                 const inputLoc = normalize(formData.location);
+
                 const foundRoom = classroomList.find(c => normalize(c.name) === inputLoc);
 
                 if (foundRoom && foundRoom.hasScreen) {
-                    setIsException(true);
+                    setIsException(true); // <--- CONFLICT DETECTED
                 } else {
                     setIsException(false);
                 }
             };
 
+            // Debounce the check (wait 300ms after typing stops)
             const timer = setTimeout(checkException, 300);
             return () => clearTimeout(timer);
         }
@@ -238,6 +231,7 @@ export default function BorrowRequestForm({ onSuccess }) {
     const validateForm = () => {
         const newErrors = {};
 
+        // Step 1: Equipment Selection
         if (!formData.equipmentId) newErrors.equipmentId = "Please select equipment";
 
         if (step === 2) {
@@ -254,6 +248,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                     const returnTime = new Date(formData.sessionDateTime);
                     const diffHours = (returnTime - now) / (1000 * 60 * 60);
 
+                    // Constraints
                     if (returnTime.getDate() !== now.getDate()) {
                         newErrors.sessionDateTime = "Borrowing is only allowed for today.";
                     } else if (diffHours <= 0) {
@@ -274,13 +269,10 @@ export default function BorrowRequestForm({ onSuccess }) {
                 if (!formData.reservationDate) {
                     newErrors.reservationDate = "Date is required";
                 } else {
-                    const now = startOfDay(new Date());
-                    const resDate = startOfDay(new Date(formData.reservationDate));
-                    const startOfCurrentWeek = startOfWeek(now, { weekStartsOn: 0 });
-                    const endOfAllowedDays = new Date(startOfCurrentWeek);
-                    endOfAllowedDays.setDate(endOfAllowedDays.getDate() + 5); // Friday
-                    if (isBefore(resDate, now) || resDate > endOfAllowedDays || resDate.getDay() === 6) {
-                        newErrors.reservationDate = "Reservations are only allowed from Sunday to Friday of the current week.";
+                    const now = new Date();
+                    const resDate = new Date(formData.reservationDate);
+                    if (resDate.getDate() !== now.getDate()) {
+                        newErrors.reservationDate = "Reservations are only allowed for today.";
                     }
                 }
                 if (!formData.reservationTime) newErrors.reservationTime = "Time is required";
@@ -298,16 +290,21 @@ export default function BorrowRequestForm({ onSuccess }) {
         setSubmitting(true);
 
         try {
+            // Prepare payload
             const payload = {
                 equipmentId: formData.equipmentId,
+                // If it's an exception, prepend a note so IT staff sees it easily
                 purpose: isException ? `[EXCEPTION: Projector in Screen Room] ${formData.purpose}` : formData.purpose,
                 destination: `${formData.location} (${formData.course} - ${formData.courseName}, Lecturer: ${formData.lecturer})`,
             };
 
             if (flowType === 'borrow') {
+                // === BORROW ACTION ===
                 payload.expectedReturnTime = formData.sessionDateTime;
+
                 const res = await api.post('/transactions/checkout', payload);
 
+                // Different feedback based on backend status
                 if (res.data.status === 'Pending' || res.data.serverStatusMessage === 'pending_approval') {
                     setStatusModal({
                         type: 'pending',
@@ -321,6 +318,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                 }
 
             } else {
+                // === RESERVE ACTION ===
                 payload.reservationDate = formData.reservationDate;
                 payload.reservationTime = formData.reservationTime;
                 payload.location = formData.location;
@@ -341,68 +339,16 @@ export default function BorrowRequestForm({ onSuccess }) {
         }
     };
 
-    // --- 6. CALENDAR HELPER (for modal) ---
-    const getDaysInMonth = (date) => {
-        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    };
-
-    const getFirstDayOfMonth = (date) => {
-        return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    };
-
-    const renderCalendarDays = () => {
-        const today = startOfDay(new Date());
-        const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 0 });
-        const endOfAllowedDays = new Date(startOfCurrentWeek);
-        endOfAllowedDays.setDate(endOfAllowedDays.getDate() + 5);
-
-        const daysInMonth = getDaysInMonth(calendarMonth);
-        const firstDay = getFirstDayOfMonth(calendarMonth);
-        const cells = [];
-
-        for (let i = 0; i < firstDay; i++) {
-            cells.push(<div key={`empty-${i}`} />);
-        }
-
-        for (let d = 1; d <= daysInMonth; d++) {
-            const date = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), d);
-            const dateStr = format(date, "yyyy-MM-dd");
-            const isPast = isBefore(date, today);
-            const isFuture = date > endOfAllowedDays;
-            const isDisabled = isPast || isFuture || date.getDay() === 6;
-            const isSelected = formData.reservationDate === dateStr;
-
-            cells.push(
-                <button
-                    key={d}
-                    type="button"
-                    disabled={isDisabled}
-                    onClick={() => !isDisabled && handleDateSelect(d)}
-                    className={cn(
-                        "aspect-square rounded-lg text-xs font-bold transition-all",
-                        isDisabled && "text-slate-400 bg-slate-50 cursor-not-allowed",
-                        !isDisabled && !isSelected && "text-slate-800 bg-slate-50 hover:bg-blue-100 hover:text-[#126dd5] cursor-pointer",
-                        isSelected && "bg-[#126dd5] text-white shadow-md shadow-blue-200 scale-110"
-                    )}
-                >
-                    {d}
-                </button>
-            );
-        }
-
-        return cells;
-    };
-
-    // --- RENDER HELPERS ---
+    // --- 6. RENDER HELPERS ---
     const currentSteps = flowType === "borrow"
         ? [
-            { label: t("equipment.stepIdentification", "Identification"), icon: Scan },
-            { label: t("equipment.stepDetails", "Details"), icon: ClipboardList },
-            { label: t("equipment.stepReview", "Review"), icon: CheckCircle2 }
+            { label: "Identification", icon: Scan },
+            { label: "Details", icon: ClipboardList },
+            { label: "Review", icon: CheckCircle2 }
         ]
         : [
-            { label: t("equipment.stepSelectItem", "Select Item"), icon: Package },
-            { label: t("equipment.stepReservation", "Reservation"), icon: CalendarClock }
+            { label: "Select Item", icon: Package },
+            { label: "Reservation", icon: CalendarClock }
         ];
 
     // --- RENDER: CHOICE SCREEN ---
@@ -410,25 +356,27 @@ export default function BorrowRequestForm({ onSuccess }) {
         return (
             <div className="max-w-6xl mx-auto py-8 px-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Borrow Option */}
                     <button onClick={() => setFlowType("borrow")} className="group bg-white p-8 rounded-3xl border border-slate-200 hover:border-[#126dd5] hover:shadow-xl transition-all text-left">
                         <div className="mb-6 p-4 rounded-2xl bg-blue-50 text-[#126dd5] inline-block">
                             <Scan className="h-8 w-8" />
                         </div>
-                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-2">{t('equipment.borrowNow', 'Borrow Now')}</h3>
-                        <p className="text-slate-500 mb-6">{t('equipment.borrowNowDesc', 'For immediate pickup. Scan QR or select from list.')}</p>
+                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-2">Borrow Now</h3>
+                        <p className="text-slate-500 mb-6">For immediate pickup. Scan QR or select from list.</p>
                         <div className="text-[#126dd5] font-semibold flex items-center group-hover:gap-2 transition-all">
-                            {t('equipment.borrowNow', 'Start Borrowing')} <ArrowRight className="ml-2 h-4 w-4" />
+                            Start Borrowing <ArrowRight className="ml-2 h-4 w-4" />
                         </div>
                     </button>
 
+                    {/* Reserve Option */}
                     <button onClick={() => setFlowType("reserve")} className="group bg-white p-8 rounded-3xl border border-slate-200 hover:border-purple-500 hover:shadow-xl transition-all text-left">
                         <div className="mb-6 p-4 rounded-2xl bg-purple-50 text-purple-600 inline-block">
                             <CalendarClock className="h-8 w-8" />
                         </div>
-                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-2">{t('equipment.reserveLater', 'Reserve for Later')}</h3>
-                        <p className="text-slate-500 mb-6">{t('equipment.reserveLaterDesc', 'Schedule equipment for a future class or event.')}</p>
+                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-2">Reserve for Later</h3>
+                        <p className="text-slate-500 mb-6">Schedule equipment for a future class or event.</p>
                         <div className="text-purple-600 font-semibold flex items-center group-hover:gap-2 transition-all">
-                            {t('equipment.stepReservation', 'Make Reservation')} <ArrowRight className="ml-2 h-4 w-4" />
+                            Make Reservation <ArrowRight className="ml-2 h-4 w-4" />
                         </div>
                     </button>
                 </div>
@@ -459,7 +407,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                     ))}
                 </div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
-                    {t('equipment.stepTracker', 'Step')} {step} / {totalSteps}
+                    Step {step} / {totalSteps}
                 </div>
             </div>
 
@@ -478,6 +426,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                         <div className="space-y-6">
                             <EquipmentScanAndPhotoUpload
                                 onScan={(result) => {
+                                    // fuzzy logic to find equipment by serial or name from code
                                     const found = equipmentList.find(e =>
                                         e.serialNumber === result ||
                                         e.name.toLowerCase().includes(result.toLowerCase())
@@ -490,10 +439,10 @@ export default function BorrowRequestForm({ onSuccess }) {
                             />
 
                             <div className="pt-4 border-t border-slate-100">
-                                <Label className="text-slate-500 mb-2 block">{t('equipment.selectManually', 'Or select equipment manually')}</Label>
+                                <Label className="text-slate-500 mb-2 block">Or select equipment manually</Label>
                                 <Select value={formData.equipmentId} onValueChange={handleEquipmentSelect}>
                                     <SelectTrigger className="h-12 bg-white text-[#0b1d3a] font-medium">
-                                        <SelectValue placeholder={t('equipment.chooseItem', 'Choose item...')} />
+                                        <SelectValue placeholder="Choose item..." />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {equipmentList.map(item => (
@@ -507,10 +456,10 @@ export default function BorrowRequestForm({ onSuccess }) {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            <Label className="text-[#0b1d3a] font-semibold">{t('equipment.selectToReserve', 'Select Equipment to Reserve')}</Label>
+                            <Label className="text-[#0b1d3a] font-semibold">Select Equipment to Reserve</Label>
                             <Select value={formData.equipmentId} onValueChange={handleEquipmentSelect}>
                                 <SelectTrigger className="h-12 bg-white text-[#0b1d3a] font-medium">
-                                    <SelectValue placeholder={t('equipment.chooseItem', 'Choose item...')} />
+                                    <SelectValue placeholder="Choose item..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {equipmentList.map(item => (
@@ -531,12 +480,12 @@ export default function BorrowRequestForm({ onSuccess }) {
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.courseCode', 'Course Code')}</Label>
+                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Course Code</Label>
                             <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. CS101" />
                             {errors.course && <p className="text-xs text-rose-500 font-bold px-1">{errors.course}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.courseName', 'Course Name')}</Label>
+                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Course Name</Label>
                             <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.courseName} onChange={(e) => handleInputChange("courseName", e.target.value)} placeholder="e.g. Introduction to Programming" />
                             {errors.courseName && <p className="text-xs text-rose-500 font-bold px-1">{errors.courseName}</p>}
                         </div>
@@ -544,12 +493,12 @@ export default function BorrowRequestForm({ onSuccess }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.lecturer', 'Lecturer Name')}</Label>
+                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Lecturer / Supervisor</Label>
                             <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.lecturer} onChange={(e) => handleInputChange("lecturer", e.target.value)} placeholder="Dr. John Doe" />
                             {errors.lecturer && <p className="text-xs text-rose-500 font-bold px-1">{errors.lecturer}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.roomLocation', 'Room / Location')}</Label>
+                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Classroom / Location</Label>
                             <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all"
                                 value={formData.location}
                                 onChange={(e) => handleInputChange("location", e.target.value)}
@@ -561,7 +510,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                                 <div className="mt-2 p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                                     <AlertTriangle className="w-4 h-4 text-amber-600" />
                                     <p className="text-[11px] font-medium text-amber-800 leading-tight">
-                                        {t('equipment.exceptionAlert', 'This room already has a screen. IT approval required.')}
+                                        This room already has a screen. IT approval required.
                                     </p>
                                 </div>
                             )}
@@ -571,13 +520,13 @@ export default function BorrowRequestForm({ onSuccess }) {
                     {/* Consolidated Purpose / Justification Field */}
                     <div className="space-y-2 animate-in fade-in">
                         <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">
-                            {isException ? t('equipment.exceptionDesc', "Justification for Projector") : t('equipment.reason', "Reason for Borrowing")}
+                            {isException ? "Justification for Projector" : "Purpose of Usage"}
                         </Label>
                         <div className="p-0.5 rounded-2xl bg-gradient-to-br from-slate-100 to-white shadow-sm ring-1 ring-slate-200 overflow-hidden focus-within:ring-[#126dd5] transition-all">
                             <Textarea
                                 value={formData.purpose}
                                 onChange={(e) => handleInputChange("purpose", e.target.value)}
-                                placeholder={isException ? t('equipment.exceptionDesc', "Explain why a projector is needed here...") : t('equipment.reasonPlaceholder', "Briefly describe what you will use this equipment for...")}
+                                placeholder={isException ? "Explain why a projector is needed here..." : "Please describe why you need this equipment..."}
                                 className="border-none bg-transparent min-h-[100px] text-[#0b1d3a] font-medium resize-none focus-visible:ring-0 py-3 px-4"
                             />
                         </div>
@@ -589,7 +538,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                             <div className="space-y-6 p-8 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl relative overflow-hidden transition-all duration-500">
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] px-1">{t('equipment.quickDurationPreset', 'Quick Duration Preset')}</Label>
+                                        <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] px-1">Quick Duration Preset</Label>
                                     </div>
 
                                     <div className="flex flex-wrap gap-3">
@@ -618,7 +567,7 @@ export default function BorrowRequestForm({ onSuccess }) {
 
                                     <div className="pt-4 mt-2">
                                         <div className="space-y-2">
-                                            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest px-1">{t('equipment.expectedReturn', 'Expected Return')}</span>
+                                            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest px-1">Expected Return</span>
                                             <div className="flex items-center gap-3">
                                                 <div className="bg-blue-50 p-3 rounded-2xl border-2 border-blue-100 flex items-center gap-3 w-fit">
                                                     <Clock className="w-5 h-5 text-[#126dd5]" />
@@ -640,133 +589,68 @@ export default function BorrowRequestForm({ onSuccess }) {
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
-                            {/* NEW: Compact Date & Time Picker Section */}
-                            <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6">
-                                {/* Header */}
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div>
-                                        <h4 className="text-base font-black text-[#0b1d3a]">{t('equipment.reservationScheduler', 'Reservation Scheduler')}</h4>
-                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">{t('equipment.chooseDateAndTime', 'Choose date & pickup time')}</p>
-                                    </div>
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Reservation Date</Label>
+                                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className={cn(
+                                                    "w-full h-12 justify-start text-left font-medium rounded-xl border-slate-200 bg-white hover:bg-slate-50 transition-all",
+                                                    !formData.reservationDate && "text-slate-400"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4 text-[#126dd5]" />
+                                                {formData.reservationDate ? format(new Date(formData.reservationDate), "MMM dd") : <span>Pick date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-slate-100" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={formData.reservationDate ? new Date(formData.reservationDate) : null}
+                                                onSelect={(date) => {
+                                                    if (date) {
+                                                        handleInputChange("reservationDate", format(date, "yyyy-MM-dd"));
+                                                        setDatePickerOpen(false);
+                                                    }
+                                                }}
+                                                disabled={(date) => {
+                                                    const today = startOfDay(new Date());
+                                                    const sunday = endOfWeek(today, { weekStartsOn: 1 });
+                                                    return isBefore(date, today) || date > sunday;
+                                                }}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
 
-                                {/* Date & Time Input Row */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Date Picker Input */}
-                                    <div className="space-y-2">
-                                        <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">{t('equipment.pickDate', 'Pick a Date')}</Label>
-                                        <Popover open={showDateModal} onOpenChange={setShowDateModal}>
-                                            <PopoverTrigger asChild>
-                                                <button
-                                                    type="button"
-                                                    className="w-full flex items-center justify-between px-4 py-3 border border-slate-300 rounded-lg bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#126dd5] focus:border-transparent transition"
-                                                >
-                                                    <span className="text-[#0b1d3a] font-semibold">
-                                                        {formData.reservationDate ? format(new Date(formData.reservationDate), 'MMM d, yyyy') : t('equipment.stepReservation', 'Select date')}
-                                                    </span>
-                                                    <CalendarIcon className="w-5 h-5 text-slate-400" />
-                                                </button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-4 rounded-2xl shadow-xl border-slate-100 bg-white" align="start">
-                                                {/* Calendar Navigation */}
-                                                <div className="flex flex-col space-y-4">
-                                                    <div className="flex items-center justify-center w-full pb-2">
-                                                        <h4 className="text-sm font-bold text-[#0b1d3a] text-center w-full">
-                                                            {calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                                                        </h4>
-                                                    </div>
-
-                                                    {/* Calendar Grid */}
-                                                    <div className="w-[240px]">
-                                                        {/* Weekday Headers */}
-                                                        <div className="grid grid-cols-7 gap-1">
-                                                            {['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].map(day => (
-                                                                <div key={day} className="text-center text-[10px] font-bold text-slate-500 py-1">
-                                                                    {day}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-
-                                                        {/* Calendar Days */}
-                                                        <div className="grid grid-cols-7 gap-1 mt-1">
-                                                            {renderCalendarDays()}
-                                                        </div>
-                                                    </div>
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowDateModal(false)}
-                                                        className="w-full mt-2 text-xs text-slate-500 font-bold hover:text-[#0b1d3a] text-center py-2"
-                                                    >
-                                                        Close
-                                                    </button>
-                                                </div>
-                                            </PopoverContent>
-                                        </Popover>
-                                        {errors.reservationDate && <p className="text-xs text-rose-500 font-bold">{errors.reservationDate}</p>}
-                                    </div>
-
-                                    {/* Time Picker Input */}
-                                    <div className="space-y-2">
-                                        <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">{t('equipment.pickTime', 'Pick Up Time')}</Label>
-                                        <Popover open={showTimeModal} onOpenChange={setShowTimeModal}>
-                                            <PopoverTrigger asChild>
-                                                <button
-                                                    type="button"
-                                                    className="w-full flex items-center justify-between px-4 py-3 border border-slate-300 rounded-lg bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#126dd5] focus:border-transparent transition"
-                                                >
-                                                    <span className="text-[#0b1d3a] font-semibold">
-                                                        {formData.reservationTime ? formData.reservationTime : t('equipment.selectTime', 'Select time')}
-                                                    </span>
-                                                    <Clock className="w-5 h-5 text-slate-400" />
-                                                </button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-[180px] p-2 rounded-xl shadow-xl border-slate-100 bg-white" align="start">
-                                                <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto pr-1">
-                                                    {[
-                                                        { time: "08:00", label: "8:00 AM" },
-                                                        { time: "09:00", label: "9:00 AM" },
-                                                        { time: "10:00", label: "10:00 AM" },
-                                                        { time: "11:00", label: "11:00 AM" },
-                                                        { time: "12:00", label: "12:00 PM" },
-                                                        { time: "13:00", label: "1:00 PM" },
-                                                        { time: "14:00", label: "2:00 PM" },
-                                                        { time: "15:00", label: "3:00 PM" },
-                                                        { time: "16:00", label: "4:00 PM" },
-                                                        { time: "17:00", label: "5:00 PM" },
-                                                        { time: "18:00", label: "6:00 PM" },
-                                                    ].map(slot => {
-                                                        const isSelected = formData.reservationTime === slot.time;
-                                                        return (
-                                                            <button
-                                                                key={slot.time}
-                                                                type="button"
-                                                                onClick={() => handleTimeSelect(slot.time)}
-                                                                className={cn(
-                                                                    "py-2 px-3 rounded-lg font-bold text-sm transition-all flex items-center justify-center border",
-                                                                    isSelected
-                                                                        ? "bg-[#126dd5] border-[#126dd5] text-white shadow-md shadow-blue-200"
-                                                                        : "bg-white border-transparent text-[#0b1d3a] hover:bg-slate-100"
-                                                                )}
-                                                            >
-                                                                {slot.label}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </PopoverContent>
-                                        </Popover>
-                                        {errors.reservationTime && <p className="text-xs text-rose-500 font-bold">{errors.reservationTime}</p>}
-                                    </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Pick Up Time</Label>
+                                    <Select value={formData.reservationTime} onValueChange={(val) => handleInputChange("reservationTime", val)}>
+                                        <SelectTrigger className="bg-white h-12 rounded-xl border-slate-200 focus:ring-[#126dd5]">
+                                            <SelectValue placeholder="Select time" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                            {timeSlots.map(slot => (
+                                                <SelectItem key={slot.time} value={slot.time}>{slot.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
 
-                            {!isException && (
-                                <div className="flex items-center gap-2 px-2">
-                                    <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                                    <p className="text-[10px] text-slate-400 font-semibold italic">Reservations are limited to the current academic week (Sun–Fri).</p>
+                            {(errors.reservationDate || errors.reservationTime) && (
+                                <div className="flex flex-col gap-1 px-1">
+                                    {errors.reservationDate && <p className="text-[10px] text-rose-500 font-bold uppercase">{errors.reservationDate}</p>}
+                                    {errors.reservationTime && <p className="text-[10px] text-rose-500 font-bold uppercase">{errors.reservationTime}</p>}
                                 </div>
+                            )}
+
+                            {!isException && (
+                                <p className="text-[10px] text-slate-400 italic px-1">Note: Current week reservations only (until Sunday).</p>
                             )}
                         </div>
                     )}
@@ -775,123 +659,130 @@ export default function BorrowRequestForm({ onSuccess }) {
 
             {/* STEP 3: FINAL REVIEW */}
             {step === 3 && flowType === 'borrow' && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-xl font-bold text-[#0b1d3a]">{t('equipment.reviewRequest', 'Review Your Request')}</h3>
-                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">{t('equipment.reviewDesc', 'Please verify the details below before submitting.')}</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-8">
-                        {/* Student Info Bar */}
-                        <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-[#126dd5] flex items-center justify-center text-white font-bold">
-                                    {studentName.charAt(0)}
+                <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
+                        <div className="p-8 bg-white border-b border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100">
+                                    <ClipboardList className="w-7 h-7 text-[#126dd5]" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{t('equipment.studentInfo', 'Student Information')}</p>
-                                    <p className="text-[#0b1d3a] font-semibold text-sm">{studentName}</p>
+                                    <h3 className="text-2xl font-black text-[#0b1d3a] tracking-tight">Borrow Review</h3>
+                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-none mt-1">Verify all details before final confirmation</p>
                                 </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{t('equipment.dateAndTime', 'Date & Time')}</p>
-                                <p className="text-[#0b1d3a] font-semibold text-sm">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Left Side */}
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.equipmentIdLabel', 'Equipment Identification')}</label>
-                                    <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm flex items-center gap-4 h-[120px]">
-                                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                                            <Package className="w-7 h-7 text-[#126dd5]" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[#0b1d3a] font-bold text-lg leading-tight">{equipment?.name || "Ref: " + formData.equipmentId}</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-slate-400 font-semibold">{t('equipment.serialNumber', 'Serial')}:</span>
-                                                <code className="text-[#126dd5] font-semibold text-xs bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{equipment?.serialNumber || "#SCAN_TAG"}</code>
-                                            </div>
-                                        </div>
+                        <div className="p-8 space-y-8">
+                            {/* Student Info Bar */}
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-[#126dd5] flex items-center justify-center text-white font-black">
+                                        {studentName.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Student Account</p>
+                                        <p className="text-[#0b1d3a] font-black text-sm">{studentName}</p>
                                     </div>
                                 </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.destinationAndCourse', 'Destination & Course')}</label>
-                                    <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-slate-400 font-semibold text-[10px] uppercase">{t('equipment.courseCode', 'Course')}</span>
-                                            <span className="text-[#0b1d3a] font-semibold text-sm tracking-tight">{formData.course} - {formData.courseName}</span>
-                                        </div>
-                                        <div className="h-px bg-slate-100" />
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-slate-400 font-semibold text-[10px] uppercase">{t('equipment.lecturer', 'Lecturer Name')}</span>
-                                            <span className="text-[#0b1d3a] font-semibold text-sm">{formData.lecturer || "Not Specified"}</span>
-                                        </div>
-                                        <div className="h-px bg-slate-100" />
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-slate-400 font-semibold text-[10px] uppercase">{t('equipment.roomLocation', 'Classroom')}</span>
-                                            <span className="text-[#0b1d3a] font-semibold text-sm">{formData.location}</span>
-                                        </div>
-                                    </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Current Date</p>
+                                    <p className="text-[#0b1d3a] font-black text-sm">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                                 </div>
                             </div>
 
-                            {/* Right Side */}
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.timingSummary', 'Timing Summary')}</label>
-                                    <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center gap-3 h-[120px]">
-                                        <div className="flex items-center justify-between px-2">
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-slate-400 text-[8px] font-bold uppercase tracking-widest leading-none">{t('equipment.startTime', 'Start')}</span>
-                                                    <span className="text-[#0b1d3a] font-bold text-sm">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                </div>
-                                                <div className="w-8 h-px bg-slate-200" />
-                                                <div className="flex flex-col">
-                                                    <span className="text-[#126dd5] text-[8px] font-bold uppercase tracking-widest leading-none">{t('equipment.returnBy', 'Return By')}</span>
-                                                    <span className="text-[#0b1d3a] font-bold text-sm">{formData.sessionDateTime ? new Date(formData.sessionDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--"}</span>
-                                                </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Left Side */}
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] px-1">Equipment Identification</label>
+                                        <div className="p-6 bg-[#126dd5]/5 rounded-3xl border-2 border-[#126dd5]/10 flex items-center gap-5 h-[140px]">
+                                            <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100">
+                                                <Package className="w-8 h-8 text-[#126dd5]" />
                                             </div>
-                                            <div className="bg-[#126dd5] text-white px-3 py-1.5 rounded-lg font-semibold text-[10px] shadow-sm shadow-blue-100">
-                                                {formData.sessionDateTime ? (
-                                                    (() => {
-                                                        const diff = (new Date(formData.sessionDateTime) - new Date()) / (1000 * 60);
-                                                        const h = Math.floor(diff / 60);
-                                                        const m = Math.floor(diff % 60);
-                                                        return `${h}h ${m}m`;
-                                                    })()
-                                                ) : "0h 0m"}
+                                            <div className="space-y-1">
+                                                <p className="text-[#0b1d3a] font-black text-xl leading-tight">{equipment?.name || "Ref: " + formData.equipmentId}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-slate-400 font-bold">Serial:</span>
+                                                    <code className="text-[#126dd5] font-black text-xs bg-white px-2 py-0.5 rounded border border-[#126dd5]/10">{equipment?.serialNumber || "#SCAN_TAG"}</code>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="h-px bg-slate-100 mx-2" />
-                                        <div className="flex items-center gap-2 px-2">
-                                            <Clock className="w-3.5 h-3.5 text-slate-400" />
-                                            <span className="text-slate-500 font-semibold text-[10px] uppercase">{t('equipment.sessionDuration', 'Session Duration')}</span>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] px-1">Destination & Course</label>
+                                        <div className="p-5 bg-slate-50 rounded-3xl border border-slate-200 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-slate-400 font-bold text-[10px] uppercase">Course</span>
+                                                <span className="text-[#0b1d3a] font-bold text-sm tracking-tight">{formData.course} - {formData.courseName}</span>
+                                            </div>
+                                            <div className="h-px bg-slate-200" />
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-slate-400 font-bold text-[10px] uppercase">Lecturer</span>
+                                                <span className="text-[#0b1d3a] font-bold text-sm">{formData.lecturer || "Not Specified"}</span>
+                                            </div>
+                                            <div className="h-px bg-slate-200" />
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-slate-400 font-bold text-[10px] uppercase">Classroom</span>
+                                                <span className="text-[#0b1d3a] font-bold text-sm">{formData.location}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.proofOfCondition', 'Proof of Condition')}</label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {['front', 'back'].map(side => (
-                                            <div key={side} className="aspect-video rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden relative group">
-                                                {conditionPhotos[side] ? (
-                                                    <img src={conditionPhotos[side]} alt={side} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-slate-50 flex items-center justify-center">
-                                                        <Camera className="w-4 h-4 text-slate-300" />
+                                {/* Right Side */}
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] px-1">Timing Summary</label>
+                                        <div className="p-6 bg-[#126dd5]/5 rounded-3xl border-2 border-[#126dd5]/10 flex flex-col justify-center gap-3 h-[140px]">
+                                            <div className="flex items-center justify-between px-2">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-slate-400 text-[8px] font-black uppercase tracking-widest leading-none">Start</span>
+                                                        <span className="text-[#0b1d3a] font-black text-sm">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>
-                                                )}
-                                                <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded text-[8px] text-white font-semibold uppercase">{side === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back')}</div>
+                                                    <div className="w-8 h-px bg-[#126dd5]/20" />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[#126dd5] text-[8px] font-black uppercase tracking-widest leading-none">Return By</span>
+                                                        <span className="text-[#0b1d3a] font-black text-sm">{formData.sessionDateTime ? new Date(formData.sessionDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--"}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-[#126dd5] text-white px-3 py-1.5 rounded-xl font-black text-[10px] shadow-lg shadow-blue-100 ring-4 ring-white/50">
+                                                    {formData.sessionDateTime ? (
+                                                        (() => {
+                                                            const diff = (new Date(formData.sessionDateTime) - new Date()) / (1000 * 60);
+                                                            const h = Math.floor(diff / 60);
+                                                            const m = Math.floor(diff % 60);
+                                                            return `${h}h ${m}m`;
+                                                        })()
+                                                    ) : "0h 0m"}
+                                                </div>
                                             </div>
-                                        ))}
+                                            <div className="h-px bg-[#126dd5]/10 mx-2" />
+                                            <div className="flex items-center gap-2 px-2">
+                                                <Clock className="w-3.5 h-3.5 text-[#126dd5]" />
+                                                <span className="text-slate-500 font-bold text-[10px] uppercase">Session Duration</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] px-1">Proof of Condition</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {['front', 'back'].map(side => (
+                                                <div key={side} className="aspect-video rounded-2xl border-2 border-white shadow-md overflow-hidden relative group">
+                                                    {conditionPhotos[side] ? (
+                                                        <img src={conditionPhotos[side]} alt={side} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                                                            <Camera className="w-4 h-4 text-slate-300" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded text-[8px] text-white font-bold uppercase">{side}</div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -900,8 +791,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                 </div>
             )}
 
-
-
+            {/* FOOTER ACTIONS */}
             <div className="mt-8 flex justify-end gap-4">
                 {step > 1 && (
                     <Button
@@ -909,7 +799,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                         onClick={() => setStep(step - 1)}
                         className="h-12 px-6 rounded-xl border-slate-200 text-[#0b1d3a] font-bold"
                     >
-                        {t('equipment.backBtn', 'Back')}
+                        Back
                     </Button>
                 )}
 
@@ -918,7 +808,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                         onClick={() => validateForm() && setStep(step + 1)}
                         className="bg-[#0b1d3a] hover:bg-[#1a3b6e] h-12 px-8 rounded-xl font-black shadow-lg shadow-slate-200 flex items-center gap-2 text-white"
                     >
-                        {step === 2 ? t('equipment.reviewDetailsBtn', 'Review Details') : t('equipment.nextStep', 'Next Step')} <ArrowRight className="w-4 h-4" />
+                        {step === 2 ? "Review Details" : "Next Step"} <ArrowRight className="w-4 h-4" />
                     </Button>
                 ) : (
                     <Button
@@ -929,12 +819,12 @@ export default function BorrowRequestForm({ onSuccess }) {
                         {submitting ? (
                             <>
                                 <Loader2 className="animate-spin w-4 h-4" />
-                                <span>{t('equipment.submitting', 'Submitting Request...')}</span>
+                                <span>Submitting...</span>
                             </>
                         ) : (
                             <>
                                 <CheckCircle2 className="w-4 h-4" />
-                                <span>{isException ? t('equipment.submitRequest', 'Confirm for Approval') : t('equipment.finalizeAndBorrow', 'Finalize & Borrow')}</span>
+                                <span>{isException ? "Confirm for Approval" : "Finalize & Borrow"}</span>
                             </>
                         )}
                     </Button>
@@ -952,7 +842,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                                 )}
                             </div>
                             <h3 className="text-2xl font-bold text-[#0b1d3a] mb-3 font-serif">
-                                {statusModal.type === 'success' ? t('equipment.statusConfirmed', 'Confirmed!') : t('equipment.statusUnderReview', 'Under Review')}
+                                {statusModal.type === 'success' ? 'Confirmed!' : 'Under Review'}
                             </h3>
                             <p className="text-slate-500 mb-8 text-sm px-2 leading-relaxed">
                                 {statusModal.message}
@@ -961,7 +851,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                                 onClick={() => navigate("/student/borrowed-items")}
                                 className="w-full bg-[#0b1d3a] hover:bg-[#126dd5] h-14 rounded-2xl font-bold shadow-lg shadow-blue-900/10 transition-all active:scale-95"
                             >
-                                {t('equipment.trackMyItems', 'Track My Items')}
+                                Track My Items
                             </Button>
                         </div>
                     </div>
@@ -971,5 +861,6 @@ export default function BorrowRequestForm({ onSuccess }) {
         </div>
     )
 }
+
 
 BorrowRequestForm.propTypes = { onSuccess: PropTypes.func };

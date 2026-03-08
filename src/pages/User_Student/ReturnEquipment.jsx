@@ -23,19 +23,20 @@ export default function ReturnEquipment() {
     const [selectedId, setSelectedId] = useState(""); // This is the EQUIPMENT ID
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    
+    const [showSuccess, setShowSuccess] = useState(false);
+
     // Camera State
     const [isScanning, setIsScanning] = useState(false);
     const [conditionPhotos, setConditionPhotos] = useState({ front: null, back: null });
     const videoRef = useRef(null);
 
-// --- 1. FETCH ACTIVE BORROWS ---
+    // --- 1. FETCH ACTIVE BORROWS ---
     useEffect(() => {
         const fetchActiveBorrows = async () => {
             try {
                 const res = await api.get('/transactions/my-borrowed');
                 setActiveItems(res.data);
-                
+
                 // If URL has ID, select it automatically
                 if (initialEquipmentId) {
                     const exists = res.data.find(t => t.equipment._id === initialEquipmentId);
@@ -45,12 +46,12 @@ export default function ReturnEquipment() {
                     setSelectedId(res.data[0].equipment._id);
                 }
             } catch (err) {
-console.error("Failed to load active borrows:", err);
+                console.error("Failed to load active borrows:", err);
             } finally {
                 setLoading(false);
             }
         };
-fetchActiveBorrows();
+        fetchActiveBorrows();
     }, [initialEquipmentId]);
 
     // Cleanup Camera on Unmount
@@ -106,12 +107,12 @@ fetchActiveBorrows();
                     equipmentId: selectedId,
                     condition: "Good" // You can add a dropdown for this later
                 };
-                
+
                 await api.post('/transactions/checkin', payload);
-                alert("Return processed successfully!");
-                navigate("/student/borrowed-items");
+                setShowSuccess(true);
             } catch (err) {
                 console.error("Return failed:", err);
+                // For errors, we can keep alert for now or use toast, but I'll stick to simple toast if available or just log
                 alert(err.response?.data?.message || "Return failed. Try again.");
             } finally {
                 setSubmitting(false);
@@ -135,19 +136,19 @@ fetchActiveBorrows();
             <div className="max-w-4xl mx-auto py-8 px-4">
                 {/* Header */}
                 <div className="mb-8 flex justify-between items-center">
-                    <button onClick={() => step > 1 ? setStep(s => s-1) : navigate('/student/borrowed-items')} className="flex items-center text-slate-500">
-                        <ChevronLeft className="w-4 h-4 mr-1"/> Back
+                    <button onClick={() => step > 1 ? setStep(s => s - 1) : navigate('/student/borrowed-items')} className="flex items-center text-slate-500">
+                        <ChevronLeft className="w-4 h-4 mr-1" /> Back
                     </button>
                     <div className="text-sm text-slate-500">Step {step} of 3</div>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="mb-8 relative h-1 bg-slate-100 rounded-full">
-                    <div className="absolute h-full bg-[#126dd5] transition-all" style={{ width: `${((step-1)/2)*100}%` }} />
+                    <div className="absolute h-full bg-[#126dd5] transition-all" style={{ width: `${((step - 1) / 2) * 100}%` }} />
                 </div>
 
                 <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-[#0b1d3a]">{steps[step-1].label}</h2>
+                    <h2 className="text-2xl font-bold text-[#0b1d3a]">{steps[step - 1].label}</h2>
 
                     {/* STEP 1: SELECT */}
                     {step === 1 && (
@@ -157,9 +158,9 @@ fetchActiveBorrows();
                             ) : (
                                 activeItems.map(t => (
                                     <label key={t._id} className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer ${selectedId === t.equipment._id ? 'border-[#126dd5] bg-blue-50' : 'border-slate-100'}`}>
-                                        <input 
-                                            type="radio" 
-                                            name="item" 
+                                        <input
+                                            type="radio"
+                                            name="item"
                                             className="w-5 h-5 text-[#126dd5]"
                                             checked={selectedId === t.equipment._id}
                                             onChange={() => setSelectedId(t.equipment._id)}
@@ -185,16 +186,16 @@ fetchActiveBorrows();
                                         <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
                                     ) : (
                                         <div className="text-center text-slate-400">
-                                            <QrCode className="w-12 h-12 mx-auto mb-2"/>
+                                            <QrCode className="w-12 h-12 mx-auto mb-2" />
                                             <p>Camera Off</p>
                                         </div>
                                     )}
                                 </div>
-                                <Button onClick={isScanning ? () => {setIsScanning(false); stopCamera();} : handleScanQR} variant="outline" className="w-full">
+                                <Button onClick={isScanning ? () => { setIsScanning(false); stopCamera(); } : handleScanQR} variant="outline" className="w-full">
                                     {isScanning ? "Stop Camera" : "Start Scanning"}
                                 </Button>
                             </div>
-                            
+
                             <div className="space-y-4">
                                 <Label>Condition Photo (Optional)</Label>
                                 <label className="h-40 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50">
@@ -234,9 +235,9 @@ fetchActiveBorrows();
 
                     {/* Footer */}
                     <div className="flex justify-end pt-4">
-                        <Button 
-                            onClick={handleNext} 
-                            disabled={submitting || (step === 1 && !selectedId)} 
+                        <Button
+                            onClick={handleNext}
+                            disabled={submitting || (step === 1 && !selectedId)}
                             className="bg-[#0b1d3a] hover:bg-[#126dd5] h-12 px-8 rounded-xl"
                         >
                             {submitting ? <Loader2 className="animate-spin" /> : (step === 3 ? "Confirm Return" : "Next Step")}
@@ -244,6 +245,28 @@ fetchActiveBorrows();
                     </div>
                 </div>
             </div>
+
+            {/* SUCCESS MODAL */}
+            {showSuccess && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-[#0b1d3a]/60 backdrop-blur-md" onClick={() => navigate("/student/borrowed-items")} />
+                    <div className="relative bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in duration-300 border border-slate-100">
+                        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <CheckCircle className="w-10 h-10 text-emerald-500" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-2 font-serif">Return Successful!</h3>
+                        <p className="text-slate-500 mb-8 text-sm px-4">
+                            Thank you for returning the equipment. IT Staff will verify the condition shortly.
+                        </p>
+                        <Button
+                            onClick={() => navigate("/student/borrowed-items")}
+                            className="w-full bg-[#0b1d3a] hover:bg-[#126dd5] h-12 rounded-2xl font-bold shadow-lg shadow-blue-900/10"
+                        >
+                            Back to Items
+                        </Button>
+                    </div>
+                </div>
+            )}
         </StudentLayout>
     );
 }

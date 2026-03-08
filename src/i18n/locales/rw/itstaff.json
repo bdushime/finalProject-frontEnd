@@ -39,10 +39,12 @@
             "subtitle": "Ibikorwa bisanzwe by'ubuyobozi"
         },
         "recentActivity": {
-            "title": "Ibikorwa Byakozwe Vuba",
             "inUse": "Ibikoresho {{active}} biri gukoreshwa kuri {{total}} byose bihari",
             "noActivity": "Nta bikorwa biherutse kwandikwa."
         },
+        "wants": "ashaka gutizwa",
+        "returning": "aragarura",
+        "requested": "Byasabwe kuya",
         "messages": {
             "loadError": "Byanze gufata imibare y'ikomezo",
             "approved": "Ibusabe bwemejwe neza",
@@ -50,7 +52,8 @@
             "provideReason": "Nyamuneka tanga impamvu",
             "denied": "Ibusabe byanzwe neza",
             "failedDeny": "Kwanga byanze"
-        }
+        },
+        "pendingReturns": "Ibusabe byo Kugarura Ibitarurwa"
     },
     "equipment": {
         "title": "Igenzurwa ry'Ibikoresho",
@@ -150,6 +153,7 @@
         "tabs": {
             "requests": "Ibyasabwe",
             "reservations": "Ibyagumishijwe",
+            "returns": "Ibigarunzwe",
             "active": "Ibikoreshwa"
         },
         "table": {
@@ -164,6 +168,7 @@
         "actions": {
             "approve": "Emeza",
             "deny": "Anza",
+            "approveReturn": "Emeza Ikigarunzwe",
             "checkout": "Shahuza",
             "cancel": "Kureka",
             "tooEarly": "Biracyari kare"
