@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Camera, Scan, RotateCcw, CheckCircle2, AlertCircle, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from "react-i18next";
+import { Input } from '@/components/ui/input';
 
 export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, onValidityChange, requireBothPhotos = false }) {
     const { t } = useTranslation('student');
@@ -141,13 +142,16 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
                 </div>
 
                 <div className="p-6 space-y-4">
-                    <div className="relative aspect-video max-h-[300px] w-full bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center border-4 border-white shadow-inner ring-1 ring-slate-100 italic text-slate-500">
+                    <div className="relative aspect-video max-h-[300px] w-full bg-slate-50/80 rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-dashed border-slate-200 hover:border-[#126dd5] transition-colors">
                         {scanning ? (
                             <video ref={videoRef} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="flex flex-col items-center gap-3 px-6 text-center">
-                                <Scan className="h-10 w-10 text-slate-700 opacity-20" />
-                                <p className="text-sm">{t('equipment.cameraPreview', 'Camera preview will appear here')}</p>
+                            <div className="flex flex-col items-center gap-3 px-6 text-center text-slate-400">
+                                <div className="p-4 bg-white rounded-full shadow-sm ring-1 ring-slate-100 mb-2">
+                                    <Scan className="h-8 w-8 text-[#126dd5]/60" />
+                                </div>
+                                <p className="text-sm font-bold uppercase tracking-widest">{t('equipment.cameraPreview', 'Camera Preview')}</p>
+                                <p className="text-xs font-medium text-slate-400 normal-case tracking-normal">Click start identification to scan QR code</p>
                             </div>
                         )}
 
@@ -175,8 +179,8 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
                         )}
 
                         {scanResult && (
-                            <Button variant="outline" onClick={() => setScanResult('')} className="h-12 w-12 rounded-xl p-0 border-slate-200">
-                                <RotateCcw className="h-4 w-4" />
+                            <Button variant="outline" onClick={() => { setScanResult(''); }} title={t('equipment.resetScan', 'Reset Scan')} className="h-14 w-14 rounded-2xl p-0 border-2 border-slate-200 flex-shrink-0 text-slate-500 hover:text-slate-700 bg-white">
+                                <RotateCcw className="h-5 w-5" />
                             </Button>
                         )}
                     </div>
@@ -226,7 +230,7 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
 
                 <div className="p-6 space-y-6">
                     {capturingFor ? (
-                        <div className="bg-slate-900 rounded-2xl overflow-hidden relative border-4 border-white shadow-lg">
+                        <div className="bg-slate-50/80 rounded-[2rem] overflow-hidden relative border-2 border-dashed border-slate-200 shadow-sm">
                             <video ref={videoRef} className="w-full aspect-video object-cover" />
                             <div className="absolute bottom-4 inset-x-0 px-4 flex justify-between items-center bg-black/40 backdrop-blur-md p-4 rounded-b-2xl">
                                 <span className="text-white text-xs font-bold uppercase">{t('equipment.capturingView', 'Capturing {{view}} view', { view: capturingFor === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}</span>
