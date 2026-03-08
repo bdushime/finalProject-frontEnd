@@ -1,18 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Camera, Scan, RotateCcw, CheckCircle2, AlertCircle, X, Trash2 } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Camera, Scan, CheckCircle2, AlertCircle, Trash2, X, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from "react-i18next";
-import { Input } from '@/components/ui/input';
+import QRCodeScanner from "./QRCodeScanner";
 
 export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, onValidityChange, requireBothPhotos = false }) {
     const { t } = useTranslation('student');
-    const videoRef = useRef(null);
-    const canvasRef = useRef(null);
-    const [scanning, setScanning] = useState(false);
-    const [capturingFor, setCapturingFor] = useState(null); // 'front' or 'back'
     const [scanResult, setScanResult] = useState('');
     const [photos, setPhotos] = useState({ front: null, back: null });
-    const [error, setError] = useState(null);
+    const [capturingSide, setCapturingSide] = useState(null); // 'front' or 'back'
+    const videoRef = useRef(null);
+    const [stream, setStream] = useState(null);
+    const [cameraError, setCameraError] = useState(null);
+
+    // We only want to show the scanner when we don't have a result
+    const showScanner = !scanResult;
 
     useEffect(() => {
         if (onPhotosChange) onPhotosChange(photos);
@@ -24,96 +26,52 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
         if (scanResult && onScan) onScan(scanResult);
     }, [scanResult, onScan]);
 
-    const openCamera = async (mode = 'scan') => {
-        setError(null);
+    const handleScanSuccess = (decodedText) => {
+        setScanResult(decodedText);
+    };
+
+    // Live Camera logic for Photos
+    const startPhotoCamera = async (side) => {
+        setCameraError(null);
+        setCapturingSide(side);
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' },
+            const newStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
                 audio: false
             });
+            setStream(newStream);
             if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                await videoRef.current.play();
-            }
-            if (mode === 'scan') {
-                setScanning(true);
-                startScanLoop();
-            } else {
-                setCapturingFor(mode);
+                videoRef.current.srcObject = newStream;
             }
         } catch (err) {
-            console.error('Camera error', err);
-            setError('Unable to access camera. Please check permissions.');
+            console.error("Camera error:", err);
+            setCameraError("Unable to access camera. Please check permissions.");
         }
     };
 
-    const stopCamera = () => {
-        setScanning(false);
-        setCapturingFor(null);
-        if (videoRef.current && videoRef.current.srcObject) {
-            const tracks = videoRef.current.srcObject.getTracks();
-            tracks.forEach(t => t.stop());
-            videoRef.current.srcObject = null;
+    const stopPhotoCamera = () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            setStream(null);
         }
-        cancelAnimationFrame(scanLoopRef.current || 0);
-    };
-
-    const scanLoopRef = useRef(0);
-
-    const startScanLoop = async () => {
-        const scanFrame = async () => {
-            if (!videoRef.current || videoRef.current.readyState < 2) {
-                scanLoopRef.current = requestAnimationFrame(scanFrame);
-                return;
-            }
-
-            const video = videoRef.current;
-            const w = video.videoWidth;
-            const h = video.videoHeight;
-            if (!canvasRef.current) canvasRef.current = document.createElement('canvas');
-            const canvas = canvasRef.current;
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, w, h);
-
-            try {
-                if ('BarcodeDetector' in window) {
-                    const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-                    const barcodes = await detector.detect(canvas);
-                    if (barcodes && barcodes.length) {
-                        setScanResult(barcodes[0].rawValue);
-                        stopCamera();
-                        return;
-                    }
-                } else if (window.jsQR) {
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    const code = window.jsQR(imageData.data, w, h);
-                    if (code && code.data) {
-                        setScanResult(code.data);
-                        stopCamera();
-                        return;
-                    }
-                }
-            } catch (e) { console.warn('scan error', e); }
-
-            scanLoopRef.current = requestAnimationFrame(scanFrame);
-        };
-        scanLoopRef.current = requestAnimationFrame(scanFrame);
+        setCapturingSide(null);
     };
 
     const takeSnapshot = () => {
-        if (!videoRef.current || !capturingFor) return;
+        if (!videoRef.current) return;
+
         const video = videoRef.current;
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
+        // Maintain aspect ratio
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
+
+        const ctx = canvas.getContext("2d");
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        setPhotos(prev => ({ ...prev, [capturingFor]: dataUrl }));
-        stopCamera();
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setPhotos(prev => ({ ...prev, [capturingSide]: dataUrl }));
+        stopPhotoCamera();
     };
 
     const removePhoto = (side) => {
@@ -121,8 +79,8 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
     };
 
     return (
-        <div className="w-full space-y-8">
-            {/* QR SCANNER SECTION - FULL WIDTH */}
+        <div className="w-full space-y-8 animate-in fade-in duration-500">
+            {/* QR SCANNER SECTION */}
             <section className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                     <div className="flex items-center gap-3">
@@ -142,75 +100,35 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
                 </div>
 
                 <div className="p-6 space-y-4">
-                    <div className="relative aspect-video max-h-[300px] w-full bg-slate-50/80 rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-dashed border-slate-200 hover:border-[#126dd5] transition-colors">
-                        {scanning ? (
-                            <video ref={videoRef} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="flex flex-col items-center gap-3 px-6 text-center text-slate-400">
-                                <div className="p-4 bg-white rounded-full shadow-sm ring-1 ring-slate-100 mb-2">
-                                    <Scan className="h-8 w-8 text-[#126dd5]/60" />
-                                </div>
-                                <p className="text-sm font-bold uppercase tracking-widest">{t('equipment.cameraPreview', 'Camera Preview')}</p>
-                                <p className="text-xs font-medium text-slate-400 normal-case tracking-normal">Click start identification to scan QR code</p>
+                    <div className="w-full bg-black rounded-[2rem] overflow-hidden flex flex-col items-center justify-center relative min-h-[300px] border-4 border-white shadow-inner">
+                        {showScanner ? (
+                            <div className="w-full absolute inset-0">
+                                <QRCodeScanner onScanSuccess={handleScanSuccess} />
                             </div>
-                        )}
-
-                        {scanning && (
-                            <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-                                <div className="w-48 h-48 border-2 border-white rounded-3xl opacity-70 relative">
-                                    <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
-                                    <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
-                                    <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
-                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                        ) : scanResult ? (
+                            <div className="flex flex-col items-center justify-center text-white z-10 w-full p-8 animate-in zoom-in-95">
+                                <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
+                                    <CheckCircle2 className="w-8 h-8 text-white" />
                                 </div>
+                                <p className="text-emerald-400 font-bold uppercase tracking-widest text-xs mb-2">Identified Successfully</p>
+                                <code className="bg-white/10 px-6 py-3 rounded-xl font-mono text-2xl tracking-widest border border-white/20 shadow-inner">
+                                    {scanResult}
+                                </code>
                             </div>
-                        )}
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        {!scanning ? (
-                            <Button onClick={() => openCamera('scan')} className="flex-1 bg-white hover:bg-slate-50 h-14 rounded-2xl border-2 border-slate-200 text-[#0b1d3a] font-black shadow-lg shadow-slate-100 flex items-center gap-3 transition-all active:scale-95">
-                                <Scan className="h-5 w-5" /> {t('equipment.startIdentification', 'Start Identification')}
-                            </Button>
-                        ) : (
-                            <Button onClick={stopCamera} className="flex-1 bg-rose-50 hover:bg-rose-100 h-14 rounded-2xl border-2 border-rose-200 text-rose-600 font-black flex items-center gap-3 transition-all active:scale-95">
-                                <X className="h-5 w-5" /> {t('equipment.stopIdentification', 'Stop Identification')}
-                            </Button>
-                        )}
-
-                        {scanResult && (
-                            <Button variant="outline" onClick={() => { setScanResult(''); }} title={t('equipment.resetScan', 'Reset Scan')} className="h-14 w-14 rounded-2xl p-0 border-2 border-slate-200 flex-shrink-0 text-slate-500 hover:text-slate-700 bg-white">
-                                <RotateCcw className="h-5 w-5" />
-                            </Button>
-                        )}
+                        ) : null}
                     </div>
 
                     {scanResult && (
-                        <div className="p-5 bg-gradient-to-r from-emerald-50 to-white rounded-2xl border-2 border-emerald-100 shadow-sm flex flex-col gap-3 animate-in fade-in slide-in-from-top-2">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[10px] text-emerald-600 font-black uppercase tracking-widest">{t('equipment.targetDetected', 'Target Detected')}</span>
-                                </div>
-                                <div className="bg-emerald-500 text-white p-1 rounded-full">
-                                    <CheckCircle2 className="h-3 w-3" />
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] text-slate-400 font-bold uppercase">{t('equipment.identificationCode', 'Identification Code')}</p>
-                                <div className="flex items-center gap-3">
-                                    <code className="text-[#126dd5] font-black text-xl tracking-tight">{scanResult}</code>
-                                    <div className="h-6 w-px bg-slate-100" />
-                                    <span className="text-xs text-emerald-700 font-bold italic">{t('equipment.equipmentVerified', 'Equipment Verified')}</span>
-                                </div>
-                            </div>
-                            <p className="text-slate-500 text-[11px] leading-relaxed">
-                                {t('equipment.scanSuccessDesc', "Great! We've identified the item. Now, please capture the front and back views below to document its condition before checkout.")}
-                            </p>
+                        <div className="flex justify-between items-center gap-4 animate-in fade-in">
+                            <Button
+                                variant="outline"
+                                onClick={() => { setScanResult(''); }}
+                                className="w-full h-12 rounded-xl text-slate-500 font-bold hover:bg-slate-50 hover:text-rose-500 border-2"
+                            >
+                                <X className="h-4 w-4 mr-2" /> Reset & Scan Again
+                            </Button>
                         </div>
                     )}
-
-                    {error && <div className="text-xs text-rose-500 flex items-center gap-1.5 px-1 font-bold bg-rose-50 p-2 rounded-lg border border-rose-100"><AlertCircle className="h-3.5 w-3.5" /> {error}</div>}
                 </div>
             </section>
 
@@ -223,20 +141,47 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
                         </div>
                         <div>
                             <h3 className="font-bold text-[#0b1d3a]">{t('equipment.conditionPhotosTitle', 'Condition Photos')}</h3>
-                            <p className="text-xs text-slate-500 font-medium">{t('equipment.documentStateDesc', 'Document the current state of the equipment')}</p>
+                            <p className="text-xs text-slate-500 font-medium">{t('equipment.documentStateDesc', 'Take real photos of the front and back')}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="p-6 space-y-6">
-                    {capturingFor ? (
-                        <div className="bg-slate-50/80 rounded-[2rem] overflow-hidden relative border-2 border-dashed border-slate-200 shadow-sm">
-                            <video ref={videoRef} className="w-full aspect-video object-cover" />
-                            <div className="absolute bottom-4 inset-x-0 px-4 flex justify-between items-center bg-black/40 backdrop-blur-md p-4 rounded-b-2xl">
-                                <span className="text-white text-xs font-bold uppercase">{t('equipment.capturingView', 'Capturing {{view}} view', { view: capturingFor === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}</span>
-                                <div className="flex gap-2">
-                                    <Button size="sm" variant="outline" onClick={stopCamera} className="bg-white/10 hover:bg-white/20 text-white border-white/20">{t('profile.cancel', 'Cancel')}</Button>
-                                    <Button size="sm" onClick={takeSnapshot} className="bg-white text-black hover:bg-white/90">{t('equipment.capture', 'Capture')}</Button>
+                    {capturingSide ? (
+                        <div className="relative aspect-video rounded-3xl overflow-hidden bg-black border-4 border-white shadow-2xl animate-in zoom-in-95">
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                className="w-full h-full object-cover"
+                            />
+
+                            <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20" />
+
+                            <div className="absolute bottom-6 inset-x-0 flex flex-col items-center gap-4">
+                                <div className="bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
+                                    {t('equipment.capturingView', 'Capturing {{view}} view', { view: capturingSide === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}
+                                </div>
+                                <div className="flex items-center gap-6">
+                                    <button
+                                        onClick={stopPhotoCamera}
+                                        className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 transition-all"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={takeSnapshot}
+                                        className="w-20 h-20 rounded-full bg-white p-1 shadow-xl hover:scale-105 active:scale-95 transition-all"
+                                    >
+                                        <div className="w-full h-full rounded-full border-4 border-slate-100 flex items-center justify-center">
+                                            <div className="w-14 h-14 rounded-full bg-rose-500" />
+                                        </div>
+                                    </button>
+                                    <button
+                                        className="w-12 h-12 rounded-full bg-white/10 opacity-0 pointer-events-none"
+                                    >
+                                        <RotateCw className="w-5 h-5" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -245,14 +190,14 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
                             {['front', 'back'].map(side => (
                                 <div key={side} className="relative group">
                                     {photos[side] ? (
-                                        <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-sm ring-4 ring-transparent hover:ring-[#126dd5]/20 hover:border-[#126dd5] transition-all">
-                                            <img src={photos[side]} alt={side} className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-sm ring-4 ring-transparent hover:ring-[#126dd5]/20 hover:border-[#126dd5] transition-all bg-black/5">
+                                            <img src={photos[side]} alt={side} className="w-full h-full object-contain" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                                 <Button size="icon" variant="destructive" onClick={() => removePhoto(side)} className="h-10 w-10 rounded-full shadow-lg">
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="icon" variant="secondary" onClick={() => openCamera(side)} className="h-10 w-10 rounded-full shadow-lg bg-white text-[#0b1d3a]">
-                                                    <RotateCcw className="h-4 w-4" />
+                                                <Button size="icon" variant="secondary" onClick={() => startPhotoCamera(side)} className="h-10 w-10 rounded-full shadow-lg bg-white">
+                                                    <RotateCw className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                             <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
@@ -261,17 +206,24 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
                                         </div>
                                     ) : (
                                         <button
-                                            onClick={() => openCamera(side)}
-                                            className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:border-[#126dd5] hover:bg-blue-50 transition-all text-slate-400 hover:text-[#126dd5]"
+                                            onClick={() => startPhotoCamera(side)}
+                                            className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 bg-[#0b1d3a] flex flex-col items-center justify-center gap-2 hover:border-[#126dd5] hover:bg-[#126dd5] transition-all text-white/80 hover:text-white cursor-pointer group"
                                         >
-                                            <div className="p-3 bg-white rounded-full shadow-sm ring-1 ring-slate-100">
-                                                <Camera className="h-6 w-6" />
+                                            <div className="p-4 bg-white/10 rounded-full shadow-sm ring-1 ring-white/20 group-hover:scale-110 transition-transform">
+                                                <Camera className="h-8 w-8 text-white" />
                                             </div>
-                                            <span className="text-xs font-bold uppercase tracking-widest">{t('equipment.takeSidePhoto', 'Take {{side}} Photo', { side: side === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}</span>
+                                            <span className="text-xs font-bold uppercase tracking-widest mt-2">{t('equipment.takeSidePhoto', 'Take {{side}} Photo', { side: side === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}</span>
                                         </button>
                                     )}
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {cameraError && (
+                        <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold flex items-center gap-2 animate-in slide-in-from-top-2">
+                            <AlertCircle className="w-5 h-5 shrink-0" />
+                            {cameraError}
                         </div>
                     )}
 
