@@ -218,7 +218,7 @@ export default function Dashboard() {
 
                     {/* Middle: Chart & Calendar */}
                     <div className="md:col-span-4 xl:col-span-5 flex flex-col gap-6">
-                        <div className="h-[320px] cursor-pointer hover:opacity-95 transition-opacity" onClick={() => navigate('/student/reports', { state: { filter: 'This Week' } })}>
+                        <div className="h-[320px] cursor-pointer hover:opacity-95 transition-opacity" onClick={() => navigate('/student/report', { state: { filter: 'This Week' } })}>
                             <ActivityChart count={getChartData().reduce((a, b) => a + b, 0)} weeklyData={getChartData()} />
                         </div>
 

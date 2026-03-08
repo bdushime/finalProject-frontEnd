@@ -154,7 +154,7 @@ export default function EquipmentDetails() {
                                     </div>
                                     <div>
                                         <div className="text-xs text-slate-400 uppercase font-bold">{t('equipment.location', 'Location')}</div>
-                                        <div className="font-medium text-[#0b1d3a]">{equipment.status === 'Available' ? t('equipment.itDepartment', 'IT Office') : (equipment.location || t('equipment.inUse', "In Use"))}</div>
+                                        <div className="font-medium text-[#0b1d3a]">{equipment.status === 'Available' ? t('equipment.itStaff', 'IT Staff') : (equipment.location || t('equipment.inUse', "In Use"))}</div>
                                     </div>
                                 </div>
 

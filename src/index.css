@@ -16,3 +16,12 @@
 .iot-marker-offline {
   background-color: #ef4444;
 }
+
+@keyframes scanLine {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.animate-scan-line {
+  animation: scanLine 2s linear infinite;
+}

@@ -40,6 +40,7 @@ import {
 import api from "@/utils/api";
 import PropTypes from "prop-types";
 import EquipmentScanAndPhotoUpload from "@/components/EquipmentScanAndPhotoUpload";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
 export default function BorrowRequestForm({ onSuccess }) {
     const { t } = useTranslation('student');
@@ -88,7 +89,7 @@ export default function BorrowRequestForm({ onSuccess }) {
 
     // Exception State
     const [isException, setIsException] = useState(false);
-    const [showRoomAlert, setShowRoomAlert] = useState(false);
+    const [showScreenWarning, setShowScreenWarning] = useState(false);
 
     // --- NEW: Modal State for Date & Time Pickers ---
     const [showDateModal, setShowDateModal] = useState(false);
@@ -210,17 +211,33 @@ export default function BorrowRequestForm({ onSuccess }) {
     useEffect(() => {
         if (step === 2 && equipment && formData.location) {
             const checkException = () => {
-                const isProjector = equipment.name.toLowerCase().includes('projector') ||
-                    (equipment.category && equipment.category.toLowerCase().includes('projector'));
+                // Safely convert the entire equipment object to a lowercase string
+                // This catches nested category names like { category: { name: 'Projector' } }
+                const equipString = JSON.stringify(equipment).toLowerCase();
+                const isProjector = equipString.includes('projector') ||
+                    equipString.includes('projecteur') ||
+                    equipString.includes('powerlite') ||
+                    equipString.includes('epson');
+
+                console.log("[DEBUG] isProjector:", isProjector, "equipment:", equipment);
 
                 if (!isProjector) {
                     setIsException(false);
                     return;
                 }
 
-                const normalize = (str) => str.toLowerCase().replace(/\s+/g, '');
+                // Strip common prefixes like 'room', 'salle', and all spaces to match "Room 312" with "312"
+                const normalize = (str) => str?.toLowerCase().replace(/(room|salle|-|_|\s+)/g, '') || '';
                 const inputLoc = normalize(formData.location);
-                const foundRoom = classroomList.find(c => normalize(c.name) === inputLoc);
+
+                let foundRoom = null;
+                // Only match if they have typed something meaningful beyond 'room'
+                if (inputLoc.length > 0) {
+                    foundRoom = classroomList.find(c => {
+                        const dbRoom = normalize(c.name);
+                        return dbRoom === inputLoc; // MUST BE EXACT MATCH now
+                    });
+                }
 
                 if (foundRoom && foundRoom.hasScreen) {
                     setIsException(true);
@@ -290,6 +307,18 @@ export default function BorrowRequestForm({ onSuccess }) {
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleNextStep = () => {
+        if (!validateForm()) return;
+
+        // Intercept step 2 -> 3 if borrowing and there's a screen exception
+        if (step === 2 && flowType === 'borrow' && isException) {
+            setShowScreenWarning(true);
+            return;
+        }
+
+        setStep(step + 1);
     };
 
     // --- 5. SUBMIT HANDLER ---
@@ -571,13 +600,13 @@ export default function BorrowRequestForm({ onSuccess }) {
                     {/* Consolidated Purpose / Justification Field */}
                     <div className="space-y-2 animate-in fade-in">
                         <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">
-                            {isException ? t('equipment.exceptionDesc', "Justification for Projector") : t('equipment.reason', "Reason for Borrowing")}
+                            {isException ? t('equipment.exceptionReasonLabel', "Justification for Projector") : t('equipment.reason', "Reason for Borrowing")}
                         </Label>
                         <div className="p-0.5 rounded-2xl bg-gradient-to-br from-slate-100 to-white shadow-sm ring-1 ring-slate-200 overflow-hidden focus-within:ring-[#126dd5] transition-all">
                             <Textarea
                                 value={formData.purpose}
                                 onChange={(e) => handleInputChange("purpose", e.target.value)}
-                                placeholder={isException ? t('equipment.exceptionDesc', "Explain why a projector is needed here...") : t('equipment.reasonPlaceholder', "Briefly describe what you will use this equipment for...")}
+                                placeholder={isException ? t('equipment.exceptionReasonPlaceholder', "Explain why a projector is needed here despite the room having a screen...") : t('equipment.reasonPlaceholder', "Briefly describe what you will use this equipment for...")}
                                 className="border-none bg-transparent min-h-[100px] text-[#0b1d3a] font-medium resize-none focus-visible:ring-0 py-3 px-4"
                             />
                         </div>
@@ -915,7 +944,7 @@ export default function BorrowRequestForm({ onSuccess }) {
 
                 {step < totalSteps ? (
                     <Button
-                        onClick={() => validateForm() && setStep(step + 1)}
+                        onClick={handleNextStep}
                         className="bg-[#0b1d3a] hover:bg-[#1a3b6e] h-12 px-8 rounded-xl font-black shadow-lg shadow-slate-200 flex items-center gap-2 text-white"
                     >
                         {step === 2 ? t('equipment.reviewDetailsBtn', 'Review Details') : t('equipment.nextStep', 'Next Step')} <ArrowRight className="w-4 h-4" />
@@ -939,33 +968,51 @@ export default function BorrowRequestForm({ onSuccess }) {
                         )}
                     </Button>
                 )}
-                {/* Status Modal Overlay */}
-                {statusModal && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div className="fixed inset-0 bg-[#0b1d3a]/60 backdrop-blur-md" onClick={() => navigate("/student/borrowed-items")} />
-                        <div className="relative bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl text-center animate-in zoom-in duration-300 border border-slate-100">
-                            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${statusModal.type === 'success' ? 'bg-emerald-50' : 'bg-amber-50'}`}>
-                                {statusModal.type === 'success' ? (
-                                    <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                {/* Status Dialog Modal */}
+                <Dialog open={!!statusModal} onOpenChange={(open) => {
+                    if (!open) navigate("/student/borrowed-items");
+                }}>
+                    <DialogContent className="bg-white sm:max-w-md border border-gray-200 shadow-xl rounded-3xl p-6 outline-none">
+                        <DialogHeader className="flex flex-col items-center text-center">
+                            <div className={`h-14 w-14 rounded-full flex items-center justify-center mb-4 ${statusModal?.type === 'success' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
+                                {statusModal?.type === 'success' ? (
+                                    <CheckCircle2 className="h-7 w-7" />
                                 ) : (
-                                    <Clock className="w-10 h-10 text-amber-500" />
+                                    <Clock className="h-7 w-7" />
                                 )}
                             </div>
-                            <h3 className="text-2xl font-bold text-[#0b1d3a] mb-3 font-serif">
-                                {statusModal.type === 'success' ? t('equipment.statusConfirmed', 'Confirmed!') : t('equipment.statusUnderReview', 'Under Review')}
-                            </h3>
-                            <p className="text-slate-500 mb-8 text-sm px-2 leading-relaxed">
-                                {statusModal.message}
-                            </p>
+                            <DialogTitle className="text-xl font-bold text-[#0b1d3a]">
+                                {statusModal?.type === 'success' ? t('equipment.statusConfirmed', 'Confirmed!') : t('equipment.statusUnderReview', 'Under Review')}
+                            </DialogTitle>
+                            <DialogDescription className="text-slate-500 mt-2 text-center w-full">
+                                {statusModal?.message}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="flex sm:justify-center mt-6 w-full">
                             <Button
                                 onClick={() => navigate("/student/borrowed-items")}
-                                className="w-full bg-[#0b1d3a] hover:bg-[#126dd5] h-14 rounded-2xl font-bold shadow-lg shadow-blue-900/10 transition-all active:scale-95"
+                                className="flex-1 w-full rounded-xl h-11 font-bold shadow-lg transition-all bg-[#0b1d3a] hover:bg-[#126dd5] text-white shadow-blue-900/10"
                             >
                                 {t('equipment.trackMyItems', 'Track My Items')}
                             </Button>
-                        </div>
-                    </div>
-                )}
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Exception Warning Modal */}
+                <ConfirmationModal
+                    isOpen={showScreenWarning}
+                    onClose={() => setShowScreenWarning(false)}
+                    onConfirm={() => {
+                        setShowScreenWarning(false);
+                        setStep(step + 1);
+                    }}
+                    title={t('equipment.screenWarningTitle', 'Screen Already Available')}
+                    description={t('equipment.screenWarningDesc', 'The room you selected already has a screen installed. Are you sure you still need to borrow a projector?')}
+                    confirmText={t('equipment.proceedAnyway', 'Proceed Anyway')}
+                    cancelText={t('equipment.cancelBtn', 'Cancel')}
+                    variant="destructive"
+                />
             </div>
 
         </div>
