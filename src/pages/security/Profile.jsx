@@ -14,7 +14,7 @@ export default function SecurityProfile() {
         <div>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 mt-4 relative z-10">
                 <div>
-                    <h1 className="text-4xl font-bold text-white mb-2">{t('profile.title')}</h1>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{t('profile.title')}</h1>
                     <p className="text-gray-400 flex items-center gap-2 text-sm">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
                         {t('profile.personal.desc')}
@@ -26,10 +26,10 @@ export default function SecurityProfile() {
 
     return (
         <MainLayout heroContent={HeroSection}>
-            <div className="max-w-6xl mx-auto space-y-8 mt-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 mt-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     {/* Account Profile Card */}
-                    <Card className="border border-slate-100 shadow-sm bg-white rounded-[2rem] overflow-hidden">
+                    <Card className="border border-slate-100 shadow-sm bg-white rounded-2xl sm:rounded-[2rem] overflow-hidden">
                         <CardHeader className="pb-2 pt-8">
                             <div className="flex flex-col items-center">
                                 <div className="relative group p-1 bg-slate-50 rounded-full border-2 border-dashed border-slate-200 hover:border-[#8D8DC7] transition-colors cursor-pointer mb-4">
@@ -58,19 +58,19 @@ export default function SecurityProfile() {
                     </Card>
 
                     {/* Personal Details Card */}
-                    <Card className="lg:col-span-2 border border-slate-100 shadow-sm bg-white rounded-[2rem] overflow-hidden">
-                        <CardHeader className="p-8 border-b border-slate-50">
-                            <div className="flex items-center justify-between">
+                    <Card className="lg:col-span-2 border border-slate-100 shadow-sm bg-white rounded-2xl sm:rounded-[2rem] overflow-hidden">
+                        <CardHeader className="p-4 sm:p-6 md:p-8 border-b border-slate-50">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                 <div>
-                                    <CardTitle className="text-2xl font-bold text-slate-900">{t('profile.personal.title')}</CardTitle>
+                                    <CardTitle className="text-xl sm:text-2xl font-bold text-slate-900">{t('profile.personal.title')}</CardTitle>
                                 </div>
                                 <Badge variant="outline" className="rounded-full px-4 py-1 text-[#8D8DC7] border-[#8D8DC7]/20 bg-[#8D8DC7]/5 font-bold">
                                     Last updated: Today
                                 </Badge>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-8">
-                            <div className="grid sm:grid-cols-2 gap-8">
+                        <CardContent className="p-4 sm:p-6 md:p-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                                 <div className="space-y-2.5">
                                     <Label htmlFor="first" className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">{t('profile.personal.firstName')}</Label>
                                     <Input
@@ -97,14 +97,14 @@ export default function SecurityProfile() {
                                     />
                                 </div>
                             </div>
-                            <div className="mt-12 flex items-center justify-end gap-4">
+                            <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4">
                                 <Button
                                     variant="ghost"
                                     className="text-slate-500 font-bold hover:bg-slate-50 px-8 h-14 rounded-2xl transition-all"
                                 >
                                     {t('common:actions.cancel')}
                                 </Button>
-                                <Button className="bg-slate-900 hover:bg-slate-800 text-white px-10 h-14 rounded-2xl shadow-xl shadow-slate-900/10 transition-transform active:scale-95 font-bold">
+                                <Button className="bg-slate-900 hover:bg-slate-800 text-white px-8 sm:px-10 h-12 sm:h-14 rounded-2xl shadow-xl shadow-slate-900/10 transition-transform active:scale-95 font-bold">
                                     {t('profile.personal.saveChanges')}
                                 </Button>
                             </div>

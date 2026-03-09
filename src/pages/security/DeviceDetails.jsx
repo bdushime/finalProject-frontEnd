@@ -202,8 +202,8 @@ function DeviceDetails() {
     return (
         <MainLayout>
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4">
                         <Button
                             variant="ghost"
                             size="icon"
@@ -213,7 +213,7 @@ function DeviceDetails() {
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">{device.name}</h1>
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{device.name}</h1>
                             <p className="text-gray-500">{device.brand} {device.model}</p>
                         </div>
                     </div>
@@ -281,28 +281,28 @@ function DeviceDetails() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
                                         <p className="text-xs text-gray-500 uppercase font-medium mb-1">Original Cost</p>
-                                        <p className="text-xl font-bold text-gray-900">
+                                        <p className="text-lg sm:text-xl font-bold text-gray-900">
                                             {device.purchasePrice?.toLocaleString() || 0} RWF
                                         </p>
                                     </div>
-                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
                                         <p className="text-xs text-gray-500 uppercase font-medium mb-1">Current Value</p>
-                                        <p className="text-xl font-bold text-blue-600">
+                                        <p className="text-lg sm:text-xl font-bold text-blue-600">
                                             {depreciation.currentValue} RWF
                                         </p>
                                     </div>
-                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
                                         <p className="text-xs text-gray-500 uppercase font-medium mb-1">Annual Depreciation</p>
-                                        <p className="text-xl font-bold text-orange-600">
+                                        <p className="text-lg sm:text-xl font-bold text-orange-600">
                                             {depreciation.annualRate} RWF
                                         </p>
                                     </div>
-                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
                                         <p className="text-xs text-gray-500 uppercase font-medium mb-1">Years Remaining</p>
-                                        <p className="text-xl font-bold text-green-600">
+                                        <p className="text-lg sm:text-xl font-bold text-green-600">
                                             {depreciation.yearsRemaining} yrs
                                         </p>
                                     </div>
@@ -310,7 +310,7 @@ function DeviceDetails() {
 
                                 {/* Depreciation Progress Bar */}
                                 <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex flex-col sm:flex-row justify-between text-sm gap-1">
                                         <span className="text-gray-600">Value Lost: {depreciation.percentLost}%</span>
                                         <span className="text-gray-600">Age: {depreciation.ageInYears} / {depreciation.lifespanYears} years</span>
                                     </div>
@@ -384,7 +384,7 @@ function DeviceDetails() {
                         </Card>
 
                         {/* Description & Specifications */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
                             {/* Description */}
                             <Card className="border border-gray-200 shadow-sm">
                                 <CardHeader className="pb-3">

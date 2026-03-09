@@ -6,10 +6,30 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // { role: "Student" | "IT" | "Admin" | "Security", ... }
 
+  // Helper: check if a JWT token is expired
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // exp is in seconds, Date.now() is in milliseconds
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true; // If we can't decode it, treat as expired
+    }
+  };
+
   // 1. Load auth state from localStorage on mount
   useEffect(() => {
-    // 👇 CHANGED: Key must match what you used in Auth.jsx ('user')
-    const storedUser = localStorage.getItem("user"); 
+    const storedUser = localStorage.getItem("user");
+    // TODO: Re-enable token expiry check after testing
+    const token = localStorage.getItem("token");
+    if (isTokenExpired(token)) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      setUser(null);
+      return;
+    }
+
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
@@ -20,6 +40,22 @@ export function AuthProvider({ children }) {
       }
     }
   }, []);
+
+  // 2. Periodically check token expiry (every 60 seconds)
+  // TODO: Re-enable after testing
+  // useEffect(() => {
+  //   const checkExpiry = () => {
+  //     const token = localStorage.getItem("token");
+  //     if (token && isTokenExpired(token)) {
+  //       setUser(null);
+  //       localStorage.removeItem("user");
+  //       localStorage.removeItem("token");
+  //       window.location.href = "/login";
+  //     }
+  //   };
+  //   const interval = setInterval(checkExpiry, 60000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   const login = (userData) => {
     setUser(userData);
@@ -32,9 +68,9 @@ export function AuthProvider({ children }) {
     // 👇 CHANGED: Clear 'user' AND 'token' so you are fully logged out
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    
+
     // Optional: Redirect to login immediately if needed
-    window.location.href = "/"; 
+    window.location.href = "/";
   };
 
   return (
