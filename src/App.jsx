@@ -57,7 +57,6 @@ import SecurityDashboard from "./pages/security/SecurityDashboard";
 import Accesslogs from "./pages/security/Accesslogs";
 import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
 import BrowseDevices from "./pages/security/BrowseDevices";
-import DeviceDetails from "./pages/security/DeviceDetails";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
@@ -141,7 +140,6 @@ export default function App() {
                     <Route path="/security/logs" element={<Accesslogs />} />
                     <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                     <Route path="/security/devices" element={<BrowseDevices />} />
-                    <Route path="/security/device/:deviceId" element={<DeviceDetails />} />
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />

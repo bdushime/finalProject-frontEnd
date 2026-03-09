@@ -32,6 +32,7 @@ import AddDeviceDialog from "./dialogs/AddDeviceDialog";
 import EditDeviceDialog from "./dialogs/EditDeviceDialog";
 import DeleteDeviceDialog from "./dialogs/DeleteDeviceDialog";
 import BulkUploadDialog from "./dialogs/BulkUploadDialog";
+import DeviceDetailsDialog from "./DeviceDetailsDialog";
 
 import api from "@/utils/api";
 import { UserRoles } from "@/config/roleConfig";
@@ -54,6 +55,8 @@ function BrowseDevices() {
 
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [detailsDeviceId, setDetailsDeviceId] = useState(null);
 
   const [deviceList, setDeviceList] = useState([]);
   const [categories, setCategories] = useState(["All", ...DEFAULT_CATEGORIES]);
@@ -133,8 +136,8 @@ function BrowseDevices() {
   });
 
   const navigateToDevice = (device) => {
-    console.log("Navigating to device:", device.id);
-    navigate(`/security/device/${device.id}`);
+    setDetailsDeviceId(device.id);
+    setIsDetailsDialogOpen(true);
   };
 
   const filteredDevices = useMemo(() => {
@@ -282,7 +285,7 @@ function BrowseDevices() {
 
   const HeroSection = (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 mt-4 relative z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2 mt-2 relative z-10">
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{t('browseDevices.title')}</h1>
           <p className="text-gray-400 flex items-center gap-2 text-sm">
@@ -316,7 +319,7 @@ function BrowseDevices() {
             placeholder={t('browseDevices.searchPlaceholder', 'Search by name, SN, or IoT Tag...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-800/50 border-slate-700/50 text-white placeholder:text-gray-500 py-7 pl-12 rounded-2xl focus:ring-2 focus:ring-[#8D8DC7]/50 transition-all backdrop-blur-sm shadow-xl"
+            className="w-full bg-slate-800/50 border-slate-700/50 text-white placeholder:text-gray-500 py-5 pl-12 rounded-2xl focus:ring-2 focus:ring-[#8D8DC7]/50 transition-all backdrop-blur-sm shadow-xl"
           />
         </div>
       </div>
@@ -325,9 +328,9 @@ function BrowseDevices() {
 
   return (
     <MainLayout heroContent={HeroSection}>
-      <div className="space-y-6">
+      <div className="space-y-2">
         {/* Filter Bar */}
-        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 mb-4 sm:mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 mb-2 sm:mb-4 md:mb-6">
           <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-1 w-full sm:w-auto">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[180px] border-none focus:ring-0 shadow-none font-medium text-slate-600">
@@ -379,7 +382,7 @@ function BrowseDevices() {
         </div>
 
         {/* Device Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-2">
           {filteredDevices.map((device) => (
             <Card
               key={device.id}
@@ -412,7 +415,7 @@ function BrowseDevices() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 pt-2 space-y-4 flex-1 flex flex-col">
+              <CardContent className="p-6 pt-2 space-y-2 flex-1 flex flex-col">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getStatusColor(device.status))}>
                     {device.status}
@@ -565,6 +568,12 @@ function BrowseDevices() {
           onOpenChange={setIsBulkUploadOpen}
           onUploadComplete={handleBulkUploadComplete}
           userRole={currentUser.role}
+        />
+
+        <DeviceDetailsDialog
+          deviceId={detailsDeviceId}
+          open={isDetailsDialogOpen}
+          onOpenChange={setIsDetailsDialogOpen}
         />
       </div>
     </MainLayout>

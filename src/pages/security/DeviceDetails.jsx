@@ -6,32 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Package,
-    MapPin,
-    Calendar,
-    TrendingDown,
-    Building2,
-    Tag,
-    DollarSign,
-    ShieldCheck,
     Printer,
-    Edit,
-    Trash2,
     ArrowLeft,
     QrCode,
 } from "lucide-react";
-
 import api from "@/utils/api";
 
-
-
-const CATEGORY_LIFESPAN = {
-    "Electronics": 3,
-    "Furniture": 10,
-    "Lab Equipment": 5,
-    "Office Supplies": 2,
-    "Vehicles": 7
-};
 
 function DeviceDetails() {
     const { deviceId } = useParams();
@@ -76,35 +56,35 @@ function DeviceDetails() {
         }
     }, [deviceId]);
 
-    const getDepreciation = () => {
-        if (!device?.purchasePrice || !device?.purchaseDate) {
-            return { currentValue: 0, percentLost: 0, annualRate: 0, yearsRemaining: 0, lifespanYears: 5, ageInYears: 0 };
-        }
+    // const getDepreciation = () => {
+    //     if (!device?.purchasePrice || !device?.purchaseDate) {
+    //         return { currentValue: 0, percentLost: 0, annualRate: 0, yearsRemaining: 0, lifespanYears: 5, ageInYears: 0 };
+    //     }
 
-        const cost = parseFloat(device.purchasePrice);
-        const purchaseDate = new Date(device.purchaseDate);
-        const today = new Date();
-        const lifespanYears = CATEGORY_LIFESPAN[device.category] || 5;
+    //     const cost = parseFloat(device.purchasePrice);
+    //     const purchaseDate = new Date(device.purchaseDate);
+    //     const today = new Date();
+    //     const lifespanYears = CATEGORY_LIFESPAN[device.category] || 5;
 
-        const ageInYears = (today - purchaseDate) / (1000 * 60 * 60 * 24 * 365.25);
-        const annualDepreciation = cost / lifespanYears;
-        const totalDepreciation = annualDepreciation * ageInYears;
+    //     const ageInYears = (today - purchaseDate) / (1000 * 60 * 60 * 24 * 365.25);
+    //     const annualDepreciation = cost / lifespanYears;
+    //     const totalDepreciation = annualDepreciation * ageInYears;
 
-        const currentValue = Math.max(0, cost - totalDepreciation);
-        const percentLost = Math.min(100, (totalDepreciation / cost) * 100);
-        const yearsRemaining = Math.max(0, lifespanYears - ageInYears);
+    //     const currentValue = Math.max(0, cost - totalDepreciation);
+    //     const percentLost = Math.min(100, (totalDepreciation / cost) * 100);
+    //     const yearsRemaining = Math.max(0, lifespanYears - ageInYears);
 
-        return {
-            currentValue: currentValue.toLocaleString(),
-            percentLost: percentLost.toFixed(1),
-            annualRate: annualDepreciation.toLocaleString(),
-            yearsRemaining: yearsRemaining.toFixed(1),
-            lifespanYears,
-            ageInYears: ageInYears.toFixed(1),
-        };
-    };
+    //     return {
+    //         currentValue: currentValue.toLocaleString(),
+    //         percentLost: percentLost.toFixed(1),
+    //         annualRate: annualDepreciation.toLocaleString(),
+    //         yearsRemaining: yearsRemaining.toFixed(1),
+    //         lifespanYears,
+    //         ageInYears: ageInYears.toFixed(1),
+    //     };
+    // };
 
-    const depreciation = getDepreciation();
+    // const depreciation = getDepreciation();
 
     // Status and condition color helpers
     const getStatusColor = (status) => {
@@ -165,16 +145,6 @@ function DeviceDetails() {
         printWindow.document.close();
     };
 
-
-    const resetForm = () => {
-        setFormData({
-            name: "", category: "", brand: "", model: "", serialNumber: "",
-            condition: "excellent", status: "available", location: "",
-            department: "", available: 0, total: 0, purchaseDate: "",
-            purchasePrice: 0, warrantyExpiry: "", description: "", specifications: "",
-        });
-    };
-
     if (loading) {
         return (
             <MainLayout>
@@ -223,35 +193,29 @@ function DeviceDetails() {
                 {/* Main Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
                     {/* Left Column - QR Code & Quick Info */}
-                    <div className="lg:col-span-1 space-y-2">
-                        {/* QR Code Card */}
-                        <Card className="border border-gray-200 shadow-sm">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center gap-2 text-lg">
-                                    <QrCode className="h-5 w-5" />
-                                    QR Code
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex flex-col items-center gap-4">
-                                <div className="bg-white p-4 border-2 border-gray-200 rounded-xl shadow-sm">
-                                    <QRCodeSVG value={device.qrCode || device.id} size={180} />
-                                </div>
-                                <p className="text-sm text-gray-500 text-center">
-                                    Scan to identify device
-                                </p>
-                                <Button variant="outline" onClick={handlePrintQR} className="w-full">
-                                    <Printer className="h-4 w-4 mr-2" />
-                                    Print QR Code
-                                </Button>
-                            </CardContent>
-                        </Card>
+                    {/* <div className="lg:col-span-1 space-y-2"> */}
+                    {/* QR Code & Status Card */}
+                    <Card className="border border-gray-200 shadow-sm">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="flex items-center gap-2 text-lg">
+                                <QrCode className="h-5 w-5" />
+                                QR Code
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-center gap-4">
+                            <div className="bg-white p-4 border-2 border-gray-200 rounded-xl shadow-sm">
+                                <QRCodeSVG value={device.qrCode || device.id} size={180} />
+                            </div>
+                            <p className="text-sm text-gray-500 text-center">
+                                Scan to identify device
+                            </p>
+                            <Button variant="outline" onClick={handlePrintQR} className="w-full">
+                                <Printer className="h-4 w-4 mr-2" />
+                                Print QR Code
+                            </Button>
 
-                        {/* Status Card */}
-                        <Card className="border border-gray-200 shadow-sm">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-lg font-medium">Status</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
+                            {/* Status & Condition */}
+                            <div className="w-full border-t border-gray-100 pt-4 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <span className="text-gray-500">Status</span>
                                     <Badge variant="outline" className={getStatusColor(device.status)}>
@@ -264,160 +228,9 @@ function DeviceDetails() {
                                         {device.condition}
                                     </Badge>
                                 </div>
-                                {/* <div className="flex items-center justify-between">
-                                    <span className="text-gray-500">Availability</span>
-                                    <span className="font-medium">{device.available} / {device.total} units</span>
-                                </div> */}
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="lg:col-span-2 space-y-2">
-                        <Card className="border border-gray-200 shadow-sm bg-[#0A1128]/15">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center gap-2 text-lg font-medium">
-                                    <TrendingDown className="h-5 w-5 text-blue-600" />
-                                    Asset Depreciation
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-                                        <p className="text-xs text-gray-500 uppercase font-medium mb-1">Original Cost</p>
-                                        <p className="text-lg sm:text-xl font-bold text-gray-900">
-                                            {device.purchasePrice?.toLocaleString() || 0} RWF
-                                        </p>
-                                    </div>
-                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-                                        <p className="text-xs text-gray-500 uppercase font-medium mb-1">Current Value</p>
-                                        <p className="text-lg sm:text-xl font-bold text-blue-600">
-                                            {depreciation.currentValue} RWF
-                                        </p>
-                                    </div>
-                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-                                        <p className="text-xs text-gray-500 uppercase font-medium mb-1">Annual Depreciation</p>
-                                        <p className="text-lg sm:text-xl font-bold text-orange-600">
-                                            {depreciation.annualRate} RWF
-                                        </p>
-                                    </div>
-                                    <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm">
-                                        <p className="text-xs text-gray-500 uppercase font-medium mb-1">Years Remaining</p>
-                                        <p className="text-lg sm:text-xl font-bold text-green-600">
-                                            {depreciation.yearsRemaining} yrs
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Depreciation Progress Bar */}
-                                <div className="space-y-2">
-                                    <div className="flex flex-col sm:flex-row justify-between text-sm gap-1">
-                                        <span className="text-gray-600">Value Lost: {depreciation.percentLost}%</span>
-                                        <span className="text-gray-600">Age: {depreciation.ageInYears} / {depreciation.lifespanYears} years</span>
-                                    </div>
-                                    <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full transition-all duration-700 rounded-full ${parseFloat(depreciation.percentLost) > 80
-                                                ? 'bg-gradient-to-r from-red-400 to-red-600'
-                                                : parseFloat(depreciation.percentLost) > 50
-                                                    ? 'bg-gradient-to-r from-orange-400 to-orange-600'
-                                                    : 'bg-gradient-to-r from-blue-400 to-blue-600'
-                                                }`}
-                                            style={{ width: `${100 - parseFloat(depreciation.percentLost)}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Device Information */}
-                        <Card className="border border-gray-200 shadow-sm">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-lg font-medium">Device Information</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <Tag className="h-5 w-5 text-gray-400" />
-                                            <div>
-                                                <p className="text-xs text-gray-500 uppercase">Serial Number</p>
-                                                <p className="font-medium">{device.serialNumber}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <Package className="h-5 w-5 text-gray-400" />
-                                            <div>
-                                                <p className="text-xs text-gray-500 uppercase">Category</p>
-                                                <p className="font-medium">{device.category}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <Calendar className="h-5 w-5 text-gray-400" />
-                                            <div>
-                                                <p className="text-xs text-gray-500 uppercase">Purchase Date</p>
-                                                <p className="font-medium">
-                                                    {device.purchaseDate ? new Date(device.purchaseDate).toLocaleDateString() : 'N/A'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <DollarSign className="h-5 w-5 text-gray-400" />
-                                            <div>
-                                                <p className="text-xs text-gray-500 uppercase">Purchase Price</p>
-                                                <p className="font-medium">{device.purchasePrice?.toLocaleString() || 0} RWF</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <ShieldCheck className="h-5 w-5 text-gray-400" />
-                                            <div>
-                                                <p className="text-xs text-gray-500 uppercase">Warranty Expiry</p>
-                                                <p className="font-medium">
-                                                    {device.warrantyExpiry ? new Date(device.warrantyExpiry).toLocaleDateString() : 'N/A'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Description & Specifications */}
-                        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                            {/* Description */}
-                            <Card className="border border-gray-200 shadow-sm">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-lg font-medium">Description</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-gray-600">
-                                        {device.description || "No description available"}
-                                    </p>
-                                </CardContent>
-                            </Card>
-
-                            {/* Specifications */}
-                            <Card className="border border-gray-200 shadow-sm">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-lg font-medium">Specifications</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    {device.specifications && device.specifications.length > 0 ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {(Array.isArray(device.specifications) ? device.specifications : [device.specifications]).map((spec, idx) => (
-                                                <Badge key={idx} variant="secondary" className="bg-gray-100 text-gray-700">
-                                                    {spec}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-gray-500">No specifications listed</p>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
             </div>
