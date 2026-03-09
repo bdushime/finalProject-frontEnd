@@ -13,9 +13,9 @@ export default function QuickActions() {
         { label: t('dashboard.quickActions.report'), icon: FileText, onClick: () => navigate("/it/reports") },
     ];
     return (
-        <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow h-full flex flex-col w-full">
+        <Card className="border border-gray-300 text-gray-800 shadow-md hover:shadow-lg transition-shadow h-full flex flex-col w-full">
             <CardHeader>
-                <CardTitle className="text-base sm:text-lg lg:text-xl font-bold">{t('dashboard.quickActions.title')}</CardTitle>
+                <CardTitle className="text-gray-800 sm:text-lg lg:text-xl font-bold">{t('dashboard.quickActions.title')}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">{t('dashboard.quickActions.subtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex items-center justify-center">
