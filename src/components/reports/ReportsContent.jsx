@@ -27,7 +27,9 @@ import {
 import { FileDown, Download, RefreshCw, Filter, Loader2 } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/common/PaginationControls";
-import { generateReportData, exportToCSV, exportToPDF } from "@/pages/IT_Staff/reports/reportService";
+import { generateReportData, exportToCSV } from "@/pages/IT_Staff/reports/reportService";
+import { generatePDF } from "@/utils/pdfGenerator";
+import api from "@/utils/api";
 import PropTypes from "prop-types";
 import { toast } from "sonner";
 
@@ -68,6 +70,171 @@ const DEVICE_IDS = [
   "TTGO-001", "TTGO-002", "TTGO-003", "TTGO-004", "TTGO-005", "TTGO-006",
   "EQ-001", "EQ-002", "EQ-003", "EQ-004", "EQ-005"
 ];
+
+const generateSecurityReportData = async ({
+  reportType,
+  startDate,
+  endDate,
+  category,
+  status,
+  borrower,
+  eventType,
+  deviceId,
+}) => {
+  // All security reports (including inventory) are derived from access logs
+  // so that the content reflects the selected date range and activity.
+  const res = await api.get("/transactions/security/access-logs");
+  const logs = res.data?.logs || [];
+
+  const start = startDate ? new Date(startDate) : new Date("2020-01-01");
+  const end = endDate ? new Date(endDate) : new Date();
+  end.setHours(23, 59, 59, 999);
+
+  const mapEventType = (logStatus) => {
+    if (logStatus === "Checked Out") return "checkout";
+    if (logStatus === "Returned") return "return";
+    if (logStatus === "Overdue") return "geofence_violation";
+    return "movement";
+  };
+
+  let filtered = logs.filter((log) => {
+    const ts = new Date(log.updatedAt || log.createdAt);
+    if (ts < start || ts > end) return false;
+
+    if (category && category !== "all") {
+      const logCategory = log.equipment?.category || log.equipment?.type;
+      if (logCategory !== category) return false;
+    }
+
+    if (borrower) {
+      const name = log.user?.username || log.user?.fullName || "";
+      if (!name.toLowerCase().includes(borrower.toLowerCase())) return false;
+    }
+
+    if (deviceId && log.equipment?.serialNumber !== deviceId) return false;
+
+    if (eventType && eventType !== "all") {
+      if (mapEventType(log.status) !== eventType) return false;
+    }
+
+    if (status && status !== "all") {
+      if (reportType === "logs") {
+        if (status === "active" && log.status !== "Checked Out") return false;
+        if (status === "completed" && log.status !== "Returned") return false;
+        if (status === "violation" && log.status !== "Overdue") return false;
+        if (status === "resolved" && log.status !== "Returned") return false;
+      } else if (log.status !== status) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  if (reportType === "logs") {
+    return filtered.map((log) => ({
+      id: log._id,
+      deviceName: log.equipment?.name || "Unknown Item",
+      deviceId: log.equipment?.serialNumber || "N/A",
+      eventType: mapEventType(log.status),
+      location: log.destination || "Main Storage",
+      userName: log.user?.username || "Unknown",
+      timestamp: log.updatedAt || log.createdAt,
+      status: (status === "all" || !status) ?
+        (log.status === "Checked Out"
+          ? "active"
+          : log.status === "Returned"
+            ? "completed"
+            : log.status === "Overdue"
+              ? "violation"
+              : log.status?.toLowerCase() || "completed")
+        : status,
+    }));
+  }
+
+  if (reportType === "inventory") {
+    const map = {};
+    filtered.forEach((log) => {
+      const eqId = log.equipment?._id;
+      if (!eqId) return;
+      if (!map[eqId]) {
+        map[eqId] = {
+          id: eqId,
+          equipmentName: log.equipment?.name || "Unknown Device",
+          serialNumber: log.equipment?.serialNumber || "N/A",
+          category: log.equipment?.category || log.equipment?.type || "General",
+          location: log.destination || "Main Storage",
+          status: log.status || "AVAILABLE",
+          condition: "Good",
+          purchaseDate: (log.createdAt && log.createdAt.split("T")[0]) || "",
+        };
+      } else {
+        map[eqId].status = log.status || map[eqId].status;
+        map[eqId].location = log.destination || map[eqId].location;
+      }
+    });
+    return Object.values(map);
+  }
+
+  if (reportType === "damaged") {
+    return filtered
+      .filter((log) => log.status === "Damaged")
+      .map((log) => ({
+        id: log._id,
+        equipmentName: log.equipment?.name || "Unknown Device",
+        serialNumber: log.equipment?.serialNumber || "N/A",
+        category: log.equipment?.category || log.equipment?.type || "General",
+        damageDate: (log.updatedAt || log.createdAt || "").split("T")[0],
+        condition: "Damaged",
+        remarks: log.purpose || "Reported as damaged",
+        status: "DAMAGED",
+      }));
+  }
+
+  if (reportType === "lost") {
+    return filtered
+      .filter((log) => log.status === "Lost")
+      .map((log) => ({
+        id: log._id,
+        equipmentName: log.equipment?.name || "Unknown Device",
+        serialNumber: log.equipment?.serialNumber || "N/A",
+        category: log.equipment?.category || log.equipment?.type || "General",
+        lossDate: (log.updatedAt || log.createdAt || "").split("T")[0],
+        lastKnownLocation: log.destination || "Unknown",
+        remarks: log.purpose || "Reported as lost",
+        status: "LOST",
+      }));
+  }
+
+  if (reportType === "utilization") {
+    const utilMap = {};
+    filtered.forEach((log) => {
+      const eqId = log.equipment?._id;
+      if (!eqId) return;
+      if (!utilMap[eqId]) {
+        utilMap[eqId] = {
+          id: eqId,
+          equipmentName: log.equipment?.name || "Unknown Device",
+          serialNumber: log.equipment?.serialNumber || "N/A",
+          category: log.equipment?.category || log.equipment?.type || "General",
+          totalCheckouts: 0,
+          currentStatus: log.status || "AVAILABLE",
+        };
+      }
+      if (["Checked Out", "Returned", "Overdue"].includes(log.status)) {
+        utilMap[eqId].totalCheckouts += 1;
+      }
+      utilMap[eqId].currentStatus = log.status || utilMap[eqId].currentStatus;
+    });
+
+    return Object.values(utilMap).map((item) => ({
+      ...item,
+      utilizationRate: Math.min(100, item.totalCheckouts * 5),
+    }));
+  }
+
+  return [];
+};
 
 export default function ReportsContent({
   reportTypes,
@@ -124,6 +291,39 @@ export default function ReportsContent({
   const [page, setPage] = useState(1);
   const [reportGenerated, setReportGenerated] = useState(false);
   const pageSize = 10;
+  const isSecurityContext = exportFilenamePrefix?.startsWith("security-");
+
+  const [categoryOptions, setCategoryOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/config/options");
+        const raw = res.data?.categories || [];
+
+        let normalized = [];
+        if (Array.isArray(raw) && raw.length > 0) {
+          if (typeof raw[0] === "string") {
+            normalized = raw;
+          } else {
+            normalized = raw
+              .map((c) => c.name || c.code)
+              .filter(Boolean);
+          }
+        }
+
+        if (normalized.length === 0) {
+          normalized = ["Laptop", "Tablet", "Camera", "Audio", "Video", "Projector", "Accessories"];
+        }
+
+        setCategoryOptions(normalized);
+      } catch (e) {
+        console.warn("Failed to load report categories, using defaults.", e);
+        setCategoryOptions(["Laptop", "Tablet", "Camera", "Audio", "Video", "Projector", "Accessories"]);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const today = new Date();
@@ -168,18 +368,41 @@ export default function ReportsContent({
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const data = generateReportData({
-        reportType,
-        startDate,
-        endDate,
-        category: category !== "all" ? category : undefined,
-        status: status !== "all" ? status : undefined,
-        borrower: showBorrowerFilter && borrower ? borrower : undefined,
-        eventType: reportType === "logs" && eventType !== "all" ? eventType : undefined,
-        deviceId: reportType === "logs" && deviceId ? deviceId : undefined,
-      });
+      let data = [];
+      if (isSecurityContext) {
+        data = await generateSecurityReportData({
+          reportType,
+          startDate,
+          endDate,
+          category,
+          status,
+          borrower: showBorrowerFilter && borrower ? borrower : undefined,
+          eventType: reportType === "logs" ? eventType : undefined,
+          deviceId: reportType === "logs" ? deviceId : undefined,
+        });
+      } else {
+        data = await generateReportData({
+          reportType,
+          startDate,
+          endDate,
+          category: category !== "all" ? category : undefined,
+          status: status !== "all" ? status : undefined,
+          borrower: showBorrowerFilter && borrower ? borrower : undefined,
+          eventType: reportType === "logs" && eventType !== "all" ? eventType : undefined,
+          deviceId: reportType === "logs" && deviceId ? deviceId : undefined,
+        });
+      }
 
-      setReportData(data);
+      const normalize = (val) => (val || "").toString().trim().toLowerCase();
+      if (category && category !== "all") {
+        data = (data || []).filter((item) => {
+          if (!item || typeof item !== "object") return false;
+          if (!("category" in item)) return true;
+          return normalize(item.category) === normalize(category);
+        });
+      }
+
+      setReportData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to generate report:", error);
     } finally {
@@ -373,7 +596,6 @@ export default function ReportsContent({
           </Badge>,
         ];
       case "logs":
-        // Map status to display text and styling to match Accesslogs.jsx
         const getStatusDisplay = (status) => {
           if (status === "completed") return "Resolved";
           if (status === "violation") return "Open";
@@ -416,6 +638,106 @@ export default function ReportsContent({
     paginatedItems: currentData,
   } = usePagination(reportData, page, pageSize);
 
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {
+        username: "Security Staff",
+        role: "Security",
+      };
+    } catch {
+      return { username: "Security Staff", role: "Security" };
+    }
+  })();
+
+  const mapItemToPdfRow = (item) => {
+    switch (reportType) {
+      case "inventory":
+        return {
+          createdAt: item.purchaseDate,
+          status: item.status,
+          equipment: {
+            name: item.equipmentName,
+            serialNumber: item.serialNumber,
+            category: item.category,
+          },
+          user: {
+            username: "-",
+            email: "-",
+          },
+        };
+      case "damaged":
+        return {
+          createdAt: item.damageDate,
+          status: item.status,
+          equipment: {
+            name: item.equipmentName,
+            serialNumber: item.serialNumber,
+            category: item.category,
+          },
+          user: {
+            username: "-",
+            email: "-",
+          },
+        };
+      case "lost":
+        return {
+          createdAt: item.lossDate,
+          status: item.status,
+          equipment: {
+            name: item.equipmentName,
+            serialNumber: item.serialNumber,
+            category: item.category,
+          },
+          user: {
+            username: "-",
+            email: "-",
+          },
+        };
+      case "utilization":
+        return {
+          createdAt: new Date().toISOString(),
+          status: item.currentStatus,
+          equipment: {
+            name: item.equipmentName,
+            serialNumber: item.serialNumber,
+            category: item.category,
+          },
+          user: {
+            username: "-",
+            email: "-",
+          },
+        };
+      case "logs":
+        return {
+          createdAt: item.timestamp,
+          status: item.status,
+          equipment: {
+            name: item.deviceName,
+            serialNumber: item.deviceId,
+            category: item.eventType,
+          },
+          user: {
+            username: item.userName,
+            email: "-",
+          },
+        };
+      default:
+        return {
+          createdAt: new Date().toISOString(),
+          status: item.status,
+          equipment: {
+            name: item.equipmentName || item.deviceName || "N/A",
+            serialNumber: item.serialNumber || item.deviceId || "N/A",
+            category: item.category || item.eventType || "N/A",
+          },
+          user: {
+            username: item.userName || "-",
+            email: "-",
+          },
+        };
+    }
+  };
+
   // Handle download
   const handleDownload = async (format) => {
     if (reportData.length === 0) {
@@ -431,35 +753,16 @@ export default function ReportsContent({
       if (format === "csv") {
         exportToCSV(reportData, getTableColumns(), getRowData, filename);
       } else if (format === "pdf") {
-        await exportToPDF(
-          reportData,
-          getTableColumns(),
-          getRowData,
-          reportTypeLabel,
-          startDate,
-          endDate,
-          filename
-        );
+        const pdfData = reportData.map(mapItemToPdfRow);
+        const title = `${reportTypeLabel.toUpperCase()} ${t("reports.title").toUpperCase()}`;
+        const includeUserColumn = !(isSecurityContext && reportType === "inventory");
+        generatePDF(pdfData, currentUser, title, includeUserColumn);
       }
     } catch (error) {
       console.error("Export failed:", error);
       toast.error("Failed to export report. Please try again.");
     }
   };
-
-  // Get categories from equipment data
-  const categories = useMemo(() => {
-    return [
-      t('reports.filters.allCategories'),
-      "Laptop",
-      "Tablet",
-      "Camera",
-      "Audio",
-      "Video",
-      "Projector",
-      "Accessories",
-    ];
-  }, []);
 
   return (
     <div className="space-y-3">
@@ -618,10 +921,13 @@ export default function ReportsContent({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((cat) => (
+                        <SelectItem value="all">
+                          {t('reports.filters.allCategories')}
+                        </SelectItem>
+                        {categoryOptions.map((cat) => (
                           <SelectItem
                             key={cat}
-                            value={cat === t('reports.filters.allCategories') ? "all" : cat}
+                            value={cat}
                           >
                             {cat}
                           </SelectItem>

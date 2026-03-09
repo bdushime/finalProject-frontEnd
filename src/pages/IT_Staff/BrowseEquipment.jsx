@@ -120,7 +120,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
       <div className="min-h-screen">
         <PageHeader title={t('equipment.title')} />
 
-        <Card className="mb-6 border-gray-300">
+        <Card className="mb-6 border-gray-300 text-gray-800">
           <CardContent className="pt-6">
             <form onSubmit={handleSearchSubmit} className="space-y-4">
               <div className="flex flex-col md:flex-row gap-4">
@@ -130,7 +130,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                     placeholder={t('equipment.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 rounded-full border-gray-300 shadow-sm"
+                    className="pl-10 text-gray-800 rounded-full border-gray-300 shadow-sm"
                   />
                 </div>
                 <Button type="submit" className="rounded-full border-gray-300 shadow-sm">
@@ -211,7 +211,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
             {currentEquipment.map(item => (
               <Card
                 key={item.id}
-                className="flex flex-col border-gray-300 hover:shadow-lg hover:bg-gray-50 transition-all shadow-sm bg-background rounded-3xl cursor-pointer"
+                className="flex flex-col text-gray-800 border-gray-300 hover:shadow-lg hover:bg-gray-50 transition-all shadow-sm bg-background rounded-3xl cursor-pointer"
                 onClick={() => {
                   setSelectedEquipment(item);
                   setDialogOpen(true);

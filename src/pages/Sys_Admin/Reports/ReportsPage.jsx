@@ -3,15 +3,14 @@ import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
 import {
     FileText, Users, Monitor, ShieldAlert, Download, ChevronDown,
-    Loader2, ChevronLeft, ChevronRight // 👈 Added ChevronLeft and ChevronRight
+    Loader2, ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import { toast } from 'sonner';
 import { generatePDF } from '@/utils/pdfGenerator';
 
-// CONSTANTS - Moved inside component for i18n
-const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
-const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
+// const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
+// const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
 
 const datePickerStyles = `
   input[type="date"]::-webkit-calendar-picker-indicator {

@@ -54,6 +54,10 @@ export default function EquipmentDetailsDialog({
     serialNumber: "",
   });
 
+  // Options matching backend schema
+  const categories = ['Laptop', 'Projector', 'Tablet', 'Camera', 'Audio', 'Accessories', 'Microphone', 'Other'];
+  const statuses = ['Available', 'Maintenance', 'Lost'];
+
   // Reset data when opening the dialog
   useEffect(() => {
     if (open && equipment) {
@@ -127,8 +131,7 @@ export default function EquipmentDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* Added bg-white to prevent transparent background */}
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white text-gray-800 space-y-1">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between text-xl font-bold">
             {isEditing ? t('equipment.dialog.editTitle') : equipment.name}
@@ -238,12 +241,11 @@ export default function EquipmentDetailsDialog({
                       <SelectValue placeholder={t('equipment.dialog.selectType')} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="Laptop">{t('equipment.categories.laptop')}</SelectItem>
-                      <SelectItem value="Projector">{t('equipment.categories.projector')}</SelectItem>
-                      <SelectItem value="Tablet">{t('equipment.categories.tablet')}</SelectItem>
-                      <SelectItem value="Camera">{t('equipment.categories.camera')}</SelectItem>
-                      <SelectItem value="Audio">{t('equipment.categories.audio')}</SelectItem>
-                      <SelectItem value="Accessories">{t('equipment.categories.accessories')}</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {t(`equipment.categories.${cat.toLowerCase()}`, cat)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -260,9 +262,11 @@ export default function EquipmentDetailsDialog({
                       <SelectValue placeholder={t('equipment.dialog.selectStatus')} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="Available">{t('equipment.status.available')}</SelectItem>
-                      <SelectItem value="Maintenance">{t('equipment.status.maintenance')}</SelectItem>
-                      <SelectItem value="Lost">{t('equipment.status.lost')}</SelectItem>
+                      {statuses.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {t(`equipment.status.${status.toLowerCase()}`, status)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

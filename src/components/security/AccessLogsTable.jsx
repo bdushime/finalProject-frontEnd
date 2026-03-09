@@ -24,74 +24,7 @@ import { Avatar, AvatarFallback } from "@components/ui/avatar";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-// Mock data - replace with actual API call
-const mockAccessLogs = [
-  {
-    id: "LOG-001",
-    timestamp: "Jan 21, 2025",
-    user: "Alex Trie",
-    userId: "STU001",
-    email: "alex.trie@university.edu",
-    action: "Checkout",
-    equipment: "Projector 1",
-    equipmentId: "EQ-001",
-    location: "Room 108",
-    status: "success",
-    ipAddress: "192.168.1.100",
-  },
-  {
-    id: "LOG-002",
-    timestamp: "Jan 20, 2025",
-    user: "Annette Black",
-    userId: "STU002",
-    email: "annette.black@university.edu",
-    action: "Checkout",
-    equipment: "Projector 2",
-    equipmentId: "EQ-002",
-    location: "Room 104",
-    status: "success",
-    ipAddress: "192.168.1.101",
-  },
-  {
-    id: "LOG-003",
-    timestamp: "Jan 19, 2025",
-    user: "Jerome Bell",
-    userId: "STU003",
-    email: "jerome.bell@university.edu",
-    action: "Return",
-    equipment: "TV Remote 2",
-    equipmentId: "EQ-003",
-    location: "Room 101",
-    status: "success",
-    ipAddress: "192.168.1.102",
-  },
-  {
-    id: "LOG-004",
-    timestamp: "Jan 18, 2025",
-    user: "Jenny Wilson",
-    userId: "STU004",
-    email: "jenny.wilson@university.edu",
-    action: "Checkout",
-    equipment: "Extension Cable 1",
-    equipmentId: "EQ-004",
-    location: "Room 308",
-    status: "failed",
-    ipAddress: "192.168.1.103",
-  },
-  {
-    id: "LOG-005",
-    timestamp: "Jan 17, 2025",
-    user: "Promise Izere",
-    userId: "STU005",
-    email: "promise.izere@auca.ac.rw",
-    action: "Overdue",
-    equipment: "TV Remote 1",
-    equipmentId: "EQ-005",
-    location: "Room 205",
-    status: "success",
-    ipAddress: "192.168.1.104",
-  },
-];
+
 
 const statusConfig = {
   success: { label: "Success", className: "bg-[#BEBEE0] text-[#1A2240] border-none rounded-full" },
@@ -214,7 +147,7 @@ export default function AccessLogsTable({ data, loading = false }) {
           <div className="overflow-x-auto">
             <Table className="min-w-[800px]">
               <TableHeader>
-                <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b border-gray-50">
+                <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 border-b border-gray-50 text-center align-middle justify-center items-center">
                   <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.logId')}</TableHead>
                   <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.user')}</TableHead>
                   <TableHead className="px-4 py-4 font-bold text-gray-400 uppercase text-[10px] tracking-widest">{t('accessLogs.table.action')}</TableHead>
@@ -249,7 +182,7 @@ export default function AccessLogsTable({ data, loading = false }) {
                       <TableCell className="px-4 py-4 font-bold text-slate-900 font-mono text-xs">
                         {log.id}
                       </TableCell>
-                      <TableCell className="px-4 py-4">
+                      <TableCell className="px-4 py-4 flex justify-center items-center">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9 ring-2 ring-slate-50 shadow-sm transition-transform group-hover:scale-105">
                             <AvatarFallback className="bg-slate-100 text-[#8D8DC7] text-[10px] font-black underline underline-offset-2">
@@ -257,7 +190,7 @@ export default function AccessLogsTable({ data, loading = false }) {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
-                            <span className="font-extrabold text-slate-900 text-sm whitespace-nowrap">{log.user}</span>
+                            <span className="font-bold text-slate-900 text-sm whitespace-nowrap">{log.user}</span>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{log.email}</span>
                           </div>
                         </div>
