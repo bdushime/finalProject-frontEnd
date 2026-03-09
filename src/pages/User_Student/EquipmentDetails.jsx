@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Package, MapPin, Calendar, QrCode, Loader2, ArrowLeft } from "lucide-react";
 import { PageContainer } from "@/components/common/Page";
-import api from "@/utils/api"; 
+import api from "@/utils/api";
 
 export default function EquipmentDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
-    
+
     // State for Real Data
     const [equipment, setEquipment] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -72,7 +72,7 @@ export default function EquipmentDetails() {
         <StudentLayout>
             <PageContainer>
                 {/* Back Button */}
-                <button 
+                <button
                     onClick={() => navigate('/student/browse')}
                     className="flex items-center text-slate-500 hover:text-[#0b1d3a] transition-colors mb-6 text-sm font-medium"
                 >
@@ -89,11 +89,10 @@ export default function EquipmentDetails() {
                                     <div>
                                         <div className="flex items-center gap-3 mb-3">
                                             {/* Dynamic Status Badge */}
-                                            <Badge className={`uppercase tracking-wide ${
-                                                equipment.status === 'Available' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : 
-                                                equipment.status === 'Checked Out' ? 'bg-rose-100 text-rose-700 hover:bg-rose-100' :
-                                                'bg-slate-100 text-slate-500 hover:bg-slate-100'
-                                            }`}>
+                                            <Badge className={`uppercase tracking-wide ${equipment.status === 'Available' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' :
+                                                    equipment.status === 'Checked Out' ? 'bg-rose-100 text-rose-700 hover:bg-rose-100' :
+                                                        'bg-slate-100 text-slate-500 hover:bg-slate-100'
+                                                }`}>
                                                 {equipment.status}
                                             </Badge>
                                             {/* Category Badge */}
@@ -170,7 +169,7 @@ export default function EquipmentDetails() {
 
                                 <div className="pt-6 border-t border-slate-100 space-y-3">
                                     {/* REQUEST BUTTON - GOES TO FORM */}
-                                    <Button 
+                                    <Button
                                         className="w-full bg-[#0b1d3a] hover:bg-[#1a3b6e] text-white font-bold h-12 rounded-xl shadow-md transition-all active:scale-95"
                                         disabled={equipment.status !== 'Available'}
                                         onClick={() => navigate(`/student/borrow-request?equipmentId=${equipment._id}`)}
@@ -178,16 +177,15 @@ export default function EquipmentDetails() {
                                         {equipment.status === 'Available' ? 'Proceed to Request' : 'Item Unavailable'}
                                     </Button>
 
-                                    {/* QR Code Button (Future Feature) */}
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full h-12 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50"
-                                        disabled={true} 
+                                    {/* QR Code Button */}
+                                    <Button
+                                        variant="outline"
+                                        className="w-full h-12 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 transition-all font-semibold"
+                                        onClick={() => navigate(`/student/borrow-request?action=borrow&scan=true`)}
                                     >
-                                        <QrCode className="h-4 w-4 mr-2" />
-                                        Scan QR Code
+                                        <QrCode className="h-4 w-4 mr-2 text-blue-500" />
+                                        Scan QR Instead
                                     </Button>
-                                    <p className="text-[10px] text-center text-slate-400">QR Scanning coming in v2.0</p>
                                 </div>
                             </CardContent>
                         </Card>

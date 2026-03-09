@@ -22,6 +22,7 @@ import {
 import api from "@/utils/api";
 import PropTypes from "prop-types";
 import { toast } from "sonner";
+import QRScanner from "@/components/common/QRScanner";
 
 export default function BorrowRequestForm({ onSuccess }) {
     const navigate = useNavigate();
@@ -123,26 +124,25 @@ export default function BorrowRequestForm({ onSuccess }) {
         }
     };
 
-    const handleScanQR = async () => {
+    const handleScanQR = () => {
         setIsScanning(true);
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                videoRef.current.play();
-            }
-        } catch (err) {
-            console.error("Camera denied:", err);
-            setIsScanning(false);
-            toast.error("Camera access denied or not available.");
-        }
     };
 
     const stopCamera = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const tracks = videoRef.current.srcObject.getTracks();
-            tracks.forEach((track) => track.stop());
-            videoRef.current.srcObject = null;
+        setIsScanning(false);
+    };
+
+    const handleScanSuccess = (decodedText) => {
+        setIsScanning(false);
+        // Find equipment matching the QR text (which we assume is the Equipment ID or Serial No)
+        const found = equipmentList.find(e => e._id === decodedText || e.serialNumber === decodedText);
+        if (found) {
+            setEquipment(found);
+            setFormData(prev => ({ ...prev, equipmentId: found._id }));
+            toast.success("Equipment found! " + found.name);
+            setStep(2); // Auto-advance
+        } else {
+            toast.error("Equipment not found or unavailable.");
         }
     };
 
@@ -343,13 +343,13 @@ export default function BorrowRequestForm({ onSuccess }) {
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                     {flowType === 'borrow' && (
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
-                            <div className="w-full max-w-sm mx-auto aspect-video bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                            <div className="w-full max-w-sm mx-auto mb-4 flex items-center justify-center">
                                 {isScanning ? (
-                                    <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
+                                    <QRScanner onScanSuccess={handleScanSuccess} />
                                 ) : (
-                                    <div className="text-slate-500 flex flex-col items-center">
+                                    <div className="aspect-video w-full bg-slate-900 rounded-3xl overflow-hidden flex flex-col items-center justify-center text-slate-500 shadow-inner">
                                         <QrCode className="h-10 w-10 mb-2 opacity-50" />
-                                        <span className="text-sm">Camera Off</span>
+                                        <span className="text-sm font-semibold">Camera Off</span>
                                     </div>
                                 )}
                             </div>

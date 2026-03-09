@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ChevronLeft, Scan, Camera, CheckCircle, Package, Clock, QrCode, AlertTriangle, Loader2 } from "lucide-react";
 import api from "@/utils/api";
 import { toast } from "sonner";
+import QRScanner from "@/components/common/QRScanner";
 
 function useQuery() {
     const { search } = useLocation();
@@ -28,7 +29,6 @@ export default function ReturnEquipment() {
     // Camera State
     const [isScanning, setIsScanning] = useState(false);
     const [conditionPhotos, setConditionPhotos] = useState({ front: null, back: null });
-    const videoRef = useRef(null);
 
     // --- 1. FETCH ACTIVE BORROWS ---
     useEffect(() => {
@@ -54,31 +54,16 @@ export default function ReturnEquipment() {
         fetchActiveBorrows();
     }, [initialEquipmentId]);
 
-    // Cleanup Camera on Unmount
-    useEffect(() => {
-        return () => stopCamera();
-    }, []);
+    const handleScanSuccess = (decodedText) => {
+        setIsScanning(false);
+        const match = activeItems.find(t => t.equipment._id === decodedText || t.equipment.serialNumber === decodedText);
 
-    const stopCamera = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const tracks = videoRef.current.srcObject.getTracks();
-            tracks.forEach(track => track.stop());
-            videoRef.current.srcObject = null;
-        }
-    };
-
-    const handleScanQR = async () => {
-        setIsScanning(true);
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                videoRef.current.play();
-            }
-        } catch (err) {
-            console.error("Camera denied:", err);
-            setIsScanning(false);
-            toast.error("Camera not accessible.");
+        if (match) {
+            setSelectedId(match.equipment._id);
+            toast.success("Item matched: " + match.equipment.name);
+            setStep(3); // skip to confirm
+        } else {
+            toast.error("This item is not in your active borrows list.");
         }
     };
 
@@ -97,7 +82,7 @@ export default function ReturnEquipment() {
         if (step === 1 && selectedId) {
             setStep(2);
         } else if (step === 2) {
-            stopCamera();
+            setIsScanning(false);
             setStep(3);
         } else if (step === 3) {
             // --- SUBMIT RETURN ---
@@ -181,18 +166,18 @@ export default function ReturnEquipment() {
                         <div className="grid md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <Label>Scan QR Code (Optional)</Label>
-                                <div className="aspect-square bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden">
+                                <div className="aspect-square bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden shadow-inner">
                                     {isScanning ? (
-                                        <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
+                                        <QRScanner onScanSuccess={handleScanSuccess} />
                                     ) : (
-                                        <div className="text-center text-slate-400">
-                                            <QrCode className="w-12 h-12 mx-auto mb-2" />
-                                            <p>Camera Off</p>
+                                        <div className="text-center text-slate-500">
+                                            <QrCode className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                            <p className="text-sm font-semibold">Camera Off</p>
                                         </div>
                                     )}
                                 </div>
-                                <Button onClick={isScanning ? () => { setIsScanning(false); stopCamera(); } : handleScanQR} variant="outline" className="w-full">
-                                    {isScanning ? "Stop Camera" : "Start Scanning"}
+                                <Button onClick={() => setIsScanning(!isScanning)} variant="outline" className="w-full">
+                                    {isScanning ? "Cancel Scanning" : "Start Scanning"}
                                 </Button>
                             </div>
 
