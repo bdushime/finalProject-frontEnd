@@ -17,7 +17,7 @@ export default function SecurityReports() {
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 mt-4 relative z-10">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">{t('reports.title')}</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{t('reports.title')}</h1>
           <p className="text-gray-400 flex items-center gap-2 text-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
             {t('reports.subtitle', 'Comprehensive activity and security analytics')}

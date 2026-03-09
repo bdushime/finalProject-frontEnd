@@ -84,7 +84,7 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
+      <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg border border-gray-200">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-gray-500" />
           <span className="text-sm font-medium text-gray-700">{t('deviceMovementHistory.timeline.filters.label')}</span>
@@ -113,8 +113,8 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
             <SelectItem value="resolved">{t('deviceMovementHistory.timeline.filters.resolved')}</SelectItem>
           </SelectContent>
         </Select>
-        <div className="ml-auto">
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
+        <div className="ml-auto w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="flex items-center gap-2 w-full sm:w-auto justify-center">
             <Download className="h-4 w-4" />
             {t('deviceMovementHistory.timeline.filters.export')}
           </Button>
@@ -172,7 +172,7 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
 
                         {/* Content Card */}
                         <div
-                          className={`ml-12 p-4 rounded-lg border ${movement.eventType === "geofence_violation"
+                          className={`ml-8 sm:ml-12 p-3 sm:p-4 rounded-lg border ${movement.eventType === "geofence_violation"
                             ? "bg-red-50 border-red-200"
                             : "bg-white border-gray-200"
                             } hover:shadow-md transition-shadow`}
@@ -256,7 +256,7 @@ export default function DeviceMovementTimeline({ movements, deviceName, deviceId
       )}
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="text-sm text-gray-600">{t('deviceMovementHistory.timeline.filters.allEvents')}</div>
           <div className="text-2xl font-bold text-gray-900">{filteredMovements.length}</div>

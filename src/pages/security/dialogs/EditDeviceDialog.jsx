@@ -36,16 +36,16 @@ function EditDeviceDialog({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-slate-900">Edit Device</DialogTitle>
                     <DialogDescription className="text-gray-500">
                         Update the details for {selectedDevice?.name}
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="grid gap-5 py-4">
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="edit-name" className="text-sm font-semibold text-slate-700">Device Name *</Label>
                             <Input
@@ -72,8 +72,8 @@ function EditDeviceDialog({
                             </Select>
                         </div>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-5">
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="edit-serialNumber" className="text-sm font-semibold text-slate-700">Serial Number *</Label>
                             <Input
@@ -94,7 +94,7 @@ function EditDeviceDialog({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="edit-location" className="text-sm font-semibold text-slate-700">Location *</Label>
                             <Input
@@ -154,14 +154,14 @@ function EditDeviceDialog({
                         />
                     </div>
                 </div>
-                
-                <DialogFooter className="mt-4 gap-3">
+
+                <DialogFooter className="mt-4 gap-3 flex-col sm:flex-row">
                     <Button variant="outline" onClick={onCancel} disabled={isLoading} className="h-12 px-6 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50">
                         Cancel
                     </Button>
-                    <Button 
-                        onClick={onSubmit} 
-                        className="h-12 px-8 rounded-xl bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold shadow-md shadow-[#8D8DC7]/20" 
+                    <Button
+                        onClick={onSubmit}
+                        className="h-12 px-8 rounded-xl bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold shadow-md shadow-[#8D8DC7]/20"
                         disabled={isLoading}
                     >
                         {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : "Save Changes"}
