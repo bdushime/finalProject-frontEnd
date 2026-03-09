@@ -1,245 +1,280 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Camera, Scan, CheckCircle2, AlertCircle, Trash2, X, RotateCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useTranslation } from "react-i18next";
+import QRCodeScanner from "./QRCodeScanner";
 
-/**
- * EquipmentScanAndPhotoUpload
- * Props:
- * - onScan(result: string) => void
- * - onPhotosChange(photos: { front, back }) => void
- * - onValidityChange(valid: boolean) => void
- * - requireBothPhotos?: boolean (defaults false, component ensures at least one photo)
- */
-export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, onValidityChange, requireBothPhotos = false }) {
-    const videoRef = useRef(null);
-    const canvasRef = useRef(null);
-    const [scanning, setScanning] = useState(false);
+export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, onValidityChange, requireBothPhotos = false, equipment = null, scanError = null, onReset = null }) {
+    const { t } = useTranslation('student');
     const [scanResult, setScanResult] = useState('');
     const [photos, setPhotos] = useState({ front: null, back: null });
-    const [error, setError] = useState(null);
-    const [dragOver, setDragOver] = useState({ front: false, back: false });
+    const [capturingSide, setCapturingSide] = useState(null); // 'front' or 'back'
+    const videoRef = useRef(null);
+    const [stream, setStream] = useState(null);
+    const [cameraError, setCameraError] = useState(null);
+
+    // We only want to show the scanner when we don't have a result
+    const showScanner = !scanResult;
 
     useEffect(() => {
-        // notify parent of photos change
         if (onPhotosChange) onPhotosChange(photos);
         const valid = requireBothPhotos ? !!(photos.front && photos.back) : !!(photos.front || photos.back);
         if (onValidityChange) onValidityChange(valid);
-    }, [photos]);
+    }, [photos, requireBothPhotos, onPhotosChange, onValidityChange]);
 
     useEffect(() => {
         if (scanResult && onScan) onScan(scanResult);
-    }, [scanResult]);
+    }, [scanResult, onScan]);
 
-    // Start camera and scanning
-    const openCamera = async () => {
-        setError(null);
+    const handleScanSuccess = (decodedText) => {
+        setScanResult(decodedText);
+    };
+
+    // Live Camera logic for Photos
+    const startPhotoCamera = async (side) => {
+        setCameraError(null);
+        setCapturingSide(side);
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+            const newStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+                audio: false
+            });
+            setStream(newStream);
             if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                await videoRef.current.play();
+                videoRef.current.srcObject = newStream;
             }
-            setScanning(true);
-            startScanLoop();
         } catch (err) {
-            console.error('Camera error', err);
-            setError('Unable to access camera. Please allow camera permissions or use file upload.');
+            console.error("Camera error:", err);
+            setCameraError("Unable to access camera. Please check permissions.");
         }
     };
 
-    // Stop camera
-    const stopCamera = () => {
-        setScanning(false);
-        if (videoRef.current && videoRef.current.srcObject) {
-            const tracks = videoRef.current.srcObject.getTracks();
-            tracks.forEach(t => t.stop());
-            videoRef.current.srcObject = null;
+    const stopPhotoCamera = () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            setStream(null);
         }
-        cancelAnimationFrame(scanLoopRef.current || 0);
+        setCapturingSide(null);
     };
 
-    const scanLoopRef = useRef(0);
+    const takeSnapshot = () => {
+        if (!videoRef.current) return;
 
-    const startScanLoop = async () => {
-        // Prefer BarcodeDetector if available
-        const useBarcode = 'BarcodeDetector' in window;
-        let detector = null;
-        if (useBarcode) {
-            try {
-                detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-            } catch (e) {
-                detector = null;
-            }
-        }
+        const video = videoRef.current;
+        const canvas = document.createElement("canvas");
+        // Maintain aspect ratio
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
 
-        const scanFrame = async () => {
-            if (!videoRef.current || videoRef.current.readyState < 2) {
-                scanLoopRef.current = requestAnimationFrame(scanFrame);
-                return;
-            }
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const video = videoRef.current;
-            const w = video.videoWidth;
-            const h = video.videoHeight;
-            if (!canvasRef.current) canvasRef.current = document.createElement('canvas');
-            const canvas = canvasRef.current;
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, w, h);
-
-            try {
-                if (detector) {
-                    const barcodes = await detector.detect(canvas);
-                    if (barcodes && barcodes.length) {
-                        const bc = barcodes[0];
-                        if (bc && bc.rawValue) {
-                            setScanResult(bc.rawValue);
-                            stopCamera();
-                            return; // stop scanning
-                        }
-                    }
-                } else if (window.jsQR) {
-                    // If project has jsQR available globally (user may install), use it
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    const code = window.jsQR(imageData.data, w, h);
-                    if (code && code.data) {
-                        setScanResult(code.data);
-                        stopCamera();
-                        return;
-                    }
-                }
-            } catch (e) {
-                // detection errors shouldn't break loop
-                console.warn('scan error', e);
-            }
-
-            scanLoopRef.current = requestAnimationFrame(scanFrame);
-        };
-
-        scanLoopRef.current = requestAnimationFrame(scanFrame);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setPhotos(prev => ({ ...prev, [capturingSide]: dataUrl }));
+        stopPhotoCamera();
     };
 
-    const handleFile = (side, file) => {
-        if (!file) return;
-        if (!file.type.startsWith('image/')) {
-            setError('Only image files are allowed');
-            return;
-        }
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            setError('Image is too large (max 5MB)');
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            setPhotos(prev => ({ ...prev, [side]: e.target.result }));
-            setError(null);
-        };
-        reader.readAsDataURL(file);
-    };
-
-    // Drag/drop handlers
-    const handleDragOver = (e, side) => { e.preventDefault(); setDragOver(prev => ({ ...prev, [side]: true })); };
-    const handleDragLeave = (e, side) => { e.preventDefault(); setDragOver(prev => ({ ...prev, [side]: false })); };
-    const handleDrop = (e, side) => {
-        e.preventDefault(); setDragOver(prev => ({ ...prev, [side]: false }));
-        const file = e.dataTransfer.files && e.dataTransfer.files[0];
-        handleFile(side, file);
+    const removePhoto = (side) => {
+        setPhotos(prev => ({ ...prev, [side]: null }));
     };
 
     return (
-        <div className="w-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* QR Section */}
-                <section className="p-4 bg-white rounded-lg shadow-sm">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="text-2xl">📷</div>
+        <div className="w-full space-y-8 animate-in fade-in duration-500">
+            {/* QR SCANNER SECTION */}
+            <section className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-[#126dd5]/10 text-[#126dd5] rounded-xl">
+                            <Scan className="h-5 w-5" />
+                        </div>
                         <div>
-                            <h3 className="text-lg font-semibold">Scan QR Code</h3>
-                            <p className="text-sm text-slate-500">Scan Equipment QR Code</p>
+                            <h3 className="font-bold text-[#0b1d3a]">{t('equipment.qrCodeScanner', 'QR Code Scanner')}</h3>
+                            <p className="text-xs text-slate-500 font-medium">{t('equipment.scanTagDesc', 'Scan the equipment tag for quick identification')}</p>
                         </div>
                     </div>
-
-                    <p className="text-sm text-slate-600 mb-3">Point your camera at the QR code on the equipment</p>
-
-                    <div className="flex flex-col gap-3">
-                        <div className="rounded border border-dashed p-2 flex items-center justify-center bg-slate-50">
-                            {scanning ? (
-                                <video ref={videoRef} className="w-full h-56 object-cover" />
-                            ) : (
-                                <div className="text-sm text-slate-500">Camera is closed</div>
-                            )}
+                    {scanResult && (
+                        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-emerald-100">
+                            <CheckCircle2 className="h-3.5 w-3.5" /> {t('equipment.scanned', 'Scanned')}
                         </div>
+                    )}
+                </div>
 
-                        <div className="flex gap-2">
-                            {!scanning && <button type="button" className="px-4 py-2 bg-sky-600 text-white rounded hover:opacity-90" onClick={openCamera}>Open Camera</button>}
-                            {scanning && <button type="button" className="px-4 py-2 bg-red-600 text-white rounded hover:opacity-90" onClick={stopCamera}>Stop Camera</button>}
-                            <button type="button" className="px-4 py-2 border rounded" onClick={() => {
-                                // Manual capture and attempt decode (draw to canvas then try BarcodeDetector/jsQR)
-                                if (!videoRef.current) return;
-                                const video = videoRef.current;
-                                const w = video.videoWidth; const h = video.videoHeight;
-                                const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-                                const ctx = canvas.getContext('2d'); ctx.drawImage(video, 0, 0, w, h);
-                                try {
-                                    if ('BarcodeDetector' in window) {
-                                        const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-                                        detector.detect(canvas).then(list => {
-                                            if (list && list.length) {
-                                                setScanResult(list[0].rawValue);
-                                                stopCamera();
-                                            } else {
-                                                setError('No QR code detected in this frame');
-                                            }
-                                        }).catch(err => setError('QR detection failed'));
-                                    } else if (window.jsQR) {
-                                        const imageData = ctx.getImageData(0, 0, w, h);
-                                        const code = window.jsQR(imageData.data, w, h);
-                                        if (code && code.data) { setScanResult(code.data); stopCamera(); } else setError('No QR code detected');
-                                    } else {
-                                        setError('No QR decoder available in this browser');
-                                    }
-                                } catch (e) { setError('Manual scan failed'); }
-                            }}>Manual Scan</button>
-                        </div>
-
-                        <div className="text-sm text-slate-600">{scanResult ? (<span>Scanned: <strong>{scanResult}</strong></span>) : 'No code scanned yet'}</div>
-                        {error && <div className="text-sm text-red-600">{error}</div>}
-                    </div>
-                </section>
-
-                {/* Photos Section */}
-                <section className="p-4 bg-white rounded-lg shadow-sm">
-                    <div className="mb-3">
-                        <h3 className="text-lg font-semibold">Condition Photos</h3>
-                        <p className="text-sm text-slate-500">Please take photos of the equipment from multiple angles to document its current condition.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {['front', 'back'].map((side) => (
-                            <div key={side}
-                                onDragOver={(e) => handleDragOver(e, side)}
-                                onDragLeave={(e) => handleDragLeave(e, side)}
-                                onDrop={(e) => handleDrop(e, side)}
-                                className={`p-3 rounded-lg border-2 ${dragOver[side] ? 'border-sky-300 bg-sky-50' : 'border-dashed border-slate-300 bg-white'} flex flex-col items-center justify-center cursor-pointer`}
-                                onClick={() => document.getElementById(`file-${side}`).click()}
-                            >
-                                <div className="text-sm font-medium mb-1">{side === 'front' ? 'Front View' : 'Back View'}</div>
-                                {!photos[side] ? (
-                                    <div className="flex flex-col items-center text-slate-400">
-                                        <div className="text-3xl">＋</div>
-                                        <div className="text-xs mt-1">Click to upload</div>
+                <div className="p-6 space-y-4">
+                    <div className={`w-full bg-black rounded-[2rem] overflow-hidden flex flex-col items-center justify-center relative min-h-[300px] border-4 ${scanError ? 'border-rose-500' : 'border-white'} shadow-inner transition-colors`}>
+                        {showScanner ? (
+                            <div className="w-full absolute inset-0">
+                                <QRCodeScanner onScanSuccess={handleScanSuccess} />
+                                {scanError && (
+                                    <div className="absolute top-4 inset-x-4 z-20 animate-in slide-in-from-top-2">
+                                        <div className="bg-rose-600 text-white p-3 rounded-xl flex items-center gap-2 shadow-lg border border-rose-400">
+                                            <AlertCircle className="w-5 h-5 shrink-0" />
+                                            <p className="text-xs font-bold">{scanError}</p>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <img src={photos[side]} alt={side} className="w-full h-48 object-cover rounded" />
                                 )}
-                                <input id={`file-${side}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(side, e.target.files && e.target.files[0])} />
                             </div>
-                        ))}
+                        ) : scanResult ? (
+                            <div className="flex flex-col items-center justify-center text-white z-10 w-full p-8 animate-in zoom-in-95">
+                                <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
+                                    <CheckCircle2 className="w-8 h-8 text-white" />
+                                </div>
+                                <p className="text-emerald-400 font-bold uppercase tracking-widest text-xs mb-2">Identified Successfully</p>
+                                <code className="bg-white/10 px-6 py-3 rounded-xl font-mono text-xl tracking-widest border border-white/20 shadow-inner mb-6">
+                                    {scanResult}
+                                </code>
+
+                                {/* ACCOUNTABILITY & DESCRIPTION */}
+                                <div className="w-full space-y-4 max-w-sm">
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-3">Security & Accountability</p>
+                                        <p className="text-[11px] text-slate-300 leading-relaxed italic">
+                                            "This QR code was generated by the <b>Security Office</b>. Every scan is logged for digital accountability and physical tracking."
+                                        </p>
+                                    </div>
+
+                                    {equipment ? (
+                                        <div className="p-4 bg-[#126dd5]/10 rounded-2xl border border-[#126dd5]/30 animate-in fade-in slide-in-from-top-2">
+                                            <p className="text-[10px] text-[#126dd5] font-black uppercase tracking-[0.2em] mb-1">Equipment Description</p>
+                                            <p className="text-sm font-bold text-white mb-1">{equipment.name}</p>
+                                            <p className="text-[11px] text-slate-400 leading-tight">
+                                                {equipment.description || "No description available for this item."}
+                                            </p>
+                                            <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 font-bold bg-black/20 p-2 rounded-lg">
+                                                <span>SN: {equipment.serialNumber}</span>
+                                                <span className="text-[#126dd5]">ID: {scanResult}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="p-4 bg-[#126dd5]/5 rounded-2xl border border-white/5 animate-pulse">
+                                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Identifying Equipment...</p>
+                                            <div className="h-4 bg-white/5 rounded w-3/4 mb-2" />
+                                            <div className="h-4 bg-white/5 rounded w-1/2" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
 
-                    <div className="mt-3 text-sm text-slate-500">At least one photo is required{requireBothPhotos ? ' (both front and back required)' : ''}.</div>
-                </section>
-            </div>
+                    {scanResult && (
+                        <div className="flex justify-between items-center gap-4 animate-in fade-in">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setScanResult('');
+                                    setPhotos({ front: null, back: null });
+                                    if (onReset) onReset();
+                                }}
+                                className="w-full h-12 rounded-xl text-slate-500 font-bold hover:bg-slate-50 hover:text-rose-500 border-2"
+                            >
+                                <X className="h-4 w-4 mr-2" /> Reset & Scan Again
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* PHOTOS SECTION */}
+            <section className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-50 text-purple-600 rounded-xl">
+                            <Camera className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-[#0b1d3a]">{t('equipment.conditionPhotosTitle', 'Condition Photos')}</h3>
+                            <p className="text-xs text-slate-500 font-medium">{t('equipment.documentStateDesc', 'Take real photos of the front and back')}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-6 space-y-6">
+                    {capturingSide ? (
+                        <div className="relative aspect-video rounded-3xl overflow-hidden bg-black border-4 border-white shadow-2xl animate-in zoom-in-95">
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                className="w-full h-full object-cover"
+                            />
+
+                            <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20" />
+
+                            <div className="absolute bottom-6 inset-x-0 flex flex-col items-center gap-4">
+                                <div className="bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
+                                    {t('equipment.capturingView', 'Capturing {{view}} view', { view: capturingSide === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}
+                                </div>
+                                <div className="flex items-center gap-6">
+                                    <button
+                                        onClick={stopPhotoCamera}
+                                        className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 transition-all"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={takeSnapshot}
+                                        className="w-20 h-20 rounded-full bg-white p-1 shadow-xl hover:scale-105 active:scale-95 transition-all"
+                                    >
+                                        <div className="w-full h-full rounded-full border-4 border-slate-100 flex items-center justify-center">
+                                            <div className="w-14 h-14 rounded-full bg-rose-500" />
+                                        </div>
+                                    </button>
+                                    <button
+                                        className="w-12 h-12 rounded-full bg-white/10 opacity-0 pointer-events-none"
+                                    >
+                                        <RotateCw className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {['front', 'back'].map(side => (
+                                <div key={side} className="relative group">
+                                    {photos[side] ? (
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-sm ring-4 ring-transparent hover:ring-[#126dd5]/20 hover:border-[#126dd5] transition-all bg-black/5">
+                                            <img src={photos[side]} alt={side} className="w-full h-full object-contain" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                <Button size="icon" variant="destructive" onClick={() => removePhoto(side)} className="h-10 w-10 rounded-full shadow-lg">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button size="icon" variant="secondary" onClick={() => startPhotoCamera(side)} className="h-10 w-10 rounded-full shadow-lg bg-white">
+                                                    <RotateCw className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                            <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
+                                                {t('equipment.sideView', '{{side}} view', { side: side === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => startPhotoCamera(side)}
+                                            className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 bg-[#0b1d3a] flex flex-col items-center justify-center gap-2 hover:border-[#126dd5] hover:bg-[#126dd5] transition-all text-white/80 hover:text-white cursor-pointer group"
+                                        >
+                                            <div className="p-4 bg-white/10 rounded-full shadow-sm ring-1 ring-white/20 group-hover:scale-110 transition-transform">
+                                                <Camera className="h-8 w-8 text-white" />
+                                            </div>
+                                            <span className="text-xs font-bold uppercase tracking-widest mt-2">{t('equipment.takeSidePhoto', 'Take {{side}} Photo', { side: side === 'front' ? t('equipment.front', 'front') : t('equipment.backView', 'back') })}</span>
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {cameraError && (
+                        <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold flex items-center gap-2 animate-in slide-in-from-top-2">
+                            <AlertCircle className="w-5 h-5 shrink-0" />
+                            {cameraError}
+                        </div>
+                    )}
+
+                    <div className="flex items-start gap-2 text-[11px] text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-[#126dd5]" />
+                        <p>{t('equipment.photoMandatoryDesc', 'Documenting the physical condition is mandatory. Please ensure clear lighting and centered focus on identifying features.')}</p>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }

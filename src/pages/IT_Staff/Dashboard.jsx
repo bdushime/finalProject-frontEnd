@@ -71,12 +71,24 @@ export function Dashboard() {
     };
 
     // Approve Request
-    const handleApprove = async (id) => {
+    // Approve Request (Now handles both Checkout & Return)
+    const handleApprove = async (id, isReturn = false, equipmentId = null, userId = null) => {
         try {
-            await api.put(`/transactions/${id}/respond`, { action: 'Approve' });
-            toast.success(t('dashboard.messages.approved'));
+            if (isReturn && equipmentId && userId) {
+                // If it's a return, use the checkin endpoint for full physical return processing
+                await api.post('/transactions/checkin', {
+                    equipmentId,
+                    userId,
+                    condition: "Good" // Defaulting to Good for quick approval from dashboard
+                });
+            } else {
+                // Normal checkout request approval
+                await api.put(`/transactions/${id}/respond`, { action: 'Approve' });
+            }
+            toast.success(isReturn ? t('checkouts.messages.statusUpdated') : t('dashboard.messages.approved'));
             fetchStats(); // Refresh data
         } catch (err) {
+            console.error("Approval error:", err);
             toast.error(t('dashboard.messages.failedApprove'));
         }
     };
@@ -120,6 +132,7 @@ export function Dashboard() {
 
     // Filter pending requests from recent activity
     const pendingRequests = stats?.recentActivity?.filter(item => item.status === 'Pending') || [];
+    const pendingReturns = stats?.recentActivity?.filter(item => item.status === 'Pending Return') || [];
     const overviewStats = stats?.metrics || {};
 
     if (loading) {
@@ -197,6 +210,37 @@ export function Dashboard() {
                                             className="flex-1 sm:flex-none gap-2"
                                         >
                                             <XCircle className="w-4 h-4" /> {t('dashboard.deny')}
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* --- PENDING RETURN REQUESTS SECTION --- */}
+                {pendingReturns.length > 0 && (
+                    <div className="bg-white p-6 rounded-xl border shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.pendingReturns')}</h3>
+                        <div className="space-y-3">
+                            {pendingReturns.map((req) => (
+                                <div key={req._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg bg-blue-50/30 gap-4">
+                                    <div>
+                                        <p className="font-semibold text-gray-900">
+                                            {req.user?.username || t('common.unknownUser')}
+                                            <span className="font-normal text-gray-500"> {t('dashboard.returning')} </span>
+                                            {req.equipment?.name || t('common.unknownItem')}
+                                        </p>
+                                        <p className="text-sm text-gray-500">
+                                            {t('dashboard.requested')} {format(new Date(req.createdAt), "MMM d, h:mm a")}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 w-full sm:w-auto">
+                                        <Button
+                                            onClick={() => handleApprove(req._id, true, req.equipment?._id, req.user?._id)}
+                                            className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white gap-2 font-bold"
+                                        >
+                                            <CheckCircle className="w-4 h-4" /> {t('checkouts.actions.approveReturn')}
                                         </Button>
                                     </div>
                                 </div>

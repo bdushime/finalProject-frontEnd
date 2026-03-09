@@ -24,6 +24,7 @@ export default function ReturnEquipment() {
     const [selectedId, setSelectedId] = useState(""); // This is the EQUIPMENT ID
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     // Camera State
     const [isScanning, setIsScanning] = useState(false);
@@ -109,10 +110,10 @@ export default function ReturnEquipment() {
                 };
 
                 await api.post('/transactions/checkin', payload);
-                toast.success("Return processed successfully!");
-                navigate("/student/borrowed-items");
+                setShowSuccess(true);
             } catch (err) {
                 console.error("Return failed:", err);
+                // For errors, we can keep alert for now or use toast, but I'll stick to simple toast if available or just log
                 toast.error(err.response?.data?.message || "Return failed. Try again.");
             } finally {
                 setSubmitting(false);
@@ -245,6 +246,28 @@ export default function ReturnEquipment() {
                     </div>
                 </div>
             </div>
+
+            {/* SUCCESS MODAL */}
+            {showSuccess && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-[#0b1d3a]/60 backdrop-blur-md" onClick={() => navigate("/student/borrowed-items")} />
+                    <div className="relative bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in duration-300 border border-slate-100">
+                        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <CheckCircle className="w-10 h-10 text-emerald-500" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-[#0b1d3a] mb-2 font-serif">Return Successful!</h3>
+                        <p className="text-slate-500 mb-8 text-sm px-4">
+                            Thank you for returning the equipment. IT Staff will verify the condition shortly.
+                        </p>
+                        <Button
+                            onClick={() => navigate("/student/borrowed-items")}
+                            className="w-full bg-[#0b1d3a] hover:bg-[#126dd5] h-12 rounded-2xl font-bold shadow-lg shadow-blue-900/10"
+                        >
+                            Back to Items
+                        </Button>
+                    </div>
+                </div>
+            )}
         </StudentLayout>
     );
 }

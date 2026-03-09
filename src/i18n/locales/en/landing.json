@@ -9,21 +9,15 @@
     "features": {
         "title": "Everything you need to manage equipment",
         "subtitle": "Powerful tools designed to make equipment tracking effortless for everyone on campus.",
-        "smartInventory": "Smart Inventory",
-        "smartInventoryDesc": "AI-powered cataloguing with automatic categorization and smart search.",
-        "qrScanning": "QR Scanning",
-        "qrScanningDesc": "Instant check-in/out with QR codes. No manual entry needed.",
-        "smartAlerts": "Smart Alerts",
-        "smartAlertsDesc": "Automated reminders for due dates, maintenance, and availability.",
-        "analytics": "Analytics",
-        "analyticsDesc": "Track usage patterns, identify trends, and optimize inventory.",
-        "roleAccess": "Role Access",
-        "roleAccessDesc": "Custom permissions for students, staff, and administrators.",
-        "multiPlatform": "Multi-Platform",
-        "multiPlatformDesc": "Access from any device - desktop, tablet, or mobile."
+        "iotTracking": "IoT Tracking",
+        "iotTrackingDesc": "Real-time monitoring and automated alerts when devices are removed beyond authorized premises.",
+        "qrScanning": "Digital Accountability",
+        "qrScanningDesc": "Secure Borrow/Return with QR codes, photo documentation, and chain of custody records.",
+        "riskAnalytics": "Analytics & Risk Scoring",
+        "riskAnalyticsDesc": "Data-driven insights, automated reporting, and preventive controls to reduce theft opportunities."
     },
     "howItWorks": {
-        "title": "Simple as 1-2-3-4",
+        "title": "Simple as",
         "subtitle": "From browsing to returning, the entire process takes just minutes.",
         "step1": "Browse",
         "step1Desc": "Search our smart catalogue",
@@ -35,7 +29,7 @@
         "step4Desc": "Drop off & confirm"
     },
     "users": {
-        "title": "Who uses Tracknity?",
+        "title": "Who uses",
         "subtitle": "From students to administrators, everyone benefits from streamlined equipment management.",
         "students": "Students",
         "studentsDesc": "Browse, request, and track equipment with ease",
@@ -43,10 +37,10 @@
         "lecturersDesc": "Reserve gear for classes and research projects",
         "itStaff": "IT Staff",
         "itStaffDesc": "Manage inventory, approvals, and maintenance",
-        "researchers": "Researchers",
-        "researchersDesc": "Schedule specialized equipment for experiments",
-        "mediaTeams": "Media Teams",
-        "mediaTeamsDesc": "Coordinate cameras, mics, and studio gear",
+        "security": "Security Officers",
+        "securityDesc": "Monitor alerts, track missing devices, and ensure campus security",
+        "gatekeepers": "Gatekeepers",
+        "gatekeepersDesc": "Verify equipment, scan QR codes at checkout, and manage access",
         "admins": "Admins",
         "adminsDesc": "Monitor usage trends and generate reports"
     },

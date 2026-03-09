@@ -220,8 +220,8 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <CategoryBadge category={item.category} />
-                    <Badge className={item.available > 0 ? 'bg-yellow-400 text-yellow-900 rounded-full' : 'bg-gray-200 text-gray-600 rounded-full'}>
-                      {item.available > 0 ? t('equipment.status.available') : t('equipment.status.unavailable')}
+                    <Badge className={item.status?.toLowerCase() === 'available' ? 'bg-yellow-400 text-yellow-900 rounded-full' : 'bg-gray-200 text-gray-600 rounded-full'}>
+                      {item.status?.toLowerCase() === 'available' ? t('equipment.status.available') : t('equipment.status.unavailable')}
                     </Badge>
                   </div>
                   <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
