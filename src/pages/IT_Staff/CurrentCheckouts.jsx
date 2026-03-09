@@ -81,6 +81,8 @@ export default function CurrentCheckouts() {
         let result = [];
         if (currentTab === 'requests') {
             result = allTransactions.filter(t => t.status === 'Pending');
+        } else if (currentTab === 'returns') {
+            result = allTransactions.filter(t => t.status === 'Pending Return');
         } else if (currentTab === 'reservations') {
             result = allTransactions.filter(t => t.status === 'Reserved');
         } else if (currentTab === 'active') {
@@ -88,6 +90,45 @@ export default function CurrentCheckouts() {
         }
         setFilteredData(result);
     }, [currentTab, allTransactions]);
+
+    // --- 2.5 AUTOMATIC DENIAL LOGIC (4 HOURS) ---
+    useEffect(() => {
+        if (!allTransactions || allTransactions.length === 0) return;
+
+        const autoDenyPending = async () => {
+            const now = new Date();
+            const fourHoursInMs = 4 * 60 * 60 * 1000;
+            const pendingToDeny = allTransactions.filter(tx => {
+                if (tx.status !== 'Pending') return false;
+                const createdAt = new Date(tx.fullData.createdAt);
+                return (now - createdAt) > fourHoursInMs;
+            });
+
+            if (pendingToDeny.length > 0) {
+                console.log(`[Auto-Deny] Found ${pendingToDeny.length} expired requests.`);
+
+                for (const tx of pendingToDeny) {
+                    try {
+                        await api.put(`/transactions/${tx.checkoutId}/respond`, {
+                            action: 'Deny',
+                            reason: "Automatic system denial: Request expired after 4 hours of inactivity."
+                        });
+                        console.log(`[Auto-Deny] Denied ${tx.checkoutId}`);
+                    } catch (err) {
+                        console.error(`[Auto-Deny] Failed to deny ${tx.checkoutId}`, err);
+                    }
+                }
+
+                // Refresh list after processing all auto-denials
+                fetchActive();
+                toast.info(`System automatically denied ${pendingToDeny.length} expired requests.`);
+            }
+        };
+
+        // Run once on load and then could set an interval if the page stays open long
+        const timeout = setTimeout(autoDenyPending, 1000);
+        return () => clearTimeout(timeout);
+    }, [allTransactions]);
 
 
     // --- 3. ACTIONS ---
@@ -98,7 +139,7 @@ export default function CurrentCheckouts() {
     };
 
     // Approve / Deny Logic
-    const handleResponse = async (e, id, action) => {
+    const handleResponse = async (e, id, action, isReturn = false, equipmentId = null, userId = null) => {
         e.stopPropagation();
 
         // If Deny, Open Dialog instead of calling API immediately
@@ -112,8 +153,17 @@ export default function CurrentCheckouts() {
         if (!confirm(t('checkouts.messages.confirmApprove'))) return;
 
         try {
-            // 'Approve' on a Reservation converts it to 'Checked Out'
-            await api.put(`/transactions/${id}/respond`, { action });
+            if (isReturn && equipmentId && userId) {
+                // If it's a return, use the checkin endpoint for full physical return processing
+                await api.post('/transactions/checkin', {
+                    equipmentId,
+                    userId,
+                    condition: "Good" // Defaulting to Good for quick approval
+                });
+            } else {
+                // Normal checkout/reservation response
+                await api.put(`/transactions/${id}/respond`, { action });
+            }
             toast.success(t('checkouts.messages.statusUpdated'));
             fetchActive();
         } catch (err) {
@@ -200,6 +250,15 @@ export default function CurrentCheckouts() {
                         }
                     </button>
                     <button
+                        onClick={() => setCurrentTab('returns')}
+                        className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'returns' ? 'border-[#126dd5] text-[#126dd5]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                    >
+                        {t('checkouts.tabs.returns')}
+                        {allTransactions.filter(t => t.status === 'Pending Return').length > 0 &&
+                            <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">{allTransactions.filter(t => t.status === 'Pending Return').length}</span>
+                        }
+                    </button>
+                    <button
                         onClick={() => setCurrentTab('reservations')}
                         className={`pb-3 px-4 text-sm font-medium transition-all border-b-2 ${currentTab === 'reservations' ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                     >
@@ -260,9 +319,10 @@ export default function CurrentCheckouts() {
                                             <td className="px-0 font-medium text-gray-900 relative">
                                                 <div className="flex items-center h-full">
                                                     <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r ${row.status === 'Pending' ? 'bg-yellow-500' :
-                                                        row.status === 'Reserved' ? 'bg-purple-600' :
-                                                            row.status === 'Overdue' ? 'bg-red-600' :
-                                                                'bg-slate-500'
+                                                        row.status === 'Pending Return' ? 'bg-blue-500' :
+                                                            row.status === 'Reserved' ? 'bg-purple-600' :
+                                                                row.status === 'Overdue' ? 'bg-red-600' :
+                                                                    'bg-slate-500'
                                                         }`}></div>
                                                     <span className="pl-6">{row.equipmentName}</span>
                                                 </div>
@@ -285,9 +345,10 @@ export default function CurrentCheckouts() {
 
                                             <td className="px-6 py-5">
                                                 <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                    row.status === 'Reserved' ? 'bg-purple-100 text-purple-700' :
-                                                        row.status === 'Overdue' ? 'bg-red-100 text-red-700' :
-                                                            'bg-blue-100 text-blue-700'
+                                                    row.status === 'Pending Return' ? 'bg-blue-100 text-blue-700' :
+                                                        row.status === 'Reserved' ? 'bg-purple-100 text-purple-700' :
+                                                            row.status === 'Overdue' ? 'bg-red-100 text-red-700' :
+                                                                'bg-blue-100 text-blue-700'
                                                     }`}>
                                                     {row.status}
                                                 </span>
@@ -298,7 +359,7 @@ export default function CurrentCheckouts() {
                                                     {row.status === 'Pending' && (
                                                         <>
                                                             <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 px-3"
-                                                                onClick={(e) => handleResponse(e, row.checkoutId, 'Approve')}>
+                                                                onClick={(e) => handleResponse(e, row.checkoutId, 'Approve', false)}>
                                                                 <Check className="h-4 w-4 mr-1" /> {t('checkouts.actions.approve')}
                                                             </Button>
                                                             <Button size="sm" variant="outline" className="h-8 px-3 text-red-600 border-red-200 hover:bg-red-50"
@@ -308,11 +369,18 @@ export default function CurrentCheckouts() {
                                                         </>
                                                     )}
 
+                                                    {row.status === 'Pending Return' && (
+                                                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3"
+                                                            onClick={(e) => handleResponse(e, row.checkoutId, 'Approve', true, row.fullData?.equipment?._id, row.fullData?.user?._id)}>
+                                                            <Check className="h-4 w-4 mr-1" /> {t('checkouts.actions.approveReturn')}
+                                                        </Button>
+                                                    )}
+
                                                     {row.status === 'Reserved' && (
                                                         <>
                                                             {isReservationReady(row.startTime) ? (
                                                                 <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white h-8 px-3"
-                                                                    onClick={(e) => handleResponse(e, row.checkoutId, 'Approve')}>
+                                                                    onClick={(e) => handleResponse(e, row.checkoutId, 'Approve', false)}>
                                                                     <Check className="h-4 w-4 mr-1" /> {t('checkouts.actions.checkout')}
                                                                 </Button>
                                                             ) : (

@@ -4,9 +4,11 @@ import BorrowRequestForm from "./forms/BorrowRequestForm";
 import BackButton from "./components/BackButton";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export default function BorrowRequest() {
     const navigate = useNavigate();
+    const { t } = useTranslation("student");
 
     const handleSuccess = (formData) => {
         // Show success notification depending on action
@@ -21,10 +23,11 @@ export default function BorrowRequest() {
     return (
         <StudentLayout>
             <PageContainer>
-                <BackButton to="/student/browse" />
+
                 <PageHeader
-                    title="Request Equipment"
-                    subtitle="Submit a request to borrow IT equipment"
+                    title={t("equipment.requestBorrow", "Request Equipment")}
+                    subtitle={t("equipment.subtitle", "Submit a request to borrow IT equipment")}
+                    backUrl="/student/browse"
                 />
                 <BorrowRequestForm onSuccess={handleSuccess} />
             </PageContainer>

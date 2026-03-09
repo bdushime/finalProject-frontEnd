@@ -39,10 +39,12 @@
             "subtitle": "Common administrative tasks"
         },
         "recentActivity": {
-            "title": "Recent Activity",
             "inUse": "{{active}} items currently in use across {{total}} total inventory",
             "noActivity": "No recent activity recorded."
         },
+        "wants": "wants to borrow",
+        "returning": "is returning",
+        "requested": "Requested on",
         "messages": {
             "loadError": "Failed to load dashboard stats",
             "approved": "Request approved successfully",
@@ -50,7 +52,8 @@
             "provideReason": "Please provide a reason",
             "denied": "Request denied successfully",
             "failedDeny": "Failed to deny request"
-        }
+        },
+        "pendingReturns": "Pending Return Requests"
     },
     "equipment": {
         "title": "Equipment Management",
@@ -150,6 +153,7 @@
         "tabs": {
             "requests": "Requests",
             "reservations": "Reservations",
+            "returns": "Returns",
             "active": "Active"
         },
         "table": {
@@ -164,6 +168,7 @@
         "actions": {
             "approve": "Approve",
             "deny": "Deny",
+            "approveReturn": "Approve Return",
             "checkout": "Check Out",
             "cancel": "Cancel",
             "tooEarly": "Too early"

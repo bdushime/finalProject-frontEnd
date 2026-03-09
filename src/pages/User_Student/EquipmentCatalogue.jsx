@@ -19,17 +19,41 @@ export default function EquipmentCatalogue() {
     const { t } = useTranslation("student");
 
     useEffect(() => {
-        const fetchEquipment = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get('/equipment');
-                setEquipmentList(res.data);
+                // Fetch both equipment and active transactions to map the real-time locations
+                const [eqRes, txRes] = await Promise.all([
+                    api.get('/equipment'),
+                    api.get('/transactions/my-borrowed').catch(() => ({ data: [] }))
+                ]);
+
+                // Map active borrows by equipmentId to easily pull their real-time destination
+                const activeBorrows = {};
+                if (txRes && txRes.data) {
+                    txRes.data.forEach(tx => {
+                        if (tx.equipment) {
+                            const eqId = typeof tx.equipment === 'object' ? tx.equipment._id : tx.equipment;
+                            // The destination is formatted like "Room 109 (Course Name...)", split it to just get "Room 109"
+                            const roomName = tx.destination ? tx.destination.split(' (')[0] : null;
+                            activeBorrows[eqId] = roomName || tx.location;
+                        }
+                    });
+                }
+
+                // Inject the active real-time location into the equipment list
+                const mergedEquipment = eqRes.data.map(eq => ({
+                    ...eq,
+                    activeLocation: activeBorrows[eq._id] || eq.location
+                }));
+
+                setEquipmentList(mergedEquipment);
             } catch (err) {
                 console.error("Failed to load equipment:", err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchEquipment();
+        fetchData();
     }, []);
 
     const filteredEquipment = equipmentList.filter((item) => {
@@ -135,7 +159,7 @@ export default function EquipmentCatalogue() {
 
                                             <div className="flex items-center gap-2 text-xs text-slate-500 border-t border-slate-50 pt-3 mt-3">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${status === 'available' ? 'bg-emerald-400' : 'bg-slate-300'}`}></div>
-                                                {item.location || t("equipment.itDepartment")}
+                                                {status === 'available' ? t("equipment.itStaff", "Equipment Storage") : (item.activeLocation || t("equipment.itStaff", "Equipment Storage"))}
                                             </div>
 
                                             <div className="pt-2">

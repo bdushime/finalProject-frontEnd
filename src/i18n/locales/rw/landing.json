@@ -1,7 +1,7 @@
 {
     "hero": {
         "title": "Gucunga Ibikoresho",
-        "subtitle": "Kurikirana, cunga, kandi uvugurure ibikoresho by'ikigo cyawe mu buryo bworoshye.",
+        "subtitle": "Kurikirana, cunga, kandi uvugurure ibikoresho by'ikigo cyawe mu buryo byoroshye.",
         "subtitle2": "Uburyo bugezweho bwo gukurikirana, gucunga no gusangira ibikoresho mu kigo cyawe. Byakozwe n'abanyeshuri, byagenewe abanyeshuri.",
         "startFree": "Tangira ku Buntu",
         "watchDemo": "Reba Demo"
@@ -9,21 +9,15 @@
     "features": {
         "title": "Ibyo ukeneye byose ngo ucunge ibikoresho",
         "subtitle": "Ibikoresho simusiga byagenewe korohereza buri wese mu kigo gukurikirana ibikoresho.",
-        "smartInventory": "Ububiko Bwenge",
-        "smartInventoryDesc": "Gushyira ibintu mu byiciro hifashishijwe AI no gushakisha mu buryo bwenge.",
-        "qrScanning": "Gusoma QR",
-        "qrScanningDesc": "Kwinjira/Gusohoka ako kanya ukoresheje code za QR. Nta kwandika n'intoki bikenewe.",
-        "smartAlerts": "Imenyesha Bwenge",
-        "smartAlertsDesc": "Kwibutsa mu buryo bwikora amatariki ntarengwa, gusana, no kumenya niba bihari.",
-        "analytics": "Isesengura",
-        "analyticsDesc": "Kurikirana imikoreshereze, menya ibigezweho, no kunoza ububiko.",
-        "roleAccess": "Uruhushya rwa Buri Wese",
-        "roleAccessDesc": "Uruhushya rwihariye ku banyeshuri, abakozi, n'abayobozi.",
-        "multiPlatform": "Platform Nyinshi",
-        "multiPlatformDesc": "Koresha igikoresho icyo aricyo cyose - mudasobwa, tablet, cyangwa telefoni."
+        "iotTracking": "Gukurikirana hakoreshejwe IoT",
+        "iotTrackingDesc": "Kugenzura umunota ku wundi n'imenyesha mu gihe igikoresho gisohowe ahatemewe.",
+        "qrScanning": "Kwiyandikisha hifashishijwe QR",
+        "qrScanningDesc": "Kwinjira no gusohoka ukoresheje code za QR, n'amafoto yemeza ihererekanya ry'ibikoresho.",
+        "riskAnalytics": "Isesengura n'Igenzura ry'Ibyago",
+        "riskAnalyticsDesc": "Raporo zicukumbuye, isesengura ry'imikoreshereze, n'ingamba zo gukumira ibyago byo kwibwa."
     },
     "howItWorks": {
-        "title": "Biroroshye nka 1-2-3-4",
+        "title": "Biroroshye nka",
         "subtitle": "Kuva ushakisha kugezaugaruye, igikorwa cyose gitwara iminota mike.",
         "step1": "Shakisha",
         "step1Desc": "Shakisha muri catalogue yacu",
@@ -35,7 +29,7 @@
         "step4Desc": "Tanga & emeza"
     },
     "users": {
-        "title": "Ninde ukoresha Tracknity?",
+        "title": "Ninde ukoresha",
         "subtitle": "Kuva ku banyeshuri kugera ku bayobozi, buri wese yungukira mu micungire y'ibikoresho inoze.",
         "students": "Abanyeshuri",
         "studentsDesc": "Shakisha, saba, kandi ukurikirane ibikoresho mu buryo bworoshye",
@@ -43,10 +37,10 @@
         "lecturersDesc": "Bika ibikoresho by'amasomo n'imishinga y'ubushakashatsi",
         "itStaff": "Abakozi ba IT",
         "itStaffDesc": "Cunga ububiko, kwemeza, no gusana",
-        "researchers": "Abashakashatsi",
-        "researchersDesc": "Teganya ibikoresho byihariye by'ubushakashatsi",
-        "mediaTeams": "Amatsinda y'Itangazamakuru",
-        "mediaTeamsDesc": "Huza cameras, micro, n'ibikoresho bya studio",
+        "security": "Abashinzwe Umutekano",
+        "securityDesc": "Kurikirana amakuru, shakisha ibikoresho byabuze, n'umutekano w'ikigo",
+        "gatekeepers": "Abazamu",
+        "gatekeepersDesc": "Emeza ibikoresho, soma QR code mu gusohoka, no kugenzura abinjira",
         "admins": "Abayobozi",
         "adminsDesc": "Kurikirana imikoreshereze no gukora raporo"
     },
