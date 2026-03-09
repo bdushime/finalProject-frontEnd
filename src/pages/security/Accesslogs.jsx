@@ -55,6 +55,7 @@ const STATUS_COLORS = {
 };
 
 import { useTranslation } from "react-i18next";
+import PaginationControls from "@/components/common/PaginationControls";
 
 export default function AccessLogs() {
   const { t } = useTranslation(["security", "common"]);
@@ -71,6 +72,8 @@ export default function AccessLogs() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [sortBy, setSortBy] = useState("date-desc");
 
   // --- FETCH DATA ---
@@ -154,16 +157,26 @@ export default function AccessLogs() {
     return filtered;
   }, [allLogs, searchQuery, filterEventType, startDate, endDate, sortBy]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterEventType, startDate, endDate, sortBy]);
+
+  const totalPages = Math.ceil(filteredMovements.length / itemsPerPage) || 1;
+  const paginatedMovements = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredMovements.slice(start, start + itemsPerPage);
+  }, [filteredMovements, currentPage]);
+
   // Group by Date for Timeline
   const groupedMovements = useMemo(() => {
     const groups = {};
-    filteredMovements.forEach((movement) => {
+    paginatedMovements.forEach((movement) => {
       const dateKey = format(new Date(movement.timestamp), "yyyy-MM-dd");
       if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(movement);
     });
     return Object.entries(groups).sort((a, b) => new Date(b[0]) - new Date(a[0]));
-  }, [filteredMovements]);
+  }, [paginatedMovements]);
 
   const toggleExpand = (id) => setExpandedRow(expandedRow === id ? null : id);
 
@@ -367,6 +380,17 @@ export default function AccessLogs() {
                 )}
               </div>
             </div>
+
+            {totalPages > 1 && (
+              <div className="border-t border-gray-100 bg-gray-50/50 p-4">
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+
           </div>
         </Card>
       </div>
