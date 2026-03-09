@@ -92,6 +92,45 @@ export default function CurrentCheckouts() {
         setFilteredData(result);
     }, [currentTab, allTransactions]);
 
+    // --- 2.5 AUTOMATIC DENIAL LOGIC (4 HOURS) ---
+    useEffect(() => {
+        if (!allTransactions || allTransactions.length === 0) return;
+
+        const autoDenyPending = async () => {
+            const now = new Date();
+            const fourHoursInMs = 4 * 60 * 60 * 1000;
+            const pendingToDeny = allTransactions.filter(tx => {
+                if (tx.status !== 'Pending') return false;
+                const createdAt = new Date(tx.fullData.createdAt);
+                return (now - createdAt) > fourHoursInMs;
+            });
+
+            if (pendingToDeny.length > 0) {
+                console.log(`[Auto-Deny] Found ${pendingToDeny.length} expired requests.`);
+
+                for (const tx of pendingToDeny) {
+                    try {
+                        await api.put(`/transactions/${tx.checkoutId}/respond`, {
+                            action: 'Deny',
+                            reason: "Automatic system denial: Request expired after 4 hours of inactivity."
+                        });
+                        console.log(`[Auto-Deny] Denied ${tx.checkoutId}`);
+                    } catch (err) {
+                        console.error(`[Auto-Deny] Failed to deny ${tx.checkoutId}`, err);
+                    }
+                }
+
+                // Refresh list after processing all auto-denials
+                fetchActive();
+                toast.info(`System automatically denied ${pendingToDeny.length} expired requests.`);
+            }
+        };
+
+        // Run once on load and then could set an interval if the page stays open long
+        const timeout = setTimeout(autoDenyPending, 1000);
+        return () => clearTimeout(timeout);
+    }, [allTransactions]);
+
 
     // --- 3. ACTIONS ---
 

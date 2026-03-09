@@ -81,6 +81,7 @@ export default function BorrowRequestForm({ onSuccess }) {
 
     // UI States
     const [isScanning, setIsScanning] = useState(scanMode);
+    const [scanError, setScanError] = useState(null);
     const [conditionPhotos, setConditionPhotos] = useState({ front: null, back: null });
     const [timeSlots, setTimeSlots] = useState([]);
     const [submitting, setSubmitting] = useState(false);
@@ -506,13 +507,23 @@ export default function BorrowRequestForm({ onSuccess }) {
                     {flowType === 'borrow' ? (
                         <div className="space-y-6">
                             <EquipmentScanAndPhotoUpload
+                                equipment={equipment}
+                                scanError={scanError}
+                                onReset={() => {
+                                    setScanError(null);
+                                    setEquipment(null);
+                                }}
                                 onScan={(result) => {
                                     const found = equipmentList.find(e =>
                                         e.serialNumber === result ||
-                                        e.name.toLowerCase().includes(result.toLowerCase())
+                                        e._id === result
                                     );
                                     if (found) {
+                                        setScanError(null);
                                         handleEquipmentSelect(found._id);
+                                    } else {
+                                        setScanError("Invalid QR Code. This item is not registered in the system.");
+                                        setEquipment(null);
                                     }
                                 }}
                                 onPhotosChange={setConditionPhotos}

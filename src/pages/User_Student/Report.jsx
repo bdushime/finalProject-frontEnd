@@ -113,8 +113,10 @@ export default function Report() {
 
             const itemStatus = item.status ? item.status.toUpperCase() : "UNKNOWN";
 
-            // "09:00 AM - 05:00 PM" or "Cancelled"
-            const displayDuration = itemStatus === 'CANCELLED' ? "Cancelled" : `${startTimeStr} - ${endTimeStr}`;
+            // "09:00 AM - 05:00 PM" or "Cancelled" / "Denied"
+            let displayDuration = `${startTimeStr} - ${endTimeStr}`;
+            if (itemStatus === 'CANCELLED') displayDuration = "Cancelled";
+            else if (itemStatus === 'DENIED') displayDuration = "Denied";
 
             return {
                 ...item,
@@ -412,6 +414,7 @@ export default function Report() {
                                     <option>Active</option>
                                     <option>Overdue</option>
                                     <option>Cancelled</option>
+                                    <option>Denied</option>
                                 </select>
                                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             </div>
@@ -506,7 +509,8 @@ export default function Report() {
                                                     <Badge className={`font-bold border-0 shadow-sm ${item.status === 'RETURNED' || item.status === 'Returned' ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' :
                                                         item.status === 'OVERDUE' || item.status === 'Overdue' ? 'bg-rose-50 text-rose-600 hover:bg-rose-100' :
                                                             item.status === 'CANCELLED' || item.status === 'Cancelled' ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' :
-                                                                'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                                                item.status === 'DENIED' || item.status === 'Denied' ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' :
+                                                                    'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
                                                         }`}>
                                                         {item.status}
                                                     </Badge>
