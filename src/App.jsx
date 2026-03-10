@@ -29,7 +29,7 @@ import Report from "./pages/User_Student/Report";
 // IT Staff Pages
 import { Dashboard as ITStaffDashboard } from "./pages/IT_Staff/Dashboard";
 import BrowseEquipment from "./pages/IT_Staff/BrowseEquipment";
-import SimpleReports from "./pages/IT_Staff/SimpleReports"; 
+import SimpleReports from "./pages/IT_Staff/SimpleReports";
 import ITStaffProfile from "./pages/IT_Staff/Profile";
 import ITStaffSettings from "./pages/IT_Staff/Settings";
 import ITStaffNotifications from "./pages/IT_Staff/ITStaffNotifications";
@@ -57,7 +57,6 @@ import SecurityDashboard from "./pages/security/SecurityDashboard";
 import Accesslogs from "./pages/security/Accesslogs";
 import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
 import BrowseDevices from "./pages/security/BrowseDevices";
-import DeviceDetails from "./pages/security/DeviceDetails";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
@@ -71,6 +70,7 @@ import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
 import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
 import AdminNotifications from "./pages/Sys_Admin/AdminNotifications";
 import AdminProfile from "./pages/Sys_Admin/AdminProfile";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
     return (
@@ -140,7 +140,6 @@ export default function App() {
                     <Route path="/security/logs" element={<Accesslogs />} />
                     <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                     <Route path="/security/devices" element={<BrowseDevices />} />
-                    <Route path="/security/device/:deviceId" element={<DeviceDetails />} />
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
@@ -165,7 +164,7 @@ export default function App() {
                 </Route>
 
                 {/* 3. Fallback Route (Redirect unknown links to Home) */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     );

@@ -79,7 +79,7 @@ function AddDeviceDialog({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-slate-900">Add New Device</DialogTitle>
                     <DialogDescription className="text-gray-500">
@@ -107,7 +107,7 @@ function AddDeviceDialog({
 
                 <div className="grid gap-5 py-4">
                     {/* Row 1 */}
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="name" className="text-sm font-semibold text-slate-700">
                                 Device Name {fieldRequired("name") && <span className="text-red-500">*</span>}
@@ -141,7 +141,7 @@ function AddDeviceDialog({
                     </div>
 
                     {/* Row 2 */}
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="serialNumber" className="text-sm font-semibold text-slate-700">
                                 Serial Number {fieldRequired("serialNumber") && <span className="text-red-500">*</span>}
@@ -169,7 +169,7 @@ function AddDeviceDialog({
                     </div>
 
                     {/* Row 3 */}
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="location" className="text-sm font-semibold text-slate-700">
                                 Location {fieldRequired("location") && <span className="text-red-500">*</span>}
@@ -238,7 +238,7 @@ function AddDeviceDialog({
                     </div>
                 </div>
 
-                <DialogFooter className="mt-4 gap-3">
+                <DialogFooter className="mt-4 gap-3 flex-col sm:flex-row">
                     <Button variant="outline" onClick={onCancel} disabled={isLoading} className="h-12 px-6 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50">
                         Cancel
                     </Button>

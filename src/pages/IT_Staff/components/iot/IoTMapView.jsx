@@ -98,7 +98,7 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
   const activeZoom = userLocation ? 15 : DEFAULT_ZOOM;
 
   return (
-    <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow h-full w-full flex flex-col relative">
+    <Card className="border border-gray-300 text-gray-900 shadow-md hover:shadow-lg transition-shadow h-full w-full flex flex-col relative">
       <CardHeader
         className={`${onNavigate ? "cursor-pointer" : ""} pb-2 sm:pb-4`}
         onClick={onNavigate}

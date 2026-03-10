@@ -32,10 +32,7 @@ export default function CurrentCheckouts() {
     // Tabs state: 'requests' | 'reservations' | 'active'
     const [currentTab, setCurrentTab] = useState('requests');
 
-    //     // Tabs state: 'requests' | 'reservations' | 'active'
-    //     const [currentTab, setCurrentTab] = useState('requests');
 
-    // --- REJECTION LOGIC STATE ---
     const [isRejectOpen, setIsRejectOpen] = useState(false);
     const [rejectId, setRejectId] = useState(null);
     const [rejectionReason, setRejectionReason] = useState("");
@@ -51,6 +48,8 @@ export default function CurrentCheckouts() {
             const mappedData = res.data.map(tx => ({
                 checkoutId: tx._id,
                 equipmentName: tx.equipment?.name || "Unknown Item",
+                borrower: tx.user?.fullName || tx.user?.username || "Unknown User",
+                borrowerEmail: tx.user?.email || "",
                 dateDisplay: tx.status === 'Reserved'
                     ? format(new Date(tx.startTime), 'MMM dd, HH:mm')
                     : format(new Date(tx.createdAt), 'MMM dd, HH:mm'),
@@ -231,12 +230,12 @@ export default function CurrentCheckouts() {
                         <h2 className="text-2xl font-bold tracking-tight text-gray-900">{t('checkouts.manageTransactions')}</h2>
                         <p className="text-gray-500 text-sm">{t('checkouts.manageDesc')}</p>
                     </div>
-                    <Button
+                    {/* <Button
                         onClick={() => navigate('/it/checkout/select')}
                         className="bg-[#0b1d3a] hover:bg-[#1a2f55]"
                     >
                         <Plus className="mr-2 h-4 w-4" /> {t('checkouts.newCheckout')}
-                    </Button>
+                    </Button> */}
                 </div>
 
                 {/* TABS */}
@@ -283,6 +282,7 @@ export default function CurrentCheckouts() {
                             <TableHeader className="bg-slate-50 border-b border-slate-200">
                                 <tr className="text-black">
                                     <th className="px-6 py-4 font-semibold text-left">{t('checkouts.table.item')}</th>
+                                    <th className="px-6 py-4 font-semibold text-left">{t('checkouts.table.borrower', 'Borrower')}</th>
                                     <th className="px-6 py-4 font-semibold text-left">
                                         {currentTab === 'reservations' ? t('checkouts.table.startTime') : t('checkouts.table.date')}
                                     </th>
@@ -293,7 +293,7 @@ export default function CurrentCheckouts() {
                             <TableBody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="4" className="text-center py-12">
+                                        <td colSpan="5" className="text-center py-12">
                                             <div className="flex justify-center items-center gap-2 text-gray-500">
                                                 <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
                                                 {t('checkouts.table.loading')}
@@ -302,7 +302,7 @@ export default function CurrentCheckouts() {
                                     </tr>
                                 ) : filteredData.length === 0 ? (
                                     <tr>
-                                        <td colSpan="4" className="text-center py-12 text-gray-400">
+                                        <td colSpan="5" className="text-center py-12 text-gray-400">
                                             {t('checkouts.table.noItems')}
                                         </td>
                                     </tr>
@@ -325,6 +325,14 @@ export default function CurrentCheckouts() {
                                                                     'bg-slate-500'
                                                         }`}></div>
                                                     <span className="pl-6">{row.equipmentName}</span>
+                                                </div>
+                                            </td>
+
+                                            {/* BORROWER */}
+                                            <td className="px-6 py-5">
+                                                <div>
+                                                    <div className="font-medium text-gray-900">{row.borrower}</div>
+                                                    {row.borrowerEmail && <div className="text-xs text-gray-400">{row.borrowerEmail}</div>}
                                                 </div>
                                             </td>
 

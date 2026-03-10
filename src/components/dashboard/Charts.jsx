@@ -128,7 +128,7 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
       </Card>
 
       {/* 2. ACTIVITY TRENDS CHART (Line) */}
-      <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
+      <Card className="border border-gray-300 text-gray-900 shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
           <CardTitle className="text-base sm:text-lg font-bold">
             {t('dashboard.charts.activityTrends')}
@@ -152,7 +152,7 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
       </Card>
 
       {/* 3. DEVICE TYPES CHART (Bar) */}
-      <Card className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow">
+      <Card className="border border-gray-300 text-slate-900 shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
           <CardTitle className="text-base sm:text-lg font-bold">{t('dashboard.charts.deviceTypes')}</CardTitle>
           <CardDescription className="text-xs sm:text-sm">{t('dashboard.charts.distribution')}</CardDescription>
@@ -160,8 +160,8 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
         <CardContent className="p-0">
           <ResponsiveContainer className="overflow-hidden" width="100%" height={getChartHeight()}>
             <BarChart data={deviceTypesData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-              <XAxis dataKey="name" axisLine={false} tickLine={false} className="text-xs" tick={{ fill: "currentColor" }} />
-              <YAxis axisLine={false} tickLine={false} className="text-xs" tick={{ fill: "currentColor" }} />
+              <XAxis dataKey="name" axisLine={true} tickLine={false} className="text-xs" tick={{ fill: "currentColor" }} />
+              <YAxis axisLine={true} tickLine={true} className="text-xs" tick={{ fill: "currentColor" }} />
               <Tooltip
                 cursor={{ fill: 'transparent' }}
                 contentStyle={{ backgroundColor: "#343264", color: "#fff", borderRadius: "5px" }}

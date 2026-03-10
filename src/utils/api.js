@@ -12,7 +12,7 @@ const api = axios.create({
     },
 });
 
-// 2. Add the Interceptor (The Security Guard)
+// 2. Add the Request Interceptor (The Security Guard)
 // This automatically grabs the token from storage and attaches it to every request
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');

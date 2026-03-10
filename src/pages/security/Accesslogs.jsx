@@ -55,6 +55,7 @@ const STATUS_COLORS = {
 };
 
 import { useTranslation } from "react-i18next";
+import PaginationControls from "@/components/common/PaginationControls";
 
 export default function AccessLogs() {
   const { t } = useTranslation(["security", "common"]);
@@ -71,6 +72,8 @@ export default function AccessLogs() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [sortBy, setSortBy] = useState("date-desc");
 
   // --- FETCH DATA ---
@@ -154,16 +157,26 @@ export default function AccessLogs() {
     return filtered;
   }, [allLogs, searchQuery, filterEventType, startDate, endDate, sortBy]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterEventType, startDate, endDate, sortBy]);
+
+  const totalPages = Math.ceil(filteredMovements.length / itemsPerPage) || 1;
+  const paginatedMovements = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredMovements.slice(start, start + itemsPerPage);
+  }, [filteredMovements, currentPage]);
+
   // Group by Date for Timeline
   const groupedMovements = useMemo(() => {
     const groups = {};
-    filteredMovements.forEach((movement) => {
+    paginatedMovements.forEach((movement) => {
       const dateKey = format(new Date(movement.timestamp), "yyyy-MM-dd");
       if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(movement);
     });
     return Object.entries(groups).sort((a, b) => new Date(b[0]) - new Date(a[0]));
-  }, [filteredMovements]);
+  }, [paginatedMovements]);
 
   const toggleExpand = (id) => setExpandedRow(expandedRow === id ? null : id);
 
@@ -181,7 +194,7 @@ export default function AccessLogs() {
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 mt-4 relative z-10">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">{t('accessLogs.title')}</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{t('accessLogs.title')}</h1>
           <p className="text-gray-400 flex items-center gap-2 text-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
             {t('accessLogs.subtitle')}
@@ -192,7 +205,7 @@ export default function AccessLogs() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 relative z-10 mb-8">
         <StatCard
           title={t('accessLogs.stats.totalBorrowed')}
           value={stats.totalBorrowed.toString()}
@@ -269,10 +282,10 @@ export default function AccessLogs() {
         </div>
 
 
-        <Card className="border border-gray-100 shadow-sm overflow-hidden bg-white rounded-[2rem]">
+        <Card className="border border-gray-100 shadow-sm overflow-hidden bg-white rounded-2xl sm:rounded-[2rem]">
           <div className="overflow-x-auto">
             <div className="min-w-[700px]">
-              <div className="grid grid-cols-12 gap-4 px-4 sm:px-8 py-4 bg-gray-50/50 border-b border-gray-50 font-bold text-[10px] text-gray-400 uppercase tracking-widest">
+              <div className="grid grid-cols-12 gap-2 sm:gap-4 px-3 sm:px-4 md:px-8 py-3 sm:py-4 bg-gray-50/50 border-b border-gray-50 font-bold text-[10px] text-gray-400 uppercase tracking-widest">
                 <div className="col-span-1">{t('accessLogs.table.event')}</div>
                 <div className="col-span-2">{t('accessLogs.table.dateTime')}</div>
                 <div className="col-span-3">{t('accessLogs.table.user')}</div>
@@ -301,7 +314,7 @@ export default function AccessLogs() {
                           return (
                             <div key={log.id}>
                               <div
-                                className={`grid grid-cols-12 gap-4 px-4 sm:px-8 py-5 hover:bg-gray-50/50 cursor-pointer transition-all duration-200 border-b border-gray-50/50 group ${isExpanded ? 'bg-[#8D8DC7]/5 shadow-inner' : ''}`}
+                                className={`grid grid-cols-12 gap-2 sm:gap-4 px-3 sm:px-4 md:px-8 py-3 sm:py-5 hover:bg-gray-50/50 cursor-pointer transition-all duration-200 border-b border-gray-50/50 group ${isExpanded ? 'bg-[#8D8DC7]/5 shadow-inner' : ''}`}
                                 onClick={() => toggleExpand(log.id)}
                               >
                                 <div className="col-span-1 flex items-center">
@@ -333,8 +346,8 @@ export default function AccessLogs() {
 
                               {/* Expanded Details */}
                               {isExpanded && (
-                                <div className="bg-slate-50 px-6 py-4 border-b border-gray-100 text-sm">
-                                  <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-50 px-3 sm:px-6 py-4 border-b border-gray-100 text-sm">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                       <h4 className="font-semibold text-gray-900 mb-2">{t('accessLogs.table.eventDetails')}</h4>
                                       <p><span className="text-gray-500">{t('accessLogs.table.logId')}:</span> {log.id}</p>
@@ -367,6 +380,17 @@ export default function AccessLogs() {
                 )}
               </div>
             </div>
+
+            {totalPages > 1 && (
+              <div className="border-t border-gray-100 bg-gray-50/50 p-4">
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+
           </div>
         </Card>
       </div>

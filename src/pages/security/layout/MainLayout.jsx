@@ -1,13 +1,10 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-// import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "./Topbar";
 
-const DESKTOP_BREAKPOINT = 640; // matches `sm:` in Tailwind config
-
+const DESKTOP_BREAKPOINT = 640;
 export default function MainLayout({ children, heroContent }) {
-  // Controls visibility on mobile
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -19,10 +16,13 @@ export default function MainLayout({ children, heroContent }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 transition-all duration-300">
+    <div
+      className="min-h-screen bg-gray-50 font-sans p-2 sm:p-4 md:p-6 transition-all duration-300"
+      style={{ fontFamily: '"Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}
+    >
 
-      {/* Floating Dark Container - Header + Hero */}
-      <div className="bg-slate-900 rounded-[2rem] text-white shadow-2xl relative mb-8 overflow-hidden">
+
+      <div className="bg-slate-900 rounded-2xl sm:rounded-[2rem] text-white shadow-2xl relative mb-4 sm:mb-6 md:mb-8 overflow-hidden">
         {/* Background Glow Effect */}
         <div className="absolute inset-0 overflow-hidden rounded-[2rem] pointer-events-none">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#8D8DC7] opacity-20 blur-[100px] rounded-full -mr-20 -mt-20"></div>
@@ -33,13 +33,13 @@ export default function MainLayout({ children, heroContent }) {
 
         {/* Hero Content Slot */}
         {heroContent && (
-          <div className="px-6 pb-8 pt-2 relative z-10 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-6 md:pb-8 pt-2 relative z-10 animate-in fade-in slide-in-from-top-4 duration-500">
             {heroContent}
           </div>
         )}
       </div>
 
-      <main className="px-2 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <main className="animate-in fade-in slide-in-from-bottom-4 duration-500 px-1 sm:px-0">
         {children}
       </main>
 

@@ -7,8 +7,13 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
 };
 
-// Now accepts a 3rd argument: 'reportTitle'
-export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT REPORT") => {
+// Now accepts a 3rd argument: 'reportTitle' and optional 4th 'includeUserColumn'
+export const generatePDF = (
+    reportData,
+    currentUser,
+    reportTitle = "EQUIPMENT REPORT",
+    includeUserColumn = true
+) => {
     const doc = new jsPDF();
 
     // --- 1. HEADER SECTION ---
@@ -64,19 +69,31 @@ export const generatePDF = (reportData, currentUser, reportTitle = "EQUIPMENT RE
 
     // --- 3. DYNAMIC DATA TABLE ---
 
-    const tableColumn = ["No.", "Equipment Name", "Serial No.", "Category", "Borrowed Date", "Student/User", "Status"];
+    const tableColumn = includeUserColumn
+        ? ["No.", "Equipment Name", "Serial No.", "Category", "Borrowed Date", "Returned Date", "Student/User", "Status"]
+        : ["No.", "Equipment Name", "Serial No.", "Category", "Borrowed Date", "Returned Date", "Status"];
     const tableRows = [];
 
     reportData.forEach((item, index) => {
-        const rowData = [
+        const baseRow = [
             index + 1,
             item.equipment?.name || "N/A",
             item.equipment?.serialNumber || "N/A",
             item.equipment?.category || "General",
             formatDate(item.createdAt),
-            item.user?.username || item.user?.email || "Unknown",
-            item.status
+            formatDate(item.expectedReturnTime || item.actualReturnTime || item.updatedAt)
         ];
+
+        const rowData = includeUserColumn
+            ? [
+                ...baseRow,
+                item.user?.username || item.user?.email || "Unknown",
+                item.status
+            ]
+            : [
+                ...baseRow,
+                item.status
+            ];
         tableRows.push(rowData);
     });
 

@@ -37,38 +37,38 @@ const DeviceUsage = ({ data: serverData }) => {
   }, [serverData, t]);
 
   return (
-    <div className="p-6 w-full">
-      <div className="relative h-60 flex items-center justify-center w-full mb-4">
+    <div className="p-3 sm:p-6 w-full">
+      <div className="relative h-48 sm:h-60 flex items-center justify-center w-full mb-4">
         {/* Double room - largest, back */}
         <div
-          className="absolute left-[20%] top-[-10%] z-1 w-[200px] h-[200px] flex items-center justify-center rounded-full border-2 border-gray-200"
+          className="absolute left-[15%] sm:left-[20%] top-[-5%] sm:top-[-10%] z-1 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] md:w-[200px] md:h-[200px] flex items-center justify-center rounded-full border-2 border-gray-200"
           style={{ backgroundColor: displayData[0].color }}
         >
           <div className="text-center text-white">
-            <div className="text-4xl font-bold">{displayData[0].percent}%</div>
-            <div className="text-sm mt-1">{displayData[0].name}</div>
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold">{displayData[0].percent}%</div>
+            <div className="text-[10px] sm:text-sm mt-1">{displayData[0].name}</div>
           </div>
         </div>
 
         {/* Single room - medium, front left */}
         <div
-          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200"
-          style={{ width: '150px', height: '150px', backgroundColor: displayData[1].color, left: '5%', bottom: '-5%', zIndex: 2 }}
+          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px]"
+          style={{ backgroundColor: displayData[1].color, left: '3%', bottom: '-5%', zIndex: 2 }}
         >
           <div className="text-center text-white">
-            <div className="text-3xl font-bold">{displayData[1].percent}%</div>
-            <div className="text-xs mt-1">{displayData[1].name}</div>
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold">{displayData[1].percent}%</div>
+            <div className="text-[10px] sm:text-xs mt-1">{displayData[1].name}</div>
           </div>
         </div>
 
         {/* Deluxe room - smallest, front right */}
         <div
-          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200"
-          style={{ width: '110px', height: '110px', backgroundColor: displayData[2].color, right: '10%', bottom: '0%', zIndex: 3 }}
+          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[110px] md:h-[110px]"
+          style={{ backgroundColor: displayData[2].color, right: '5%', bottom: '0%', zIndex: 3 }}
         >
           <div className="text-center text-gray-200">
-            <div className="text-2xl font-bold text-white">{displayData[2].percent}%</div>
-            <div className="text-xs mt-1 text-white">{displayData[2].name}</div>
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">{displayData[2].percent}%</div>
+            <div className="text-[10px] sm:text-xs mt-1 text-white">{displayData[2].name}</div>
           </div>
         </div>
       </div>

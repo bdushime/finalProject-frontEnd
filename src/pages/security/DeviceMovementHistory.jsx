@@ -137,9 +137,9 @@ export default function DeviceMovementHistory() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('deviceMovementHistory.backToDevices')}
           </Button>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{t('deviceMovementHistory.title')}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('deviceMovementHistory.title')}</h1>
               <p className="text-gray-600 mt-1">
                 {deviceName} • {effectiveDeviceId}
               </p>
@@ -155,7 +155,7 @@ export default function DeviceMovementHistory() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6"
           >
             <Card className="border border-gray-200">
               <CardContent className="p-4">

@@ -110,7 +110,7 @@ function ViewDeviceDialog({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-gray-900">
                         Device Details
@@ -119,9 +119,9 @@ function ViewDeviceDialog({
 
                 <div className="space-y-6">
                     {/* Header with Name and QR Code */}
-                    <div className="flex items-start justify-between gap-4 bg-gradient-to-r from-slate-50 to-slate-100 p-4 rounded-xl border">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4 bg-gradient-to-r from-slate-50 to-slate-100 p-3 sm:p-4 rounded-xl border">
                         <div className="flex-1">
-                            <h2 className="text-2xl font-bold text-gray-900">{device.name}</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{device.name}</h2>
                             <p className="text-gray-500">{device.brand} {device.model}</p>
                             <div className="flex gap-2 mt-3">
                                 <Badge variant="outline" className={getStatusColor?.(device.status) || "bg-gray-100"}>
@@ -157,7 +157,7 @@ function ViewDeviceDialog({
                             <h3 className="font-semibold text-gray-900">Asset Depreciation</h3>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4">
                             <div className="bg-white rounded-lg p-3 border">
                                 <p className="text-xs text-gray-500 uppercase font-medium">Original Cost</p>
                                 <p className="text-lg font-bold text-gray-900">
@@ -186,17 +186,17 @@ function ViewDeviceDialog({
 
                         {/* Depreciation Progress Bar */}
                         <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
+                            <div className="flex flex-col sm:flex-row justify-between text-sm gap-1">
                                 <span className="text-gray-600">Value Lost: {depreciation.percentLost}%</span>
                                 <span className="text-gray-600">Age: {depreciation.ageInYears} / {depreciation.lifespanYears} years</span>
                             </div>
                             <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full transition-all duration-700 rounded-full ${parseFloat(depreciation.percentLost) > 80
-                                            ? 'bg-gradient-to-r from-red-400 to-red-600'
-                                            : parseFloat(depreciation.percentLost) > 50
-                                                ? 'bg-gradient-to-r from-orange-400 to-orange-600'
-                                                : 'bg-gradient-to-r from-blue-400 to-blue-600'
+                                        ? 'bg-gradient-to-r from-red-400 to-red-600'
+                                        : parseFloat(depreciation.percentLost) > 50
+                                            ? 'bg-gradient-to-r from-orange-400 to-orange-600'
+                                            : 'bg-gradient-to-r from-blue-400 to-blue-600'
                                         }`}
                                     style={{ width: `${100 - parseFloat(depreciation.percentLost)}%` }}
                                 ></div>
@@ -292,7 +292,7 @@ function ViewDeviceDialog({
                     )}
 
                     {/* Action Buttons */}
-                    <div className="flex justify-end gap-2 pt-4 border-t">
+                    <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
                         <Button variant="outline" onClick={() => onOpenChange(false)}>
                             Close
                         </Button>

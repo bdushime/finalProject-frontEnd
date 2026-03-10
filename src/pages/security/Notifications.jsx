@@ -50,7 +50,7 @@ export default function SecurityNotifications() {
 		<div>
 			<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 mt-4 relative z-10">
 				<div>
-					<h1 className="text-4xl font-bold text-white mb-2">{t('notifications.title')}</h1>
+					<h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{t('notifications.title')}</h1>
 					<p className="text-gray-400 flex items-center gap-2 text-sm">
 						<span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
 						{t('notifications.subtitle')}
@@ -100,7 +100,7 @@ export default function SecurityNotifications() {
 	return (
 		<MainLayout heroContent={HeroSection}>
 			<div className="mt-4">
-				<div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+				<div className="bg-white rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
 					{items.length === 0 ? (
 						<div className="p-20 text-center text-slate-400">
 							<div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -119,9 +119,9 @@ export default function SecurityNotifications() {
 										initial={{ opacity: 0, x: -20 }}
 										animate={{ opacity: 1, x: 0 }}
 										transition={{ delay: idx * 0.05 }}
-										className={`p-6 flex items-start gap-5 transition-all w-full relative group ${isViolation && n.severity === "critical"
-												? "bg-red-50/30 hover:bg-red-50/50"
-												: "hover:bg-slate-50/50"
+										className={`p-3 sm:p-4 md:p-6 flex flex-col sm:flex-row items-start gap-3 sm:gap-5 transition-all w-full relative group ${isViolation && n.severity === "critical"
+											? "bg-red-50/30 hover:bg-red-50/50"
+											: "hover:bg-slate-50/50"
 											}`}
 									>
 										{isViolation && n.severity === "critical" && (
@@ -129,8 +129,8 @@ export default function SecurityNotifications() {
 										)}
 
 										<div className={`mt-1 rounded-[1.25rem] p-4 flex-shrink-0 transition-transform group-hover:scale-105 ${isViolation
-												? (n.severity === "critical" ? "bg-red-100 text-red-600 shadow-sm shadow-red-100" : "bg-orange-100 text-orange-600")
-												: "bg-slate-100 text-slate-600"
+											? (n.severity === "critical" ? "bg-red-100 text-red-600 shadow-sm shadow-red-100" : "bg-orange-100 text-orange-600")
+											: "bg-slate-100 text-slate-600"
 											}`}>
 											{isViolation ? (
 												<AlertTriangle className="h-6 w-6" />
@@ -142,7 +142,7 @@ export default function SecurityNotifications() {
 										<div className="flex-1 min-w-0">
 											<div className="flex items-start justify-between gap-4">
 												<div className="flex-1">
-													<div className="flex flex-wrap items-center gap-3 mb-2">
+													<div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
 														<h4 className={`text-lg font-bold tracking-tight ${isViolation ? "text-red-900" : "text-slate-900"}`}>
 															{n.title}
 														</h4>
@@ -154,7 +154,7 @@ export default function SecurityNotifications() {
 																{n.severity}
 															</Badge>
 														)}
-														<span className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 ml-auto md:ml-0">
+														<span className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 sm:ml-auto">
 															<Clock className="h-3.5 w-3.5" /> {n.time}
 														</span>
 													</div>
@@ -188,7 +188,7 @@ export default function SecurityNotifications() {
 												</div>
 
 												{isViolation && (
-													<div className="flex flex-col gap-2 shrink-0 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+													<div className="flex flex-row sm:flex-col gap-2 shrink-0 sm:opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 sm:mt-0">
 														<Button
 															variant="outline"
 															size="sm"

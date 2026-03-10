@@ -30,7 +30,7 @@ export default function StatsOverview({ stats }) {
     ];
 
     return (
-        <div className="flex items-center justify-end gap-6 md:gap-8 flex-wrap">
+        <div className="flex text-gray-800 items-center justify-end gap-6 md:gap-8 flex-wrap">
             {items.map((item, idx) => (
                 <div key={idx} className="flex flex-col items-center group cursor-default">
                     <div className="flex items-center gap-3 mb-1">

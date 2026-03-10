@@ -32,6 +32,7 @@ import AddDeviceDialog from "./dialogs/AddDeviceDialog";
 import EditDeviceDialog from "./dialogs/EditDeviceDialog";
 import DeleteDeviceDialog from "./dialogs/DeleteDeviceDialog";
 import BulkUploadDialog from "./dialogs/BulkUploadDialog";
+import DeviceDetailsDialog from "./DeviceDetailsDialog";
 
 import api from "@/utils/api";
 import { UserRoles } from "@/config/roleConfig";
@@ -46,14 +47,16 @@ function BrowseDevices() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("all");
-  
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
-  
+
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [detailsDeviceId, setDetailsDeviceId] = useState(null);
 
   const [deviceList, setDeviceList] = useState([]);
   const [categories, setCategories] = useState(["All", ...DEFAULT_CATEGORIES]);
@@ -76,7 +79,7 @@ function BrowseDevices() {
         const mappedDevices = devicesRes.data.map(d => ({
           ...d,
           id: d._id,
-          category: d.type || d.category, 
+          category: d.type || d.category,
         }));
         setDeviceList(mappedDevices);
       }
@@ -92,13 +95,13 @@ function BrowseDevices() {
         // 👇 BULLETPROOF FIX: Only override defaults if arrays are actually returned and not empty
         if (optionsRes.data) {
           if (Array.isArray(optionsRes.data.categories) && optionsRes.data.categories.length > 0) {
-              setCategories(["All", ...optionsRes.data.categories]);
+            setCategories(["All", ...optionsRes.data.categories]);
           }
           if (Array.isArray(optionsRes.data.conditions) && optionsRes.data.conditions.length > 0) {
-              setConditions(optionsRes.data.conditions);
+            setConditions(optionsRes.data.conditions);
           }
           if (Array.isArray(optionsRes.data.statuses) && optionsRes.data.statuses.length > 0) {
-              setStatuses(optionsRes.data.statuses);
+            setStatuses(optionsRes.data.statuses);
           }
         }
       } catch (err) {
@@ -106,7 +109,7 @@ function BrowseDevices() {
       }
       await fetchDevices();
     };
-    
+
     fetchOptionsAndDevices();
 
     const handleOpenAddDialog = () => setIsAddDialogOpen(true);
@@ -123,7 +126,7 @@ function BrowseDevices() {
 
   const [formData, setFormData] = useState({
     name: "",
-    category: "", 
+    category: "",
     serialNumber: "",
     condition: "Good",
     status: "Available",
@@ -133,7 +136,8 @@ function BrowseDevices() {
   });
 
   const navigateToDevice = (device) => {
-    navigate(`/security/device/${device.id}`);
+    setDetailsDeviceId(device.id);
+    setIsDetailsDialogOpen(true);
   };
 
   const filteredDevices = useMemo(() => {
@@ -281,18 +285,18 @@ function BrowseDevices() {
 
   const HeroSection = (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 mt-4 relative z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2 mt-2 relative z-10">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">{t('browseDevices.title')}</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{t('browseDevices.title')}</h1>
           <p className="text-gray-400 flex items-center gap-2 text-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
             {t('browseDevices.showingDevices', { current: filteredDevices.length, total: deviceList.length })}
           </p>
         </div>
-        <div className="mt-6 md:mt-0 flex gap-3">
+        <div className="mt-4 sm:mt-6 md:mt-0 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Button
             onClick={() => setIsAddDialogOpen(true)}
-            className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold py-6 px-6 rounded-2xl shadow-lg shadow-[#8D8DC7]/20 transition-transform active:scale-95 border-none"
+            className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold py-5 sm:py-6 px-5 sm:px-6 rounded-2xl shadow-lg shadow-[#8D8DC7]/20 transition-transform active:scale-95 border-none w-full sm:w-auto"
           >
             <Plus className="h-5 w-5 mr-2" />
             {t('devices.addDevice')}
@@ -300,7 +304,7 @@ function BrowseDevices() {
           <Button
             variant="outline"
             onClick={() => setIsBulkUploadOpen(true)}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md font-bold py-6 px-6 rounded-2xl transition-transform active:scale-95"
+            className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md font-bold py-5 sm:py-6 px-5 sm:px-6 rounded-2xl transition-transform active:scale-95 w-full sm:w-auto"
           >
             <Upload className="h-5 w-5 mr-2" />
             {t('browseDevices.bulkUpload')}
@@ -315,7 +319,7 @@ function BrowseDevices() {
             placeholder={t('browseDevices.searchPlaceholder', 'Search by name, SN, or IoT Tag...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-800/50 border-slate-700/50 text-white placeholder:text-gray-500 py-7 pl-12 rounded-2xl focus:ring-2 focus:ring-[#8D8DC7]/50 transition-all backdrop-blur-sm shadow-xl"
+            className="w-full bg-slate-800/50 border-slate-700/50 text-white placeholder:text-gray-500 py-5 pl-12 rounded-2xl focus:ring-2 focus:ring-[#8D8DC7]/50 transition-all backdrop-blur-sm shadow-xl"
           />
         </div>
       </div>
@@ -324,10 +328,10 @@ function BrowseDevices() {
 
   return (
     <MainLayout heroContent={HeroSection}>
-      <div className="space-y-6">
+      <div className="space-y-2">
         {/* Filter Bar */}
-        <div className="flex flex-wrap items-center gap-3 mb-8">
-          <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 flex items-center gap-1">
+        <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 mb-2 sm:mb-4 md:mb-6">
+          <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-1 w-full sm:w-auto">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[180px] border-none focus:ring-0 shadow-none font-medium text-slate-600">
                 <div className="flex items-center gap-2">
@@ -343,7 +347,7 @@ function BrowseDevices() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="w-[1px] h-6 bg-slate-100 mx-1"></div>
+            <div className="w-full sm:w-[1px] h-[1px] sm:h-6 bg-slate-100 mx-0 sm:mx-1"></div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px] border-none focus:ring-0 shadow-none font-medium text-slate-600">
                 <div className="flex items-center gap-2">
@@ -378,11 +382,11 @@ function BrowseDevices() {
         </div>
 
         {/* Device Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-2">
           {filteredDevices.map((device) => (
             <Card
               key={device.id}
-              className="border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group bg-white rounded-[2rem] overflow-hidden flex flex-col h-full"
+              className="border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group bg-white rounded-2xl sm:rounded-[2rem] overflow-hidden flex flex-col h-full"
               onClick={() => navigateToDevice(device)}
             >
               <CardHeader className="p-6 pb-2">
@@ -392,9 +396,9 @@ function BrowseDevices() {
                       {device.name}
                     </CardTitle>
                     {device.iotTag ? (
-                        <p className="text-xs text-blue-600 font-mono bg-blue-50 inline-block px-2 py-0.5 mt-2 rounded">IoT: {device.iotTag}</p>
+                      <p className="text-xs text-blue-600 font-mono bg-blue-50 inline-block px-2 py-0.5 mt-2 rounded">IoT: {device.iotTag}</p>
                     ) : (
-                        <p className="text-xs text-gray-400 italic mt-2">No IoT Tag</p>
+                      <p className="text-xs text-gray-400 italic mt-2">No IoT Tag</p>
                     )}
                   </div>
                   <Button
@@ -411,7 +415,7 @@ function BrowseDevices() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 pt-2 space-y-4 flex-1 flex flex-col">
+              <CardContent className="p-6 pt-2 space-y-2 flex-1 flex flex-col">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getStatusColor(device.status))}>
                     {device.status}
@@ -438,13 +442,13 @@ function BrowseDevices() {
                   </div>
 
                   {device.trackingStatus && device.trackingStatus !== 'Unknown' && (
-                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                       <Activity className={`h-4 w-4 ${device.trackingStatus === 'Safe' ? 'text-green-500' : 'text-red-500'}`} />
-                       <span className="text-xs font-semibold">{device.trackingStatus}</span>
-                       <span className="text-gray-300 mx-1">•</span>
-                       <Battery className={`h-4 w-4 ${device.batteryLevel > 20 ? 'text-green-500' : 'text-red-500'}`} />
-                       <span className="text-xs">{device.batteryLevel}%</span>
-                     </div>
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                      <Activity className={`h-4 w-4 ${device.trackingStatus === 'Safe' ? 'text-green-500' : 'text-red-500'}`} />
+                      <span className="text-xs font-semibold">{device.trackingStatus}</span>
+                      <span className="text-gray-300 mx-1">•</span>
+                      <Battery className={`h-4 w-4 ${device.batteryLevel > 20 ? 'text-green-500' : 'text-red-500'}`} />
+                      <span className="text-xs">{device.batteryLevel}%</span>
+                    </div>
                   )}
                 </div>
 
@@ -564,6 +568,12 @@ function BrowseDevices() {
           onOpenChange={setIsBulkUploadOpen}
           onUploadComplete={handleBulkUploadComplete}
           userRole={currentUser.role}
+        />
+
+        <DeviceDetailsDialog
+          deviceId={detailsDeviceId}
+          open={isDetailsDialogOpen}
+          onOpenChange={setIsDetailsDialogOpen}
         />
       </div>
     </MainLayout>

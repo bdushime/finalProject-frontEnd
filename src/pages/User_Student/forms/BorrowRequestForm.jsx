@@ -41,6 +41,7 @@ import api from "@/utils/api";
 import PropTypes from "prop-types";
 import EquipmentScanAndPhotoUpload from "@/components/EquipmentScanAndPhotoUpload";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
+import QRScanner from "@/components/common/QRScanner";
 
 export default function BorrowRequestForm({ onSuccess }) {
     const { t } = useTranslation('student');
@@ -157,26 +158,25 @@ export default function BorrowRequestForm({ onSuccess }) {
         }
     };
 
-    const handleScanQR = async () => {
+    const handleScanQR = () => {
         setIsScanning(true);
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                videoRef.current.play();
-            }
-        } catch (err) {
-            console.error("Camera denied:", err);
-            setIsScanning(false);
-            alert("Camera access denied or not available.");
-        }
     };
 
     const stopCamera = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const tracks = videoRef.current.srcObject.getTracks();
-            tracks.forEach((track) => track.stop());
-            videoRef.current.srcObject = null;
+        setIsScanning(false);
+    };
+
+    const handleScanSuccess = (decodedText) => {
+        setIsScanning(false);
+        // Find equipment matching the QR text (which we assume is the Equipment ID or Serial No)
+        const found = equipmentList.find(e => e._id === decodedText || e.serialNumber === decodedText);
+        if (found) {
+            setEquipment(found);
+            setFormData(prev => ({ ...prev, equipmentId: found._id }));
+            toast.success("Equipment found! " + found.name);
+            setStep(2); // Auto-advance
+        } else {
+            toast.error("Equipment not found or unavailable.");
         }
     };
 
@@ -365,7 +365,7 @@ export default function BorrowRequestForm({ onSuccess }) {
         } catch (err) {
             console.error("Submit Error:", err);
             const msg = err.response?.data?.message || "Failed to submit.";
-            alert(msg);
+            toast.error(msg);
         } finally {
             setSubmitting(false);
         }

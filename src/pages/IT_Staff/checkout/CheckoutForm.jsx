@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 
 function Progress() {
     return (
@@ -32,7 +33,7 @@ export default function CheckoutForm() {
 
     const handleNext = () => {
         // Validate
-        if (!form.userId || !form.returnDate) return alert("Please fill required fields");
+        if (!form.userId || !form.returnDate) return toast.warning("Please fill required fields");
 
         const expectedReturnTime = `${form.returnDate}T${form.returnTime}:00`;
 

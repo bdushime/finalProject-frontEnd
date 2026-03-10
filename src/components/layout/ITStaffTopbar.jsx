@@ -3,6 +3,7 @@ import { NavLink, useLocation, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, X } from "lucide-react";
+import api from "@/utils/api";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,7 +20,7 @@ export default function ITStaffTopbar({ onMenuClick }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const unreadCount = 5;
+    const [unreadCount, setUnreadCount] = useState(0);
     const { t } = useTranslation("common");
 
     const itStaffLinks = [
@@ -59,6 +60,22 @@ export default function ITStaffTopbar({ onMenuClick }) {
             }
         }
     }, []);
+
+    // --- Fetch notification count from backend ---
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            try {
+                const res = await api.get('/notifications');
+                const count = (res.data || []).filter(n => !n.read).length;
+                setUnreadCount(count);
+            } catch (err) {
+                console.error("Failed to fetch notification count", err);
+            }
+        };
+        fetchUnreadCount();
+        const interval = setInterval(fetchUnreadCount, 30000);
+        return () => clearInterval(interval);
+    }, [location.pathname]);
 
     useEffect(() => {
         setIsMobileMenuOpen(false);
