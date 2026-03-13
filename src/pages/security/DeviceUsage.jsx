@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 const DeviceUsage = ({ data: serverData }) => {
   const { t } = useTranslation(["security"]);
 
-  // Use server data if available, otherwise use default
   const displayData = useMemo(() => {
     let processedList = [];
 

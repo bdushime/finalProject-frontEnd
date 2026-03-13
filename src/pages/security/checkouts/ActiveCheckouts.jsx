@@ -16,7 +16,7 @@ function ActiveCheckouts() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get('/transactions/security/access-logs');
+        const res = await api.get('/transactions/security/access-logs?page=1&limit=10');
         setStats(res.data.stats || { totalBorrowed: 0, totalLost: 0, totalDamaged: 0, totalOverdue: 0 });
 
         const mappedLogs = (res.data.logs || []).map(log => ({

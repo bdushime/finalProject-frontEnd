@@ -181,8 +181,8 @@ function BrowseDevices() {
       console.error("Failed to add device:", err);
       const errorMessage = err.response?.data?.errors?.join(", ") ||
         err.response?.data?.message ||
-        "Failed to add device. Please check your input and try again.";
-      alert(errorMessage);
+        "Failed to add device. Device exists.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

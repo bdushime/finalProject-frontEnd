@@ -88,7 +88,8 @@
             "eventDetails": "Détails de l'Événement",
             "fullTime": "Horodatage Complet",
             "notes": "But/Notes",
-            "viewDeviceHistory": "Voir l'historique de l'appareil"
+            "viewDeviceHistory": "Voir l'historique de l'appareil",
+            "showingInfo": "Affichage de {{from}} à {{to}} sur {{total}}"
         },
         "details": {
             "title": "Détails du Journal",

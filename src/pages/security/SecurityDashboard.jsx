@@ -101,7 +101,7 @@ export default function SecurityDashboard() {
       </div>
 
       {/* Stats Cards + Action Buttons in one row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 relative z-10">
+      <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-5 gap-2 relative z-10">
         <StatCard
           title={t('dashboard.stats.activeCheckouts')}
           value={stats.activeCount}

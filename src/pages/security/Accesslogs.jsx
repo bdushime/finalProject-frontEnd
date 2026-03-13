@@ -81,7 +81,7 @@ export default function AccessLogs() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await api.get('/transactions/security/access-logs');
+        const res = await api.get('/transactions/security/access-logs?page=1&limit=10');
         setStats(res.data.stats || { totalBorrowed: 0, totalLost: 0, totalDamaged: 0, totalOverdue: 0 });
 
         // Map Backend Data to Frontend Structure
@@ -106,7 +106,7 @@ export default function AccessLogs() {
             notes: log.purpose || "No notes provided"
           };
         });
-
+        console.log(mappedLogs);
         setAllLogs(mappedLogs);
       } catch (err) {
         console.error("Failed to load logs:", err);

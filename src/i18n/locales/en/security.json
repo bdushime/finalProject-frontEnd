@@ -88,7 +88,8 @@
             "eventDetails": "Event Details",
             "fullTime": "Full Timestamp",
             "notes": "Purpose/Notes",
-            "viewDeviceHistory": "View Device History"
+            "viewDeviceHistory": "View Device History",
+            "showingInfo": "Showing {{from}}–{{to}} of {{total}}"
         },
         "details": {
             "title": "Log Details",
