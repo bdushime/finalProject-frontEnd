@@ -836,8 +836,8 @@ export default function BorrowRequestForm({ onSuccess }) {
                             <div className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">COURSE/PROJECT CODE</Label>
-                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. CS101" />
+                                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">COURSE CODE</Label>
+                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. COSC101" />
                                         {errors.course && <p className="text-xs text-rose-500 font-bold px-1">{errors.course}</p>}
                                     </div>
                                     <div className="space-y-2">
@@ -849,7 +849,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Lecture Name</Label>
-                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.lecturer} onChange={(e) => handleInputChange("lecturer", e.target.value)} placeholder="Dr. Jane Doe" />
+                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.lecturer} onChange={(e) => handleInputChange("lecturer", e.target.value)} placeholder="Dr. Jane Bright" />
                                         {errors.lecturer && <p className="text-xs text-rose-500 font-bold px-1">{errors.lecturer}</p>}
                                     </div>
                                     <div className="space-y-2">
