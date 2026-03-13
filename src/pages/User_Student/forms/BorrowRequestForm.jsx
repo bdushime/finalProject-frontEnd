@@ -589,11 +589,11 @@ export default function BorrowRequestForm({ onSuccess }) {
                             {errors.lecturer && <p className="text-xs text-rose-500 font-bold px-1">{errors.lecturer}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.roomLocation', 'Room / Location')}</Label>
+                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">{t('equipment.roomLocation', 'Classroom / Location')}</Label>
                             <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all"
                                 value={formData.location}
                                 onChange={(e) => handleInputChange("location", e.target.value)}
-                                placeholder="Room 304"
+                                placeholder="e.g. Room 304"
                             />
                             {errors.location && <p className="text-xs text-rose-500 font-bold px-1">{errors.location}</p>}
 
@@ -601,7 +601,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                                 <div className="mt-2 p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                                     <AlertTriangle className="w-4 h-4 text-amber-600" />
                                     <p className="text-[11px] font-medium text-amber-800 leading-tight">
-                                        {t('equipment.exceptionAlert', 'This room already has a screen. IT approval required.')}
+                                        {t('equipment.exceptionAlert', 'This classroom already has a screen. IT approval required.')}
                                     </p>
                                 </div>
                             )}

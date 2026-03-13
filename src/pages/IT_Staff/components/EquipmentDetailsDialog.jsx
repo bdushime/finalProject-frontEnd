@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,8 @@ import {
   X,
   Edit2,
   Trash2,
+  Printer,
+  Download,
 } from "lucide-react";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
@@ -126,7 +129,66 @@ export default function EquipmentDetailsDialog({
     }
   };
 
-  // --- RENDER HELPERS ---
+  // --- QR CODE HANDLERS ---
+  const handlePrintQR = () => {
+    if (!equipment) return;
+    const printWindow = window.open('', '_blank');
+    const qrUrl = `https://tracknity.netlify.app/equipment/${equipment.id}`;
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>QR Code - ${equipment.name}</title>
+          <style>
+            body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: Arial, sans-serif; }
+            .qr-container { text-align: center; padding: 40px; border: 2px solid #ccc; border-radius: 8px; }
+            .device-name { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+            .device-id { font-size: 16px; color: #666; margin-bottom: 20px; }
+            .serial { font-size: 14px; color: #888; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="qr-container">
+            <div class="device-name">${equipment.name}</div>
+            <div class="device-id">ID: ${equipment.id}</div>
+            <svg id="qr-placeholder"></svg>
+            <div class="serial">SN: ${equipment.serialNumber || equipment.id}</div>
+          </div>
+          <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"><\/script>
+          <script>
+            QRCode.toCanvas(document.createElement('canvas'), '${qrUrl}', { width: 300 }, function(err, canvas) {
+              if (!err) {
+                document.getElementById('qr-placeholder').replaceWith(canvas);
+                setTimeout(() => window.print(), 500);
+              }
+            });
+          <\/script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handleDownloadQR = () => {
+    if (!equipment) return;
+    const svg = document.getElementById('equipment-qr-code');
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width + 40;
+      canvas.height = img.height + 40;
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 20, 20);
+      const pngFile = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.download = `QR_${equipment.name.replace(/\s+/g, '_')}.png`;
+      downloadLink.href = `${pngFile}`;
+      downloadLink.click();
+    };
+    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+  };
   const isOnline = formData.status === "Available";
 
   return (
@@ -212,6 +274,30 @@ export default function EquipmentDetailsDialog({
                   <Droplets className="h-4 w-4 text-blue-600 mb-1" />
                   <span className="text-xs font-bold text-blue-800">12%</span>
                 </div>
+              </div>
+
+              {/* QR Code Section */}
+              <div className="flex flex-col items-center gap-3 p-4 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                <div className="bg-white p-4 border border-slate-200 rounded-lg shadow-sm">
+                  <QRCodeSVG
+                    id="equipment-qr-code"
+                    value={`https://tracknity.netlify.app/equipment/${equipment.id}`}
+                    size={160}
+                  />
+                </div>
+                <div className="flex gap-2 w-full max-w-[300px]">
+                  <Button variant="outline" size="sm" onClick={handlePrintQR} className="flex-1">
+                    <Printer className="h-4 w-4 mr-2" />
+                    Print
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleDownloadQR} className="flex-1">
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+                <p className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
+                  Scan to access equipment details
+                </p>
               </div>
             </>
           ) : (
