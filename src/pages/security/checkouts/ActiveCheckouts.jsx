@@ -11,6 +11,7 @@ function ActiveCheckouts() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalBorrowed: 0, totalLost: 0, totalDamaged: 0, totalOverdue: 0 });
   const [logs, setLogs] = useState([]);
+  const [totalBorrowed, setTotalBorrowed] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +42,20 @@ function ActiveCheckouts() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchBorrowed = async () => {
+      try {
+        const res = await api.get('/transactions/active');
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        const checkedOutCount = list.filter(tx => tx.status === 'Checked Out' || tx.status === 'Overdue').length;
+        setTotalBorrowed(checkedOutCount);
+      } catch (err) {
+        console.error('Failed to fetch total borrowed items:', err);
+      }
+    };
+    fetchBorrowed();
+  }, []);
+
   const HeroSection = (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 mt-4 relative z-10">
@@ -56,7 +71,7 @@ function ActiveCheckouts() {
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 relative z-10">
         <StatCard
           title={t('activeCheckouts.stats.totalBorrowed', 'Total Borrowed')}
-          value={loading ? '...' : stats.totalBorrowed}
+          value={loading ? '...' : totalBorrowed}
           subtext={t('activeCheckouts.stats.allTime', 'all time')}
           changeType="neutral"
           icon={Package}

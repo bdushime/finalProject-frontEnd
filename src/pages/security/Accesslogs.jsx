@@ -161,11 +161,11 @@ export default function AccessLogs() {
     setCurrentPage(1);
   }, [searchQuery, filterEventType, startDate, endDate, sortBy]);
 
-  const totalPages = Math.ceil(filteredMovements.length / itemsPerPage) || 1;
-  const paginatedMovements = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredMovements.slice(start, start + itemsPerPage);
-  }, [filteredMovements, currentPage]);
+  const totalPages = Math.max(1, Math.ceil(filteredMovements.length / itemsPerPage));
+  const paginatedMovements = filteredMovements.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Group by Date for Timeline
   const groupedMovements = useMemo(() => {
@@ -381,15 +381,22 @@ export default function AccessLogs() {
               </div>
             </div>
 
-            {totalPages > 1 && (
-              <div className="border-t border-gray-100 bg-gray-50/50 p-4">
+            <div className="border-t border-gray-100 bg-gray-50/50 px-4 sm:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="text-xs font-medium text-slate-500">
+                {t('accessLogs.table.showingInfo', {
+                  from: filteredMovements.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1,
+                  to: Math.min(currentPage * itemsPerPage, filteredMovements.length),
+                  total: filteredMovements.length
+                })}
+              </span>
+              {totalPages > 1 && (
                 <PaginationControls
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={setCurrentPage}
                 />
-              </div>
-            )}
+              )}
+            </div>
 
           </div>
         </Card>

@@ -39,6 +39,7 @@
             "subtitle": "Tâches administratives courantes"
         },
         "recentActivity": {
+            "title": "Activité Récente",
             "inUse": "{{active}} articles actuellement utilisés sur un inventaire total de {{total}}",
             "noActivity": "Aucune activité récente enregistrée."
         },
@@ -330,6 +331,37 @@
             "youAreHere": "Vous êtes ici",
             "status": "Statut :",
             "warningNoGps": "Avertissement : {{count}} appareils signalent sans coordonnées GPS valides."
+        },
+        "filters": {
+            "searchPlaceholder": "Rechercher par nom d'équipement ou ID du traceur...",
+            "statusPlaceholder": "Filtrer par statut",
+            "allStatus": "Tous les Statuts",
+            "online": "En Ligne",
+            "offline": "Hors Ligne"
+        },
+        "table": {
+            "title": "Traceurs d'Appareils",
+            "showing": "Affichage de {{current}} sur {{total}} traceurs",
+            "page": "Page {{current}} sur {{total}}",
+            "headers": {
+                "equipment": "Équipement",
+                "id": "ID du Traceur",
+                "location": "Emplacement",
+                "status": "Statut",
+                "battery": "Batterie",
+                "temp": "Temp.",
+                "humidity": "Humidité",
+                "lastSeen": "Dernière Vue"
+            },
+            "noTrackers": "Aucun traceur trouvé correspondant à vos filtres.",
+            "lastSeen": "Vu pour la dernière fois : {{time}}",
+            "viewHistory": "Voir l'Historique",
+            "historyTitle": "Historique — {{equipment}}",
+            "trends": "Tendances des Capteurs",
+            "batteryPercent": "Batterie (%)",
+            "tempCelcius": "Temp. (°C)",
+            "currentBattery": "Niveau de Batterie Actuel",
+            "currentTemp": "Température Actuelle"
         }
     }
 }
