@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Printer, QrCode, Loader2 } from "lucide-react";
+import { Printer, QrCode, Loader2, Download } from "lucide-react";
 import api from "@/utils/api";
 import PropTypes from "prop-types";
 
@@ -73,6 +73,7 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
     const handlePrintQR = () => {
         if (!device) return;
         const printWindow = window.open('', '_blank');
+        const qrUrl = `https://tracknity.netlify.app/equipment/${device.id}`;
         printWindow.document.write(`
       <html>
         <head>
@@ -94,7 +95,7 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
           </div>
           <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"><\/script>
           <script>
-            QRCode.toCanvas(document.createElement('canvas'), '${device.qrCode || device.id}', { width: 200 }, function(err, canvas) {
+            QRCode.toCanvas(document.createElement('canvas'), '${qrUrl}', { width: 300 }, function(err, canvas) {
               if (!err) {
                 document.getElementById('qr-placeholder').replaceWith(canvas);
                 setTimeout(() => window.print(), 500);
@@ -105,6 +106,29 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
       </html>
     `);
         printWindow.document.close();
+    };
+
+    // Download QR Code
+    const handleDownloadQR = () => {
+        if (!device) return;
+        const svg = document.getElementById('device-qr-code');
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        img.onload = () => {
+            canvas.width = img.width + 40;
+            canvas.height = img.height + 40;
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 20, 20);
+            const pngFile = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement("a");
+            downloadLink.download = `QR_${device.name.replace(/\s+/g, '_')}.png`;
+            downloadLink.href = `${pngFile}`;
+            downloadLink.click();
+        };
+        img.src = "data:image/svg+xml;base64," + btoa(svgData);
     };
 
     return (
@@ -134,15 +158,25 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
                             {/* QR Code */}
                             <div className="flex flex-col items-center gap-3">
                                 <div className="bg-white p-4 border-2 border-gray-200 rounded-xl shadow-sm">
-                                    <QRCodeSVG value={device.qrCode || device.id} size={180} />
+                                    <QRCodeSVG
+                                        id="device-qr-code"
+                                        value={`https://tracknity.netlify.app/equipment/${device.id}`}
+                                        size={180}
+                                    />
                                 </div>
                                 <p className="text-sm text-gray-500 text-center">
-                                    Scan to identify device
+                                    Scan to open equipment page
                                 </p>
-                                <Button variant="outline" onClick={handlePrintQR} className="w-full">
-                                    <Printer className="h-4 w-4 mr-2" />
-                                    Print QR Code
-                                </Button>
+                                <div className="flex gap-2 w-full">
+                                    <Button variant="outline" onClick={handlePrintQR} className="flex-1">
+                                        <Printer className="h-4 w-4 mr-2" />
+                                        Print
+                                    </Button>
+                                    <Button variant="outline" onClick={handleDownloadQR} className="flex-1">
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Download
+                                    </Button>
+                                </div>
                             </div>
 
                             {/* Status & Condition */}

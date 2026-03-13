@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AtSign, CreditCard, AlertCircle, CheckCircle2 } from "lucide-react";
 import api from "@/utils/api";
 import { useAuth } from "./AuthContext";
@@ -17,6 +17,9 @@ export default function Auth() {
     const [feedback, setFeedback] = useState({ type: null, message: null }); // type: 'success' | 'error'
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from;
+
     const { login } = useAuth();
 
     const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -47,6 +50,11 @@ export default function Auth() {
 
             // Small delay to let user see success message before redirect
             setTimeout(() => {
+                if (from) {
+                    navigate(from, { replace: true });
+                    return;
+                }
+
                 const role = res.data.role;
                 switch (role) {
                     case 'Student':
@@ -131,8 +139,8 @@ export default function Auth() {
 
         return (
             <div className={`flex items-center gap-2 p-3 rounded-xl text-sm mb-4 ${isError
-                    ? 'bg-red-50 border border-red-200 text-red-800'
-                    : 'bg-green-50 border border-green-200 text-green-800'
+                ? 'bg-red-50 border border-red-200 text-red-800'
+                : 'bg-green-50 border border-green-200 text-green-800'
                 }`}>
                 {isError ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
                 <span>{feedback.message}</span>
@@ -185,8 +193,8 @@ export default function Auth() {
                         <button
                             onClick={() => { if (isSignUp) toggleMode(); }}
                             className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${!isSignUp
-                                    ? 'bg-white shadow-sm text-gray-900'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white shadow-sm text-gray-900'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             {t("signIn")}
@@ -194,8 +202,8 @@ export default function Auth() {
                         <button
                             onClick={() => { if (!isSignUp) toggleMode(); }}
                             className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${isSignUp
-                                    ? 'bg-white shadow-sm text-gray-900'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white shadow-sm text-gray-900'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             {t("signUp")}

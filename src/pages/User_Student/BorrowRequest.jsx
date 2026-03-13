@@ -25,8 +25,8 @@ export default function BorrowRequest() {
             <PageContainer>
 
                 <PageHeader
-                    title={t("equipment.requestBorrow", "Request Equipment")}
-                    subtitle={t("equipment.subtitle", "Submit a request to borrow IT equipment")}
+                    title={t("equipment.requestBorrow", "Borrow Equipment")}
+                    subtitle={t("equipment.subtitle", "Enter classroom and lecture details to borrow equipment")}
                     backUrl="/student/browse"
                 />
                 <BorrowRequestForm onSuccess={handleSuccess} />
