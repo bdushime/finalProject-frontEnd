@@ -33,16 +33,26 @@ export default function TimeTracker({ activeBorrow: activeLoan }) {
                 return;
             }
 
-            // Convert to HH:MM
-            const hours = Math.floor((diff / (1000 * 60 * 60)));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            // Convert to HH:MM:SS
+            const totalSeconds = Math.floor(diff / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
 
             // Format for display
             const hDisplay = hours < 10 ? `0${hours}` : hours;
             const mDisplay = minutes < 10 ? `0${minutes}` : minutes;
+            const sDisplay = seconds < 10 ? `0${seconds}` : seconds;
 
-            setTimeLeft(`${hDisplay}:${mDisplay}`);
-            setStatusText(hDisplay === "00" && mDisplay !== "00" ? "Minutes Remaining" : t("dashboard.timeLeft"));
+            if (hours > 0) {
+                // More than an hour: Show HH:MM
+                setTimeLeft(`${hDisplay}:${mDisplay}`);
+                setStatusText(t("dashboard.timeLeft"));
+            } else {
+                // Less than an hour: Show MM:SS
+                setTimeLeft(`${mDisplay}:${sDisplay}`);
+                setStatusText("Minutes Remaining");
+            }
 
             // Calculate Progress Bar (Dynamic)
             const createdAt = activeLoan?.createdAt || activeLoan?.startTime || new Date();
@@ -59,9 +69,21 @@ export default function TimeTracker({ activeBorrow: activeLoan }) {
             setProgressOffset(offset);
         };
 
-        // Run immediately and then every minute
+        // Run immediately
         calculateTime();
-        const timer = setInterval(calculateTime, 60000);
+
+        // Initial setup: Determine interval
+        const now = new Date();
+        const due = new Date(activeLoan.expectedReturnTime);
+        const diff = due - now;
+
+        // If less than an hour, update every second. Otherwise every minute.
+        const intervalTime = (diff > 0 && diff < 3600000) ? 1000 : 60000;
+        const timer = setInterval(calculateTime, intervalTime);
+
+        // Optional: Re-eval interval if it crosses the 1-hour threshold
+        // (Simple interval above is fine for most UX, but we can also just use 1s always for simplicity 
+        // if we want it most accurate, or stick to this as it's more efficient)
 
         return () => clearInterval(timer);
     }, [activeLoan, circumference, t]);
