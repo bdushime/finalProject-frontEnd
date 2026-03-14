@@ -487,16 +487,18 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                 onClick={() => step > i + 1 && setStep(i + 1)}
                                 className="flex items-center gap-2 group transition-all"
                             >
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black transition-all ${step === i + 1 ? 'bg-[#126dd5] text-white shadow-lg shadow-blue-200 ring-4 ring-blue-50' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'}`}>
-                                    {step > i + 1 ? <CheckCircle2 className="h-5 w-5" /> : i + 1}
+                                <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-[10px] md:text-xs font-black transition-all ${step === i + 1 ? 'bg-[#126dd5] text-white shadow-lg shadow-blue-200 ring-4 ring-blue-50' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'}`}>
+                                    {step > i + 1 ? <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" /> : i + 1}
                                 </div>
-                                <span className={`text-sm font-black tracking-tight ${step === i + 1 ? 'text-[#0b1d3a]' : 'text-slate-400 group-hover:text-slate-600'}`}>{s.label}</span>
+                                <span className={`text-xs md:text-sm font-black tracking-tight hidden sm:inline ${step === i + 1 ? 'text-[#0b1d3a]' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                                    {s.label}
+                                </span>
                             </button>
-                            {i < currentSteps.length - 1 && <div className="w-12 h-1 bg-slate-100 mx-3 rounded-full" />}
+                            {i < currentSteps.length - 1 && <div className="w-6 md:w-12 h-1 bg-slate-100 mx-2 md:mx-3 rounded-full" />}
                         </div>
                     ))}
                 </div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
+                <div className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 md:px-3 py-1 rounded-full whitespace-nowrap">
                     {t('equipment.stepTracker', 'Step')} {step} / {totalSteps}
                 </div>
             </div>

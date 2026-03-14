@@ -62,14 +62,37 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
 
         const video = videoRef.current;
         const canvas = document.createElement("canvas");
-        // Maintain aspect ratio
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+
+        // --- RESIZING LOGIC ---
+        // Max dimension we want to send to the backend (to prevent payload too large errors)
+        const MAX_DIMENSION = 1024;
+        let width = video.videoWidth;
+        let height = video.videoHeight;
+
+        if (width > height) {
+            if (width > MAX_DIMENSION) {
+                height = Math.round((height * MAX_DIMENSION) / width);
+                width = MAX_DIMENSION;
+            }
+        } else {
+            if (height > MAX_DIMENSION) {
+                width = Math.round((width * MAX_DIMENSION) / height);
+                height = MAX_DIMENSION;
+            }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
 
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Ensure high quality interpolation
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        ctx.drawImage(video, 0, 0, width, height);
+
+        // JPEG at 0.7 quality provides a good balance of size and clarity
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
         setPhotos(prev => ({ ...prev, [capturingSide]: dataUrl }));
         stopPhotoCamera();
     };
