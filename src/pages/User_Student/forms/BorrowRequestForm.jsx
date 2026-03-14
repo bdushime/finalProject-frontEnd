@@ -44,7 +44,7 @@ import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import QRScanner from "@/components/common/QRScanner";
 import { toast } from "sonner";
 
-export default function BorrowRequestForm({ onSuccess }) {
+export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess }) {
     const { t } = useTranslation('student');
     const { user } = useAuth();
     const studentName = user?.fullName || user?.username || "Student";
@@ -331,12 +331,22 @@ export default function BorrowRequestForm({ onSuccess }) {
             if (flowType === 'borrow') {
                 payload.expectedReturnTime = formData.sessionDateTime;
                 payload.conditionPhotos = conditionPhotos;
+
+                // Add granular fields for backend compatibility
+                payload.location = formData.location;
+                payload.course = formData.course;
+                payload.courseName = formData.courseName;
+                payload.lecturer = formData.lecturer;
+
                 const res = await api.post('/transactions/checkout', payload);
 
-                if (res.data.status === 'Pending' || res.data.serverStatusMessage === 'pending_approval') {
+                const status = (res.data.status || "").toLowerCase();
+                const serverMsg = (res.data.serverStatusMessage || "").toLowerCase();
+
+                if (status === 'pending' || serverMsg === 'pending_approval' || status === 'saved') {
                     setStatusModal({
                         type: 'pending',
-                        message: "Request Flagged for Approval. Because this room has a screen, your request is pending review by IT Staff."
+                        message: "Request Received. Your request is being reviewed by IT Staff."
                     });
                 } else {
                     setStatusModal({
@@ -344,6 +354,9 @@ export default function BorrowRequestForm({ onSuccess }) {
                         message: "Checkout Successful! You can pick up your equipment now."
                     });
                 }
+
+                // Trigger parent success logic if available
+                if (onSuccess) onSuccess(res.data);
 
             } else {
                 payload.reservationDate = formData.reservationDate;
@@ -353,11 +366,13 @@ export default function BorrowRequestForm({ onSuccess }) {
                 payload.courseName = formData.courseName;
                 payload.lecturer = formData.lecturer;
 
-                await api.post('/transactions/reserve', payload);
+                const res = await api.post('/transactions/reserve', payload);
                 setStatusModal({
                     type: 'success',
                     message: "Reservation confirmed successfully!"
                 });
+
+                if (onSuccess) onSuccess(res.data);
             }
 
         } catch (err) {
@@ -502,7 +517,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">COURSE CODE</Label>
-                                    <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. CS101" />
+                                    <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. COSC1010" />
                                     {errors.course && <p className="text-xs text-rose-500 font-bold px-1">{errors.course}</p>}
                                 </div>
                                 <div className="space-y-2">
@@ -774,15 +789,22 @@ export default function BorrowRequestForm({ onSuccess }) {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Location & Course</Label>
-                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 space-y-3">
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Location, Course & Lecturer</Label>
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 space-y-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-slate-400" /></div>
-                                                    <p className="text-[#0b1d3a] font-bold text-sm">{formData.course} - {formData.courseName}</p>
+                                                    <div>
+                                                        <p className="text-[#0b1d3a] font-bold text-sm">{formData.course} - {formData.courseName}</p>
+                                                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">{formData.lecturer}</p>
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center"><Scan className="w-4 h-4 text-slate-400" /></div>
                                                     <p className="text-[#0b1d3a] font-bold text-sm">{formData.location}</p>
+                                                </div>
+                                                <div className="pt-2 border-t border-slate-50">
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest px-1 mb-1">Purpose</p>
+                                                    <p className="text-slate-500 text-xs leading-relaxed italic px-1">"{formData.purpose}"</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -790,15 +812,29 @@ export default function BorrowRequestForm({ onSuccess }) {
 
                                     <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Return Time & Purpose</Label>
-                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 space-y-3">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><Clock className="w-4 h-4 text-[#126dd5]" /></div>
-                                                    <p className="text-[#0b1d3a] font-bold text-sm">{formData.sessionDateTime ? format(new Date(formData.sessionDateTime), 'hh:mm a') : "Not set"}</p>
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Date & Time</Label>
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center"><CalendarIcon className="w-4 h-4 text-slate-400" /></div>
+                                                        <p className="text-[#0b1d3a] font-bold text-sm">{format(new Date(), 'MMM d, yyyy')}</p>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-start gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0"><ClipboardList className="w-4 h-4 text-slate-400" /></div>
-                                                    <p className="text-slate-500 text-xs leading-relaxed italic">"{formData.purpose}"</p>
+                                                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-50">
+                                                    <div className="space-y-1">
+                                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">Booking Time</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded bg-blue-50 flex items-center justify-center text-[#126dd5]"><Clock className="w-3 h-3" /></div>
+                                                            <p className="text-[#0b1d3a] font-bold text-sm">{format(new Date(), 'hh:mm a')}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">Return Time</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded bg-rose-50 flex items-center justify-center text-rose-500"><Clock className="w-3 h-3" /></div>
+                                                            <p className="text-[#0b1d3a] font-bold text-sm">{formData.sessionDateTime ? format(new Date(formData.sessionDateTime), 'hh:mm a') : "Not set"}</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
