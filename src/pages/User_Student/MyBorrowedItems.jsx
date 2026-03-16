@@ -60,13 +60,14 @@ export default function MyBorrowedItems() {
                 // 1. FILTER PENDING (Initial Checkout Requests)
                 const pending = activeRes.data.filter(t => t.status?.toLowerCase() === 'pending');
 
-                // 2. FILTER ACTIVE BORROWS (Now includes 'Pending Return')
+                // 2. FILTER ACTIVE BORROWS (Now includes 'Pending Return' and 'Saved')
                 const borrowed = activeRes.data.filter(t => {
                     const status = t.status?.toLowerCase();
                     return (status === 'borrowed' ||
                         status === 'checked out' ||
                         status === 'overdue' ||
-                        status === 'pending return') &&
+                        status === 'pending return' ||
+                        status === 'saved') &&
                         status !== 'returned';
                 });
 

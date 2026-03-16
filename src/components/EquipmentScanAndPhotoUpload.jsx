@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from "react-i18next";
 import QRCodeScanner from "./QRCodeScanner";
 
-export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, onValidityChange, requireBothPhotos = false, equipment = null, scanError = null, onReset = null }) {
+export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, onValidityChange, requireBothPhotos = false, equipment = null, scanError = null, onReset = null, hideScanner = false }) {
     const { t } = useTranslation('student');
     const [scanResult, setScanResult] = useState('');
     const [photos, setPhotos] = useState({ front: null, back: null });
@@ -62,14 +62,37 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
 
         const video = videoRef.current;
         const canvas = document.createElement("canvas");
-        // Maintain aspect ratio
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+
+        // --- RESIZING LOGIC ---
+        // Max dimension we want to send to the backend (to prevent payload too large errors)
+        const MAX_DIMENSION = 1024;
+        let width = video.videoWidth;
+        let height = video.videoHeight;
+
+        if (width > height) {
+            if (width > MAX_DIMENSION) {
+                height = Math.round((height * MAX_DIMENSION) / width);
+                width = MAX_DIMENSION;
+            }
+        } else {
+            if (height > MAX_DIMENSION) {
+                width = Math.round((width * MAX_DIMENSION) / height);
+                height = MAX_DIMENSION;
+            }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
 
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Ensure high quality interpolation
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        ctx.drawImage(video, 0, 0, width, height);
+
+        // JPEG at 0.7 quality provides a good balance of size and clarity
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
         setPhotos(prev => ({ ...prev, [capturingSide]: dataUrl }));
         stopPhotoCamera();
     };
@@ -81,98 +104,100 @@ export default function EquipmentScanAndPhotoUpload({ onScan, onPhotosChange, on
     return (
         <div className="w-full space-y-8 animate-in fade-in duration-500">
             {/* QR SCANNER SECTION */}
-            <section className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-[#126dd5]/10 text-[#126dd5] rounded-xl">
-                            <Scan className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-[#0b1d3a]">{t('equipment.qrCodeScanner', 'QR Code Scanner')}</h3>
-                            <p className="text-xs text-slate-500 font-medium">{t('equipment.scanTagDesc', 'Scan the equipment tag for quick identification')}</p>
-                        </div>
-                    </div>
-                    {scanResult && (
-                        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-emerald-100">
-                            <CheckCircle2 className="h-3.5 w-3.5" /> {t('equipment.scanned', 'Scanned')}
-                        </div>
-                    )}
-                </div>
-
-                <div className="p-6 space-y-4">
-                    <div className={`w-full bg-black rounded-[2rem] overflow-hidden flex flex-col items-center justify-center relative min-h-[300px] border-4 ${scanError ? 'border-rose-500' : 'border-white'} shadow-inner transition-colors`}>
-                        {showScanner ? (
-                            <div className="w-full absolute inset-0">
-                                <QRCodeScanner onScanSuccess={handleScanSuccess} />
-                                {scanError && (
-                                    <div className="absolute top-4 inset-x-4 z-20 animate-in slide-in-from-top-2">
-                                        <div className="bg-rose-600 text-white p-3 rounded-xl flex items-center gap-2 shadow-lg border border-rose-400">
-                                            <AlertCircle className="w-5 h-5 shrink-0" />
-                                            <p className="text-xs font-bold">{scanError}</p>
-                                        </div>
-                                    </div>
-                                )}
+            {!hideScanner && (
+                <section className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-[#126dd5]/10 text-[#126dd5] rounded-xl">
+                                <Scan className="h-5 w-5" />
                             </div>
-                        ) : scanResult ? (
-                            <div className="flex flex-col items-center justify-center text-white z-10 w-full p-8 animate-in zoom-in-95">
-                                <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
-                                    <CheckCircle2 className="w-8 h-8 text-white" />
-                                </div>
-                                <p className="text-emerald-400 font-bold uppercase tracking-widest text-xs mb-2">Identified Successfully</p>
-                                <code className="bg-white/10 px-6 py-3 rounded-xl font-mono text-xl tracking-widest border border-white/20 shadow-inner mb-6">
-                                    {scanResult}
-                                </code>
+                            <div>
+                                <h3 className="font-bold text-[#0b1d3a]">{t('equipment.qrCodeScanner', 'QR Code Scanner')}</h3>
+                                <p className="text-xs text-slate-500 font-medium">{t('equipment.scanTagDesc', 'Scan the equipment tag for quick identification')}</p>
+                            </div>
+                        </div>
+                        {scanResult && (
+                            <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-emerald-100">
+                                <CheckCircle2 className="h-3.5 w-3.5" /> {t('equipment.scanned', 'Scanned')}
+                            </div>
+                        )}
+                    </div>
 
-                                {/* ACCOUNTABILITY & DESCRIPTION */}
-                                <div className="w-full space-y-4 max-w-sm">
-                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-3">Security & Accountability</p>
-                                        <p className="text-[11px] text-slate-300 leading-relaxed italic">
-                                            "This QR code was generated by the <b>Security Office</b>. Every scan is logged for digital accountability and physical tracking."
-                                        </p>
-                                    </div>
-
-                                    {equipment ? (
-                                        <div className="p-4 bg-[#126dd5]/10 rounded-2xl border border-[#126dd5]/30 animate-in fade-in slide-in-from-top-2">
-                                            <p className="text-[10px] text-[#126dd5] font-black uppercase tracking-[0.2em] mb-1">Equipment Description</p>
-                                            <p className="text-sm font-bold text-white mb-1">{equipment.name}</p>
-                                            <p className="text-[11px] text-slate-400 leading-tight">
-                                                {equipment.description || "No description available for this item."}
-                                            </p>
-                                            <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 font-bold bg-black/20 p-2 rounded-lg">
-                                                <span>SN: {equipment.serialNumber}</span>
-                                                <span className="text-[#126dd5]">ID: {scanResult}</span>
+                    <div className="p-6 space-y-4">
+                        <div className={`w-full bg-black rounded-[2rem] overflow-hidden flex flex-col items-center justify-center relative min-h-[300px] border-4 ${scanError ? 'border-rose-500' : 'border-white'} shadow-inner transition-colors`}>
+                            {showScanner ? (
+                                <div className="w-full absolute inset-0">
+                                    <QRCodeScanner onScanSuccess={handleScanSuccess} />
+                                    {scanError && (
+                                        <div className="absolute top-4 inset-x-4 z-20 animate-in slide-in-from-top-2">
+                                            <div className="bg-rose-600 text-white p-3 rounded-xl flex items-center gap-2 shadow-lg border border-rose-400">
+                                                <AlertCircle className="w-5 h-5 shrink-0" />
+                                                <p className="text-xs font-bold">{scanError}</p>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="p-4 bg-[#126dd5]/5 rounded-2xl border border-white/5 animate-pulse">
-                                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Identifying Equipment...</p>
-                                            <div className="h-4 bg-white/5 rounded w-3/4 mb-2" />
-                                            <div className="h-4 bg-white/5 rounded w-1/2" />
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        ) : null}
-                    </div>
+                            ) : scanResult ? (
+                                <div className="flex flex-col items-center justify-center text-white z-10 w-full p-8 animate-in zoom-in-95">
+                                    <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
+                                        <CheckCircle2 className="w-8 h-8 text-white" />
+                                    </div>
+                                    <p className="text-emerald-400 font-bold uppercase tracking-widest text-xs mb-2">Identified Successfully</p>
+                                    <code className="bg-white/10 px-6 py-3 rounded-xl font-mono text-xl tracking-widest border border-white/20 shadow-inner mb-6">
+                                        {scanResult}
+                                    </code>
 
-                    {scanResult && (
-                        <div className="flex justify-between items-center gap-4 animate-in fade-in">
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setScanResult('');
-                                    setPhotos({ front: null, back: null });
-                                    if (onReset) onReset();
-                                }}
-                                className="w-full h-12 rounded-xl text-slate-500 font-bold hover:bg-slate-50 hover:text-rose-500 border-2"
-                            >
-                                <X className="h-4 w-4 mr-2" /> Reset & Scan Again
-                            </Button>
+                                    {/* ACCOUNTABILITY & DESCRIPTION */}
+                                    <div className="w-full space-y-4 max-w-sm">
+                                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-3">Security & Accountability</p>
+                                            <p className="text-[11px] text-slate-300 leading-relaxed italic">
+                                                "This QR code was generated by the <b>Security Office</b>. Every scan is logged for digital accountability and physical tracking."
+                                            </p>
+                                        </div>
+
+                                        {equipment ? (
+                                            <div className="p-4 bg-[#126dd5]/10 rounded-2xl border border-[#126dd5]/30 animate-in fade-in slide-in-from-top-2">
+                                                <p className="text-[10px] text-[#126dd5] font-black uppercase tracking-[0.2em] mb-1">Equipment Description</p>
+                                                <p className="text-sm font-bold text-white mb-1">{equipment.name}</p>
+                                                <p className="text-[11px] text-slate-400 leading-tight">
+                                                    {equipment.description || "No description available for this item."}
+                                                </p>
+                                                <div className="mt-3 flex items-center justify-between text-[10px] text-slate-500 font-bold bg-black/20 p-2 rounded-lg">
+                                                    <span>SN: {equipment.serialNumber}</span>
+                                                    <span className="text-[#126dd5]">ID: {scanResult}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="p-4 bg-[#126dd5]/5 rounded-2xl border border-white/5 animate-pulse">
+                                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Identifying Equipment...</p>
+                                                <div className="h-4 bg-white/5 rounded w-3/4 mb-2" />
+                                                <div className="h-4 bg-white/5 rounded w-1/2" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
-                    )}
-                </div>
-            </section>
+
+                        {scanResult && (
+                            <div className="flex justify-between items-center gap-4 animate-in fade-in">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setScanResult('');
+                                        setPhotos({ front: null, back: null });
+                                        if (onReset) onReset();
+                                    }}
+                                    className="w-full h-12 rounded-xl text-slate-500 font-bold hover:bg-slate-50 hover:text-rose-500 border-2"
+                                >
+                                    <X className="h-4 w-4 mr-2" /> Reset & Scan Again
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            )}
 
             {/* PHOTOS SECTION */}
             <section className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">

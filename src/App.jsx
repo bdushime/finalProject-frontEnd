@@ -70,6 +70,7 @@ import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
 import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
 import AdminNotifications from "./pages/Sys_Admin/AdminNotifications";
 import AdminProfile from "./pages/Sys_Admin/AdminProfile";
+import EquipmentRedirect from "./pages/Public/EquipmentRedirect";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
@@ -85,6 +86,7 @@ export default function App() {
                 <Route path="/signup" element={<Auth />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/otp-verify" element={<OTPVerify />} />
+                <Route path="/equipment/:id" element={<EquipmentRedirect />} />
 
                 {/* ===========================
                     2. PROTECTED ROUTES (Requires Login + Role)

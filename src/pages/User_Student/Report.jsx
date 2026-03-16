@@ -4,6 +4,7 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { PageContainer } from "@/components/common/Page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import BackButton from "./components/BackButton";
 import {
     Search,
     Download,
@@ -353,15 +354,7 @@ export default function Report() {
                 {/* HEADER + BACK BUTTON (Aligned with EquipmentCatalogue) */}
                 <div className="mb-8">
                     <div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="p-0 hover:bg-transparent text-slate-500 hover:text-[#0b1d3a] mb-4 -ml-2"
-                            onClick={() => navigate(-1)}
-                        >
-                            <ArrowLeft className="w-5 h-5 mr-1" />
-                            Back
-                        </Button>
+                        <BackButton />
                         <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">{t("report.title")}</h1>
                         <p className="text-slate-500 mt-1">{t("report.detailedLedger")}</p>
                     </div>
