@@ -6,20 +6,20 @@ import { cva } from "class-variance-authority";
 import { cn } from "./utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-gray-300 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-[#8D8DC7] text-white hover:bg-[#7A7AB5] shadow-sm",
         destructive:
-          "bg-red-100 text-red-500 hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500/20",
         outline:
-          "border bg-background text-foreground hover:bg-[#343264] hover:text-white dark:hover:bg-input/50",
+          "border border-gray-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-sm",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-slate-100 text-slate-900 hover:bg-slate-200",
         ghost:
-          "hover:bg-[#343264] hover:text-white dark:hover:bg-[#343264]",
-        link: "text-[#343264] underline-offset-4 hover:text-white hover:underline",
+          "text-slate-700 hover:bg-slate-100 hover:text-slate-900",
+        link: "text-[#343264] underline-offset-4 hover:text-[#343264]/80 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
