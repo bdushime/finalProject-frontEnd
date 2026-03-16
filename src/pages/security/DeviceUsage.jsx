@@ -37,10 +37,10 @@ const DeviceUsage = ({ data: serverData }) => {
 
   return (
     <div className="p-3 sm:p-6 w-full">
-      <div className="relative h-48 sm:h-60 flex items-center justify-center w-full mb-4">
+      <div className="relative h-48 sm:h-60 group flex items-center justify-center w-full mb-4">
         {/* Double room - largest, back */}
         <div
-          className="absolute left-[15%] sm:left-[20%] top-[-5%] sm:top-[-10%] z-1 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] md:w-[200px] md:h-[200px] flex items-center justify-center rounded-full border-2 border-gray-200"
+          className="absolute left-[15%] sm:left-[20%] top-[-5%] sm:top-[-10%] z-1 w-[150px] h-[150px] sm:w-[190px] sm:h-[190px] md:w-[210px] md:h-[210px] flex items-center justify-center rounded-full border-2 border-gray-200"
           style={{ backgroundColor: displayData[0].color }}
         >
           <div className="text-center text-white">
@@ -51,8 +51,8 @@ const DeviceUsage = ({ data: serverData }) => {
 
         {/* Single room - medium, front left */}
         <div
-          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px]"
-          style={{ backgroundColor: displayData[1].color, left: '3%', bottom: '-5%', zIndex: 2 }}
+          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[150px] md:h-[150px]"
+          style={{ backgroundColor: displayData[1].color, left: '15%', bottom: '-15%', zIndex: 2 }}
         >
           <div className="text-center text-white">
             <div className="text-xl sm:text-2xl md:text-3xl font-bold">{displayData[1].percent}%</div>
@@ -62,8 +62,8 @@ const DeviceUsage = ({ data: serverData }) => {
 
         {/* Deluxe room - smallest, front right */}
         <div
-          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[110px] md:h-[110px]"
-          style={{ backgroundColor: displayData[2].color, right: '5%', bottom: '0%', zIndex: 3 }}
+          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px]"
+          style={{ backgroundColor: displayData[2].color, right: '15%', bottom: '-10%', zIndex: 3 }}
         >
           <div className="text-center text-gray-200">
             <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">{displayData[2].percent}%</div>
