@@ -357,11 +357,15 @@ function BrowseDevices() {
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-slate-100 shadow-xl z-[100]">
                 <SelectItem value="all" className="rounded-xl focus:bg-slate-50">{t('browseDevices.filters.allStatus')}</SelectItem>
-                {statuses.map((status) => (
-                  <SelectItem key={status} value={status} className="rounded-xl focus:bg-slate-50">
-                    {t(`browseDevices.labels.${status}`) || status.charAt(0).toUpperCase() + status.slice(1)}
-                  </SelectItem>
-                ))}
+                {statuses.map((status) => {
+                  const statusKey = status.replace(/\s+/g, '').replace(/^[A-Z]/, c => c.toLowerCase());
+                  const fallback = status.charAt(0).toUpperCase() + status.slice(1);
+                  return (
+                    <SelectItem key={status} value={status} className="rounded-xl focus:bg-slate-50">
+                      {t(`browseDevices.labels.${statusKey}`, { defaultValue: fallback })}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
