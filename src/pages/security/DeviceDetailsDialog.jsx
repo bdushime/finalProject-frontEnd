@@ -205,6 +205,55 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
                                         <span className="text-sm font-medium text-gray-800">{device.location}</span>
                                     </div>
                                 )}
+                                {device.purchaseDate && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-gray-500 text-sm">Purchase Date</span>
+                                        <span className="text-sm font-medium text-gray-800">
+                                            {new Date(device.purchaseDate).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                )}
+                                {(device.amount !== undefined || device.purchasePrice !== undefined) && (
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-gray-500 text-sm">Amount</span>
+                                        <span className="text-sm font-medium text-gray-800">
+                                            {parseFloat(device.amount || device.purchasePrice || 0).toLocaleString()} RWF
+                                        </span>
+                                    </div>
+                                )}
+                                {(() => {
+                                    const costInfo = device.amount || device.purchasePrice;
+                                    if (!costInfo || !device.purchaseDate) return null;
+                                    
+                                    const CATEGORY_LIFESPAN = {
+                                        "Electronics": 3,
+                                        "Furniture": 10,
+                                        "Lab Equipment": 5,
+                                        "Office Supplies": 2,
+                                        "Vehicles": 7
+                                    };
+
+                                    const cost = parseFloat(costInfo);
+                                    const purchaseDate = new Date(device.purchaseDate);
+                                    const today = new Date();
+                                    const lifespanYears = CATEGORY_LIFESPAN[device.category] || 5;
+
+                                    const ageInYears = (today - purchaseDate) / (1000 * 60 * 60 * 24 * 365.25);
+                                    const annualDepreciation = cost / lifespanYears;
+                                    const totalDepreciation = annualDepreciation * ageInYears;
+
+                                    const currentValue = Math.max(0, cost - totalDepreciation);
+                                    const currentValueFormatted = currentValue.toLocaleString(undefined, { maximumFractionDigits: 2 });
+                                    
+                                    return (
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-500 text-sm">Depreciated Value</span>
+                                            <span className="text-sm font-medium text-blue-600">
+                                                {currentValueFormatted} RWF
+                                            </span>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </>

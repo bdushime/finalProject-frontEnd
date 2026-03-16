@@ -203,6 +203,37 @@ function AddDeviceDialog({
                     </div>
 
                     {/* Row 4 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                        <div className="space-y-2">
+                            <Label htmlFor="purchaseDate" className="text-sm font-semibold text-slate-700">
+                                Purchase Date {fieldRequired("purchaseDate") && <span className="text-red-500">*</span>}
+                            </Label>
+                            <Input
+                                id="purchaseDate"
+                                type="date"
+                                value={formData.purchaseDate || ""}
+                                onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+                                className={`${inputClass} ${validationErrors.purchaseDate ? "border-red-500 ring-red-100" : ""}`}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="amount" className="text-sm font-semibold text-slate-700">
+                                Amount {fieldRequired("amount") && <span className="text-red-500">*</span>}
+                            </Label>
+                            <Input
+                                id="amount"
+                                type="number"
+                                min="0"
+                                step="any"
+                                value={formData.amount || ""}
+                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                placeholder="e.g., 1500"
+                                className={`${inputClass} ${validationErrors.amount ? "border-red-500 ring-red-100" : ""}`}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Row 5 */}
                     <div className="grid grid-cols-1 gap-5">
                         {shouldShowField("status") && (
                             <div className="space-y-2">
@@ -239,7 +270,7 @@ function AddDeviceDialog({
                 </div>
 
                 <DialogFooter className="mt-4 gap-3 flex-col sm:flex-row">
-                    <Button variant="outline" onClick={onCancel} disabled={isLoading} className="h-12 px-6 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50">
+                    <Button variant="outline" onClick={onCancel} disabled={isLoading} className="h-12 px-6 rounded-xl border-gray-200 text-gray-600 hover:bg-slate-900">
                         Cancel
                     </Button>
                     <Button
