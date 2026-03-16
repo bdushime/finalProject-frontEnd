@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import PropTypes from "prop-types";
+import { generatePDF } from "@/utils/pdfGenerator";
 import {
   Table,
   TableBody,
@@ -86,6 +87,30 @@ export default function AccessLogsTable({ data, loading = false }) {
       .slice(0, 2);
   };
 
+  const handleExportPDF = () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'Security Staff', role: 'Security' };
+
+      const formattedForPdf = filteredData.map(log => ({
+          createdAt: log.timestamp || new Date().toISOString(),
+          status: log.status || 'Unknown',
+          equipment: {
+              name: log.equipment || "Unknown Item",
+              serialNumber: log.id || "N/A",
+              category: "Hardware", // Action or location could be adapted here since standard template requires category
+          },
+          user: {
+              username: log.user || "Unknown",
+              email: log.email || "N/A"
+          }
+      }));
+
+      generatePDF(formattedForPdf, currentUser, 'ACCESS LOGS REPORT');
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+    }
+  };
+
   return (
     <Card className="border border-gray-100 shadow-sm bg-white rounded-[2rem] overflow-hidden">
       <CardHeader className="p-8 pb-4">
@@ -112,7 +137,7 @@ export default function AccessLogsTable({ data, loading = false }) {
                 <SelectItem value="all">{t('accessLogs.filters.allTime')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" className="gap-2 border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
+            <Button onClick={handleExportPDF} variant="outline" size="sm" className="gap-2 border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
               <Download className="h-4 w-4" />
               {t('common:actions.export')}
             </Button>
