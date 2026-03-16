@@ -265,7 +265,7 @@ function Topbar() {
                   asChild
                   className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors"
                 >
-                  <Link to="/security/profile" className="flex items-center gap-2 font-medium">
+                  <Link to="/security/profile" className="flex items-center text-slate-800 gap-2 font-medium">
                     {t("auth.myProfile")}
                   </Link>
                 </DropdownMenuItem>
@@ -286,13 +286,6 @@ function Topbar() {
         {/* Mobile Navigation Menu — visible below lg */}
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-3 sm:mt-4 pb-3 sm:pb-4 border-t border-white/20 pt-3 sm:pt-4">
-            {/* Borrowed pill inside mobile menu for small screens */}
-            {/* <div className="flex md:hidden items-center gap-2 px-4 py-2.5 mb-2 bg-sky-900/40 border border-sky-700/50 rounded-xl text-sky-100">
-              <Package className="w-4 h-4 text-sky-400 flex-shrink-0" />
-              <span className="text-xs font-bold uppercase tracking-wider">
-                Borrowed: <span className="text-white ml-1">{totalBorrowed}</span>
-              </span>
-            </div> */}
             <nav className="flex flex-col gap-1">
               {navigationLinks.map((link) => {
                 const Icon = link.icon;
