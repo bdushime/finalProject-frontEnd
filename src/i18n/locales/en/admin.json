@@ -3,6 +3,7 @@
         "title": "Admin Dashboard",
         "totalUsers": "Total Users",
         "totalEquipment": "Total Equipment",
+        "manageCourses": "Manage Courses",
         "activeCheckouts": "Active Checkouts",
         "overdueItems": "Overdue Items",
         "weeklyUsageTrends": "Weekly Usage Trends",

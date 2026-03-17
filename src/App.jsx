@@ -68,6 +68,7 @@ import AdminDashboard from "./pages/Sys_Admin/Dashboard";
 import UsersList from "./pages/Sys_Admin/UserManagement/UsersList";
 import ConfigPage from "./pages/Sys_Admin/Configuration/ConfigPage";
 import { DataPage, MonitoringPage, ReportsPage, SecurityPage, TrackingPage, ScannerPage } from "./pages/Sys_Admin/routes_stubs";
+import CourseManagement from "./pages/Sys_Admin/DataManagement/CourseManagement";
 import AdminNotifications from "./pages/Sys_Admin/AdminNotifications";
 import AdminProfile from "./pages/Sys_Admin/AdminProfile";
 import EquipmentRedirect from "./pages/Public/EquipmentRedirect";
@@ -157,6 +158,7 @@ export default function App() {
                     <Route path="/admin/config" element={<ConfigPage />} />
                     <Route path="/admin/data" element={<DataPage />} />
                     <Route path="/admin/monitoring" element={<MonitoringPage />} />
+                    <Route path="/admin/courses" element={<CourseManagement />} />
                     <Route path="/admin/reports" element={<ReportsPage />} />
                     <Route path="/admin/security" element={<SecurityPage />} />
                     <Route path="/admin/tracking" element={<TrackingPage />} />

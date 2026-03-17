@@ -27,7 +27,13 @@ export default function CurrentCheckouts() {
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCheckout, setSelectedCheckout] = useState(null);
+    const [selectedCheckoutId, setSelectedCheckoutId] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [nowTick, setNowTick] = useState(0);
+
+    // Borrowing sessions are capped at 5 hours in the student flow.
+    // The "Active" tab should show sessions within this window (and any overdue sessions).
+    const ACTIVE_CHECKOUT_WINDOW_HOURS = 5;
 
     // Tabs state: 'requests' | 'reservations' | 'active'
     const [currentTab, setCurrentTab] = useState('requests');
@@ -52,7 +58,9 @@ export default function CurrentCheckouts() {
                 borrowerEmail: tx.user?.email || "",
                 dateDisplay: tx.status === 'Reserved'
                     ? format(new Date(tx.startTime), 'MMM dd, HH:mm')
-                    : format(new Date(tx.createdAt), 'MMM dd, HH:mm'),
+                    : (tx.status === 'Checked Out' || tx.status === 'Overdue')
+                        ? format(new Date(tx.checkedOutAt || tx.checkoutDate || tx.createdAt), 'MMM dd, HH:mm')
+                        : format(new Date(tx.createdAt), 'MMM dd, HH:mm'),
                 status: tx.status,
                 startTime: tx.startTime,
                 fullData: {
@@ -74,9 +82,28 @@ export default function CurrentCheckouts() {
         fetchActive();
     }, []);
 
+    // Recompute "Active" tab statuses over time (overdue can flip without refetching).
+    useEffect(() => {
+        if (currentTab !== 'active') return;
+        const id = setInterval(() => setNowTick((t) => t + 1), 60 * 1000);
+        return () => clearInterval(id);
+    }, [currentTab]);
+
     // --- 2. FILTERING LOGIC ---
     useEffect(() => {
         if (!allTransactions) return;
+
+        const parseDateOrNull = (value) => {
+            if (!value) return null;
+            const d = new Date(value);
+            return Number.isNaN(d.getTime()) ? null : d;
+        };
+
+        const getCheckoutDate = (tx) =>
+            parseDateOrNull(tx?.fullData?.checkedOutAt || tx?.fullData?.checkoutDate || tx?.fullData?.createdAt);
+
+        const getDueDate = (tx) =>
+            parseDateOrNull(tx?.fullData?.expectedReturnTime || tx?.fullData?.dueDate);
 
         let result = [];
         if (currentTab === 'requests') {
@@ -86,10 +113,53 @@ export default function CurrentCheckouts() {
         } else if (currentTab === 'reservations') {
             result = allTransactions.filter(t => t.status === 'Reserved');
         } else if (currentTab === 'active') {
-            result = allTransactions.filter(t => ['Checked Out', 'Overdue'].includes(t.status));
+            const now = new Date();
+            const windowMs = ACTIVE_CHECKOUT_WINDOW_HOURS * 60 * 60 * 1000;
+
+            // Start with transactions that are "active-ish" according to the API,
+            // then compute overdue locally based on due time to keep UI correct.
+            let activeItems = allTransactions
+                .filter(t => ['Checked Out', 'Overdue'].includes(t.status))
+                .map((t) => {
+                    const dueAt = getDueDate(t);
+                    const isOverdue =
+                        t?.fullData?.isOverdue === true ||
+                        (dueAt ? now.getTime() > dueAt.getTime() : false);
+
+                    return {
+                        ...t,
+                        status: isOverdue ? 'Overdue' : 'Checked Out',
+                    };
+                })
+                .filter((t) => {
+                    const checkoutAt = getCheckoutDate(t);
+                    const inActiveWindow = checkoutAt ? (now.getTime() - checkoutAt.getTime()) <= windowMs : false;
+
+                    // Only show sessions checked out within the window,
+                    // but always keep overdue items visible for follow-up.
+                    return inActiveWindow || t.status === 'Overdue';
+                });
+            
+            // Remove checkouts where the equipment itself is marked Available (implicitly canceled by system or staff)
+            activeItems = activeItems.filter(t => t.fullData?.equipment?.status !== 'Available');
+            
+            // Deduplicate: If an equipment has multiple active checkouts, only the newest one is valid.
+            const seenEquipments = new Set();
+            result = [];
+            for (const t of activeItems) {
+                const eqId = t.fullData?.equipment?._id;
+                if (eqId) {
+                    if (!seenEquipments.has(eqId)) {
+                        seenEquipments.add(eqId);
+                        result.push(t);
+                    }
+                } else {
+                    result.push(t);
+                }
+            }
         }
         setFilteredData(result);
-    }, [currentTab, allTransactions]);
+    }, [currentTab, allTransactions, nowTick]);
 
     // --- 2.5 AUTOMATIC DENIAL LOGIC (4 HOURS) ---
     useEffect(() => {
@@ -135,6 +205,7 @@ export default function CurrentCheckouts() {
 
     const handleRowClick = (checkout) => {
         setSelectedCheckout(checkout.fullData);
+        setSelectedCheckoutId(checkout.checkoutId);
         setIsDialogOpen(true);
     };
 
@@ -413,6 +484,7 @@ export default function CurrentCheckouts() {
                     <CheckoutDetailsDialog
                         isOpen={isDialogOpen}
                         onOpenChange={setIsDialogOpen}
+                        checkoutId={selectedCheckoutId}
                         selectedCheckout={selectedCheckout}
                     />
                 )}

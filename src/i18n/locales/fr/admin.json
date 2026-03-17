@@ -3,6 +3,7 @@
         "title": "Tableau de bord Admin",
         "totalUsers": "Total Utilisateurs",
         "totalEquipment": "Total Équipement",
+        "manageCourses": "Gérer les cours",
         "activeCheckouts": "Sorties Actives",
         "overdueItems": "Éléments en Retard",
         "weeklyUsageTrends": "Tendances Hebdomadaires",

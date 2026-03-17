@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield, LogOut } from 'lucide-react';
+import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield, LogOut, BookOpen } from 'lucide-react';
 import logo from '../../../assets/images/logo8noback.png';
 import { useNavigate, Link } from 'react-router-dom';
 import {
@@ -24,6 +24,7 @@ const AdminLayout = ({ children, heroContent }) => {
     { label: t("nav.userMgmt"), href: '/admin/users', icon: Users },
     { label: t("nav.config"), href: '/admin/config', icon: Settings },
     { label: t("nav.data"), href: '/admin/data', icon: Database },
+    { label: "Courses", href: '/admin/courses', icon: BookOpen },
     { label: t("nav.monitoring"), href: '/admin/monitoring', icon: Activity },
     { label: t("nav.reports"), href: '/admin/reports', icon: FileText },
     { label: t("nav.security"), href: '/admin/security', icon: Shield },

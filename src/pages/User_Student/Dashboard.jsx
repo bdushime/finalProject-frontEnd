@@ -48,7 +48,12 @@ export default function Dashboard() {
 
                 // C. Available Devices
                 const equipRes = await api.get('/equipment');
-                const available = equipRes.data.filter(item => item.status === 'Available').slice(0, 5);
+                const equipPayload = equipRes?.data;
+                const equipList = Array.isArray(equipPayload)
+                    ? equipPayload
+                    : (equipPayload?.equipment || equipPayload?.items || equipPayload?.results || equipPayload?.data || []);
+                const normalizedList = Array.isArray(equipList) ? equipList : [];
+                const available = normalizedList.filter(item => item?.status === 'Available').slice(0, 5);
                 setDevices(available);
 
                 // D. Stats

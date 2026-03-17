@@ -41,7 +41,12 @@ export default function EquipmentCatalogue() {
                 }
 
                 // Inject the active real-time location into the equipment list
-                const mergedEquipment = eqRes.data.map(eq => ({
+                const payload = eqRes?.data;
+                const list = Array.isArray(payload)
+                    ? payload
+                    : (payload?.equipment || payload?.items || payload?.results || payload?.data || []);
+
+                const mergedEquipment = (Array.isArray(list) ? list : []).map(eq => ({
                     ...eq,
                     activeLocation: activeBorrows[eq._id] || eq.location
                 }));
@@ -49,6 +54,7 @@ export default function EquipmentCatalogue() {
                 setEquipmentList(mergedEquipment);
             } catch (err) {
                 console.error("Failed to load equipment:", err);
+                setEquipmentList([]);
             } finally {
                 setLoading(false);
             }
