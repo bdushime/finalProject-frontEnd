@@ -21,7 +21,7 @@ export default function IoTFiltersBar({
 }) {
   const { t } = useTranslation(["itstaff"]);
   return (
-    <div className="border-gray-200 shadow-sm rounded-lg">
+    <div className="border-gray-200 text-gray-900 shadow-sm rounded-lg">
       <div className="pt-6 px-4 pb-4">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="relative flex-1 w-full sm:w-auto">

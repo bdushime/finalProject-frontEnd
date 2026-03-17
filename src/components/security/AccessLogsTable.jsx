@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import PropTypes from "prop-types";
+import { generatePDF } from "@/utils/pdfGenerator";
 import {
   Table,
   TableBody,
@@ -23,6 +24,7 @@ import { Badge } from "@components/ui/badge";
 import { Avatar, AvatarFallback } from "@components/ui/avatar";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import PaginationControls from "@/components/common/PaginationControls";
 
 
 
@@ -40,11 +42,13 @@ const actionConfig = {
 
 export default function AccessLogsTable({ data, loading = false }) {
   const { t } = useTranslation(["security", "common"]);
-  const displayData = data && data.length > 0 ? data : (loading ? [] : mockAccessLogs);
+  const displayData = Array.isArray(data) ? data : [];
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("today");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const filteredData = useMemo(() => {
     return displayData.filter((log) => {
@@ -62,6 +66,18 @@ export default function AccessLogsTable({ data, loading = false }) {
     });
   }, [displayData, searchQuery, statusFilter, actionFilter]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, actionFilter, timeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
+  const paginatedData = useMemo(() => {
+    return filteredData.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredData, currentPage]);
+
   const getInitials = (name) => {
     return name
       .split(" ")
@@ -69,6 +85,30 @@ export default function AccessLogsTable({ data, loading = false }) {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleExportPDF = () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'Security Staff', role: 'Security' };
+
+      const formattedForPdf = filteredData.map(log => ({
+          createdAt: log.timestamp || new Date().toISOString(),
+          status: log.status || 'Unknown',
+          equipment: {
+              name: log.equipment || "Unknown Item",
+              serialNumber: log.id || "N/A",
+              category: "Hardware", // Action or location could be adapted here since standard template requires category
+          },
+          user: {
+              username: log.user || "Unknown",
+              email: log.email || "N/A"
+          }
+      }));
+
+      generatePDF(formattedForPdf, currentUser, 'ACCESS LOGS REPORT');
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+    }
   };
 
   return (
@@ -97,7 +137,7 @@ export default function AccessLogsTable({ data, loading = false }) {
                 <SelectItem value="all">{t('accessLogs.filters.allTime')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" className="gap-2 border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
+            <Button onClick={handleExportPDF} variant="outline" size="sm" className="gap-2 border-slate-200 rounded-lg shadow-sm bg-white text-slate-700">
               <Download className="h-4 w-4" />
               {t('common:actions.export')}
             </Button>
@@ -177,7 +217,7 @@ export default function AccessLogsTable({ data, loading = false }) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredData.map((log) => (
+                  paginatedData.map((log) => (
                     <TableRow key={log.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
                       <TableCell className="px-4 py-4 font-bold text-slate-900 font-mono text-xs">
                         {log.id}
@@ -235,6 +275,26 @@ export default function AccessLogsTable({ data, loading = false }) {
             </Table>
           </div>
         </div>
+
+        {!loading && filteredData.length > 0 && (
+          <div className="border-t border-gray-50 bg-gray-50/30 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 mt-0">
+            <span className="text-xs font-medium text-slate-500">
+              {t('accessLogs.table.showingInfo', {
+                from: filteredData.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1,
+                to: Math.min(currentPage * itemsPerPage, filteredData.length),
+                total: filteredData.length,
+              })}
+            </span>
+            {totalPages > 1 && (
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+          </div>
+        )}
+
         <Link to="/security/logs" className="flex items-center gap-2 mt-6 p-4 justify-end border-t border-gray-50">
           <Button variant="outline" size="sm" className="gap-2 border-slate-200 text-slate-600 hover:text-black hover:bg-slate-50 rounded-xl font-bold px-6">
             <Eye className="h-4 w-4" />

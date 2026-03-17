@@ -81,8 +81,6 @@ const generateSecurityReportData = async ({
   eventType,
   deviceId,
 }) => {
-  // All security reports (including inventory) are derived from access logs
-  // so that the content reflects the selected date range and activity.
   const res = await api.get("/transactions/security/access-logs");
   const logs = res.data?.logs || [];
 

@@ -47,26 +47,40 @@ function Topbar() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [totalBorrowed, setTotalBorrowed] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { t } = useTranslation("common");
   const { t: tSec } = useTranslation("security");
 
-  const unreadCount = 3;
-  const currentPath = location.pathname;
-
+  // Fetch unread notification count from backend (security-role only)
   useEffect(() => {
-    const fetchBorrowed = async () => {
+    const fetchUnreadCount = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       try {
-        const res = await api.get('/transactions/active');
-        const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-        const checkedOutCount = list.filter(tx => tx.status === 'Checked Out' || tx.status === 'Overdue').length;
-        setTotalBorrowed(checkedOutCount);
+        const res = await api.get('/notifications', {
+          params: { role: 'Security' }
+        });
+        const notifications = res.data || [];
+        // Only count unread notifications that are for security role or user-specific (no role)
+        const count = notifications.filter(n =>
+          !n.read && (!n.role || n.role.toLowerCase() === 'security')
+        ).length;
+        setUnreadCount(count);
       } catch (err) {
-        console.error('Failed to fetch total borrowed items:', err);
+        if (err.response?.status !== 401 && err.response?.status !== 403) {
+          console.error("Failed to fetch notification count", err);
+        }
       }
     };
-    fetchBorrowed();
-  }, [currentPath]);
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [location.pathname]);
+
+  const currentPath = location.pathname;
+
 
   const navigationLinks = [
     { label: t("nav.dashboard"), path: "/security/dashboard", icon: LayoutGrid },
@@ -131,25 +145,6 @@ function Topbar() {
 
   const pageHeaders = getPageHeaders();
   const pageHeader = getPageHeader(currentPath, pageHeaders);
-
-  const formattedDate = new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date());
-
-  const handleActionClick = () => {
-    if (currentPath === "/security/devices") {
-      window.dispatchEvent(new CustomEvent("openAddDeviceDialog"));
-    } else if (pageHeader.actionButton) {
-      navigate(pageHeader.actionButton.path);
-    }
-  };
-
-  const handleBulkUploadClick = () => {
-    window.dispatchEvent(new CustomEvent("openBulkUploadDialog"));
-  };
 
   const isLinkActive = (path) => {
     if (location.pathname === path) return true;
@@ -220,16 +215,9 @@ function Topbar() {
             })}
           </nav>
 
-          {/* Right: Borrowed Pill, Language Switcher, Notifications, User */}
+          {/*Language Switcher, Notifications, User */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
 
-            {/* Total Borrowed Pill — visible md+ */}
-            <div className="hidden md:flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-sky-900/40 border border-sky-700/50 rounded-full text-sky-100">
-              <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 flex-shrink-0" />
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap">
-                Borrowed: <span className="text-white ml-0.5 sm:ml-1">{totalBorrowed}</span>
-              </span>
-            </div>
 
             <LanguageSwitcher variant="dark" />
 
@@ -277,7 +265,7 @@ function Topbar() {
                   asChild
                   className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors"
                 >
-                  <Link to="/security/profile" className="flex items-center gap-2 font-medium">
+                  <Link to="/security/profile" className="flex items-center text-slate-800 gap-2 font-medium">
                     {t("auth.myProfile")}
                   </Link>
                 </DropdownMenuItem>
@@ -298,13 +286,6 @@ function Topbar() {
         {/* Mobile Navigation Menu — visible below lg */}
         {isMobileMenuOpen && (
           <div className="lg:hidden mt-3 sm:mt-4 pb-3 sm:pb-4 border-t border-white/20 pt-3 sm:pt-4">
-            {/* Borrowed pill inside mobile menu for small screens */}
-            <div className="flex md:hidden items-center gap-2 px-4 py-2.5 mb-2 bg-sky-900/40 border border-sky-700/50 rounded-xl text-sky-100">
-              <Package className="w-4 h-4 text-sky-400 flex-shrink-0" />
-              <span className="text-xs font-bold uppercase tracking-wider">
-                Borrowed: <span className="text-white ml-1">{totalBorrowed}</span>
-              </span>
-            </div>
             <nav className="flex flex-col gap-1">
               {navigationLinks.map((link) => {
                 const Icon = link.icon;

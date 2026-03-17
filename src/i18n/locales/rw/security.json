@@ -88,7 +88,8 @@
             "eventDetails": "Ibisobanuro by'Ibirori",
             "fullTime": "Igihe Cyuzuye",
             "notes": "Intego/Ibianditse",
-            "viewDeviceHistory": "Reba amateka y'igikoresho"
+            "viewDeviceHistory": "Reba amateka y'igikoresho",
+            "showingInfo": "Kugaragaza {{from}}-{{to}} kuri {{total}}"
         },
         "details": {
             "title": "Ibisobanuro by'Icyanditswe",

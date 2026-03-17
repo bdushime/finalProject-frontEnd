@@ -6,10 +6,10 @@ export default function QRCodeScanner({ onScanSuccess }) {
 
     useEffect(() => {
         const id = "reader";
+        let isMounted = true;
 
         const startScanner = async () => {
             try {
-                // Use the lower-level Html5Qrcode for a more integrated look (no library buttons)
                 const html5QrCode = new Html5Qrcode(id);
                 scannerRef.current = html5QrCode;
 
@@ -19,36 +19,56 @@ export default function QRCodeScanner({ onScanSuccess }) {
                     aspectRatio: 1.0
                 };
 
-                await html5QrCode.start(
-                    { facingMode: "environment" },
-                    config,
-                    (decodedText) => {
-                        console.log("Scanned:", decodedText);
-                        // Stop and clear on success
-                        html5QrCode.stop().then(() => {
-                            html5QrCode.clear();
-                            onScanSuccess(decodedText);
-                        }).catch(err => {
-                            console.error("Stop error:", err);
-                            onScanSuccess(decodedText);
-                        });
-                    },
-                    (errorMessage) => {
-                        // ignore scan failures
-                    }
-                );
+                await html5QrCode
+                    .start(
+                        { facingMode: "environment" },
+                        config,
+                        (decodedText) => {
+                            if (!isMounted) return;
+                            console.log("Scanned:", decodedText);
+                            html5QrCode
+                                .stop()
+                                .then(() => {
+                                    if (!isMounted) return;
+                                    html5QrCode.clear();
+                                    onScanSuccess(decodedText);
+                                })
+                                .catch((err) => {
+                                    console.error("Stop error:", err);
+                                    if (!isMounted) return;
+                                    onScanSuccess(decodedText);
+                                });
+                        },
+                        () => {
+                            // ignore scan failures
+                        }
+                    )
+                    .catch((err) => {
+                        // html5-qrcode may throw AbortError if the video element is removed
+                        if (err?.name === "AbortError") {
+                            console.debug("Scanner start aborted:", err.message);
+                            return;
+                        }
+                        console.error("Unable to start scanner:", err);
+                    });
             } catch (err) {
-                console.error("Unable to start scanner:", err);
+                console.error("Unable to initialize scanner:", err);
             }
         };
 
         startScanner();
 
         return () => {
-            if (scannerRef.current && scannerRef.current.isScanning) {
-                scannerRef.current.stop().then(() => {
-                    scannerRef.current.clear();
-                }).catch(e => console.log('Cleanup error:', e));
+            isMounted = false;
+            if (scannerRef.current) {
+                scannerRef.current
+                    .stop()
+                    .then(() => {
+                        scannerRef.current?.clear();
+                    })
+                    .catch((e) => {
+                        console.log("Cleanup error:", e);
+                    });
             }
         };
     }, [onScanSuccess]);

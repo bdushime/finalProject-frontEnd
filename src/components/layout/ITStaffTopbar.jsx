@@ -189,7 +189,7 @@ export default function ITStaffTopbar({ onMenuClick }) {
                                         <p className="text-xs text-[#126dd5] font-medium uppercase tracking-wider">{user.role}</p>
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 text-slate-800 focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
                                     <Link to="/it/profile" className="flex items-center gap-2 font-medium">
                                         {t("auth.myProfile")}
                                     </Link>

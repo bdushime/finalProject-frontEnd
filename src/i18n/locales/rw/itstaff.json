@@ -39,6 +39,7 @@
             "subtitle": "Ibikorwa bisanzwe by'ubuyobozi"
         },
         "recentActivity": {
+            "title": "Ibikorwa Biherutse",
             "inUse": "Ibikoresho {{active}} biri gukoreshwa kuri {{total}} byose bihari",
             "noActivity": "Nta bikorwa biherutse kwandikwa."
         },
@@ -330,6 +331,37 @@
             "youAreHere": "Uri hano",
             "status": "Imiterere:",
             "warningNoGps": "Ibuyanditse: Ibikoresho {{count}} biri gutanga amakuru ariko nta GPS ifata."
+        },
+        "filters": {
+            "searchPlaceholder": "Shakisha ku zina ry'igikoresho cyangwa ID y'ikurikirana...",
+            "statusPlaceholder": "Yunguruza ku miterere",
+            "allStatus": "Imiterere Yose",
+            "online": "Birakora",
+            "offline": "Ntabwo Bikora"
+        },
+        "table": {
+            "title": "Ibikoresho byo Gukurikirana",
+            "showing": "Kwerekana {{current}} kuri {{total}} by'ibikoresho",
+            "page": "Ipaji {{current}} kuri {{total}}",
+            "headers": {
+                "equipment": "Igikoresho",
+                "id": "ID y'Ikurikirana",
+                "location": "Aho Giherereye",
+                "status": "Imiterere",
+                "battery": "Bateri",
+                "temp": "Ubushyuhe",
+                "humidity": "Ubuhehere",
+                "lastSeen": "Cyabonetse Bwa Nyuma"
+            },
+            "noTrackers": "Nta gikoresho cyo gukurikirana cyabonetse kijyanye n'ibyo washakishije.",
+            "lastSeen": "Cyabonekeje bwa nyuma: {{time}}",
+            "viewHistory": "Reba Amateka",
+            "historyTitle": "Amateka — {{equipment}}",
+            "trends": "Imigendekere y'Ibikoresho",
+            "batteryPercent": "Bateri (%)",
+            "tempCelcius": "Ubushyuhe (°C)",
+            "currentBattery": "Urwego rwa Bateri Ubu",
+            "currentTemp": "Ubushyuhe Bw'ubu"
         }
     }
 }

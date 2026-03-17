@@ -39,6 +39,7 @@
             "subtitle": "Common administrative tasks"
         },
         "recentActivity": {
+            "title": "Recent Activity",
             "inUse": "{{active}} items currently in use across {{total}} total inventory",
             "noActivity": "No recent activity recorded."
         },
@@ -330,6 +331,37 @@
             "youAreHere": "You are here",
             "status": "Status:",
             "warningNoGps": "Warning: {{count}} devices reporting without valid GPS coordinates."
+        },
+        "filters": {
+            "searchPlaceholder": "Search by equipment name or tracker ID...",
+            "statusPlaceholder": "Filter by status",
+            "allStatus": "All Status",
+            "online": "Online",
+            "offline": "Offline"
+        },
+        "table": {
+            "title": "Device Trackers",
+            "showing": "Showing {{current}} of {{total}} trackers",
+            "page": "Page {{current}} of {{total}}",
+            "headers": {
+                "equipment": "Equipment",
+                "id": "Tracker ID",
+                "location": "Location",
+                "status": "Status",
+                "battery": "Battery",
+                "temp": "Temp",
+                "humidity": "Humidity",
+                "lastSeen": "Last Seen"
+            },
+            "noTrackers": "No trackers found matching your filters.",
+            "lastSeen": "Last seen: {{time}}",
+            "viewHistory": "View History",
+            "historyTitle": "History — {{equipment}}",
+            "trends": "Sensor Trends",
+            "batteryPercent": "Battery (%)",
+            "tempCelcius": "Temp (°C)",
+            "currentBattery": "Current Battery Level",
+            "currentTemp": "Current Temperature"
         }
     }
 }
