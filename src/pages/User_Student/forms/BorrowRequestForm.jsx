@@ -66,10 +66,14 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     const [equipmentList, setEquipmentList] = useState([]);
     const [classroomList, setClassroomList] = useState([]);
     const [equipment, setEquipment] = useState(null);
+    const [courses, setCourses] = useState([]);
+    const [coursesLoading, setCoursesLoading] = useState(false);
+    const [coursesLoadError, setCoursesLoadError] = useState(null);
 
     // Form Data
     const [formData, setFormData] = useState({
         equipmentId: equipmentIdParam || "",
+        courseId: "",
         course: "",
         courseName: "",
         lecturer: "",
@@ -104,7 +108,13 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         const loadInitialData = async () => {
             try {
                 const eqRes = await api.get('/equipment');
-                const availableItems = eqRes.data.filter(item => item.status === 'Available');
+                const eqPayload = eqRes?.data;
+                const eqList = Array.isArray(eqPayload)
+                    ? eqPayload
+                    : (eqPayload?.equipment || eqPayload?.items || eqPayload?.results || eqPayload?.data || []);
+
+                const normalizedList = Array.isArray(eqList) ? eqList : [];
+                const availableItems = normalizedList.filter(item => item?.status === 'Available');
                 setEquipmentList(availableItems);
 
                 try {
@@ -114,8 +124,22 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     console.warn("Could not load classrooms (Permission issue?)", roomErr);
                 }
 
+                try {
+                    setCoursesLoading(true);
+                    setCoursesLoadError(null);
+                    const courseRes = await api.get('/courses');
+                    const list = Array.isArray(courseRes.data) ? courseRes.data : [];
+                    setCourses(list);
+                } catch (courseErr) {
+                    console.warn("Could not load courses", courseErr);
+                    setCourses([]);
+                    setCoursesLoadError(courseErr);
+                } finally {
+                    setCoursesLoading(false);
+                }
+
                 if (equipmentIdParam) {
-                    const found = eqRes.data.find(e => e._id === equipmentIdParam);
+                    const found = normalizedList.find(e => e?._id === equipmentIdParam);
                     if (found) {
                         setEquipment(found);
                         setFormData(prev => ({ ...prev, equipmentId: found._id }));
@@ -127,6 +151,21 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         };
         loadInitialData();
     }, [equipmentIdParam]);
+
+    const handleCourseSelect = (courseId) => {
+        const selected = courses.find(c => c._id === courseId);
+        setFormData(prev => ({
+            ...prev,
+            courseId,
+            course: selected?.code || "",
+            courseName: selected?.name || "",
+        }));
+        setErrors(prev => ({ ...prev, courseId: null, course: null, courseName: null }));
+    };
+
+    const sortedCourses = [...(courses || [])].sort((a, b) =>
+        `${a?.code || ""}`.localeCompare(`${b?.code || ""}`, undefined, { sensitivity: "base" })
+    );
 
     // --- 2. HELPER: Time Slots (For Reservation) ---
     useEffect(() => {
@@ -249,8 +288,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
 
         if (step === 1) {
             if (flowType === 'borrow') {
-                if (!formData.course.trim()) newErrors.course = "Course Code is required";
-                if (!formData.courseName.trim()) newErrors.courseName = "Course Name is required";
+                if (!formData.courseId) newErrors.courseId = "Course is required";
                 if (!formData.lecturer.trim()) newErrors.lecturer = "Lecturer Name is required";
                 if (!formData.location.trim()) newErrors.location = "Room is required";
 
@@ -276,8 +314,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     newErrors.purpose = isException ? "Reason for exception is required." : "Purpose is required.";
                 }
             } else if (flowType === 'reserve') {
-                if (!formData.course.trim()) newErrors.course = "Course Code is required";
-                if (!formData.courseName.trim()) newErrors.courseName = "Course Name is required";
+                if (!formData.courseId) newErrors.courseId = "Course is required";
                 if (!formData.lecturer.trim()) newErrors.lecturer = "Lecturer Name is required";
                 if (!formData.location.trim()) newErrors.location = "Room is required";
                 if (!formData.purpose.trim()) newErrors.purpose = "Reason for reservation is required";
@@ -353,6 +390,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         try {
             const payload = {
                 equipmentId: formData.equipmentId,
+                courseId: formData.courseId,
                 purpose: isException ? `[EXCEPTION: Projector in Screen Room] ${formData.purpose}` : formData.purpose,
                 destination: `${formData.location} (${formData.course} - ${formData.courseName}, Lecturer: ${formData.lecturer})`,
             };
@@ -369,6 +407,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
 
                 // Add granular fields for backend compatibility
                 payload.location = formData.location;
+                payload.courseId = formData.courseId;
                 payload.course = formData.course;
                 payload.courseName = formData.courseName;
                 payload.lecturer = formData.lecturer;
@@ -397,6 +436,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                 payload.reservationDate = formData.reservationDate;
                 payload.reservationTime = formData.reservationTime;
                 payload.location = formData.location;
+                payload.courseId = formData.courseId;
                 payload.course = formData.course;
                 payload.courseName = formData.courseName;
                 payload.lecturer = formData.lecturer;
@@ -552,15 +592,39 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     {flowType === 'borrow' ? (
                         <div className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">COURSE CODE</Label>
-                                    <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. COSC1010" />
-                                    {errors.course && <p className="text-xs text-rose-500 font-bold px-1">{errors.course}</p>}
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Course Name</Label>
-                                    <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.courseName} onChange={(e) => handleInputChange("courseName", e.target.value)} placeholder="e.g. Introduction to Programming" />
-                                    {errors.courseName && <p className="text-xs text-rose-500 font-bold px-1">{errors.courseName}</p>}
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">
+                                        {t("equipment.courseLabel", "Course")}
+                                    </Label>
+                                    <Select value={formData.courseId} onValueChange={handleCourseSelect} disabled={coursesLoading || sortedCourses.length === 0}>
+                                        <SelectTrigger className="w-full h-12 rounded-xl bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-[#126dd5]/20 text-[#0b1d3a] font-medium">
+                                            <SelectValue
+                                                placeholder={
+                                                    coursesLoading
+                                                        ? t("equipment.loadingCourses", "Loading courses...")
+                                                        : (sortedCourses.length === 0 ? t("equipment.noCoursesAvailable", "No courses available") : t("equipment.selectCourse", "Select course"))
+                                                }
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl border-slate-100 shadow-xl max-h-[320px]">
+                                            {sortedCourses.map((c) => (
+                                                <SelectItem key={c._id} value={c._id}>
+                                                    {(c.code ? `${c.code} — ` : "")}{c.name || "Unnamed course"}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.courseId && <p className="text-xs text-rose-500 font-bold px-1">{errors.courseId}</p>}
+                                    {!errors.courseId && coursesLoadError && (
+                                        <p className="text-[11px] text-amber-700 font-semibold px-1">
+                                            {t("equipment.coursesLoadFailed", "Courses could not be loaded. Please refresh or contact support.")}
+                                        </p>
+                                    )}
+                                    {formData.courseId && (
+                                        <p className="text-[11px] text-slate-500 font-semibold px-1">
+                                            {t("equipment.selectedCourse", "Selected")}: {formData.course} {formData.courseName ? `— ${formData.courseName}` : ""}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -677,15 +741,39 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                 <h4 className="text-base font-black text-[#0b1d3a] mb-6 tracking-tight uppercase text-xs opacity-60">{t('equipment.bookingDetails', 'Reservation Details')}</h4>
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">COURSE CODE</Label>
-                                            <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. COSC1010" />
-                                            {errors.course && <p className="text-xs text-rose-500 font-bold px-1">{errors.course}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Course Name</Label>
-                                            <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.courseName} onChange={(e) => handleInputChange("courseName", e.target.value)} placeholder="e.g. Introduction to Programming" />
-                                            {errors.courseName && <p className="text-xs text-rose-500 font-bold px-1">{errors.courseName}</p>}
+                                        <div className="space-y-2 md:col-span-2">
+                                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">
+                                                {t("equipment.courseLabel", "Course")}
+                                            </Label>
+                                            <Select value={formData.courseId} onValueChange={handleCourseSelect} disabled={coursesLoading || sortedCourses.length === 0}>
+                                                <SelectTrigger className="w-full h-12 rounded-xl bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-[#126dd5]/20 text-[#0b1d3a] font-medium">
+                                                    <SelectValue
+                                                        placeholder={
+                                                            coursesLoading
+                                                                ? t("equipment.loadingCourses", "Loading courses...")
+                                                                : (sortedCourses.length === 0 ? t("equipment.noCoursesAvailable", "No courses available") : t("equipment.selectCourse", "Select course"))
+                                                        }
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-xl border-slate-100 shadow-xl max-h-[320px]">
+                                                    {sortedCourses.map((c) => (
+                                                        <SelectItem key={c._id} value={c._id}>
+                                                            {(c.code ? `${c.code} — ` : "")}{c.name || "Unnamed course"}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.courseId && <p className="text-xs text-rose-500 font-bold px-1">{errors.courseId}</p>}
+                                            {!errors.courseId && coursesLoadError && (
+                                                <p className="text-[11px] text-amber-700 font-semibold px-1">
+                                                    {t("equipment.coursesLoadFailed", "Courses could not be loaded. Please refresh or contact support.")}
+                                                </p>
+                                            )}
+                                            {formData.courseId && (
+                                                <p className="text-[11px] text-slate-500 font-semibold px-1">
+                                                    {t("equipment.selectedCourse", "Selected")}: {formData.course} {formData.courseName ? `— ${formData.courseName}` : ""}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 

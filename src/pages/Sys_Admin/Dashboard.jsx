@@ -7,11 +7,9 @@ import {
     Package,
     Wifi,
     AlertTriangle,
-    UserX,
-    Clock,
-    ChevronDown,
-    QrCode,
-    ShieldAlert,
+    Users,
+    Settings,
+    BookOpen,
     Activity,
     Loader2
 } from 'lucide-react';
@@ -193,10 +191,13 @@ const Dashboard = () => {
                         <h3 className="text-xl font-bold text-slate-900 mb-6 tracking-tight">{t("dashboard.quickActions")}</h3>
                         <div className="space-y-4">
                             <button onClick={() => navigate('/admin/users')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
-                                <span className="p-2 bg-white rounded-lg shadow-sm">👥</span> {t("dashboard.manageUsers")}
+                                <span className="p-2 bg-white rounded-lg shadow-sm"><Users /></span> {t("dashboard.manageUsers")}
                             </button>
                             <button onClick={() => navigate('/admin/config')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
-                                <span className="p-2 bg-white rounded-lg shadow-sm">⚙️</span> {t("dashboard.systemConfig")}
+                                <span className="p-2 bg-white rounded-lg shadow-sm"><Settings /></span> {t("dashboard.systemConfig")}
+                            </button>
+                            <button onClick={() => navigate('/admin/courses')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
+                                <span className="p-2 bg-white rounded-lg shadow-sm"><BookOpen /></span> {t("dashboard.manageCourses")}
                             </button>
                             <button onClick={() => navigate('/admin/reports')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
                                 <span className="p-2 bg-white rounded-lg shadow-sm">📊</span> {t("dashboard.generateReport")}
