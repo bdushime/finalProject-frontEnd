@@ -27,6 +27,7 @@ const UsersList = () => {
     // Dynamic Data
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const safeUsers = Array.isArray(users) ? users : [];
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -46,13 +47,29 @@ const UsersList = () => {
 
     // 1. FETCH USERS
     const fetchUsers = async () => {
+        setLoading(true);
         try {
             const res = await api.get('/users');
-            setUsers(res.data);
+
+            const payload = res?.data;
+            const list =
+                (Array.isArray(payload) && payload) ||
+                payload?.users ||
+                payload?.results ||
+                payload?.items ||
+                payload?.data?.users ||
+                payload?.data?.results ||
+                payload?.data?.items ||
+                payload?.data ||
+                [];
+
+            setUsers(Array.isArray(list) ? list : []);
         } catch (err) {
             console.error(err);
             toast.error(t('users.failedFetch'));
-        } finally {
+            setUsers([]);
+        }
+        finally {
             setLoading(false);
         }
     };
@@ -141,7 +158,7 @@ const UsersList = () => {
 
         if (!window.confirm(newStatus === 'Suspended' ? t('users.confirmSuspend') : t('users.confirmActivate'))) return;
 
-        setUsers(users.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
+        setUsers(safeUsers.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
 
         try {
             await api.put(`/users/${user._id}`, { status: newStatus });
@@ -158,7 +175,7 @@ const UsersList = () => {
         try {
             await api.delete(`/users/${id}`);
             toast.success(t('users.userDeleted'));
-            setUsers(users.filter(u => u._id !== id));
+            setUsers(safeUsers.filter(u => u._id !== id));
         } catch (err) {
             toast.error(t('users.failedDelete'));
         }
@@ -175,7 +192,7 @@ const UsersList = () => {
         if (!selectedUser) return;
 
         // Optimistic UI Update
-        const updatedUsers = users.map(u =>
+        const updatedUsers = safeUsers.map(u =>
             u._id === selectedUser._id ? { ...u, responsibilityScore: newScore } : u
         );
         setUsers(updatedUsers);
@@ -220,7 +237,7 @@ const UsersList = () => {
     };
 
     // Filter Logic
-    const filteredUsers = users.filter(user => {
+    const filteredUsers = safeUsers.filter(user => {
         const fullName = user.fullName || user.username || "";
         const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -284,7 +301,7 @@ const UsersList = () => {
 
     return (
         <AdminLayout heroContent={HeroSection}>
-            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 min-h-[600px]">
+            <div className="bg-white rounded-4xl p-8 shadow-sm border border-gray-100 min-h-[600px]">
 
                 {/* Filters Row */}
                 <div className="flex flex-col lg:flex-row gap-4 mb-8">
@@ -362,7 +379,7 @@ const UsersList = () => {
                                         </td>
                                         <td className="px-6 py-5 text-sm text-slate-600 font-bold">{user.department || t('users.general')}</td>
                                         <td className="px-6 py-5">
-                                            <span className={`inline-flex items-center justify-center min-w-[3rem] h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore || 100)} shadow-sm`}>
+                                            <span className={`inline-flex items-center justify-center min-w-12 h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore || 100)} shadow-sm`}>
                                                 {user.responsibilityScore ?? 100}
                                             </span>
                                         </td>
