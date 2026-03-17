@@ -276,6 +276,12 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     newErrors.purpose = isException ? "Reason for exception is required." : "Purpose is required.";
                 }
             } else if (flowType === 'reserve') {
+                if (!formData.course.trim()) newErrors.course = "Course Code is required";
+                if (!formData.courseName.trim()) newErrors.courseName = "Course Name is required";
+                if (!formData.lecturer.trim()) newErrors.lecturer = "Lecturer Name is required";
+                if (!formData.location.trim()) newErrors.location = "Room is required";
+                if (!formData.purpose.trim()) newErrors.purpose = "Reason for reservation is required";
+
                 if (!formData.reservationDate) newErrors.reservationDate = "Date is required";
                 if (!formData.reservationTime) newErrors.reservationTime = "Time is required";
 
@@ -293,14 +299,6 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
             }
         }
 
-        if (step === 2 && flowType === 'reserve') {
-            if (!formData.course.trim()) newErrors.course = "Course Code is required";
-            if (!formData.courseName.trim()) newErrors.courseName = "Course Name is required";
-            if (!formData.lecturer.trim()) newErrors.lecturer = "Lecturer Name is required";
-            if (!formData.location.trim()) newErrors.location = "Room is required";
-            if (!formData.purpose.trim()) newErrors.purpose = "Reason is required";
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -314,6 +312,37 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         }
 
         setStep(step + 1);
+    };
+
+    // --- IMAGE COMPRESSION HELPER ---
+    const compressImage = (base64Str, maxWidth = 800, maxHeight = 800, quality = 0.7) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = base64Str;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+        });
     };
 
     // --- SUBMIT HANDLER ---
@@ -330,7 +359,13 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
 
             if (flowType === 'borrow') {
                 payload.expectedReturnTime = formData.sessionDateTime;
-                payload.conditionPhotos = conditionPhotos;
+
+                // Compress photos before submission to avoid 413 Payload Too Large
+                const compressedPhotos = {};
+                if (conditionPhotos.front) compressedPhotos.front = await compressImage(conditionPhotos.front);
+                if (conditionPhotos.back) compressedPhotos.back = await compressImage(conditionPhotos.back);
+
+                payload.conditionPhotos = compressedPhotos;
 
                 // Add granular fields for backend compatibility
                 payload.location = formData.location;
@@ -441,8 +476,8 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
             { label: t("equipment.stepReview", "Review"), icon: CheckCircle2 }
         ]
         : [
-            { label: t("equipment.stepReservation", "Schedule"), icon: CalendarClock },
-            { label: t("equipment.stepDetails", "Details"), icon: ClipboardList }
+            { label: t("equipment.stepDetails", "Reservation Details"), icon: CalendarClock },
+            { label: t("equipment.stepReview", "Review"), icon: CheckCircle2 }
         ];
 
     if (!flowType) {
@@ -460,13 +495,13 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                         </div>
                     </button>
 
-                    <button onClick={() => setFlowType("reserve")} className="group bg-white p-8 rounded-3xl border border-slate-200 hover:border-purple-500 hover:shadow-xl transition-all text-left">
-                        <div className="mb-6 p-4 rounded-2xl bg-purple-50 text-purple-600 inline-block">
+                    <button onClick={() => setFlowType("reserve")} className="group bg-white p-8 rounded-3xl border border-slate-200 hover:border-[#126dd5] hover:shadow-xl transition-all text-left">
+                        <div className="mb-6 p-4 rounded-2xl bg-blue-50 text-[#126dd5] inline-block">
                             <CalendarClock className="h-8 w-8" />
                         </div>
                         <h3 className="text-2xl font-bold text-[#0b1d3a] mb-2">{t('equipment.reserveLater', 'Reserve for Later')}</h3>
                         <p className="text-slate-500 mb-6">{t('equipment.reserveLaterDesc', 'Schedule equipment for a future class or event.')}</p>
-                        <div className="text-purple-600 font-semibold flex items-center group-hover:gap-2 transition-all">
+                        <div className="text-[#126dd5] font-semibold flex items-center group-hover:gap-2 transition-all">
                             {t('equipment.stepReservation', 'Make Reservation')} <ArrowRight className="ml-2 h-4 w-4" />
                         </div>
                     </button>
@@ -589,9 +624,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                                         onClick={() => {
                                                             const target = new Date();
                                                             target.setMinutes(target.getMinutes() + hrs * 60);
-                                                            const localDate = target.toLocaleDateString('en-CA');
-                                                            const localTime = target.toTimeString().substring(0, 5);
-                                                            handleInputChange("sessionDateTime", `${localDate}T${localTime}:00`);
+                                                            handleInputChange("sessionDateTime", target.toISOString());
                                                         }}
                                                         className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all border-2 ${isActive ? 'bg-[#126dd5] border-[#126dd5] text-white shadow-lg shadow-blue-100 scale-105' : 'bg-slate-50 border-slate-100 text-[#0b1d3a] hover:bg-slate-100 hover:border-slate-200'}`}
                                                     >
@@ -639,7 +672,55 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-8">
+                            <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6">
+                                <h4 className="text-base font-black text-[#0b1d3a] mb-6 tracking-tight uppercase text-xs opacity-60">{t('equipment.bookingDetails', 'Reservation Details')}</h4>
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">COURSE CODE</Label>
+                                            <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. COSC1010" />
+                                            {errors.course && <p className="text-xs text-rose-500 font-bold px-1">{errors.course}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Course Name</Label>
+                                            <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.courseName} onChange={(e) => handleInputChange("courseName", e.target.value)} placeholder="e.g. Introduction to Programming" />
+                                            {errors.courseName && <p className="text-xs text-rose-500 font-bold px-1">{errors.courseName}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Lecture Name</Label>
+                                            <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.lecturer} onChange={(e) => handleInputChange("lecturer", e.target.value)} placeholder="Dr. Jade Bright" />
+                                            {errors.lecturer && <p className="text-xs text-rose-500 font-bold px-1">{errors.lecturer}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Room</Label>
+                                            <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all"
+                                                value={formData.location}
+                                                onChange={(e) => handleInputChange("location", e.target.value)}
+                                                placeholder="e.g. Room 304"
+                                            />
+                                            {errors.location && <p className="text-xs text-rose-500 font-bold px-1">{errors.location}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Reason for Reservation</Label>
+                                        <div className="p-0.5 rounded-2xl bg-gradient-to-br from-slate-100 to-white shadow-sm ring-1 ring-slate-200 overflow-hidden focus-within:ring-[#126dd5] transition-all">
+                                            <Textarea
+                                                value={formData.purpose}
+                                                onChange={(e) => handleInputChange("purpose", e.target.value)}
+                                                placeholder="Explain why you need this equipment..."
+                                                className="border-none bg-transparent min-h-[80px] text-[#0b1d3a] font-medium resize-none focus-visible:ring-0 py-3 px-4"
+                                            />
+                                        </div>
+                                        {errors.purpose && <p className="text-xs text-rose-500 font-bold px-1">{errors.purpose}</p>}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div>
@@ -866,45 +947,85 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                         <div className="space-y-8">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-xl font-bold text-[#0b1d3a]">{t('equipment.completeReservation', 'Complete Your Reservation')}</h3>
-                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">{t('equipment.reserveDetailsDesc', 'Please provide the missing details for your booking.')}</p>
+                                    <h3 className="text-xl font-bold text-[#0b1d3a]">{t('equipment.reviewReservation', 'Review Your Reservation')}</h3>
+                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">{t('equipment.reviewDesc', 'Please verify the details below before submitting.')}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">COURSE CODE</Label>
-                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} placeholder="e.g. COSC101" />
-                                        {errors.course && <p className="text-xs text-rose-500 font-bold px-1">{errors.course}</p>}
+                                <div className="p-6 bg-blue-50/30 rounded-3xl border border-blue-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-200">
+                                            {studentName.charAt(0)}
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-1">Student Information</p>
+                                            <p className="text-[#0b1d3a] font-black text-base">{studentName}</p>
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Course Name</Label>
-                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.courseName} onChange={(e) => handleInputChange("courseName", e.target.value)} placeholder="e.g. Programming Basics" />
-                                        {errors.courseName && <p className="text-xs text-rose-500 font-bold px-1">{errors.courseName}</p>}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Lecture Name</Label>
-                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.lecturer} onChange={(e) => handleInputChange("lecturer", e.target.value)} placeholder="Dr. Jane Bright" />
-                                        {errors.lecturer && <p className="text-xs text-rose-500 font-bold px-1">{errors.lecturer}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Room</Label>
-                                        <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all" value={formData.location} onChange={(e) => handleInputChange("location", e.target.value)} placeholder="e.g. Room 102" />
-                                        {errors.location && <p className="text-xs text-rose-500 font-bold px-1">{errors.location}</p>}
+                                    <div className="flex flex-col items-end">
+                                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-1">Equipment Category</p>
+                                        <p className="text-[#0b1d3a] font-black text-sm">{equipment?.category?.name || "Equipment"}</p>
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Reason for Reservation</Label>
-                                    <Textarea
-                                        className="text-[#0b1d3a] font-medium bg-white rounded-xl border-slate-200 focus:border-[#126dd5] transition-all min-h-[100px]"
-                                        value={formData.purpose}
-                                        onChange={(e) => handleInputChange("purpose", e.target.value)}
-                                        placeholder="Why do you need this equipment?"
-                                    />
-                                    {errors.purpose && <p className="text-xs text-rose-500 font-bold px-1">{errors.purpose}</p>}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Target Equipment</Label>
+                                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
+                                                <div className="p-2 bg-white rounded-xl shadow-sm"><Package className="w-5 h-5 text-blue-600" /></div>
+                                                <div>
+                                                    <p className="text-[#0b1d3a] font-bold text-sm">{equipment?.name || "Selected Item"}</p>
+                                                    <p className="text-slate-400 text-[10px] font-medium">{equipment?.serialNumber || "N/A"}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Class & Lecturer Details</Label>
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 space-y-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-slate-400" /></div>
+                                                    <div>
+                                                        <p className="text-[#0b1d3a] font-bold text-sm">{formData.course} - {formData.courseName}</p>
+                                                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">{formData.lecturer}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center"><Scan className="w-4 h-4 text-slate-400" /></div>
+                                                    <p className="text-[#0b1d3a] font-bold text-sm">{formData.location}</p>
+                                                </div>
+                                                <div className="pt-2 border-t border-slate-50">
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest px-1 mb-1">Reason</p>
+                                                    <p className="text-slate-500 text-xs leading-relaxed italic px-1">"{formData.purpose}"</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Planned Schedule</Label>
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 space-y-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center"><CalendarIcon className="w-4 h-4 text-slate-400" /></div>
+                                                    <p className="text-[#0b1d3a] font-bold text-sm">
+                                                        {formData.reservationDate ? format(new Date(formData.reservationDate), 'EEEE, MMM d, yyyy') : "Date not selected"}
+                                                    </p>
+                                                </div>
+                                                <div className="grid grid-cols-1 gap-4 pt-2 border-t border-slate-50">
+                                                    <div className="space-y-1">
+                                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">Pickup Time</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded bg-blue-50 flex items-center justify-center text-[#126dd5]"><Clock className="w-3 h-3" /></div>
+                                                            <p className="text-[#0b1d3a] font-bold text-sm">{formData.reservationTime || "Time not selected"}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
