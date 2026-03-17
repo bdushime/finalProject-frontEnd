@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next';
 export default function TimeTracker({ activeBorrow: activeLoan }) {
     const { t } = useTranslation("student");
     const [timeLeft, setTimeLeft] = useState("00:00");
+    const [isHourMode, setIsHourMode] = useState(true);
     const [statusText, setStatusText] = useState(t("dashboard.noActiveTimer"));
     const [progressOffset, setProgressOffset] = useState(351); // Full circle (empty)
 
-    // Circle config
-    const radius = 56;
-    const circumference = 2 * Math.PI * radius; // approx 351
+    // Circle config (Spacious & Large)
+    const radius = 62;
+    const circumference = 2 * Math.PI * radius; // approx 390
 
     useEffect(() => {
         const currentStatus = activeLoan?.status?.toLowerCase();
@@ -47,24 +48,27 @@ export default function TimeTracker({ activeBorrow: activeLoan }) {
             if (hours > 0) {
                 // More than an hour: Show HH:MM
                 setTimeLeft(`${hDisplay}:${mDisplay}`);
+                setIsHourMode(true);
                 setStatusText(t("dashboard.timeLeft"));
             } else {
                 // Less than an hour: Show MM:SS
                 setTimeLeft(`${mDisplay}:${sDisplay}`);
-                setStatusText("Minutes Remaining");
+                setIsHourMode(false);
+                setStatusText(t("dashboard.timeLeft"));
             }
 
             // Calculate Progress Bar (Dynamic)
-            const createdAt = activeLoan?.createdAt || activeLoan?.startTime || new Date();
-            const start = new Date(createdAt);
+            // Use startTime if it exists (for both reservations and borrows), otherwise createdAt
+            const startStr = activeLoan?.startTime || activeLoan?.createdAt || new Date().toISOString();
+            const start = new Date(startStr);
             const totalDuration = due - start;
             const elapsed = now - start;
 
-            // If we don't have createdAt or it's invalid, fallback to 5H limit
+            // If we don't have a valid duration, fallback to a sensible 5H for the progress bar
             const validTotal = (totalDuration > 0) ? totalDuration : (5 * 60 * 60 * 1000);
             const percentageUsed = Math.min(Math.max(elapsed / validTotal, 0), 1);
 
-            // Offset for the circle (351 - usage)
+            // Offset for the circle (390 - usage)
             const offset = circumference * (1 - percentageUsed);
             setProgressOffset(offset);
         };
@@ -72,14 +76,8 @@ export default function TimeTracker({ activeBorrow: activeLoan }) {
         // Run immediately
         calculateTime();
 
-        // Initial setup: Determine interval
-        const now = new Date();
-        const due = new Date(activeLoan.expectedReturnTime);
-        const diff = due - now;
-
-        // If less than an hour, update every second. Otherwise every minute.
-        const intervalTime = (diff > 0 && diff < 3600000) ? 1000 : 60000;
-        const timer = setInterval(calculateTime, intervalTime);
+        // Update every second for a more "live" feel, even if only showing minutes
+        const timer = setInterval(calculateTime, 1000);
 
         // Optional: Re-eval interval if it crosses the 1-hour threshold
         // (Simple interval above is fine for most UX, but we can also just use 1s always for simplicity 
@@ -115,25 +113,36 @@ export default function TimeTracker({ activeBorrow: activeLoan }) {
 
             <div className="flex-1 flex flex-col items-center justify-center relative -mt-4 z-10">
                 {/* Circular Progress */}
-                <div className="relative w-32 h-32 flex items-center justify-center">
+                <div className="relative w-40 h-40 flex items-center justify-center">
                     <svg className="w-full h-full transform -rotate-90">
-                        <circle cx="64" cy="64" r="50" stroke="rgba(255,255,255,0.03)" strokeWidth="6" fill="transparent" />
+                        <circle cx="80" cy="80" r={radius} stroke="rgba(255,255,255,0.03)" strokeWidth="8" fill="transparent" />
                         <circle
-                            cx="64" cy="64" r="50"
+                            cx="80" cy="80" r={radius}
                             stroke={activeLoan ? (statusText === t("dashboard.returnOverdue") ? "#ef4444" : "#3b82f6") : "rgba(255,255,255,0.05)"}
-                            strokeWidth="6"
+                            strokeWidth="8"
                             fill="transparent"
-                            strokeDasharray={314} // 2 * PI * 50
-                            strokeDashoffset={activeLoan ? (314 * (1 - (progressOffset / circumference))) : 314}
+                            strokeDasharray={circumference}
+                            strokeDashoffset={progressOffset}
                             strokeLinecap="round"
                             style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
                         />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold text-white tabular-nums tracking-tighter">
-                            {timeLeft}
-                        </span>
-                        <span className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${statusText === t("dashboard.returnOverdue") ? 'text-red-400 animate-pulse' : 'text-blue-400/50'}`}>
+                        <div className="flex items-baseline text-white">
+                            <span className="text-3xl font-bold tabular-nums tracking-tighter">
+                                {timeLeft.split(':')[0]}
+                            </span>
+                            <span className="text-xs font-black text-white/30 ml-1 mr-2 uppercase">
+                                {isHourMode ? "H" : "M"}
+                            </span>
+                            <span className="text-3xl font-bold tabular-nums tracking-tighter">
+                                {timeLeft.split(':')[1]}
+                            </span>
+                            <span className="text-xs font-black text-white/30 ml-1 uppercase">
+                                {isHourMode ? "M" : "S"}
+                            </span>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] mt-1 ${statusText === t("dashboard.returnOverdue") ? 'text-red-400 animate-pulse' : 'text-blue-400/70'}`}>
                             {timeLeft === "00:00" && !activeLoan ? "READY" : statusText}
                         </span>
                     </div>

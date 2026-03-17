@@ -162,8 +162,25 @@ export default function Dashboard() {
         <StudentLayout>
             <div className="fixed inset-0 bg-gradient-to-br from-white via-white to-[#f0f9ff] -z-10 pointer-events-none" />
 
-            <div className="space-y-8 pb-10">
+            <div className="space-y-8 pb-6">
                 {/* Header Section */}
+                <style>
+                    {`
+                        .custom-scrollbar::-webkit-scrollbar {
+                            width: 6px;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-track {
+                            background: transparent;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-thumb {
+                            background: rgba(255, 255, 255, 0.1);
+                            border-radius: 10px;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                            background: rgba(255, 255, 255, 0.2);
+                        }
+                    `}
+                </style>
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-light text-[#0b1d3a] tracking-tight mb-2">
@@ -211,7 +228,7 @@ export default function Dashboard() {
                                 )}
                             </div>
                         </div>
-                        <div onClick={() => navigate('/student/notifications')} className="min-h-[260px] cursor-pointer">
+                        <div onClick={() => navigate('/student/notifications')} className="h-[340px] cursor-pointer">
                             <NotificationsWidget />
                         </div>
                     </div>
@@ -223,7 +240,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* DYNAMIC CALENDAR */}
-                        <div className="bg-white rounded-[32px] p-6 shadow-[0_4px_20px_rgba(11,29,58,0.05)] border border-slate-100 flex-1 min-h-[280px]">
+                        <div className="bg-white rounded-[32px] p-6 shadow-[0_4px_20px_rgba(11,29,58,0.05)] border border-slate-100 h-[400px]">
                             <div className="flex justify-between items-center mb-6">
                                 <span className="font-semibold text-[#0b1d3a] text-lg">{calendarData.month}</span>
                                 <button className="text-xs font-medium px-3 py-1 bg-[#f0f9ff] text-[#126dd5] rounded-full">{t("dashboard.today")}</button>
@@ -247,12 +264,12 @@ export default function Dashboard() {
                             <TimeTracker activeBorrow={borrows[0] || null} />
                         </div>
                         {/* RECENT ACTIVITY */}
-                        <div className="bg-[#0b1d3a] rounded-[32px] p-6 flex-1 min-h-[380px] text-white overflow-hidden flex flex-col">
+                        <div className="bg-[#0b1d3a] rounded-[32px] p-6 h-[450px] text-white overflow-hidden flex flex-col">
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-lg font-medium">{t("dashboard.recentActivity")}</h3>
                                 <ArrowUpRight className="w-4 h-4 text-white opacity-50" />
                             </div>
-                            <div className="space-y-4 overflow-y-auto pr-2 scrollbar-hide flex-1">
+                            <div className="space-y-4 overflow-y-auto pr-2 flex-1 custom-scrollbar">
                                 {history.length > 0 ? (
                                     history.map((item) => (
                                         <div key={item._id} className="flex items-center gap-4">
@@ -276,7 +293,7 @@ ${item.status === 'Returned' ? 'bg-emerald-500/20 text-emerald-400' :
                     </div>
                 </div>
 
-                <div className="text-center pt-8 border-t border-slate-200 text-[#0b1d3a]/40 text-xs font-medium">
+                <div className="text-center pt-6 border-t border-slate-100 text-[#0b1d3a]/30 text-[10px] font-bold uppercase tracking-widest">
                     {t("dashboard.copyright", { year: new Date().getFullYear() })}
                 </div>
             </div>
