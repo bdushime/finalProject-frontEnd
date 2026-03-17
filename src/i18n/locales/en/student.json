@@ -141,6 +141,8 @@
         "backBtn": "Back",
         "finalizeAndBorrow": "Finalize & Borrow",
         "reviewDetailsBtn": "Review Details",
+        "bookingDetails": "Reservation Details",
+        "reviewReservation": "Review Your Reservation",
         "timingSummary": "Timing Summary",
         "startTime": "Start",
         "returnBy": "Return By",
