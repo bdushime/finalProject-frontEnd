@@ -7,12 +7,13 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
 };
 
-// Now accepts a 3rd argument: 'reportTitle' and optional 4th 'includeUserColumn'
+// Now supports 'customColumns' and 'customRows' for full flexibility
 export const generatePDF = (
     reportData,
     currentUser,
     reportTitle = "EQUIPMENT REPORT",
-    includeUserColumn = true
+    customColumns = null,
+    customRows = null
 ) => {
     const doc = new jsPDF();
 
@@ -68,34 +69,27 @@ export const generatePDF = (
     doc.setTextColor(0, 0, 0);
 
     // --- 3. DYNAMIC DATA TABLE ---
+    let tableColumn = customColumns;
+    let tableRows = customRows;
 
-    const tableColumn = includeUserColumn
-        ? ["No.", "Equipment Name", "Serial No.", "Category", "Borrowed Date", "Returned Date", "Student/User", "Status"]
-        : ["No.", "Equipment Name", "Serial No.", "Category", "Borrowed Date", "Returned Date", "Status"];
-    const tableRows = [];
-
-    reportData.forEach((item, index) => {
-        const baseRow = [
-            index + 1,
-            item.equipment?.name || "N/A",
-            item.equipment?.serialNumber || "N/A",
-            item.equipment?.category || "General",
-            formatDate(item.createdAt),
-            formatDate(item.expectedReturnTime || item.actualReturnTime || item.updatedAt)
-        ];
-
-        const rowData = includeUserColumn
-            ? [
-                ...baseRow,
+    // LEGACY FALLBACK (to avoid breaking other modules)
+    if (!tableColumn || !tableRows) {
+        tableColumn = ["No.", "Equipment Name", "Serial No.", "Category", "Borrowed Date", "Returned Date", "Student/User", "Status"];
+        tableRows = [];
+        reportData.forEach((item, index) => {
+            const rowData = [
+                index + 1,
+                item.equipment?.name || "N/A",
+                item.equipment?.serialNumber || "N/A",
+                item.equipment?.category || "General",
+                formatDate(item.createdAt),
+                formatDate(item.expectedReturnTime || item.actualReturnTime || item.updatedAt),
                 item.user?.username || item.user?.email || "Unknown",
                 item.status
-            ]
-            : [
-                ...baseRow,
-                item.status
             ];
-        tableRows.push(rowData);
-    });
+            tableRows.push(rowData);
+        });
+    }
 
     autoTable(doc, {
         head: [tableColumn],

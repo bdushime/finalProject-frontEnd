@@ -12,19 +12,40 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import api from '@/utils/api';
+import { useLocation } from 'react-router-dom';
 
 const AdminLayout = ({ children, heroContent }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const brandColor = '#8D8DC7';
   const { t } = useTranslation("common");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await api.get('/notifications/unread-count');
+      setUnreadCount(res.data.count || 0);
+    } catch (err) {
+      if (err.response?.status !== 401 && err.response?.status !== 403) {
+        console.error("Failed to fetch admin unread count", err);
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 10000); // 10s refresh sync
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   const navItems = [
     { label: t("nav.dashboard"), href: '/admin/dashboard', icon: LayoutDashboard },
     { label: t("nav.userMgmt"), href: '/admin/users', icon: Users },
+    { label: t("nav.courses"), href: '/admin/courses', icon: BookOpen },
     { label: t("nav.config"), href: '/admin/config', icon: Settings },
     { label: t("nav.data"), href: '/admin/data', icon: Database },
-    { label: "Courses", href: '/admin/courses', icon: BookOpen },
     { label: t("nav.monitoring"), href: '/admin/monitoring', icon: Activity },
     { label: t("nav.reports"), href: '/admin/reports', icon: FileText },
     { label: t("nav.security"), href: '/admin/security', icon: Shield },
@@ -58,17 +79,17 @@ const AdminLayout = ({ children, heroContent }) => {
               <div className="flex items-center space-x-3">
                 {/* Logo Image */}
                 <img src={logo} alt="Tracknity Logo" className="h-10 w-auto object-contain" />
-                <span className="text-xl font-bold tracking-tight hidden sm:block">{t("misc.tracknity")}</span>
+                <span className="text-xl font-bold tracking-tight hidden xl:block">{t("misc.tracknity")}</span>
               </div>
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1 bg-slate-800/50 p-1 rounded-full backdrop-blur-sm border border-slate-700/50">
+            <nav className="hidden lg:flex items-center space-x-0.5 bg-slate-800/40 p-1 rounded-full backdrop-blur-md border border-slate-700/30">
               {navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="px-4 py-2 rounded-full text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all flex items-center space-x-2"
+                  className="px-3 py-2 rounded-full text-[13px] font-medium text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all flex items-center space-x-1.5 whitespace-nowrap"
                 >
                   <item.icon className="w-4 h-4" />
                   <span>{item.label}</span>
@@ -85,7 +106,11 @@ const AdminLayout = ({ children, heroContent }) => {
 
               <Link to="/admin/notifications" className="relative p-2 hover:bg-slate-800 rounded-full transition-colors group">
                 <Bell className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
-                <span style={{ backgroundColor: brandColor }} className="absolute top-2 right-2 w-2 h-2 rounded-full ring-2 ring-slate-900 animate-pulse"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-slate-900 animate-in zoom-in duration-200">
+                    {unreadCount}
+                  </span>
+                )}
               </Link>
 
               <div className="flex items-center space-x-3 pl-2 sm:border-l border-slate-700">
@@ -95,7 +120,7 @@ const AdminLayout = ({ children, heroContent }) => {
                       <div style={{ backgroundColor: brandColor }} className="h-9 w-9 rounded-full flex items-center justify-center text-white font-bold ring-2 ring-slate-800 shadow-lg shadow-[#8D8DC7]/20 group-hover:scale-105 transition-transform">
                         <User className="w-5 h-5" />
                       </div>
-                      <div className="text-right hidden sm:block">
+                      <div className="text-right hidden xl:block">
                         <p className="text-sm font-bold text-white group-hover:text-[#8D8DC7] transition-colors">{t("roles.admin")}</p>
                         <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">System</p>
                       </div>

@@ -164,7 +164,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     };
 
     const sortedCourses = [...(courses || [])].sort((a, b) =>
-        `${a?.code || ""}`.localeCompare(`${b?.code || ""}`, undefined, { sensitivity: "base" })
+        `${a?.name || ""}`.localeCompare(`${b?.name || ""}`, undefined, { sensitivity: "base" })
     );
 
     // --- 2. HELPER: Time Slots (For Reservation) ---
@@ -305,8 +305,6 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                         newErrors.sessionDateTime = "Return time must be in the future.";
                     } else if (diffHours > 5) {
                         newErrors.sessionDateTime = "Maximum borrowing duration is 5 hours.";
-                    } else if (returnTime.getHours() >= 19) {
-                        newErrors.sessionDateTime = "No borrowing is allowed after 7:00 PM.";
                     }
                 }
 
@@ -673,11 +671,11 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                 <div className="space-y-6 p-8 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl relative overflow-hidden transition-all duration-500">
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] px-1">{t('equipment.quickDurationPreset', 'Quick Duration Preset')}</Label>
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] px-1">{t('equipment.borrowingFor', 'Borrowing for (hours)')}</Label>
                                         </div>
 
                                         <div className="flex flex-wrap gap-3">
-                                            {[2, 3, 3.5, 4, 4.5].map((hrs) => {
+                                            {[2, 2.5, 3, 3.5, 4, 4.5].map((hrs) => {
                                                 const now = new Date().getTime();
                                                 const currentH = formData.sessionDateTime ? (new Date(formData.sessionDateTime).getTime() - now) / (1000 * 60 * 60) : 0;
                                                 const isActive = Math.abs(currentH - hrs) < 0.1;

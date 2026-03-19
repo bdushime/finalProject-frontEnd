@@ -78,8 +78,8 @@ export default function Auth() {
 
         } catch (err) {
             console.error(err);
-            // Generic error message as requested
-            setFeedback({ type: 'error', message: t("loginFailed") });
+            const errorMsg = err.response?.data?.message || t("loginFailed");
+            setFeedback({ type: 'error', message: errorMsg });
         } finally {
             setIsLoading(false);
         }

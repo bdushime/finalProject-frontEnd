@@ -27,8 +27,8 @@ const AdminNotifications = () => {
     useEffect(() => {
         fetchNotifications();
 
-        // Optional: Poll for new notifications every 30 seconds
-        const interval = setInterval(fetchNotifications, 30000);
+        // Optional: Poll for new notifications every 10 seconds (synced)
+        const interval = setInterval(fetchNotifications, 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -48,8 +48,7 @@ const AdminNotifications = () => {
     // 3. MARK ALL AS READ
     const markAllAsRead = async () => {
         try {
-            await api.put('/notifications/read-all');
-            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            await api.put('/notifications/mark-all-read');
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             toast.success(t('notifications.success'));
         } catch (err) {
@@ -96,52 +95,72 @@ const AdminNotifications = () => {
         }
     };
 
+    const unreadCount = notifications.filter(n => !n.read).length;
+
     return (
         <AdminLayout heroContent={HeroSection}>
-            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
-                <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                    <h3 className="font-bold text-slate-900 text-xl tracking-tight">{t('notifications.recent')}</h3>
-                    {notifications.some(n => !n.read) && (
+            <div className="space-y-6">
+                {/* Header Controls */}
+                <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-[#8D8DC7]/10 p-2 rounded-xl">
+                            <Bell className="w-5 h-5 text-[#8D8DC7]" />
+                        </div>
+                        <h3 className="font-bold text-slate-900 text-lg tracking-tight">
+                            {t('notifications.recent')}
+                            {unreadCount > 0 && <span className="ml-2 text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-full">{unreadCount}</span>}
+                        </h3>
+                    </div>
+                    {unreadCount > 0 && (
                         <button
                             onClick={markAllAsRead}
-                            className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-[#8D8DC7] hover:text-[#7b7bb5] transition-all bg-[#8D8DC7]/10 px-4 py-2 rounded-xl active:scale-95"
+                            className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#8D8DC7] hover:bg-[#8D8DC7] hover:text-white transition-all bg-[#8D8DC7]/10 px-6 py-3 rounded-xl active:scale-95"
                         >
                             <Check className="w-4 h-4" /> {t('notifications.markAll')}
                         </button>
                     )}
                 </div>
 
-                <div className="divide-y divide-slate-100">
+                {/* Notifications List */}
+                <div className="space-y-4">
                     {loading ? (
-                        <div className="p-12 text-center flex justify-center">
+                        <div className="bg-white rounded-[2rem] p-20 text-center flex justify-center border border-gray-100">
                             <Loader2 className="w-8 h-8 animate-spin text-[#8D8DC7]" />
                         </div>
                     ) : notifications.length === 0 ? (
-                        <div className="p-12 text-center text-slate-400">
-                            <Bell className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                            <p>{t('notifications.empty')}</p>
+                        <div className="bg-white rounded-[2rem] p-20 text-center text-slate-400 border border-gray-100 shadow-sm">
+                            <Bell className="w-16 h-16 mx-auto mb-4 opacity-10" />
+                            <p className="font-medium">{t('notifications.empty')}</p>
                         </div>
                     ) : (
                         notifications.map((notif) => (
                             <div
                                 key={notif._id}
                                 onClick={() => !notif.read && markAsRead(notif._id)}
-                                className={`p-8 flex items-start gap-6 transition-all cursor-pointer group border-b border-gray-50 last:border-0 ${!notif.read ? 'bg-[#8D8DC7]/5 hover:bg-[#8D8DC7]/10' : 'hover:bg-gray-50'}`}
+                                className={`p-6 rounded-[2rem] flex items-start gap-6 transition-all cursor-pointer border shadow-sm group hover:shadow-md active:scale-[0.99]
+                                    ${!notif.read ? 'bg-white border-[#8D8DC7]/30 ring-1 ring-[#8D8DC7]/5' : 'bg-white/80 border-gray-100 grayscale-[0.5] opacity-80'}`}
                             >
-                                <div className={`mt-1 p-3 rounded-2xl flex-shrink-0 transition-transform group-hover:scale-110 ${!notif.read ? 'bg-white shadow-sm border border-[#8D8DC7]/20 border-gray-100' : 'bg-gray-100'}`}>
+                                <div className={`p-3.5 rounded-2xl flex-shrink-0 transition-transform group-hover:scale-110 
+                                    ${!notif.read ? 'bg-[#8D8DC7]/10 shadow-inner' : 'bg-gray-50'}`}>
                                     {getIcon(notif.type || 'info')}
                                 </div>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h4 className={`text-base font-bold tracking-tight ${!notif.read ? 'text-slate-900' : 'text-slate-500'}`}>{notif.title}</h4>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className={`text-base font-bold tracking-tight truncate ${!notif.read ? 'text-slate-900' : 'text-slate-500'}`}>
+                                            {notif.title}
+                                        </h4>
                                         <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400 gap-1.5 whitespace-nowrap ml-4">
                                             <Clock className="w-3.5 h-3.5" />
                                             <span>{formatTimeAgo(notif.createdAt)}</span>
                                         </div>
                                     </div>
-                                    <p className={`text-sm leading-relaxed ${!notif.read ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>{notif.message}</p>
+                                    <p className={`text-sm leading-relaxed ${!notif.read ? 'text-slate-600 font-medium' : 'text-slate-400'}`}>
+                                        {notif.message}
+                                    </p>
                                 </div>
-                                {!notif.read && <div className="w-2.5 h-2.5 rounded-full bg-[#8D8DC7] self-center ml-4 ring-4 ring-[#8D8DC7]/10 shadow-[0_0_15px_rgba(141,141,199,0.4)]" />}
+                                {!notif.read && (
+                                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500 self-center ml-4 shadow-[0_0_12px_rgba(244,63,94,0.4)]" />
+                                )}
                             </div>
                         ))
                     )}

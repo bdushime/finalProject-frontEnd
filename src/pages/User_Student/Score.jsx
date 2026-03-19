@@ -26,7 +26,7 @@ export default function Score() {
             try {
                 // 1. Get User Profile (for Score)
                 const userRes = await api.get('/users/profile');
-                setScore(userRes.data.responsibilityScore || 100);
+                setScore(userRes.data.responsibilityScore ?? 100);
 
                 // 2. Get History (to calc stats)
                 const historyRes = await api.get('/transactions/my-history');

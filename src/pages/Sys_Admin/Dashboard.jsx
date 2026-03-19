@@ -11,7 +11,8 @@ import {
     Settings,
     BookOpen,
     Activity,
-    Loader2
+    Loader2,
+    FileBarChart
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 
@@ -117,7 +118,7 @@ const Dashboard = () => {
                     value={data.stats.atRiskItems}
                     change={t("dashboard.actionReq")}
                     changeType={data.stats.atRiskItems > 0 ? "negative" : "positive"}
-                    subtext={t("dashboard.overdueItemsDesc")}
+                    subtext={`${data.stats.overdueCount || 0} ${t("dashboard.overdue")}, ${data.stats.maintenanceCount || 0} ${t("dashboard.maintenance")}`}
                     icon={AlertTriangle}
                     isAlert={data.stats.atRiskItems > 0}
                     onClick={() => navigate('/admin/reports')}
@@ -200,7 +201,7 @@ const Dashboard = () => {
                                 <span className="p-2 bg-white rounded-lg shadow-sm"><BookOpen /></span> {t("dashboard.manageCourses")}
                             </button>
                             <button onClick={() => navigate('/admin/reports')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
-                                <span className="p-2 bg-white rounded-lg shadow-sm">📊</span> {t("dashboard.generateReport")}
+                                <span className="p-2 bg-white rounded-lg shadow-sm"><FileBarChart className="w-5 h-5 text-indigo-500" /></span> {t("dashboard.generateReport")}
                             </button>
                         </div>
                     </div>

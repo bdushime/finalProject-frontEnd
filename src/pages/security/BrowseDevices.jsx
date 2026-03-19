@@ -76,7 +76,7 @@ function BrowseDevices() {
     try {
       const devicesRes = await api.get('/equipment');
       if (devicesRes.data) {
-        const mappedDevices = devicesRes.data.map(d => ({
+        const mappedDevices = devices.data.items.map(d => ({
           ...d,
           id: d._id,
           category: d.type || d.category,
