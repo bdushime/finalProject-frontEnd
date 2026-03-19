@@ -28,7 +28,8 @@ const AdminLayout = ({ children, heroContent }) => {
       const res = await api.get('/notifications/unread-count');
       setUnreadCount(res.data.count || 0);
     } catch (err) {
-      if (err.response?.status !== 401 && err.response?.status !== 403) {
+      const status = err.response?.status;
+      if (status !== 401 && status !== 403 && status !== 404) {
         console.error("Failed to fetch admin unread count", err);
       }
     }

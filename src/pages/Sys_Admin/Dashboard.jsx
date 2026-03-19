@@ -34,7 +34,11 @@ const Dashboard = () => {
         const fetchAdminData = async () => {
             try {
                 const res = await api.get('/transactions/admin/dashboard-stats');
-                setData(res.data);
+                const result = res.data;
+                setData({
+                    stats: result?.stats || { activeBorrowed: 0, totalUsers: 0, atRiskItems: 0, systemStatus: "Error" },
+                    recentActivity: Array.isArray(result?.recentActivity) ? result.recentActivity : []
+                });
             } catch (err) {
                 console.error("Failed to load admin stats", err);
             } finally {
@@ -118,7 +122,7 @@ const Dashboard = () => {
                     value={data.stats.atRiskItems}
                     change={t("dashboard.actionReq")}
                     changeType={data.stats.atRiskItems > 0 ? "negative" : "positive"}
-                    subtext={`${data.stats.overdueCount || 0} ${t("dashboard.overdue")}, ${data.stats.maintenanceCount || 0} ${t("dashboard.maintenance")}`}
+                    subtext={`${data.stats.overdueCount || 0} ${t("dashboard.overdue")}, ${data.stats.maintenanceCount || 0} ${t("dashboard.maintenance")}${data.stats.damagedCount > 0 ? `, ${data.stats.damagedCount} ${t("dashboard.status.damaged")}` : ""}`}
                     icon={AlertTriangle}
                     isAlert={data.stats.atRiskItems > 0}
                     onClick={() => navigate('/admin/reports')}
@@ -138,6 +142,30 @@ const Dashboard = () => {
 
     return (
         <AdminLayout heroContent={HeroSection}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div onClick={() => navigate('/admin/monitoring')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] mb-4 group-hover:scale-110 transition-transform">
+                        <Activity className="w-6 h-6" />
+                    </div>
+                    <h4 className="text-lg font-bold text-slate-900 mb-1">{t("dashboard.borrowRequests", "Borrow Requests")}</h4>
+                    <p className="text-xs text-gray-500 font-medium">{t("dashboard.managePending", "Manage pending equipment requests")}</p>
+                </div>
+                <div onClick={() => navigate('/admin/reports')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform">
+                        <FileBarChart className="w-6 h-6" />
+                    </div>
+                    <h4 className="text-lg font-bold text-slate-900 mb-1">{t("dashboard.activityReports", "Activity Reports")}</h4>
+                    <p className="text-xs text-gray-500 font-medium">{t("dashboard.viewAnalytics", "View analytics and transaction logs")}</p>
+                </div>
+                <div onClick={() => navigate('/admin/profile')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-500 mb-4 group-hover:scale-110 transition-transform">
+                        <User className="w-6 h-6" />
+                    </div>
+                    <h4 className="text-lg font-bold text-slate-900 mb-1">{t("auth.myProfile")}</h4>
+                    <p className="text-xs text-gray-500 font-medium">{t("profile.subtitle", "Manage your account settings")}</p>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 {/* Left Column: Recent Activity Table */}
                 <div className="xl:col-span-2 space-y-6 h-full">

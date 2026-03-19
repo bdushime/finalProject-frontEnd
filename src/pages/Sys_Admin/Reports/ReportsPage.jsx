@@ -102,11 +102,13 @@ const ReportsPage = () => {
 
                 if (endpoint) {
                     const res = await api.get(endpoint, { params });
-                    setData(res.data);
+                    setData(Array.isArray(res.data) ? res.data : []);
                 }
             } catch (err) {
                 console.error("Reports Fetch Error:", err);
-                toast.error("Failed to load report data.");
+                if (err.response?.status !== 404) {
+                    toast.error("Failed to load report data.");
+                }
             } finally {
                 setLoading(false);
             }
@@ -117,7 +119,7 @@ const ReportsPage = () => {
     // Filtered Data Logic (Client Side)
     const filteredData = useMemo(() => {
         if (!data) return [];
-        return data.filter(item => {
+        return (Array.isArray(data) ? data : []).filter(item => {
             // Global Date Filter
             const itemDate = new Date(item.dateOut || item.createdAt || item.date || item.updatedAt);
             const start = new Date(startDate);

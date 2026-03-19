@@ -19,7 +19,7 @@
         "registeredAccounts": "Konti zanditswe",
         "atRiskItems": "Ibikoresho Biri mu Mazi",
         "actionReq": "Hakenewe Igikorwa",
-        "overdueItemsDesc": "Ibirengeje igihe cyangwa mu gusana",
+        "overdueItemsDesc": "Ibyatinze, Ibirimo gusanwa cyangwa Ibyangiritse",
         "overdue": "Ibirengeje igihe",
         "maintenance": "Mu gusana",
         "availableEquip": "Ibikoresho Bihari",
@@ -46,9 +46,10 @@
         "status": {
             "checkedOut": "Iyasohotse",
             "returned": "Iyararuwe",
-            "overdue": "Iyarenze Igihe",
-            "unknown": "Ntibizwi",
-            "deletedItem": "Igikoresho Cyasibwe"
+            "overdue": "Byatinze",
+            "damaged": "Ibyangiritse",
+            "unknown": "Ntitubizi",
+            "deletedItem": "Igisibishijwe"
         }
     },
     "users": {

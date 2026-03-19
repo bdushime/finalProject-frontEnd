@@ -57,10 +57,13 @@ export default function CourseManagement() {
     const loadCourses = async () => {
         try {
             const res = await api.get('/courses');
-            setCourses(res.data);
+            setCourses(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error(err);
-            toast.error(t('courses.failedLoad'));
+            if (err.response?.status !== 404) {
+                toast.error(t('courses.failedLoad'));
+            }
+            setCourses([]);
         } finally {
             setLoading(false);
         }
