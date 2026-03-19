@@ -6,8 +6,8 @@ import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Load
 import { toast } from 'sonner';
 import { cn } from "@/components/ui/utils";
 
-// Define roles
-const ROLES = ['All Roles', 'Student', 'IT_Staff', 'Security', 'Admin'];
+// Default system roles
+const DEFAULT_ROLES = ['Student', 'IT_Staff', 'Security', 'Admin'];
 
 const UsersList = () => {
     const { t } = useTranslation(["admin", "common"]);
@@ -20,12 +20,15 @@ const UsersList = () => {
     const [showEditUserModal, setShowEditUserModal] = useState(false);
     const [showScoreModal, setShowScoreModal] = useState(false);
     const [showMessageModal, setShowMessageModal] = useState(false); // <--- NEW: Message Modal
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [statusUser, setStatusUser] = useState(null);
 
     const [selectedUser, setSelectedUser] = useState(null);
     const [newScore, setNewScore] = useState(100);
 
     // Dynamic Data
     const [users, setUsers] = useState([]);
+    const [roles, setRoles] = useState(DEFAULT_ROLES);
     const [loading, setLoading] = useState(true);
     const safeUsers = Array.isArray(users) ? users : [];
 
@@ -74,8 +77,20 @@ const UsersList = () => {
         }
     };
 
+    const fetchRoles = async () => {
+        try {
+            const res = await api.get('/api/roles');
+            const customRoles = res.data.map(r => r.name);
+            // Unique roles: default + custom
+            setRoles([...DEFAULT_ROLES, ...customRoles.filter(r => !DEFAULT_ROLES.includes(r))]);
+        } catch (err) {
+            console.error("Failed to fetch roles", err);
+        }
+    };
+
     useEffect(() => {
         fetchUsers();
+        fetchRoles();
     }, []);
 
     // 2. HANDLE ADD USER
@@ -152,16 +167,21 @@ const UsersList = () => {
     };
 
     // 5. HANDLE SUSPEND/ACTIVATE
-    const handleToggleStatus = async (user) => {
-        const newStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
-        const actionName = newStatus === 'Suspended' ? 'Suspended' : 'Activated';
+    const openStatusModal = (user) => {
+        setStatusUser(user);
+        setShowStatusModal(true);
+    };
 
-        if (!window.confirm(newStatus === 'Suspended' ? t('users.confirmSuspend') : t('users.confirmActivate'))) return;
+    const confirmToggleStatus = async () => {
+        if (!statusUser) return;
+        const newStatus = statusUser.status === 'Suspended' ? 'Active' : 'Suspended';
 
-        setUsers(safeUsers.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
+        // Optimistic UI update
+        setUsers(safeUsers.map(u => u._id === statusUser._id ? { ...u, status: newStatus } : u));
+        setShowStatusModal(false);
 
         try {
-            await api.put(`/users/${user._id}`, { status: newStatus });
+            await api.put(`/users/${statusUser._id}`, { status: newStatus });
             toast.success(newStatus === 'Suspended' ? t('users.userSuspended') : t('users.userActivated'));
         } catch (err) {
             toast.error(t('users.failedChangeStatus'));
@@ -169,17 +189,7 @@ const UsersList = () => {
         }
     };
 
-    // 6. DELETE USER
-    const handleDeleteUser = async (id) => {
-        if (!window.confirm(t('users.confirmDelete'))) return;
-        try {
-            await api.delete(`/users/${id}`);
-            toast.success(t('users.userDeleted'));
-            setUsers(safeUsers.filter(u => u._id !== id));
-        } catch (err) {
-            toast.error(t('users.failedDelete'));
-        }
-    };
+
 
     // 7. SCORE LOGIC
     const openScoreModal = (user) => {
@@ -319,9 +329,12 @@ const UsersList = () => {
                         <div className="flex justify-end animate-in slide-in-from-top-2 fade-in duration-200">
                             <div className="relative w-full md:w-64">
                                 <select className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8D8DC7] cursor-pointer" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
-                                    {ROLES.map(role => (
+                                    <option value="All Roles">{t('users.allRoles')}</option>
+                                    {roles.map(role => (
                                         <option key={role} value={role}>
-                                            {role === 'All Roles' ? t('users.allRoles') : t(`common:roles.${role === 'IT_Staff' ? 'itStaff' : role.toLowerCase()}`)}
+                                            {DEFAULT_ROLES.includes(role)
+                                                ? t(`common:roles.${role === 'IT_Staff' ? 'itStaff' : role.toLowerCase()}`)
+                                                : role}
                                         </option>
                                     ))}
                                 </select>
@@ -379,7 +392,7 @@ const UsersList = () => {
                                         </td>
                                         <td className="px-6 py-5 text-sm text-slate-600 font-bold">{user.department || t('users.general')}</td>
                                         <td className="px-6 py-5">
-                                            <span className={`inline-flex items-center justify-center min-w-12 h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore || 100)} shadow-sm`}>
+                                            <span className={`inline-flex items-center justify-center min-w-12 h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore ?? 100)} shadow-sm`}>
                                                 {user.responsibilityScore ?? 100}
                                             </span>
                                         </td>
@@ -401,7 +414,7 @@ const UsersList = () => {
 
                                                 {user.role !== 'Admin' && (
                                                     <button
-                                                        onClick={() => handleToggleStatus(user)}
+                                                        onClick={() => openStatusModal(user)}
                                                         className={`p-2 rounded-lg transition-colors ${user.status === 'Suspended' ? 'hover:bg-emerald-50 text-emerald-500' : 'hover:bg-orange-50 text-orange-500'}`}
                                                         title={user.status === 'Suspended' ? "Activate User" : "Suspend User"}
                                                     >
@@ -409,11 +422,6 @@ const UsersList = () => {
                                                     </button>
                                                 )}
 
-                                                {user.role !== 'Admin' && (
-                                                    <button onClick={() => handleDeleteUser(user._id)} className="p-2.5 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-500 transition-all active:scale-90" title="Delete User">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -436,18 +444,21 @@ const UsersList = () => {
                             {/* ... (Existing form inputs for First Name, Last Name, Email, Role, Dept) ... */}
                             {/* I'll abbreviate to save space, assuming you keep your existing form inputs here */}
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder={t('users.firstName')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
-                                <input type="text" placeholder={t('users.lastName')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
+                                <input type="text" placeholder={t('users.firstName')} className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
+                                <input type="text" placeholder={t('users.lastName')} className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
                             </div>
-                            <input type="email" placeholder={t('users.emailField')} className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
+                            <input type="email" placeholder={t('users.emailField')} className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
-                                    <option value="Student">{t('common:roles.student')}</option>
-                                    <option value="IT_Staff">{t('common:roles.itStaff')}</option>
-                                    <option value="Security">{t('common:roles.security')}</option>
-                                    <option value="Admin">{t('common:roles.admin')}</option>
+                                <select className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+                                    {roles.map(role => (
+                                        <option key={role} value={role}>
+                                            {DEFAULT_ROLES.includes(role)
+                                                ? t(`common:roles.${role === 'IT_Staff' ? 'itStaff' : role.toLowerCase()}`)
+                                                : role}
+                                        </option>
+                                    ))}
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                                     <option value="Active">{t('users.activeStatus')}</option>
                                     <option value="Suspended">{t('users.suspended')}</option>
                                 </select>
@@ -455,7 +466,7 @@ const UsersList = () => {
                             {formData.role === 'Student' && (
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
+                                    <input type="text" placeholder="Student ID (e.g. 25001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
@@ -475,22 +486,25 @@ const UsersList = () => {
                         <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">{t('users.editUser')}</h2><p className="text-gray-500">{t('users.updatingFor')} <strong>{selectedUser.fullName || selectedUser.username}</strong></p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleUpdateUser(); }}>
                             <div className="grid grid-cols-2 gap-5">
-                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
-                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
+                                <input type="text" placeholder="First Name" className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
+                                <input type="text" placeholder="Last Name" className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
                             </div>
-                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
+                            <input type="email" placeholder="Email" className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                <input type="password" placeholder={t('users.resetPassword')} className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:border-red-300 focus:ring-red-100" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                                <input type="password" placeholder={t('users.resetPassword')} className="w-full pl-10 p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:border-red-300 focus:ring-2 focus:ring-red-100" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                             </div>
                             <div className="grid grid-cols-2 gap-5">
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
-                                    <option value="Student">{t('common:roles.student')}</option>
-                                    <option value="IT_Staff">{t('common:roles.itStaff')}</option>
-                                    <option value="Security">{t('common:roles.security')}</option>
-                                    <option value="Admin">{t('common:roles.admin')}</option>
+                                <select className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+                                    {roles.map(role => (
+                                        <option key={role} value={role}>
+                                            {DEFAULT_ROLES.includes(role)
+                                                ? t(`common:roles.${role === 'IT_Staff' ? 'itStaff' : role.toLowerCase()}`)
+                                                : role}
+                                        </option>
+                                    ))}
                                 </select>
-                                <select className="w-full p-3 rounded-xl border border-gray-200" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                                <select className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                                     <option value="Active">{t('users.activeStatus')}</option>
                                     <option value="Suspended">{t('users.suspended')}</option>
                                 </select>
@@ -498,7 +512,7 @@ const UsersList = () => {
                             {formData.role === 'Student' && (
                                 <div className="relative">
                                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
+                                    <input type="text" placeholder="Student ID (e.g. 2024001)" className="w-full pl-10 p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.studentId} onChange={e => setFormData({ ...formData, studentId: e.target.value })} />
                                 </div>
                             )}
                             <div className="pt-6 flex gap-3">
@@ -566,7 +580,7 @@ const UsersList = () => {
                                 <input
                                     type="text"
                                     placeholder={t('users.subjectPlaceholder')}
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all"
+                                    className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:ring-2 focus:ring-[#8D8DC7]/50 focus:border-[#8D8DC7] outline-none transition-all"
                                     value={messageData.subject}
                                     onChange={e => setMessageData({ ...messageData, subject: e.target.value })}
                                     required
@@ -578,7 +592,7 @@ const UsersList = () => {
                                 <textarea
                                     rows="4"
                                     placeholder={t('users.messagePlaceholder')}
-                                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#8D8DC7] focus:border-[#8D8DC7] outline-none transition-all resize-none"
+                                    className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:ring-2 focus:ring-[#8D8DC7]/50 focus:border-[#8D8DC7] outline-none transition-all resize-none"
                                     value={messageData.body}
                                     onChange={e => setMessageData({ ...messageData, body: e.target.value })}
                                     required
@@ -592,6 +606,37 @@ const UsersList = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* --- CONFIRM STATUS MODAL --- */}
+            {showStatusModal && statusUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative text-center">
+                        <button onClick={() => setShowStatusModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
+
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${statusUser.status === 'Suspended' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'}`}>
+                            {statusUser.status === 'Suspended' ? <CheckCircle className="w-8 h-8" /> : <Ban className="w-8 h-8" />}
+                        </div>
+
+                        <h2 className="text-xl font-bold text-slate-900 mb-2">
+                            {statusUser.status === 'Suspended' ? 'Activate User' : 'Suspend User'}
+                        </h2>
+
+                        <p className="text-gray-500 text-sm mb-8">
+                            Are you sure you want to {statusUser.status === 'Suspended' ? 'activate' : 'suspend'} <span className="font-bold text-slate-700">{statusUser.fullName || statusUser.username}</span>?
+                            {statusUser.status !== 'Suspended' && " They will not be able to log in while suspended."}
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button onClick={() => setShowStatusModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">
+                                {t('common:actions.cancel')}
+                            </button>
+                            <button onClick={confirmToggleStatus} className={`flex-1 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all ${statusUser.status === 'Suspended' ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' : 'bg-red-500 hover:bg-red-600 shadow-red-500/30'}`}>
+                                Yes, {statusUser.status === 'Suspended' ? 'Activate' : 'Suspend'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

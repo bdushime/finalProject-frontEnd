@@ -36,12 +36,11 @@ export default function CourseManagement() {
     const [deletingCourseCode, setDeletingCourseCode] = useState("");
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
     const [deleting, setDeleting] = useState(false);
-    
+
     // New course state
     const [newCourseCode, setNewCourseCode] = useState("");
     const [newCourseName, setNewCourseName] = useState("");
-    const [newCourseDescription, setNewCourseDescription] = useState("");
-    
+
     const [submitting, setSubmitting] = useState(false);
 
     // Edit course state
@@ -49,7 +48,6 @@ export default function CourseManagement() {
     const [editingCourseId, setEditingCourseId] = useState(null);
     const [editCourseCode, setEditCourseCode] = useState("");
     const [editCourseName, setEditCourseName] = useState("");
-    const [editCourseDescription, setEditCourseDescription] = useState("");
     const [savingEdit, setSavingEdit] = useState(false);
 
     useEffect(() => {
@@ -62,7 +60,7 @@ export default function CourseManagement() {
             setCourses(res.data);
         } catch (err) {
             console.error(err);
-            toast.error("Failed to load courses");
+            toast.error(t('courses.failedLoad'));
         } finally {
             setLoading(false);
         }
@@ -70,7 +68,7 @@ export default function CourseManagement() {
 
     const handleAddCourse = async () => {
         if (!newCourseCode.trim() || !newCourseName.trim()) {
-            toast.error("Course code and name are required");
+            toast.error(t('courses.requiredFields'));
             return;
         }
         setSubmitting(true);
@@ -78,16 +76,14 @@ export default function CourseManagement() {
             await api.post('/courses', {
                 code: newCourseCode.toUpperCase(),
                 name: newCourseName,
-                description: newCourseDescription
             });
-            toast.success("Course added successfully");
+            toast.success(t('courses.addedSuccess'));
             setNewCourseCode("");
             setNewCourseName("");
-            setNewCourseDescription("");
             setIsAddDialogOpen(false);
             loadCourses();
         } catch (err) {
-            toast.error(err.response?.data?.message || "Error adding course");
+            toast.error(err.response?.data?.message || t('courses.errorAdding'));
         } finally {
             setSubmitting(false);
         }
@@ -97,13 +93,12 @@ export default function CourseManagement() {
         setEditingCourseId(course._id);
         setEditCourseCode(course.code);
         setEditCourseName(course.name);
-        setEditCourseDescription(course.description || "");
         setIsEditDialogOpen(true);
     };
 
     const handleSaveEdit = async () => {
         if (!editCourseCode.trim() || !editCourseName.trim()) {
-            toast.error("Course code and name are required");
+            toast.error(t('courses.requiredFields'));
             return;
         }
         setSavingEdit(true);
@@ -111,13 +106,12 @@ export default function CourseManagement() {
             await api.put(`/courses/${editingCourseId}`, {
                 code: editCourseCode.toUpperCase(),
                 name: editCourseName,
-                description: editCourseDescription
             });
-            toast.success("Course updated successfully");
+            toast.success(t('courses.updatedSuccess'));
             setIsEditDialogOpen(false);
             loadCourses();
         } catch (err) {
-            toast.error(err.response?.data?.message || "Error updating course");
+            toast.error(err.response?.data?.message || t('courses.errorUpdating'));
         } finally {
             setSavingEdit(false);
         }
@@ -136,7 +130,7 @@ export default function CourseManagement() {
         setDeleting(true);
         try {
             await api.delete(`/courses/${deletingCourseId}`);
-            toast.success("Course deleted successfully");
+            toast.success(t('courses.deletedSuccess'));
             setCourses(prev => prev.filter(course => course._id !== deletingCourseId));
             setIsDeleteDialogOpen(false);
             setDeletingCourseId(null);
@@ -144,7 +138,7 @@ export default function CourseManagement() {
             setDeletingCourseCode("");
             setDeleteConfirmText("");
         } catch (err) {
-            toast.error(err.response?.data?.message || "Error deleting course");
+            toast.error(err.response?.data?.message || t('courses.errorDeleting'));
         } finally {
             setDeleting(false);
         }
@@ -153,66 +147,54 @@ export default function CourseManagement() {
     const HeroContent = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10 px-2 pt-4">
             <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Course Management</h1>
-                <p className="text-gray-400">Manage all courses needed for the system</p>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('courses.title')}</h1>
+                <p className="text-gray-400">{t('courses.subtitle')}</p>
             </div>
             <div className="mt-4 md:mt-0">
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                         <Button className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white shadow-lg rounded-xl px-6 py-5 flex items-center">
-                            <Plus className="mr-2 h-5 w-5" /> Add New Course
+                            <Plus className="mr-2 h-5 w-5" /> {t('courses.addCourse')}
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-white sm:max-w-[500px] rounded-2xl">
                         <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold text-slate-800">Add New Course</DialogTitle>
+                            <DialogTitle className="text-2xl font-bold text-slate-800">{t('courses.addCourse')}</DialogTitle>
                             <DialogDescription className="text-slate-500">
-                                Enter the details of the new course below.
+                                {t('courses.enterDetails')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-5 py-6">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="code" className="text-right font-semibold text-slate-700">
-                                    Course Code <span className="text-red-500">*</span>
+                                    {t('courses.courseCode')} <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="code"
                                     value={newCourseCode}
                                     onChange={(e) => setNewCourseCode(e.target.value)}
-                                    placeholder="e.g. CS 101"
+                                    placeholder={t('courses.placeholderCode')}
                                     className="col-span-3 rounded-lg border-slate-200"
                                 />
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="name" className="text-right font-semibold text-slate-700">
-                                    Course Name <span className="text-red-500">*</span>
+                                    {t('courses.courseName')} <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="name"
                                     value={newCourseName}
                                     onChange={(e) => setNewCourseName(e.target.value)}
-                                    placeholder="e.g. Intro to Computer Science"
+                                    placeholder={t('courses.placeholderName')}
                                     className="col-span-3 rounded-lg border-slate-200"
                                 />
                             </div>
-                            <div className="grid grid-cols-4 items-start gap-4">
-                                <Label htmlFor="description" className="text-right font-semibold text-slate-700 mt-2">
-                                    Description
-                                </Label>
-                                <textarea
-                                    id="description"
-                                    value={newCourseDescription}
-                                    onChange={(e) => setNewCourseDescription(e.target.value)}
-                                    placeholder="Optional description..."
-                                    className="col-span-3 rounded-lg border border-slate-200 p-3 min-h-[100px] outline-none focus:ring-2 focus:ring-[#8D8DC7]/20 focus:border-[#8D8DC7] text-sm"
-                                ></textarea>
-                            </div>
                         </div>
                         <DialogFooter className="sm:justify-end gap-3 pt-4 border-t border-slate-100">
-                            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="rounded-xl border-slate-200 text-slate-600">Cancel</Button>
+                            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="rounded-xl border-slate-200 text-slate-600">{t('common:actions.cancel')}</Button>
                             <Button onClick={handleAddCourse} disabled={submitting} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white rounded-xl px-6">
                                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                {submitting ? "Saving..." : "Save Course"}
+                                {submitting ? t('courses.saving') : t('courses.saveCourse')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -222,60 +204,48 @@ export default function CourseManagement() {
                 <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                     <DialogContent className="bg-white sm:max-w-[500px] rounded-2xl">
                         <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold text-slate-800">Edit Course</DialogTitle>
+                            <DialogTitle className="text-2xl font-bold text-slate-800">{t('courses.editCourse')}</DialogTitle>
                             <DialogDescription className="text-slate-500">
-                                Modify the details of the course below.
+                                {t('courses.modifyDetails')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-5 py-6">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="edit-code" className="text-right font-semibold text-slate-700">
-                                    Course Code <span className="text-red-500">*</span>
+                                    {t('courses.courseCode')} <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="edit-code"
                                     value={editCourseCode}
                                     onChange={(e) => setEditCourseCode(e.target.value)}
-                                    placeholder="e.g. CS 101"
+                                    placeholder={t('courses.placeholderCode')}
                                     className="col-span-3 rounded-lg border-slate-200"
                                 />
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="edit-name" className="text-right font-semibold text-slate-700">
-                                    Course Name <span className="text-red-500">*</span>
+                                    {t('courses.courseName')} <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="edit-name"
                                     value={editCourseName}
                                     onChange={(e) => setEditCourseName(e.target.value)}
-                                    placeholder="e.g. Intro to Computer Science"
+                                    placeholder={t('courses.placeholderName')}
                                     className="col-span-3 rounded-lg border-slate-200"
                                 />
                             </div>
-                            <div className="grid grid-cols-4 items-start gap-4">
-                                <Label htmlFor="edit-description" className="text-right font-semibold text-slate-700 mt-2">
-                                    Description
-                                </Label>
-                                <textarea
-                                    id="edit-description"
-                                    value={editCourseDescription}
-                                    onChange={(e) => setEditCourseDescription(e.target.value)}
-                                    placeholder="Optional description..."
-                                    className="col-span-3 rounded-lg border border-slate-200 p-3 min-h-[100px] outline-none focus:ring-2 focus:ring-[#8D8DC7]/20 focus:border-[#8D8DC7] text-sm"
-                                ></textarea>
-                            </div>
                         </div>
                         <DialogFooter className="sm:justify-end gap-3 pt-4 border-t border-slate-100">
-                            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl border-slate-200 text-slate-600">Cancel</Button>
+                            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl border-slate-200 text-slate-600">{t('common:actions.cancel')}</Button>
                             <Button onClick={handleSaveEdit} disabled={savingEdit} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white rounded-xl px-6">
                                 {savingEdit ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                {savingEdit ? "Saving..." : "Save Changes"}
+                                {savingEdit ? t('courses.saving') : t('courses.saveChanges')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 
     return (
@@ -286,8 +256,8 @@ export default function CourseManagement() {
                         <BookOpen className="w-6 h-6 text-slate-800" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">All Courses</h2>
-                        <p className="text-sm text-slate-500">List of active courses in the system</p>
+                        <h2 className="text-xl font-bold text-slate-900">{t('courses.allCourses')}</h2>
+                        <p className="text-sm text-slate-500">{t('courses.listSubtitle')}</p>
                     </div>
                 </div>
 
@@ -295,10 +265,9 @@ export default function CourseManagement() {
                     <Table>
                         <TableHeader className="bg-slate-50/80">
                             <TableRow className="border-b border-slate-100">
-                                <TableHead className=" text-slate-900 font-bold text-sm py-4 pl-6 uppercase tracking-wider">Course Code</TableHead>
-                                <TableHead className=" text-slate-900 font-bold text-sm py-4 uppercase tracking-wider">Course Name</TableHead>
-                                <TableHead className=" text-slate-900 font-bold text-sm py-4 uppercase tracking-wider">Description</TableHead>
-                                <TableHead className=" text-slate-900 font-bold text-sm py-4 uppercase tracking-wider">Actions</TableHead>
+                                <TableHead className=" text-slate-900 font-bold text-sm py-4 pl-6 uppercase tracking-wider">{t('courses.courseCode')}</TableHead>
+                                <TableHead className=" text-slate-900 font-bold text-sm py-4 uppercase tracking-wider">{t('courses.courseName')}</TableHead>
+                                <TableHead className=" text-slate-900 font-bold text-sm py-4 uppercase tracking-wider text-right pr-6">{t('courses.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -315,7 +284,7 @@ export default function CourseManagement() {
                                             <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
                                                 <BookOpen className="h-8 w-8 text-slate-300" />
                                             </div>
-                                            <p className="font-medium">No courses available</p>
+                                            <p className="font-medium">{t('courses.noCourses')}</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -332,29 +301,24 @@ export default function CourseManagement() {
                                                 <span className="font-bold text-slate-800 text-base">{course.name}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="py-5">
-                                            <div className="flex flex-col">
-                                                {course.description && <span className="text-sm text-slate-500 mt-1 line-clamp-1">{course.description}</span>}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="py-5 pr-6 gap-2">
+                                        <TableCell className="py-5 text-right pr-6 gap-2">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-9 px-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all font-medium"
+                                                className="h-9 w-9 p-0 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                                 onClick={() => handleEdit(course)}
                                             >
                                                 <Edit className="h-4 w-4" />
-                                                
+
                                             </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-9 px-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all font-medium"
+                                                className="h-9 w-9 p-0 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                                 onClick={() => handleDelete(course)}
                                             >
                                                 <Trash2 className="h-4 w-4" />
-                                                
+
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -375,9 +339,9 @@ export default function CourseManagement() {
             >
                 <DialogContent className="bg-white sm:max-w-[520px] rounded-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold text-slate-900">Delete course?</DialogTitle>
+                        <DialogTitle className="text-2xl font-bold text-slate-900">{t('courses.deleteTitle')}</DialogTitle>
                         <DialogDescription className="text-slate-500">
-                            This action cannot be undone. This will permanently remove the course{" "}
+                            {t('courses.deleteDesc')}{" "}
                             <span className="font-semibold text-slate-800">
                                 {deletingCourseCode ? `${deletingCourseCode} — ` : ""}
                                 {deletingCourseName || "this course"}
@@ -387,7 +351,7 @@ export default function CourseManagement() {
 
                     <div className="space-y-2">
                         <Label className="text-slate-700 font-semibold">
-                            Type the course name to confirm
+                            {t('courses.confirmDeleteLabel')}
                         </Label>
                         <Input
                             value={deleteConfirmText}
@@ -404,7 +368,7 @@ export default function CourseManagement() {
                             disabled={deleting}
                             className="rounded-xl border-slate-200 text-slate-600"
                         >
-                            Cancel
+                            {t('common:actions.cancel')}
                         </Button>
                         <Button
                             onClick={confirmDelete}
@@ -416,7 +380,7 @@ export default function CourseManagement() {
                             className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-6"
                         >
                             {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                            {deleting ? "Deleting..." : "Delete"}
+                            {deleting ? t('courses.deleting') : t('common:actions.delete')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

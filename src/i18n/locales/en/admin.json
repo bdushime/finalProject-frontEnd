@@ -19,7 +19,9 @@
         "registeredAccounts": "Registered accounts",
         "atRiskItems": "At-Risk Items",
         "actionReq": "Action Req",
-        "overdueItemsDesc": "Overdue items",
+        "overdueItemsDesc": "Overdue or Maintenance",
+        "overdue": "Overdue",
+        "maintenance": "Maintenance",
         "availableEquip": "Available Equip",
         "readyForCheckout": "Ready for checkout",
         "recentTransactions": "Recent Transactions",
@@ -112,6 +114,37 @@
         "allRoles": "All Roles",
         "actions": "Actions"
     },
+    "courses": {
+        "title": "Course Management",
+        "subtitle": "Manage all courses needed for the system",
+        "addCourse": "Add New Course",
+        "editCourse": "Edit Course",
+        "allCourses": "All Courses",
+        "listSubtitle": "List of active courses in the system",
+        "courseCode": "Course Code",
+        "courseName": "Course Name",
+        "actions": "Actions",
+        "enterDetails": "Enter the details of the new course below.",
+        "modifyDetails": "Modify the details of the course below.",
+        "placeholderCode": "e.g. CS 101",
+        "placeholderName": "e.g. Intro to Computer Science",
+        "saveCourse": "Save Course",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "deleting": "Deleting...",
+        "deleteTitle": "Delete course?",
+        "deleteDesc": "This action cannot be undone. This will permanently remove the course",
+        "confirmDeleteLabel": "Type the course name to confirm",
+        "noCourses": "No courses available",
+        "failedLoad": "Failed to load courses",
+        "requiredFields": "Course code and name are required",
+        "addedSuccess": "Course added successfully",
+        "updatedSuccess": "Course updated successfully",
+        "deletedSuccess": "Course deleted successfully",
+        "errorAdding": "Error adding course",
+        "errorUpdating": "Error updating course",
+        "errorDeleting": "Error deleting course"
+    },
     "config": {
         "title": "System Configuration",
         "subtitle": "Manage all system settings globally.",
@@ -140,9 +173,9 @@
                 "title": "Alert Config",
                 "desc": "Manage system alerts, overdue notifications, and triggers."
             },
-            "email": {
-                "title": "Email Templates",
-                "desc": "Customize email notifications for checkouts, returns, and warnings."
+            "roles": {
+                "title": "Role Management",
+                "desc": "Create and manage system access roles for users."
             },
             "qrcode": {
                 "title": "QR Code Settings",
@@ -152,6 +185,13 @@
                 "title": "System Branding",
                 "desc": "Update logos, colors, and portal themes."
             }
+        },
+        "roles": {
+            "title": "Role Management",
+            "addRole": "+ New Role",
+            "roleName": "Role Name",
+            "roleDesc": "Description",
+            "confirmDelete": "Are you sure you want to delete this role?"
         },
         "general": {
             "basicInfo": "Basic Information",
@@ -198,7 +238,7 @@
         "alerts": {
             "title": "System Alerts",
             "overdueTitle": "Overdue Equipment Alert",
-            "overdueDesc": "Notify admin when equipment is 24h overdue",
+            "overdueDesc": "Notify admin when equipment is 6h overdue",
             "lowStockTitle": "Low Stock Warning",
             "lowStockDesc": "Alert when inventory drops below 10%",
             "unauthorizedTitle": "Unauthorized Movement",
@@ -269,9 +309,11 @@
         "equipment": "Equipment",
         "user": "User",
         "date": "Date",
+        "time": "Time",
         "riskLevel": "Risk Level",
         "riskScore": "Risk Score",
         "userIdentity": "User Identity",
+        "role": "Role",
         "deviceName": "Device Name",
         "category": "Category",
         "serialNumber": "Serial Number",

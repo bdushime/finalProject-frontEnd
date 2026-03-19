@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import AdminLayout from '../components/AdminLayout'; // Check Path
 import api from '@/utils/api';
-import { Settings, MapPin, Tags, FileText, Scale, Bell, Mail, MessageSquare, QrCode, PenTool, ChevronRight, X, Save, Loader2 } from 'lucide-react';
+import { Settings, MapPin, Tags, FileText, Scale, Bell, Mail, MessageSquare, QrCode, PenTool, ChevronRight, X, Save, Loader2, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ConfigPage = () => {
@@ -64,7 +64,48 @@ const ConfigPage = () => {
             }
         };
         fetchConfig();
+        fetchRoles();
     }, []);
+
+    const fetchRoles = async () => {
+        setRolesLoading(true);
+        try {
+            const res = await api.get('/api/roles');
+            // Merge defaults with custom ones, avoiding duplicates by name
+            const customRoles = res.data || [];
+            const customNames = customRoles.map(r => r.name);
+            const filteredDefaults = DEFAULT_SYSTEM_ROLES.filter(d => !customNames.includes(d.name));
+            setRoles([...filteredDefaults, ...customRoles]);
+        } catch (err) {
+            console.error("Failed to fetch roles", err);
+        } finally {
+            setRolesLoading(false);
+        }
+    };
+
+    const saveRole = async () => {
+        if (!newRole.name) return toast.error("Role name is required");
+        try {
+            const res = await api.post('/api/roles', newRole);
+            setRoles(prev => [res.data, ...prev]);
+            setNewRole({ name: '', description: '' });
+            setIsAddingRole(false);
+            toast.success("Role created successfully");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to create role");
+        }
+    };
+
+    const deleteRole = async (id, name) => {
+        if (!window.confirm(`Are you sure you want to delete the role "${name}"?`)) return;
+        try {
+            await api.delete(`/api/roles/${id}`);
+            setRoles(prev => prev.filter(r => r._id !== id));
+            toast.success("Role deleted");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to delete role");
+        }
+    };
 
     // SAVE CONFIG
     const handleSave = async () => {
@@ -102,6 +143,17 @@ const ConfigPage = () => {
     const [newZone, setNewZone] = useState({ name: '', type: '' });
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [newCategory, setNewCategory] = useState({ name: '', code: '' });
+    const DEFAULT_SYSTEM_ROLES = [
+        { _id: 'sys_admin', name: 'Admin', description: 'Full system access and configuration.', isSystem: true },
+        { _id: 'sys_student', name: 'Student', description: 'Standard access for borrowing equipment.', isSystem: true },
+        { _id: 'sys_it', name: 'IT_Staff', description: 'Technical management and inventory oversight.', isSystem: true },
+        { _id: 'sys_security', name: 'Security', description: 'Security monitoring and QR validation.', isSystem: true }
+    ];
+
+    const [roles, setRoles] = useState(DEFAULT_SYSTEM_ROLES);
+    const [isAddingRole, setIsAddingRole] = useState(false);
+    const [newRole, setNewRole] = useState({ name: '', description: '' });
+    const [rolesLoading, setRolesLoading] = useState(false);
 
     const saveZone = () => {
         if (!newZone.name) return toast.error("Name is required");
@@ -145,7 +197,7 @@ const ConfigPage = () => {
         { id: 'policies', title: t('config.sections.policies.title'), description: t('config.sections.policies.desc'), icon: FileText, color: 'bg-orange-50 text-orange-600' },
         { id: 'responsibility', title: t('config.sections.responsibility.title'), description: t('config.sections.responsibility.desc'), icon: Scale, color: 'bg-rose-50 text-rose-600' },
         { id: 'alerts', title: t('config.sections.alerts.title'), description: t('config.sections.alerts.desc'), icon: Bell, color: 'bg-amber-50 text-amber-600' },
-        { id: 'email', title: t('config.sections.email.title'), description: t('config.sections.email.desc'), icon: Mail, color: 'bg-indigo-50 text-indigo-600' },
+        { id: 'roles', title: t('config.roles.title', 'Role Management'), description: t('config.roles.desc', 'Create and manage system access roles.'), icon: ShieldCheck, color: 'bg-indigo-50 text-indigo-600' },
         { id: 'qrcode', title: t('config.sections.qrcode.title'), description: t('config.sections.qrcode.desc'), icon: QrCode, color: 'bg-slate-50 text-slate-600' },
         { id: 'branding', title: t('config.sections.branding.title'), description: t('config.sections.branding.desc'), icon: PenTool, color: 'bg-pink-50 text-pink-600' }
     ];
@@ -520,62 +572,83 @@ const ConfigPage = () => {
                         </div>
                     </div>
                 );
-            case 'email':
+            case 'roles':
                 return (
                     <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="flex justify-end items-center mb-2">
                             <button
-                                onClick={() => setEmailTab('receipt')}
-                                className={`p-6 rounded-2xl border-2 text-left transition-all ${emailTab === 'receipt' ? 'border-[#8D8DC7] bg-indigo-50/50' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+                                onClick={() => setIsAddingRole(true)}
+                                className="px-4 py-2 bg-[#8D8DC7] text-white text-sm font-medium rounded-lg hover:bg-[#7b7bb5] transition-colors shadow-sm"
                             >
-                                <h4 className={`font-bold text-lg ${emailTab === 'receipt' ? 'text-[#8D8DC7]' : 'text-slate-700'}`}>{t('config.email.receipt')}</h4>
-                                <p className="text-sm text-gray-500 mt-1">{t('config.email.receiptDesc')}</p>
-                            </button>
-                            <button
-                                onClick={() => setEmailTab('overdue')}
-                                className={`p-6 rounded-2xl border-2 text-left transition-all ${emailTab === 'overdue' ? 'border-rose-400 bg-rose-50/50' : 'border-slate-100 bg-white hover:border-slate-200'}`}
-                            >
-                                <h4 className={`font-bold text-lg ${emailTab === 'overdue' ? 'text-rose-500' : 'text-slate-700'}`}>{t('config.email.overdue')}</h4>
-                                <p className="text-sm text-gray-400 mt-1">{t('config.email.overdueDesc')}</p>
+                                {t('config.roles.addRole', '+ Add Role')}
                             </button>
                         </div>
 
-                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <div className="flex justify-between items-center mb-4">
-                                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('config.email.editing')}: {emailTab === 'receipt' ? t('config.email.receipt') : t('config.email.overdue')}</h4>
-                                <div className="text-xs font-medium text-slate-400">{t('config.email.variables')}: {'{student_name}'}, {'{item_count}'}, {'{date}'}</div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase">{t('config.email.subject')}</label>
-                                    <input
-                                        name={emailTab === 'receipt' ? "emailReceiptSubject" : "emailOverdueSubject"}
-                                        value={emailTab === 'receipt' ? (config.emailReceiptSubject || '') : (config.emailOverdueSubject || '')}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium text-slate-700 bg-white"
-                                    />
+                        <div className="space-y-3">
+                            {isAddingRole && (
+                                <div className="p-4 border-2 border-[#8D8DC7] rounded-2xl bg-indigo-50/10 animate-in fade-in slide-in-from-top-2">
+                                    <div className="grid grid-cols-1 gap-4 mb-4">
+                                        <input
+                                            placeholder={t('config.roles.roleName', 'Role Name (e.g. Manager)')}
+                                            value={newRole.name}
+                                            onChange={e => setNewRole({ ...newRole, name: e.target.value })}
+                                            className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:border-[#8D8DC7]"
+                                            autoFocus
+                                        />
+                                        <input
+                                            placeholder={t('config.roles.roleDesc', 'Brief description of duties')}
+                                            value={newRole.description}
+                                            onChange={e => setNewRole({ ...newRole, description: e.target.value })}
+                                            className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 outline-none focus:border-[#8D8DC7]"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                        <button onClick={() => setIsAddingRole(false)} className="px-4 py-2 text-slate-500 text-sm font-bold hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+                                        <button onClick={saveRole} className="px-4 py-2 bg-[#8D8DC7] text-white text-sm font-bold rounded-lg hover:bg-[#7b7bb5] transition-colors flex items-center gap-2">
+                                            <Save className="w-4 h-4" /> Save Role
+                                        </button>
+                                    </div>
                                 </div>
+                            )}
 
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase">{t('config.email.html')}</label>
-                                    <textarea
-                                        name={emailTab === 'receipt' ? "emailReceiptContent" : "emailOverdueContent"}
-                                        value={emailTab === 'receipt' ? (config.emailReceiptContent || '') : (config.emailOverdueContent || '')}
-                                        onChange={handleChange}
-                                        rows="8"
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-mono text-sm text-slate-600 resize-none bg-white leading-relaxed"
-                                    />
+                            {rolesLoading ? (
+                                <div className="flex justify-center py-10"><Loader2 className="animate-spin text-[#8D8DC7]" /></div>
+                            ) : roles.length === 0 ? (
+                                <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                    <ShieldCheck className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                                    <p className="text-slate-400 font-medium">No roles found.</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-between items-center">
-                            <div className="flex gap-2">
-                                <button className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200" onClick={() => insertVariable('{student_name}')}>{t('config.email.addName')}</button>
-                                <button className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200" onClick={() => insertVariable('{return_date}')}>{t('config.email.addDate')}</button>
-                            </div>
-                            <button className="text-[#8D8DC7] font-semibold text-sm hover:underline">{t('config.email.sendTest')}</button>
+                            ) : (
+                                <div className="space-y-3">
+                                    {roles.map((role) => (
+                                        <div key={role._id} className="p-4 border border-slate-100 rounded-2xl flex items-center justify-between hover:border-indigo-200 transition-all bg-white shadow-sm group">
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${role.isSystem ? 'bg-slate-100 text-slate-500' : 'bg-indigo-50 text-indigo-600'}`}>
+                                                    <ShieldCheck className="w-6 h-6" />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-slate-800">{role.name}</h4>
+                                                        {role.isSystem && (
+                                                            <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-tighter border border-slate-200">System</span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 line-clamp-1">{role.description || 'No description'}</p>
+                                                </div>
+                                            </div>
+                                            {!role.isSystem && (
+                                                <button
+                                                    onClick={() => deleteRole(role._id, role.name)}
+                                                    className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                    title="Delete Role"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 );

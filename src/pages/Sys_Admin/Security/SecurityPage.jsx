@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout'; // Ensure path is correct (../components/AdminLayout)
 import api from '@/utils/api';
 import {
     Shield, Lock, FileText, Users, AlertTriangle, CheckCircle, Search,
-    Filter, Download, Activity, Globe, Smartphone, Clock, XCircle, Loader2
+    Filter, Download, Activity, Globe, Smartphone, Monitor, Clock, XCircle, Loader2
 } from 'lucide-react';
 
 import { useTranslation } from "react-i18next";
+import { generatePDF } from '@/utils/pdfGenerator';
+import { toast } from 'sonner';
 
 const SecurityPage = () => {
+    const navigate = useNavigate();
     const { t } = useTranslation(["admin", "common"]);
     const [activeTab, setActiveTab] = useState("audit");
     const [searchTerm, setSearchTerm] = useState("");
@@ -20,6 +24,28 @@ const SecurityPage = () => {
         activeSessions: []
     });
     const [loading, setLoading] = useState(true);
+
+    // 🚀 EXPORT PDF LOGIC
+    const handleExportPDF = () => {
+        if (!data.auditLogs || data.auditLogs.length === 0) {
+            return toast.error("No audit logs to export!");
+        }
+
+        const tableColumn = ["No.", "USER", "ACTION", "TARGET / DETAILS", "IP ADDRESS", "TIME", "STATUS"];
+        const tableRows = data.auditLogs.map((log, index) => [
+            index + 1,
+            log.user || "N/A",
+            log.action || "N/A",
+            log.target || "N/A",
+            log.ip || "N/A",
+            log.time || "N/A",
+            log.status || "N/A"
+        ]);
+
+        const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'Admin' };
+        generatePDF([], currentUser, "SECURITY AUDIT LOGS", tableColumn, tableRows);
+        toast.success("Security log exported to PDF");
+    };
 
     // FETCH REAL DATA 🚀
     useEffect(() => {
@@ -42,7 +68,10 @@ const SecurityPage = () => {
                 <h1 className="text-3xl font-bold text-white mb-2">{t('security.title')}</h1>
                 <p className="text-gray-400">{t('security.subtitle')}</p>
             </div>
-            <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium transition-colors border border-slate-700 mt-4 md:mt-0">
+            <button
+                onClick={handleExportPDF}
+                className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium transition-colors border border-slate-700 mt-4 md:mt-0 shadow-lg"
+            >
                 <Download className="w-4 h-4" /> {t('security.export')}
             </button>
         </div>
@@ -109,8 +138,8 @@ const SecurityPage = () => {
                                     <td className="p-4 text-gray-600 text-sm">{log.target}</td>
                                     <td className="p-4 text-gray-500 text-xs font-mono">{log.ip}</td>
                                     <td className="p-4 rounded-r-xl">
-                                        <span className="flex items-center text-green-600 text-xs font-bold gap-1">
-                                            <CheckCircle className="w-3 h-3" /> {log.status}
+                                        <span className={`flex items-center text-xs font-bold gap-1 ${log.status === 'Critical' ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                            {log.status === 'Critical' ? <XCircle className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />} {log.status}
                                         </span>
                                     </td>
                                 </tr>
@@ -127,7 +156,11 @@ const SecurityPage = () => {
     const renderCompliance = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {data.complianceItems.map((item) => (
-                <div key={item.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-full">
+                <div
+                    key={item.id}
+                    onClick={() => item.link && navigate(item.link)}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-full cursor-pointer hover:shadow-md transition-all active:scale-[0.98] group"
+                >
                     <div>
                         <div className="flex justify-between items-start mb-4">
                             <div className="bg-[#8D8DC7]/10 p-3 rounded-full">
@@ -172,7 +205,14 @@ const SecurityPage = () => {
                                 <Globe className="w-4 h-4 mr-2 text-gray-400" /> {session.location} ({session.ip})
                             </div>
                             <div className="flex items-center text-sm text-gray-500">
-                                <Smartphone className="w-4 h-4 mr-2 text-gray-400" /> {session.device}
+                                {session.device?.includes('Mobile') ? (
+                                    <Smartphone className="w-4 h-4 mr-2 text-[#8D8DC7]" />
+                                ) : session.device?.includes('Tablet') ? (
+                                    <Smartphone className="w-4 h-4 mr-2 text-[#8D8DC7] rotate-90" />
+                                ) : (
+                                    <Monitor className="w-4 h-4 mr-2 text-[#8D8DC7]" />
+                                )}
+                                {session.device}
                             </div>
                             <div className="flex items-center text-sm text-gray-500">
                                 <Clock className="w-4 h-4 mr-2 text-gray-400" /> {t('security.sessions.login')} {session.loginTime}

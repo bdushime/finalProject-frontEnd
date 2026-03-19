@@ -3,7 +3,7 @@ import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
 import {
     FileText, Users, Monitor, ShieldAlert, Download, ChevronDown,
-    Loader2, ChevronLeft, ChevronRight 
+    Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import { toast } from 'sonner';
@@ -45,7 +45,7 @@ const ReportsPage = () => {
         { value: "Medium", label: t('reports.mediumRisk') },
         { value: "High", label: t('reports.highRisk') }
     ];
-    
+
     // Report Mode / State
     const [currentReport, setCurrentReport] = useState('activity');
     const [loading, setLoading] = useState(true);
@@ -53,11 +53,7 @@ const ReportsPage = () => {
     const [showExportMenu, setShowExportMenu] = useState(false);
 
     // Date Range State
-    const [startDate, setStartDate] = useState(() => {
-        const d = new Date();
-        d.setDate(d.getDate() - 30);
-        return d.toISOString().split('T')[0];
-    });
+    const [startDate, setStartDate] = useState("2024-01-01"); // Default to comprehensive history
     const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
 
     // Filters
@@ -134,7 +130,6 @@ const ReportsPage = () => {
             if (currentReport === 'activity' || currentReport === 'risk') {
                 const statusMatch = selectedStatus === "All Statuses" || item.status === selectedStatus;
 
-                // Risk Assessment: Show activity data filtered by risk level/status/date
                 if (currentReport === 'risk') {
                     const score = item.responsibilityScore || (item.status === 'Overdue' ? 40 : 100);
                     let level = "Low";
@@ -150,14 +145,14 @@ const ReportsPage = () => {
 
             if (currentReport === 'users') {
                 const roleMatch = selectedRole === "All Roles" || item.role === selectedRole;
-                return roleMatch && dateMatch;
+                return roleMatch; // Users directory shows all users regardless of date
             }
 
             if (currentReport === 'devices') {
                 const statusMatch = selectedStatus === "All Statuses" ||
                     (item.status === selectedStatus) ||
                     (selectedStatus === 'Active' && (item.available > 0 || item.status === 'Available'));
-                return statusMatch && dateMatch;
+                return statusMatch; // Device inventory shows all items regardless of date
             }
 
             return true;
@@ -166,7 +161,7 @@ const ReportsPage = () => {
 
     // 👇 NEW: Pagination Logic
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    
+
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredData.slice(startIndex, startIndex + itemsPerPage);
@@ -223,7 +218,8 @@ const ReportsPage = () => {
                                 <div className="font-bold text-slate-900">{row.fullName || row.username}</div>
                                 <div className="text-xs text-slate-400">{row.email}</div>
                             </div>
-                        )
+                        ),
+                        pdf: (row) => `${row.fullName || row.username} (${row.email})`
                     },
                     {
                         header: t('reports.role'), render: (row) => (
@@ -231,37 +227,60 @@ const ReportsPage = () => {
                                 row.role === 'Admin' ? 'bg-slate-800 text-white' :
                                     'bg-blue-50 text-blue-600'
                                 }`}>{ROLES.find(r => r.value === row.role)?.label || row.role}</span>
-                        )
+                        ),
+                        pdf: (row) => ROLES.find(r => r.value === row.role)?.label || row.role
                     },
-                    { header: t('reports.department'), accessor: "department", render: (row) => row.department || t('users.general') },
                     {
-                        header: t('reports.score'), render: (row) => (
-                            <span className={`font-bold ${!row.responsibilityScore || row.responsibilityScore >= 80 ? 'text-emerald-500' : row.responsibilityScore < 50 ? 'text-red-500' : 'text-yellow-500'}`}>
-                                {row.responsibilityScore ?? 100}%
-                            </span>
-                        )
+                        header: t('reports.department'), accessor: "department", render: (row) => row.department || t('users.general'),
+                        pdf: (row) => row.department || t('users.general')
+                    },
+                    {
+                        header: t('reports.score'), render: (row) => {
+                            const score = row.responsibilityScore ?? 100;
+                            const color = score >= 80 ? 'text-emerald-500' : score < 50 ? 'text-red-500' : 'text-yellow-500';
+                            return (
+                                <span className={`font-bold ${color}`}>
+                                    {score}%
+                                </span>
+                            );
+                        },
+                        pdf: (row) => `${row.responsibilityScore ?? 100}%`
                     },
                     {
                         header: t('reports.statusFilter'), render: (row) => (
                             <span className={`text-xs font-bold ${row.status === 'Inactive' ? 'text-red-500' : 'text-emerald-600'}`}>
                                 {STATUSES.find(s => s.value === row.status)?.label || row.status || 'Active'}
                             </span>
-                        )
+                        ),
+                        pdf: (row) => STATUSES.find(s => s.value === row.status)?.label || row.status || 'Active'
                     }
                 ];
             case 'devices':
                 return [
-                    { header: t('reports.deviceName'), render: (row) => <div className="font-bold text-slate-900">{row.name || row.item || row.equipment?.name || "N/A"}</div> },
-                    { header: t('reports.category'), accessor: "category", render: (row) => row.category || row.type || row.equipment?.category || row.equipment?.type || "N/A" },
-                    { header: t('reports.serialNumber'), accessor: "serialNumber", render: (row) => <span className="font-mono text-xs">{row.serialNumber || row.equipment?.serialNumber || (row.id || row._id || "").slice(-6)}</span> },
-                    { header: t('reports.location'), accessor: "location", render: (row) => row.location || row.equipment?.location || t('reports.mainStorage') },
+                    {
+                        header: t('reports.deviceName'), render: (row) => <div className="font-bold text-slate-900">{row.name || row.item || row.equipment?.name || "N/A"}</div>,
+                        pdf: (row) => row.name || row.item || row.equipment?.name || "N/A"
+                    },
+                    {
+                        header: t('reports.category'), accessor: "category", render: (row) => row.category || row.type || row.equipment?.category || row.equipment?.type || "N/A",
+                        pdf: (row) => row.category || row.type || row.equipment?.category || row.equipment?.type || "N/A"
+                    },
+                    {
+                        header: t('reports.serialNumber'), accessor: "serialNumber", render: (row) => <span className="font-mono text-xs">{row.serialNumber || row.equipment?.serialNumber || (row.id || row._id || "").slice(-6)}</span>,
+                        pdf: (row) => row.serialNumber || row.equipment?.serialNumber || (row.id || row._id || "").slice(-6)
+                    },
+                    {
+                        header: t('reports.location'), accessor: "location", render: (row) => row.location || row.equipment?.location || t('reports.mainStorage'),
+                        pdf: (row) => row.location || row.equipment?.location || t('reports.mainStorage')
+                    },
                     {
                         header: t('reports.statusFilter'), render: (row) => (
                             <span className={`px-2 py-1 rounded-full text-xs font-bold ${(row.available > 0 || row.status === 'Available' || row.status === 'Active') ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
                                 }`}>
                                 {(row.available > 0 || row.status === 'Available' || row.status === 'Active') ? t('users.activeStatus') : (STATUSES.find(s => s.value === row.status)?.label || row.status || 'Unavailable')}
                             </span>
-                        )
+                        ),
+                        pdf: (row) => (row.available > 0 || row.status === 'Available' || row.status === 'Active') ? t('users.activeStatus') : (STATUSES.find(s => s.value === row.status)?.label || row.status || 'Unavailable')
                     }
                 ];
             case 'risk':
@@ -272,11 +291,12 @@ const ReportsPage = () => {
                                 <div className="font-bold text-slate-900">{row.user?.username || row.user || "Unknown User"}</div>
                                 <div className="text-xs text-slate-400">{row.user?.email || row.email || "N/A"}</div>
                             </div>
-                        )
+                        ),
+                        pdf: (row) => row.user?.username || row.user || "Unknown User"
                     },
                     {
                         header: t('reports.riskLevel'), render: (row) => {
-                            const score = row.responsibilityScore || (row.status === 'Overdue' ? 40 : 100);
+                            const score = row.responsibilityScore ?? 100;
                             let level = t('reports.lowRisk');
                             let color = "text-emerald-600 bg-emerald-50 border-emerald-100";
                             if (score < 50) {
@@ -291,11 +311,15 @@ const ReportsPage = () => {
                                     {level}
                                 </span>
                             );
+                        },
+                        pdf: (row) => {
+                            const score = row.responsibilityScore ?? 100;
+                            return score < 50 ? t('reports.highRisk') : score < 80 ? t('reports.mediumRisk') : t('reports.lowRisk');
                         }
                     },
                     {
                         header: t('reports.riskScore'), render: (row) => {
-                            const score = row.responsibilityScore || (row.status === 'Overdue' ? 40 : 100);
+                            const score = row.responsibilityScore ?? 100;
                             return (
                                 <div className="flex items-center gap-2">
                                     <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -309,7 +333,8 @@ const ReportsPage = () => {
                                     </span>
                                 </div>
                             );
-                        }
+                        },
+                        pdf: (row) => `${row.responsibilityScore ?? 100}%`
                     },
                     {
                         header: t('reports.statusFilter'), render: (row) => (
@@ -320,7 +345,8 @@ const ReportsPage = () => {
                                 }`}>
                                 {STATUSES.find(s => s.value === row.status)?.label || row.status}
                             </span>
-                        )
+                        ),
+                        pdf: (row) => STATUSES.find(s => s.value === row.status)?.label || row.status
                     }
                 ];
             case 'activity':
@@ -332,7 +358,8 @@ const ReportsPage = () => {
                                 <div className="font-bold text-slate-900">{row.item || row.equipment?.name || "Unknown Item"}</div>
                                 <div className="text-xs text-slate-400">ID: {(row.id || "").slice(-6)}</div>
                             </div>
-                        )
+                        ),
+                        pdf: (row) => row.item || row.equipment?.name || "Unknown Item"
                     },
                     {
                         header: t('reports.user'), render: (row) => (
@@ -340,12 +367,27 @@ const ReportsPage = () => {
                                 <div className="font-medium text-slate-700">{row.user?.username || row.user || "Unknown"}</div>
                                 <div className="text-xs text-slate-400">{ROLES.find(r => r.value === (row.role || row.user?.role))?.label || row.role || row.user?.role || "User"}</div>
                             </div>
-                        )
+                        ),
+                        pdf: (row) => row.user?.username || row.user || "Unknown"
                     },
                     {
                         header: t('reports.date'), render: (row) => {
                             const date = row.dateOut || row.createdAt || row.date || row.updatedAt;
                             return date ? new Date(date).toLocaleDateString() : "N/A";
+                        },
+                        pdf: (row) => {
+                            const date = row.dateOut || row.createdAt || row.date || row.updatedAt;
+                            return date ? new Date(date).toLocaleDateString() : "N/A";
+                        }
+                    },
+                    {
+                        header: t('reports.time') || "TIME", render: (row) => {
+                            const date = row.dateOut || row.createdAt || row.date || row.updatedAt;
+                            return date ? new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A";
+                        },
+                        pdf: (row) => {
+                            const date = row.dateOut || row.createdAt || row.date || row.updatedAt;
+                            return date ? new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A";
                         }
                     },
                     {
@@ -357,7 +399,8 @@ const ReportsPage = () => {
                                 }`}>
                                 {STATUSES.find(s => s.value === row.status)?.label || row.status}
                             </span>
-                        )
+                        ),
+                        pdf: (row) => STATUSES.find(s => s.value === row.status)?.label || row.status
                     }
                 ];
         }
@@ -366,21 +409,20 @@ const ReportsPage = () => {
     const handleExportPDF = () => {
         if (filteredData.length === 0) return toast.error("No data to export!");
 
-        const formattedForPdf = filteredData.map(row => ({
-            createdAt: row.dateOut || row.createdAt || new Date().toISOString(),
-            status: row.status || 'Active',
-            equipment: {
-                name: row.item || row.name || row.equipment?.name || "N/A",
-                serialNumber: (row.id || row._id || "").slice(-6).toUpperCase(),
-                category: row.category || row.type || "N/A"
-            },
-            user: {
-                username: row.user?.username || row.user || row.fullName || "N/A",
-                email: row.user?.email || row.email || "N/A"
-            }
-        }));
+        const columns = getColumns();
+        const tableColumn = ["No.", ...columns.map(c => c.header)];
 
-        generatePDF(formattedForPdf, currentUser, `${currentReport.toUpperCase()} ${t('reports.title').toUpperCase()}`);
+        const tableRows = filteredData.map((row, index) => {
+            const rowData = [index + 1];
+            columns.forEach(col => {
+                if (col.pdf) rowData.push(col.pdf(row));
+                else if (col.accessor) rowData.push(row[col.accessor] || "N/A");
+                else rowData.push("N/A");
+            });
+            return rowData;
+        });
+
+        generatePDF(filteredData, currentUser, `${currentReport.toUpperCase()} ${t('reports.title').toUpperCase()}`, tableColumn, tableRows);
     };
 
     const handleExportExcel = async () => {
@@ -626,8 +668,8 @@ const ReportsPage = () => {
                                 Showing <span className="font-semibold text-slate-700">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-semibold text-slate-700">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="font-semibold text-slate-700">{filteredData.length}</span> entries
                             </p>
                             <div className="flex gap-2">
-                                <button 
-                                    onClick={handlePrevPage} 
+                                <button
+                                    onClick={handlePrevPage}
                                     disabled={currentPage === 1}
                                     className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
@@ -636,8 +678,8 @@ const ReportsPage = () => {
                                 <div className="flex items-center px-4 font-medium text-sm text-slate-600">
                                     Page {currentPage} of {totalPages}
                                 </div>
-                                <button 
-                                    onClick={handleNextPage} 
+                                <button
+                                    onClick={handleNextPage}
                                     disabled={currentPage === totalPages}
                                     className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
