@@ -63,7 +63,7 @@
         "userIdentity": "Identité de l'Utilisateur",
         "assignedRole": "Rôle Attribué",
         "department": "Département",
-        "respScore": "Score de Resp.",
+        "score": "Score",
         "firstName": "Prénom",
         "lastName": "Nom de famille",
         "status": "Statut",

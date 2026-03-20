@@ -63,7 +63,7 @@
         "userIdentity": "User Identity",
         "assignedRole": "Assigned Role",
         "department": "Department",
-        "respScore": "Resp. Score",
+        "score": "Score",
         "firstName": "First Name",
         "lastName": "Last Name",
         "status": "Status",
