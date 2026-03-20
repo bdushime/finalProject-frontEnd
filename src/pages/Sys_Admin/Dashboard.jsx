@@ -8,6 +8,7 @@ import {
     Wifi,
     AlertTriangle,
     Users,
+    User,
     Settings,
     BookOpen,
     Activity,
