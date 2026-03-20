@@ -205,7 +205,7 @@ const Dashboard = () => {
                                 <span className="p-2 bg-white rounded-lg shadow-sm"><BookOpen /></span> {t("dashboard.manageCourses")}
                             </button>
                             <button onClick={() => navigate('/admin/reports')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
-                                <span className="p-2 bg-white rounded-lg shadow-sm"><FileBarChart className="w-5 h-5 text-indigo-500" /></span> {t("dashboard.generateReport")}
+                                <span className="p-2 bg-white rounded-lg shadow-sm"><Activity className="w-5 h-5 text-indigo-500" /></span> {t("dashboard.generateReport")}
                             </button>
                         </div>
                     </div>
