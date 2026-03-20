@@ -8,12 +8,10 @@ import {
     Wifi,
     AlertTriangle,
     Users,
-    User,
     Settings,
     BookOpen,
     Activity,
-    Loader2,
-    FileBarChart
+    Loader2
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 
@@ -143,29 +141,6 @@ const Dashboard = () => {
 
     return (
         <AdminLayout heroContent={HeroSection}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div onClick={() => navigate('/admin/monitoring')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] mb-4 group-hover:scale-110 transition-transform">
-                        <Activity className="w-6 h-6" />
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-900 mb-1">{t("dashboard.borrowRequests", "Borrow Requests")}</h4>
-                    <p className="text-xs text-gray-500 font-medium">{t("dashboard.managePending", "Manage pending equipment requests")}</p>
-                </div>
-                <div onClick={() => navigate('/admin/reports')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform">
-                        <FileBarChart className="w-6 h-6" />
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-900 mb-1">{t("dashboard.activityReports", "Activity Reports")}</h4>
-                    <p className="text-xs text-gray-500 font-medium">{t("dashboard.viewAnalytics", "View analytics and transaction logs")}</p>
-                </div>
-                <div onClick={() => navigate('/admin/profile')} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-500 mb-4 group-hover:scale-110 transition-transform">
-                        <User className="w-6 h-6" />
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-900 mb-1">{t("auth.myProfile")}</h4>
-                    <p className="text-xs text-gray-500 font-medium">{t("profile.subtitle", "Manage your account settings")}</p>
-                </div>
-            </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 {/* Left Column: Recent Activity Table */}

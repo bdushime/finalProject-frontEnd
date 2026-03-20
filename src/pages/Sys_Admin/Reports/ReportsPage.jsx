@@ -94,15 +94,16 @@ const ReportsPage = () => {
 
                 if (currentReport === 'activity' || currentReport === 'risk') {
                     endpoint = '/reports';
-                } else if (currentReport === 'users') {
-                    endpoint = '/users';
-                } else if (currentReport === 'devices') {
-                    endpoint = '/equipment/browse';
-                }
-
-                if (endpoint) {
                     const res = await api.get(endpoint, { params });
                     setData(Array.isArray(res.data) ? res.data : []);
+                } else if (currentReport === 'users') {
+                    const res = await api.get('/users', { params: { limit: 999 } });
+                    const raw = res.data;
+                    setData(Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []));
+                } else if (currentReport === 'devices') {
+                    const res = await api.get('/equipment/browse', { params: { limit: 999 } });
+                    const raw = res.data;
+                    setData(Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []));
                 }
             } catch (err) {
                 console.error("Reports Fetch Error:", err);
