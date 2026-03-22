@@ -15,7 +15,7 @@ const AdminNotifications = () => {
     const fetchNotifications = async () => {
         try {
             const res = await api.get('/notifications');
-            setNotifications(res.data);
+            setNotifications(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error("Failed to fetch notifications:", err);
             // Optional: toast.error("Could not load notifications");

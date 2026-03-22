@@ -17,7 +17,7 @@ const DataPage = () => {
         const fetchBackups = async () => {
             try {
                 const res = await api.get('/data/backups');
-                setBackups(res.data);
+                setBackups(Array.isArray(res.data) ? res.data : []);
             } catch (err) {
                 console.error(err);
             } finally {

@@ -79,8 +79,9 @@ const UsersList = () => {
 
     const fetchRoles = async () => {
         try {
-            const res = await api.get('/api/roles');
-            const customRoles = res.data.map(r => r.name);
+            const res = await api.get('/roles');
+            const data = Array.isArray(res.data) ? res.data : [];
+            const customRoles = data.map(r => r.name);
             // Unique roles: default + custom
             setRoles([...DEFAULT_ROLES, ...customRoles.filter(r => !DEFAULT_ROLES.includes(r))]);
         } catch (err) {

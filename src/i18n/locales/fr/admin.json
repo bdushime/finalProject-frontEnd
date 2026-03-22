@@ -19,7 +19,7 @@
         "registeredAccounts": "Comptes enregistrés",
         "atRiskItems": "Éléments à Risque",
         "actionReq": "Action Requise",
-        "overdueItemsDesc": "En retard ou Maintenance",
+        "overdueItemsDesc": "En retard, Maintenance ou Endommagé",
         "overdue": "En retard",
         "maintenance": "Maintenance",
         "availableEquip": "Équipement Disponible",
@@ -46,7 +46,8 @@
         "status": {
             "checkedOut": "Sortie",
             "returned": "Retourné",
-            "overdue": "En Retard",
+            "overdue": "En retard",
+            "damaged": "Endommagé",
             "unknown": "Inconnu",
             "deletedItem": "Article Supprimé"
         }
@@ -62,7 +63,7 @@
         "userIdentity": "Identité de l'Utilisateur",
         "assignedRole": "Rôle Attribué",
         "department": "Département",
-        "respScore": "Score de Resp.",
+        "score": "Score",
         "firstName": "Prénom",
         "lastName": "Nom de famille",
         "status": "Statut",

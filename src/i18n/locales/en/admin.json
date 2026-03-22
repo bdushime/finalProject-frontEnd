@@ -19,7 +19,7 @@
         "registeredAccounts": "Registered accounts",
         "atRiskItems": "At-Risk Items",
         "actionReq": "Action Req",
-        "overdueItemsDesc": "Overdue or Maintenance",
+        "overdueItemsDesc": "Overdue, Maintenance or Damaged",
         "overdue": "Overdue",
         "maintenance": "Maintenance",
         "availableEquip": "Available Equip",
@@ -47,6 +47,7 @@
             "checkedOut": "Checked Out",
             "returned": "Returned",
             "overdue": "Overdue",
+            "damaged": "Damaged",
             "unknown": "Unknown",
             "deletedItem": "Deleted Item"
         }
@@ -62,7 +63,7 @@
         "userIdentity": "User Identity",
         "assignedRole": "Assigned Role",
         "department": "Department",
-        "respScore": "Resp. Score",
+        "score": "Score",
         "firstName": "First Name",
         "lastName": "Last Name",
         "status": "Status",

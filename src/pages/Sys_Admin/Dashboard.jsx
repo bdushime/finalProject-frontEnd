@@ -11,8 +11,7 @@ import {
     Settings,
     BookOpen,
     Activity,
-    Loader2,
-    FileBarChart
+    Loader2
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +33,11 @@ const Dashboard = () => {
         const fetchAdminData = async () => {
             try {
                 const res = await api.get('/transactions/admin/dashboard-stats');
-                setData(res.data);
+                const result = res.data;
+                setData({
+                    stats: result?.stats || { activeBorrowed: 0, totalUsers: 0, atRiskItems: 0, systemStatus: "Error" },
+                    recentActivity: Array.isArray(result?.recentActivity) ? result.recentActivity : []
+                });
             } catch (err) {
                 console.error("Failed to load admin stats", err);
             } finally {
@@ -118,7 +121,7 @@ const Dashboard = () => {
                     value={data.stats.atRiskItems}
                     change={t("dashboard.actionReq")}
                     changeType={data.stats.atRiskItems > 0 ? "negative" : "positive"}
-                    subtext={`${data.stats.overdueCount || 0} ${t("dashboard.overdue")}, ${data.stats.maintenanceCount || 0} ${t("dashboard.maintenance")}`}
+                    subtext={`${data.stats.overdueCount || 0} ${t("dashboard.overdue")}, ${data.stats.maintenanceCount || 0} ${t("dashboard.maintenance")}${data.stats.damagedCount > 0 ? `, ${data.stats.damagedCount} ${t("dashboard.status.damaged")}` : ""}`}
                     icon={AlertTriangle}
                     isAlert={data.stats.atRiskItems > 0}
                     onClick={() => navigate('/admin/reports')}
@@ -138,6 +141,7 @@ const Dashboard = () => {
 
     return (
         <AdminLayout heroContent={HeroSection}>
+
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                 {/* Left Column: Recent Activity Table */}
                 <div className="xl:col-span-2 space-y-6 h-full">
@@ -201,7 +205,7 @@ const Dashboard = () => {
                                 <span className="p-2 bg-white rounded-lg shadow-sm"><BookOpen /></span> {t("dashboard.manageCourses")}
                             </button>
                             <button onClick={() => navigate('/admin/reports')} className="w-full text-left px-5 py-4 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-700 font-bold transition-all active:scale-95 flex items-center gap-3">
-                                <span className="p-2 bg-white rounded-lg shadow-sm"><FileBarChart className="w-5 h-5 text-indigo-500" /></span> {t("dashboard.generateReport")}
+                                <span className="p-2 bg-white rounded-lg shadow-sm"><Activity className="w-5 h-5 text-indigo-500" /></span> {t("dashboard.generateReport")}
                             </button>
                         </div>
                     </div>
