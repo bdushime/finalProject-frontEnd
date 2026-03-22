@@ -20,21 +20,6 @@ const datePickerStyles = `
 const SimpleReports = () => {
     const { t } = useTranslation(["admin", "itstaff", "common"]);
 
-    const STATUSES = [
-        { value: "All Statuses", label: t('reports.allStatuses', 'All Statuses') },
-        { value: "Active", label: t('users.activeStatus', 'Active') },
-        { value: "Overdue", label: t('dashboard.status.overdue', 'Overdue') },
-        { value: "Returned", label: t('dashboard.status.returned', 'Returned') },
-        { value: "Maintenance", label: t('reports.maintenance', 'Maintenance') }
-    ];
-
-    const RISK_LEVELS = [
-        { value: "All Levels", label: t('reports.allLevels', 'All Levels') },
-        { value: "Low", label: t('reports.lowRisk', 'Low') },
-        { value: "Medium", label: t('reports.mediumRisk', 'Medium') },
-        { value: "High", label: t('reports.highRisk', 'High') }
-    ];
-
     // Report Mode / State
     const [currentReport, setCurrentReport] = useState('activity');
     const [loading, setLoading] = useState(true);
@@ -50,7 +35,6 @@ const SimpleReports = () => {
 
     // Filters
     const [selectedStatus, setSelectedStatus] = useState("All Statuses");
-    const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedRiskLevel, setSelectedRiskLevel] = useState("All Levels");
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -58,10 +42,26 @@ const SimpleReports = () => {
 
     const currentUser = JSON.parse(localStorage.getItem('user')) || { username: 'IT Staff', role: 'Staff' };
 
+    // Define options dynamically inside render to safely use translation hook
+    const STATUSES = [
+        { value: "All Statuses", label: t('reports.allStatuses', 'All Statuses') },
+        { value: "Active", label: t('users.activeStatus', 'Active') },
+        { value: "Overdue", label: t('dashboard.status.overdue', 'Overdue') },
+        { value: "Returned", label: t('dashboard.status.returned', 'Returned') },
+        { value: "Maintenance", label: t('reports.maintenance', 'Maintenance') },
+        { value: "Checked Out", label: t('reports.checkedOut', 'Checked Out') }
+    ];
+
+    const RISK_LEVELS = [
+        { value: "All Levels", label: t('reports.allLevels', 'All Levels') },
+        { value: "Low", label: t('reports.lowRisk', 'Low') },
+        { value: "Medium", label: t('reports.mediumRisk', 'Medium') },
+        { value: "High", label: t('reports.highRisk', 'High') }
+    ];
+
     const handleReportChange = (report) => {
         setCurrentReport(report);
         setSelectedStatus("All Statuses");
-        setSelectedCategory("All Categories");
         setSelectedRiskLevel("All Levels");
         setCurrentPage(1);
         setData([]);
@@ -69,7 +69,7 @@ const SimpleReports = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedStatus, selectedCategory, selectedRiskLevel, startDate, endDate]);
+    }, [selectedStatus, selectedRiskLevel, startDate, endDate]);
 
     // Fetch Data
     useEffect(() => {
@@ -77,7 +77,6 @@ const SimpleReports = () => {
             setLoading(true);
             try {
                 let endpoint = '';
-                // Since this is IT Staff, we use all-history instead of /reports
                 if (currentReport === 'activity' || currentReport === 'risk') {
                     endpoint = '/transactions/all-history';
                 } else if (currentReport === 'devices') {
@@ -86,9 +85,13 @@ const SimpleReports = () => {
 
                 if (endpoint) {
                     const res = await api.get(endpoint);
-                    // Filter down dataset locally by date here or later
+                    console.log(`Fetched data for ${currentReport}:`, res.data); // Debug log
+                    
+                    // 👇 THE PAGINATION FIX: Added res.data.items check
                     if (Array.isArray(res.data)) {
                         setData(res.data);
+                    } else if (res.data && Array.isArray(res.data.items)) {
+                        setData(res.data.items);
                     } else if (res.data && Array.isArray(res.data.data)) {
                         setData(res.data.data);
                     } else {
@@ -98,6 +101,7 @@ const SimpleReports = () => {
             } catch (err) {
                 console.error("Reports Fetch Error:", err);
                 toast.error(t('itstaff:reports.error', "Failed to load report data."));
+                setData([]); // Ensure data is empty array on fail, not undefined
             } finally {
                 setLoading(false);
             }
@@ -107,14 +111,19 @@ const SimpleReports = () => {
 
     // Filtered Data Logic
     const filteredData = useMemo(() => {
-        if (!data) return [];
+        if (!Array.isArray(data) || data.length === 0) return [];
+        
         return data.filter(item => {
-            const itemDate = new Date(item.dateOut || item.createdAt || item.date || item.updatedAt);
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
+            // Safely parse dates, ignoring nulls
+            const rawDate = item.dateOut || item.createdAt || item.startTime || item.date || item.updatedAt;
+            let dateMatch = true;
 
-            const dateMatch = !isNaN(itemDate.getTime()) ? (itemDate >= start && itemDate <= end) : true;
+            if (rawDate) {
+                const itemDate = new Date(rawDate).setHours(0,0,0,0);
+                const start = new Date(startDate).setHours(0,0,0,0);
+                const end = new Date(endDate).setHours(23,59,59,999);
+                dateMatch = !isNaN(itemDate) ? (itemDate >= start && itemDate <= end) : true;
+            }
 
             if (currentReport === 'activity' || currentReport === 'risk') {
                 const statusMatch = selectedStatus === "All Statuses" || item.status === selectedStatus;
@@ -141,7 +150,7 @@ const SimpleReports = () => {
 
             return true;
         });
-    }, [data, currentReport, selectedStatus, selectedCategory, selectedRiskLevel, startDate, endDate]);
+    }, [data, currentReport, selectedStatus, selectedRiskLevel, startDate, endDate]);
 
     const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
 
@@ -228,7 +237,7 @@ const SimpleReports = () => {
                                     row.status === 'Returned' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                         'bg-slate-50 text-slate-500 border-slate-100'
                                 }`}>
-                                {STATUSES.find(s => s.value === row.status)?.label || row.status}
+                                {STATUSES.find(s => s.value === row.status)?.label || row.status || 'Unknown'}
                             </span>
                         )
                     }
@@ -239,8 +248,8 @@ const SimpleReports = () => {
                     {
                         header: t('admin:reports.item', 'Item'), render: (row) => (
                             <div>
-                                <div className="font-bold text-slate-900">{row.item || row.equipment?.name || "Unknown Item"}</div>
-                                <div className="text-xs text-slate-400">ID: {(row.id || row._id || "").slice(-6)}</div>
+                                <div className="font-bold text-slate-900">{row.equipment?.name || row.item || "Unknown Item"}</div>
+                                <div className="text-xs text-slate-400">ID: {(row.equipment?._id || row.id || row._id || "").slice(-6)}</div>
                             </div>
                         )
                     },
@@ -254,7 +263,7 @@ const SimpleReports = () => {
                     },
                     {
                         header: t('itstaff:reports.table.borrowed', 'Borrowed Date'), render: (row) => {
-                            const date = row.dateOut || row.createdAt || row.date || row.startTime;
+                            const date = row.startTime || row.dateOut || row.createdAt || row.date;
                             return date ? new Date(date).toLocaleDateString() : "N/A";
                         }
                     },
@@ -272,7 +281,7 @@ const SimpleReports = () => {
                                         row.status === 'Checked Out' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                             'bg-slate-50 text-slate-500 border-slate-100'
                                 }`}>
-                                {STATUSES.find(s => s.value === row.status)?.label || row.status}
+                                {STATUSES.find(s => s.value === row.status)?.label || row.status || 'Unknown'}
                             </span>
                         )
                     }
@@ -477,7 +486,7 @@ const SimpleReports = () => {
                             <tbody className="divide-y divide-slate-100">
                                 {loading ? (
                                     <tr><td colSpan={columns.length} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#0b1d3a]" /></td></tr>
-                                ) : filteredData.length === 0 ? (
+                                ) : (!Array.isArray(paginatedData) || paginatedData.length === 0) ? (
                                     <tr><td colSpan={columns.length} className="p-12 text-center text-slate-400">{t('common:misc.noRecords', 'No records found.')}</td></tr>
                                 ) : (
                                     paginatedData.map((row, rIdx) => (
