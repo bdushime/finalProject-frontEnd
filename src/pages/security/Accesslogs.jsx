@@ -57,7 +57,11 @@ const STATUS_COLORS = {
 import { useTranslation } from "react-i18next";
 import PaginationControls from "@/components/common/PaginationControls";
 
-export default function AccessLogs() {
+export default function AccessLogs({
+  showHeader = true,
+  showLayout = true,
+  maxRecords = null,
+}) {
   const { t } = useTranslation(["security", "common"]);
   const navigate = useNavigate();
 
@@ -75,17 +79,52 @@ export default function AccessLogs() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [sortBy, setSortBy] = useState("date-desc");
+  const shouldLimitToMaxRecords = typeof maxRecords === "number" && maxRecords > 0;
+  const emptyStats = useMemo(
+    () => ({ totalBorrowed: 0, totalLost: 0, totalDamaged: 0, totalOverdue: 0 }),
+    []
+  );
+
+  const deriveStatsFromLogs = (logs) => {
+    const safeLogs = Array.isArray(logs) ? logs : [];
+
+    const normalize = (v) => (typeof v === "string" ? v.trim().toLowerCase() : "");
+
+    let totalBorrowed = 0;
+    let totalOverdue = 0;
+    let totalLost = 0;
+    let totalDamaged = 0;
+
+    for (const log of safeLogs) {
+      const status = normalize(log?.status);
+      const condition = normalize(log?.condition || log?.equipment?.condition);
+      const reportType = normalize(log?.reportType || log?.type);
+
+      if (status === "checked out" || status === "overdue") totalBorrowed += 1;
+      if (status === "overdue") totalOverdue += 1;
+
+      // Best-effort: backend may mark these via equipment condition or report type.
+      if (condition === "lost" || reportType === "lost" || status === "lost") totalLost += 1;
+      if (condition === "damaged" || reportType === "damaged" || status === "damaged") totalDamaged += 1;
+    }
+
+    return { totalBorrowed, totalLost, totalDamaged, totalOverdue };
+  };
 
   // --- FETCH DATA ---
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await api.get('/transactions/security/access-logs?page=1&limit=10');
-        setStats(res.data.stats || { totalBorrowed: 0, totalLost: 0, totalDamaged: 0, totalOverdue: 0 });
+        const limit = shouldLimitToMaxRecords ? maxRecords : 10;
+        const res = await api.get(`/transactions/security/access-logs?page=1&limit=${limit}`);
+
+        const backendLogs = res.data?.logs || [];
+        const backendStats = res.data?.stats;
+        setStats(backendStats || deriveStatsFromLogs(backendLogs) || emptyStats);
 
         // Map Backend Data to Frontend Structure
-        const mappedLogs = (res.data.logs || []).map(log => {
+        const mappedLogs = backendLogs.map(log => {
           // Determine Event Type based on Status
           let type = 'movement';
           if (log.status === 'Checked Out') type = 'checkout';
@@ -102,11 +141,9 @@ export default function AccessLogs() {
             deviceName: log.equipment?.name || "Unknown Item",
             deviceId: log.equipment?.serialNumber || "N/A",
             location: log.destination || "Main Storage", // Using destination as location
-            coordinates: { lat: -1.9441, lng: 30.0619 }, // Mock Kigali coords for now
             notes: log.purpose || "No notes provided"
           };
         });
-        console.log(mappedLogs);
         setAllLogs(mappedLogs);
       } catch (err) {
         console.error("Failed to load logs:", err);
@@ -115,7 +152,7 @@ export default function AccessLogs() {
       }
     };
     fetchData();
-  }, []);
+  }, [shouldLimitToMaxRecords, maxRecords, emptyStats]);
 
   // --- FILTER LOGIC ---
   const filteredMovements = useMemo(() => {
@@ -161,11 +198,12 @@ export default function AccessLogs() {
     setCurrentPage(1);
   }, [searchQuery, filterEventType, startDate, endDate, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredMovements.length / itemsPerPage));
-  const paginatedMovements = filteredMovements.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = shouldLimitToMaxRecords
+    ? 1
+    : Math.max(1, Math.ceil(filteredMovements.length / itemsPerPage));
+  const paginatedMovements = shouldLimitToMaxRecords
+    ? filteredMovements.slice(0, maxRecords)
+    : filteredMovements.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Group by Date for Timeline
   const groupedMovements = useMemo(() => {
@@ -181,16 +219,21 @@ export default function AccessLogs() {
   const toggleExpand = (id) => setExpandedRow(expandedRow === id ? null : id);
 
   if (loading) {
+    const spinner = (
+      <div
+        className={
+          showLayout ? "flex h-screen items-center justify-center" : "flex items-center justify-center py-12"
+        }
+      >
+        <Clock className="h-10 w-10 animate-spin text-[#0b1d3a]" />
+      </div>
+    );
     return (
-      <MainLayout>
-        <div className="flex h-screen items-center justify-center">
-          <Clock className="h-10 w-10 animate-spin text-[#0b1d3a]" />
-        </div>
-      </MainLayout>
+      showLayout ? <MainLayout>{spinner}</MainLayout> : spinner
     );
   }
 
-  const HeroSection = (
+  const HeroSection = showHeader ? (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 mt-4 relative z-10">
         <div>
@@ -201,69 +244,138 @@ export default function AccessLogs() {
           </p>
         </div>
         <div className="mt-6 md:mt-0 flex gap-3">
-          {/* Action buttons if needed, currently empty to match Admin layout */}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 relative z-10 mb-8">
-        <StatCard
-          title={t('accessLogs.stats.totalBorrowed')}
-          value={stats.totalBorrowed.toString()}
-          subtext={t('accessLogs.stats.activeLoans')}
-          icon={Package}
-        />
-        <StatCard
-          title={t('accessLogs.stats.totalOverdue')}
-          value={stats.totalOverdue.toString()}
-          subtext={t('accessLogs.stats.needsAction')}
-          icon={AlertTriangle}
-          isAlert={stats.totalOverdue > 0}
-        />
-        <StatCard
-          title={t('accessLogs.stats.lostItems')}
-          value={stats.totalLost.toString()}
-          subtext={t('accessLogs.stats.reportedLost')}
-          icon={Search}
-        />
-        <StatCard
-          title={t('accessLogs.stats.damagedItems')}
-          value={stats.totalDamaged.toString()}
-          subtext={t('accessLogs.stats.maintenance')}
-          icon={AlertTriangle}
-        />
+      {/* Small screens: improved grid alignment */}
+      <div className="grid grid-cols-2 items-center justify-items-center gap-x-6 gap-y-5 sm:gap-x-10 sm:gap-y-5 md:hidden relative z-10">
+        {[
+          {
+            label: t("accessLogs.stats.totalBorrowed"),
+            value: stats.totalBorrowed,
+            icon: Package,
+            colorClass: "text-primary",
+          },
+          {
+            label: t("accessLogs.stats.totalOverdue"),
+            value: stats.totalOverdue,
+            icon: AlertTriangle,
+            colorClass: "text-red-500",
+          },
+          {
+            label: t("accessLogs.stats.lostItems"),
+            value: stats.totalLost,
+            icon: Search,
+            colorClass: "text-orange-500",
+          },
+          {
+            label: t("accessLogs.stats.damagedItems"),
+            value: stats.totalDamaged,
+            icon: AlertTriangle,
+            colorClass: "text-yellow-500",
+          },
+        ].map((item, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col items-center justify-center group cursor-default text-center"
+          >
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <item.icon
+                className={`w-5 h-5 ${item.colorClass} transition-colors shrink-0`}
+              />
+              <span className="text-3xl md:text-4xl font-light text-slate-100 tracking-tight leading-none">
+                {item.value}
+              </span>
+            </div>
+            <span className="text-xs font-medium text-gray-300 uppercase tracking-wide leading-snug">
+              {item.label}
+            </span>
+          </div>
+        ))}
       </div>
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 relative group">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-[#8D8DC7] transition-colors" />
+      {/* Large screens: keep original layout */}
+      <div className="hidden md:flex flex-wrap items-center justify-start sm:justify-end gap-2 md:gap-8 relative z-10">
+        {[
+          {
+            label: t("accessLogs.stats.totalBorrowed"),
+            value: stats.totalBorrowed,
+            icon: Package,
+            colorClass: "text-primary",
+          },
+          {
+            label: t("accessLogs.stats.totalOverdue"),
+            value: stats.totalOverdue,
+            icon: AlertTriangle,
+            colorClass: "text-red-500",
+          },
+          {
+            label: t("accessLogs.stats.lostItems"),
+            value: stats.totalLost,
+            icon: Search,
+            colorClass: "text-orange-500",
+          },
+          {
+            label: t("accessLogs.stats.damagedItems"),
+            value: stats.totalDamaged,
+            icon: AlertTriangle,
+            colorClass: "text-yellow-500",
+          },
+        ].map((item, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col items-center group cursor-default"
+          >
+            <div className="flex items-center gap-3 mb-1">
+              <item.icon
+                className={`w-5 h-5 ${item.colorClass} transition-colors`}
+              />
+              <span className="text-3xl md:text-4xl font-light text-slate-100 tracking-tight">
+                {item.value}
+              </span>
+            </div>
+            <span className="text-xs font-medium text-gray-300 uppercase tracking-wide pl-7">
+              {item.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      
+    </div>
+  ) : null;
+
+  const content = (
+    <div className={`space-y-6 ${showHeader ? "mt-4" : "mt-0"}`}>
+    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="lg:col-span-2 flex justify-center items-center border-slate-100">
+        <div className="relative w-full group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600 transition-colors pointer-events-none z-10" />
           <Input
             placeholder={t('accessLogs.filters.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-800/50 border-slate-700/50 text-white placeholder:text-gray-500 py-7 pl-12 rounded-2xl focus:ring-2 focus:ring-[#8D8DC7]/50 transition-all backdrop-blur-sm shadow-xl"
+            className="w-full bg-slate-100 border-slate-700/50 text-gray-900 placeholder:text-gray-500 py-6 pl-12 rounded-xl transition-all backdrop-blur-sm shadow-xl"
           />
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+      </div>
+        <div className="flex flex-col sm:flex-row gap-2 items-stretch w-full">
           <Input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="bg-slate-800/50 border-slate-700/50 text-white h-full rounded-2xl p-4 sm:p-6 shadow-xl"
+            placeholder={t('accessLogs.filters.startDate')}
+            className="bg-slate-100 border-slate-700/50 text-gray-900 h-full rounded-xl"
           />
           <Input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="bg-slate-800/50 border-slate-700/50 text-white h-full rounded-2xl p-4 sm:p-6 shadow-xl"
+            placeholder={t('accessLogs.filters.endDate')}
+            className="w-full bg-slate-100 border-slate-700/50 text-gray-900 placeholder:text-gray-500 py-6 px-4 rounded-xl transition-all"
           />
         </div>
       </div>
-    </div>
-  );
-
-  return (
-    <MainLayout heroContent={HeroSection}>
-      <div className="space-y-6 mt-4">
         <div className="flex flex-wrap gap-2 mb-6">
           {['all', 'checkout', 'return', 'violation'].map(type => (
             <Button
@@ -282,7 +394,7 @@ export default function AccessLogs() {
         </div>
 
 
-        <Card className="border border-gray-100 shadow-sm overflow-hidden bg-white rounded-2xl sm:rounded-[2rem]">
+        <Card className="border border-gray-100 shadow-sm overflow-hidden bg-white rounded-2xl sm:rounded-4xl">
           <div className="overflow-x-auto">
             <div className="min-w-[700px]">
               <div className="grid grid-cols-12 gap-2 sm:gap-4 px-3 sm:px-4 md:px-8 py-3 sm:py-4 bg-gray-50/50 border-b border-gray-50 font-bold text-[10px] text-gray-400 uppercase tracking-widest">
@@ -383,10 +495,18 @@ export default function AccessLogs() {
 
             <div className="border-t border-gray-100 bg-gray-50/50 px-4 sm:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <span className="text-xs font-medium text-slate-500">
-                {t('accessLogs.table.showingInfo', {
-                  from: filteredMovements.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1,
-                  to: Math.min(currentPage * itemsPerPage, filteredMovements.length),
-                  total: filteredMovements.length
+                {t("accessLogs.table.showingInfo", {
+                  from: shouldLimitToMaxRecords
+                    ? paginatedMovements.length === 0
+                      ? 0
+                      : 1
+                    : filteredMovements.length === 0
+                      ? 0
+                      : (currentPage - 1) * itemsPerPage + 1,
+                  to: shouldLimitToMaxRecords
+                    ? paginatedMovements.length
+                    : Math.min(currentPage * itemsPerPage, filteredMovements.length),
+                  total: filteredMovements.length,
                 })}
               </span>
               {totalPages > 1 && (
@@ -401,6 +521,11 @@ export default function AccessLogs() {
           </div>
         </Card>
       </div>
-    </MainLayout>
+  );
+
+  return showLayout ? (
+    <MainLayout heroContent={HeroSection}>{content}</MainLayout>
+  ) : (
+    content
   );
 }

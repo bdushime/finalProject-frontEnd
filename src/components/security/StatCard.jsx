@@ -20,15 +20,15 @@ export default function StatCard({
     <div
       onClick={!loading ? onClick : undefined}
       className={cn(
-        "bg-white p-6 rounded-[2rem] shadow-lg relative overflow-hidden group transition-all duration-300 border border-gray-100",
+        "bg-white p-4 sm:p-6 rounded-4xl shadow-lg relative overflow-hidden group transition-all duration-300 border border-gray-100",
         onClick && !loading ? "cursor-pointer hover:-translate-y-1 hover:shadow-xl" : "",
         className
       )}
     >
       <div className="relative z-10">
         {/* Header: Title */}
-        <div className="flex justify-between items-start mb-4">
-          <p className="text-sm font-bold text-gray-400 tracking-wide uppercase">{title}</p>
+        <div className="flex justify-between items-start mb-3 sm:mb-4">
+          <p className="text-[11px] sm:text-sm font-bold text-gray-400 tracking-wide uppercase leading-snug">{title}</p>
         </div>
 
         {/* Body: Value & Badge */}
@@ -40,7 +40,9 @@ export default function StatCard({
             </div>
           ) : (
             <>
-              <h3 className="text-4xl font-black text-slate-900 tracking-tight">{value}</h3>
+              <h3 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none wrap-break-word">
+                {value}
+              </h3>
 
               {change && (
                 <div className={cn(
@@ -61,7 +63,7 @@ export default function StatCard({
 
         {/* Footer: Subtext */}
         {!loading && subtext && (
-          <p className="text-xs text-gray-400 mt-2 font-medium">{subtext}</p>
+          <p className="text-[11px] sm:text-xs text-gray-400 mt-2 font-medium leading-snug">{subtext}</p>
         )}
       </div>
 
