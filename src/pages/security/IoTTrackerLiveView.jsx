@@ -1,68 +1,52 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import ITStaffLayout from "@/components/layout/ITStaffLayout";
-import IoTHeader from "@/pages/security/components/iot/IoTHeader";
-import IoTStatsCards from "@/pages/security/components/iot/IoTStatsCards";
-import IoTFiltersBar from "@/pages/security/components/iot/IoTFiltersBar";
-import IoTMapView from "@/pages/security/components/iot/IoTMapView";
-import {
-  IoTTableSection,
-  TrackerHistoryDialog,
-} from "@/pages/security/components/iot/IoTTableSection";
+import MainLayout from "./layout/MainLayout";
+import IoTHeader from "./components/iot/IoTHeader";
+import IoTStatsCards from "./components/iot/IoTStatsCards";
+import IoTFiltersBar from "./components/iot/IoTFiltersBar";
+import IoTMapView from "./components/iot/IoTMapView";
+import { IoTTableSection, TrackerHistoryDialog } from "./components/iot/IoTTableSection";
 import api from "@/utils/api";
-import { toast } from "sonner"; // Assuming you have sonner installed, optional
-
+import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-export default function IoTTrackerLiveView() {
+export default function SecurityIoTTrackerLiveView() {
   const { t } = useTranslation(["itstaff", "common"]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState("map");
-
-
 
   const [selectedTracker, setSelectedTracker] = useState(null);
   const [historyData, setHistoryData] = useState({});
   const [trackers, setTrackers] = useState([]);
   const [page, setPage] = useState(1);
 
-  // =========================================================
-  // 1. FETCH REAL DATA (From Monitoring Route)
-  // =========================================================
-  /* 
-     STRICT LIVE LOGIC: 
-     Backend might be slow to timeout (e.g. 1 min). 
-     We enforce a 15-second "Heartbeat Check".
-     If 'online' but no data for >15s, force to 'offline'.
-  */
   const processTrackers = (rawTrackers) => {
     const now = new Date().getTime();
-    const TIMEOUT_MS = 15000; // 15 seconds allowed silence
+    const TIMEOUT_MS = 15000; 
 
-    return rawTrackers.map(t => {
-      // Create a copy to avoid mutating state directly if using objects
+    return rawTrackers.map((t) => {
       const tracker = { ...t };
 
-      if (tracker.status === 'online' && tracker.lastSeen) {
+      if (tracker.status === "online" && tracker.lastSeen) {
         const lastSeenTime = new Date(tracker.lastSeen).getTime();
         const diff = now - lastSeenTime;
 
         // If silent for too long, FORCE offline
         if (diff > TIMEOUT_MS) {
-          tracker.status = 'offline';
+          tracker.status = "offline";
         }
       }
+
       return tracker;
     });
   };
 
   const fetchRealData = async () => {
     try {
-      // 👇 Use the specific monitoring endpoint, add cache busting
       const res = await api.get(`/monitoring/live?nocache=${new Date().getTime()}`);
 
       if (res.data && res.data.trackers) {
-        // Apply our strict frontend timeout rule
         const processedData = processTrackers(res.data.trackers);
         setTrackers(processedData);
       }
@@ -71,9 +55,8 @@ export default function IoTTrackerLiveView() {
     }
   };
 
-  // Track previous states to detect changes
+  // Poll live data
   const prevStatuses = useRef({});
-
   useEffect(() => {
     fetchRealData();
     const interval = setInterval(fetchRealData, 2000); // Polling every 2s for live feel
@@ -81,53 +64,53 @@ export default function IoTTrackerLiveView() {
   }, []);
 
   // --- 3. NOTIFICATION LOGIC ---
+  // Creates backend notifications for Security when devices go offline.
   useEffect(() => {
     trackers.forEach((tItem) => {
       const prev = prevStatuses.current[tItem.id];
-      const isNowOffline = tItem.status === 'offline';
+      const isNowOffline = tItem.status === "offline";
 
-      // If was online (or unknown) and NOW is offline, trigger alert
-      // We only alert if we specifically knew it was 'online' before to avoid spam on load
-      if (prev === 'online' && isNowOffline) {
-        const message = t('iot.alerts.offlineMessage', {
+      // Avoid spamming on initial load by only alerting when we knew it was online before.
+      if (prev === "online" && isNowOffline) {
+        const message = t("iot.alerts.offlineMessage", {
           equipment: tItem.equipment,
-          id: tItem.id
+          id: tItem.id,
         });
 
-        // 1. Show Visual Toast
-        toast.error(t('iot.alerts.alertPrefix', { message }), {
+        toast.error(t("iot.alerts.alertPrefix", { message }), {
           duration: 5000,
-          icon: '🚨'
+          icon: "🚨",
         });
 
-        // 2. Persist to Backend (Fire and Forget)
-        api.post('/notifications', {
-          title: t('iot.alerts.offlineTitle'),
-          message: message,
-          type: "error", // red icon in list
-          role: "it_staff",
-          relatedId: tItem.id
-        }).catch(err => console.error("Failed to save notification:", err));
+        api
+          .post("/notifications", {
+            title: t("iot.alerts.offlineTitle"),
+            message,
+            type: "error",
+            role: "security",
+            relatedId: tItem.id,
+          })
+          .catch((err) =>
+            console.error("Failed to save notification:", err)
+          );
       }
 
-      // Update ref
       prevStatuses.current[tItem.id] = tItem.status;
     });
-  }, [trackers]);
+  }, [trackers, t]);
 
   // =========================================================
-  // 2. SIMULATE BUTTON LOGIC (Fixed)
+  // 2. SIMULATE BUTTON LOGIC (History / Visual only)
   // =========================================================
-
-
-  // ... (History Logic - Visual Only) ...
   useEffect(() => {
     const generateHistory = (trackerId) => {
       const data = [];
       const now = new Date();
+
       for (let i = 19; i >= 0; i--) {
         const time = new Date(now.getTime() - i * 3 * 60 * 1000);
-        const tracker = trackers.find((t) => t.id === trackerId);
+        const tracker = trackers.find((tItem) => tItem.id === trackerId);
+
         if (tracker) {
           data.push({
             time: time.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
@@ -136,8 +119,10 @@ export default function IoTTrackerLiveView() {
           });
         }
       }
+
       return data;
     };
+
     const newHistory = {};
     trackers.forEach((tracker) => {
       newHistory[tracker.id] = generateHistory(tracker.id);
@@ -145,40 +130,48 @@ export default function IoTTrackerLiveView() {
     setHistoryData(newHistory);
   }, [trackers]);
 
-  // ... (Filtering Logic) ...
+  // --- Filtering Logic ---
   const filteredTrackers = useMemo(() => {
     return trackers.filter((tracker) => {
       const matchesSearch =
         tracker.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tracker.equipment.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tracker.location.toLowerCase().includes(searchQuery.toLowerCase());
+
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "online" && tracker.status === "online") ||
         (statusFilter === "offline" && tracker.status !== "online");
+
       return matchesSearch && matchesStatus;
     });
   }, [trackers, searchQuery, statusFilter]);
 
-  useEffect(() => { setPage(1); }, [searchQuery, statusFilter, viewMode]);
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, statusFilter, viewMode]);
 
-  const onlineCount = trackers.filter((t) => t.status === "online").length;
-  // ROBUST: Treat anything not "online" (e.g. "lost", "maintenance", "offline") as Offline
+  const onlineCount = trackers.filter((tItem) => tItem.status === "online").length;
   const offlineCount = trackers.length - onlineCount;
-  const lowBatteryCount = trackers.filter((t) => t.battery < 30).length;
+  const lowBatteryCount = trackers.filter((tItem) => tItem.battery < 30).length;
 
   return (
-    <ITStaffLayout>
+    <MainLayout
+      heroContent={
+        <div className="space-y-4">
+          <IoTHeader />
+          <div className="shadow-sm">
+            <IoTStatsCards
+              totalTrackers={trackers.length}
+              onlineCount={onlineCount}
+              offlineCount={offlineCount}
+              lowBatteryCount={lowBatteryCount}
+            />
+          </div>
+        </div>
+      }
+    >
       <div className="space-y-6">
-        <IoTHeader />
-
-        <IoTStatsCards
-          totalTrackers={trackers.length}
-          onlineCount={onlineCount}
-          offlineCount={offlineCount}
-          lowBatteryCount={lowBatteryCount}
-        />
-
         <IoTFiltersBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -209,6 +202,7 @@ export default function IoTTrackerLiveView() {
           historyData={historyData}
         />
       </div>
-    </ITStaffLayout>
+    </MainLayout>
   );
 }
+

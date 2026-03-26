@@ -12,25 +12,25 @@ export default function IoTStatsCards({
 
   const items = [
     {
-      label: t('itstaff:iot.stats.total'),
+      label: t("itstaff:iot.stats.total"),
       value: totalTrackers,
       icon: MapPin,
       colorClass: "text-primary",
     },
     {
-      label: t('itstaff:iot.stats.online'),
+      label: t("itstaff:iot.stats.online"),
       value: onlineCount,
       icon: Wifi,
       colorClass: "text-green-500",
     },
     {
-      label: t('itstaff:iot.stats.offline'),
+      label: t("itstaff:iot.stats.offline"),
       value: offlineCount,
       icon: WifiOff,
       colorClass: "text-red-500",
     },
     {
-      label: t('itstaff:iot.stats.lowBattery'),
+      label: t("itstaff:iot.stats.lowBattery"),
       value: lowBatteryCount,
       icon: Battery,
       colorClass: "text-orange-500",
@@ -42,14 +42,12 @@ export default function IoTStatsCards({
       {items.map((item, idx) => (
         <div key={idx} className="flex flex-col items-center group cursor-default">
           <div className="flex items-center gap-3 mb-1">
-            <item.icon
-              className={`w-5 h-5 ${item.colorClass} transition-colors`}
-            />
-            <span className="text-3xl md:text-4xl font-light text-black tracking-tight">
+            <item.icon className={`w-5 h-5 ${item.colorClass} transition-colors`} />
+            <span className="text-3xl md:text-4xl font-light text-slate-100 tracking-tight">
               {item.value}
             </span>
           </div>
-          <span className="text-xs font-medium text-black uppercase tracking-wide pl-7">
+          <span className="text-xs font-medium text-gray-300 uppercase tracking-wide pl-7">
             {item.label}
           </span>
         </div>
@@ -57,6 +55,4 @@ export default function IoTStatsCards({
     </div>
   );
 }
-
-
 

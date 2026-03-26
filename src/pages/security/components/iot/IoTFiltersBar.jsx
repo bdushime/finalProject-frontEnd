@@ -20,6 +20,7 @@ export default function IoTFiltersBar({
   onViewModeChange,
 }) {
   const { t } = useTranslation(["itstaff"]);
+
   return (
     <div className="border-gray-200 text-gray-900 shadow-sm rounded-lg">
       <div className="pt-6 px-4 pb-4">
@@ -27,7 +28,7 @@ export default function IoTFiltersBar({
           <div className="relative flex-1 w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t('iot.filters.searchPlaceholder')}
+              placeholder={t("iot.filters.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-9 border-gray-200 shadow-sm bg-background rounded-lg"
@@ -36,12 +37,12 @@ export default function IoTFiltersBar({
 
           <Select value={statusFilter} onValueChange={onStatusChange}>
             <SelectTrigger className="w-full sm:w-[180px] border-gray-200 shadow-sm bg-background rounded-lg">
-              <SelectValue placeholder={t('iot.filters.statusPlaceholder')} />
+              <SelectValue placeholder={t("iot.filters.statusPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('iot.filters.allStatus')}</SelectItem>
-              <SelectItem value="online">{t('iot.filters.online')}</SelectItem>
-              <SelectItem value="offline">{t('iot.filters.offline')}</SelectItem>
+              <SelectItem value="all">{t("iot.filters.allStatus")}</SelectItem>
+              <SelectItem value="online">{t("iot.filters.online")}</SelectItem>
+              <SelectItem value="offline">{t("iot.filters.offline")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -66,6 +67,4 @@ export default function IoTFiltersBar({
     </div>
   );
 }
-
-
 

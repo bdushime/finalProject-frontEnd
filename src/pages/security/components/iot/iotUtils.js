@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 
-// Campus zones for location simulation
+// Campus zones for location simulation (used by some visual helpers)
 export const CAMPUS_ZONES = [
   { name: "Computer Lab A", coords: { lat: -1.945, lng: 30.089 } },
   { name: "Library Zone", coords: { lat: -1.943, lng: 30.091 } },
@@ -44,5 +44,4 @@ export const formatLastSeen = (date) => {
     return "Unknown";
   }
 };
-
 

@@ -3,10 +3,13 @@ import MainLayout from "./layout/MainLayout";
 import StatCard from "@/components/security/StatCard";
 import ActionButton from "@/components/security/ActionButton";
 import ChartCard from "@/components/security/ChartCard";
-import AccessLogsTable from "@/components/security/AccessLogsTable";
-import { Activity, FileText, ShieldCheck, AlertTriangle, Users, Clock, Loader2 } from "lucide-react";
+import { Activity, ShieldCheck, AlertTriangle, Clock, Loader2, MapPin, Package, CheckCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import AccessLogs from "./Accesslogs";
 import api from "@/utils/api"; // Import your API helper
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/components/ui/utils";
 import {
   BarChart,
   Bar,
@@ -34,7 +37,6 @@ export default function SecurityDashboard() {
     equipmentTypeData: []
   });
   const [recentLogs, setRecentLogs] = useState([]);
-
   // Fetch Data on Load
   useEffect(() => {
     const fetchStats = async () => {
@@ -72,20 +74,27 @@ export default function SecurityDashboard() {
         }
         setStats(statsData);
 
-        // Map logs for the AccessLogsTable format
-        const mappedLogs = allLogs.slice(0, 5).map(log => ({
-          id: log._id,
-          timestamp: log.updatedAt || log.createdAt,
-          user: log.user?.username || log.user?.fullName || "Unknown",
-          userId: log.user?.studentId || log.user?._id || "N/A",
-          email: log.user?.email || "N/A",
-          action: log.status === 'Checked Out' ? 'Checkout' : log.status === 'Returned' ? 'Return' : log.status === 'Overdue' ? 'Overdue' : 'Checkout',
-          equipment: log.equipment?.name || "Unknown Item",
-          equipmentId: log.equipment?.serialNumber || "N/A",
-          location: log.destination || "Main Storage",
-          status: log.status === 'Overdue' ? 'failed' : 'success',
-          ipAddress: "—"
-        }));
+        // Map logs into the same structure used by `Accesslogs.jsx`
+        const mappedLogs = allLogs.slice(0, 5).map((log) => {
+          let type = "movement";
+          if (log.status === "Checked Out") type = "checkout";
+          if (log.status === "Returned") type = "return";
+          if (log.status === "Overdue") type = "violation";
+
+          return {
+            id: log._id,
+            timestamp: log.updatedAt || log.createdAt,
+            eventType: type,
+            status: log.status,
+            userName: log.user?.username || log.user?.fullName || "Unknown",
+            userId: log.user?.email || "N/A",
+            deviceName: log.equipment?.name || "Unknown Item",
+            deviceId: log.equipment?.serialNumber || "N/A",
+            location: log.destination || "Main Storage",
+            notes: log.purpose || "No notes provided",
+          };
+        });
+
         setRecentLogs(mappedLogs);
       } catch (err) {
         console.error("Failed to load security stats", err);
@@ -178,7 +187,7 @@ export default function SecurityDashboard() {
           <ChartCard
             title={t('dashboard.charts.activityTrends')}
             description={t('dashboard.charts.checkoutsVsOverdue')}
-            className="lg:col-span-2 border border-gray-100 shadow-sm bg-white rounded-[2rem]"
+            className="lg:col-span-2 border border-gray-100 shadow-sm bg-white rounded-4xl"
           >
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={stats.trendData.length > 0 ? stats.trendData : [{ name: t('dashboard.charts.noData'), checkouts: 0 }]}>
@@ -201,14 +210,14 @@ export default function SecurityDashboard() {
           <ChartCard
             title={t('dashboard.charts.topEquipment')}
             description={t('dashboard.charts.mostAccessedCategories')}
-            className="border border-gray-100 shadow-sm bg-white rounded-[2rem]"
+            className="border border-gray-100 shadow-sm bg-white rounded-4xl"
           >
             <DeviceUsageChart data={stats.equipmentTypeData} />
           </ChartCard>
         </div>
 
         {/* Recent Logs Section */}
-        <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[2rem] border border-gray-100 shadow-sm">
+        <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-4xl border border-gray-100 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg sm:text-xl font-bold text-slate-900">{t('dashboard.recentLogs')}</h3>
             <button onClick={() => navigate('/security/logs')} className="text-sm font-semibold text-[#8D8DC7] hover:bg-slate-50 px-4 py-2 rounded-full transition-colors flex items-center gap-2">
@@ -216,7 +225,7 @@ export default function SecurityDashboard() {
               <Activity className="h-4 w-4" />
             </button>
           </div>
-          <AccessLogsTable data={recentLogs} loading={loading} />
+          <AccessLogs showHeader={false} showLayout={false} maxRecords={5} />
         </div>
       </div>
     </MainLayout>

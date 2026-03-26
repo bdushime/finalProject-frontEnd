@@ -19,7 +19,7 @@ import {
 } from "recharts";
 import RecentActivity from "./RecentActivity";
 import QuickActions from "./QuickActions";
-import IoTMapView from "@/pages/IT_Staff/components/iot/IoTMapView";
+import IoTMapView from "@/pages/security/components/iot/IoTMapView";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
@@ -116,7 +116,7 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
       {/* 1. PROFILE CARD */}
       <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow relative border-none sm:col-span-2 lg:col-span-1 min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
         <img src={image} alt="Profile" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-gray-900/60 via-black/20 to-transparent" />
         <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex items-center justify-between text-white">
           <div>
             <h3 className="text-base sm:text-xl font-bold leading-tight">

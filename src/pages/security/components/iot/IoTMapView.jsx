@@ -5,12 +5,18 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  CircleMarker,
+  useMap,
+} from "react-leaflet";
 import { useMemo, useState, useEffect } from "react";
 import L from "leaflet";
 import { useTranslation } from "react-i18next";
 
-// Helper to auto-center map
 // Helper to auto-center map
 function ChangeView({ center, zoom, bounds }) {
   const map = useMap();
@@ -37,7 +43,11 @@ const offlineIcon = L.divIcon({
   iconAnchor: [7, 7],
 });
 
-export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNavigate }) {
+export default function IoTMapView({
+  filteredTrackers,
+  mapHeight = 500,
+  onNavigate,
+}) {
   const { t } = useTranslation(["itstaff"]);
   const [userLocation, setUserLocation] = useState(null);
 
@@ -53,13 +63,15 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
         (error) => console.error("Error getting location:", error),
         { enableHighAccuracy: true }
       );
+
       return () => navigator.geolocation.clearWatch(watchId);
     }
   }, []);
+
   // STRICT SAFETY: Filter invalid trackers immediately
   const validTrackers = useMemo(() => {
     if (!Array.isArray(filteredTrackers)) return [];
-    return filteredTrackers.filter(t => {
+    return filteredTrackers.filter((t) => {
       if (!t || !t.id || !t.coords) return false;
       const lat = Number(t.coords.lat);
       const lng = Number(t.coords.lng);
@@ -77,7 +89,7 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
     const totalLng = validTrackers.reduce((sum, t) => sum + Number(t.coords.lng), 0);
     return {
       lat: totalLat / validTrackers.length,
-      lng: totalLng / validTrackers.length
+      lng: totalLng / validTrackers.length,
     };
   }, [userLocation, validTrackers]);
 
@@ -85,7 +97,7 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
   const bounds = useMemo(() => {
     if (!validTrackers.length && !userLocation) return null;
 
-    const points = validTrackers.map(t => [Number(t.coords.lat), Number(t.coords.lng)]);
+    const points = validTrackers.map((t) => [Number(t.coords.lat), Number(t.coords.lng)]);
     if (userLocation) {
       points.push([userLocation.lat, userLocation.lng]);
     }
@@ -103,11 +115,14 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
         className={`${onNavigate ? "cursor-pointer" : ""} pb-2 sm:pb-4`}
         onClick={onNavigate}
       >
-        <CardTitle className="text-base sm:text-lg font-bold">{t('iot.map.title')}</CardTitle>
+        <CardTitle className="text-base sm:text-lg font-bold">
+          {t("iot.map.title")}
+        </CardTitle>
         <CardDescription className="text-[10px] sm:text-xs">
-          {t('iot.map.desc')}
+          {t("iot.map.desc")}
         </CardDescription>
       </CardHeader>
+
       <CardContent className="flex-1 pb-0">
         <div
           className="w-full rounded-lg overflow-hidden"
@@ -130,29 +145,33 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
               <CircleMarker
                 center={userLocation}
                 radius={8}
-                pathOptions={{ color: 'white', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 }}
+                pathOptions={{
+                  color: "white",
+                  fillColor: "#3b82f6",
+                  fillOpacity: 1,
+                  weight: 2,
+                }}
               >
-                <Popup>{t('iot.map.youAreHere')}</Popup>
+                <Popup>{t("iot.map.youAreHere")}</Popup>
               </CircleMarker>
             )}
 
             {validTrackers.map((tracker) => (
               <Marker
                 key={tracker.id}
-                position={{ lat: Number(tracker.coords.lat), lng: Number(tracker.coords.lng) }}
+                position={{
+                  lat: Number(tracker.coords.lat),
+                  lng: Number(tracker.coords.lng),
+                }}
                 icon={tracker.status === "online" ? onlineIcon : offlineIcon}
               >
                 <Popup className="border-gray-200 shadow-sm bg-background rounded-lg">
                   <div className="space-y-1 text-sm">
                     <div className="font-semibold">{tracker.equipment}</div>
-                    <div className="text-muted-foreground text-xs">
-                      {tracker.id}
-                    </div>
-                    <div className="text-muted-foreground text-xs">
-                      {tracker.location}
-                    </div>
+                    <div className="text-muted-foreground text-xs">{tracker.id}</div>
+                    <div className="text-muted-foreground text-xs">{tracker.location}</div>
                     <div className="text-xs mt-1">
-                      {t('iot.map.status')}{" "}
+                      {t("iot.map.status")}{" "}
                       <span
                         className={
                           tracker.status === "online"
@@ -170,8 +189,7 @@ export default function IoTMapView({ filteredTrackers, mapHeight = 500, onNaviga
           </MapContainer>
         </div>
       </CardContent>
-    </Card >
+    </Card>
   );
 }
-
 

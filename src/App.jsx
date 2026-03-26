@@ -61,6 +61,7 @@ import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
 import SecurityProfile from "./pages/security/Profile";
+import SecurityIoTTrackerLiveView from "./pages/security/IoTTrackerLiveView";
 import GateVerification from "./pages/Gate_security_officer/GateVerification";
 
 // Admin Pages
@@ -143,6 +144,7 @@ export default function App() {
                     <Route path="/security/logs" element={<Accesslogs />} />
                     <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                     <Route path="/security/devices" element={<BrowseDevices />} />
+                    <Route path="/security/iot-tracker" element={<SecurityIoTTrackerLiveView />} />
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />

@@ -3,9 +3,8 @@ import { useLocation, useNavigate, NavLink, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Menu, Bell, Plus, LayoutGrid, ShieldAlert, Package,
-  ClipboardList, FileText, Shield, X, Upload, LogOut
+  ClipboardList, FileText, Shield, Radio, X, Upload, LogOut
 } from "lucide-react";
-import PropTypes from "prop-types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,7 +84,8 @@ function Topbar() {
   const navigationLinks = [
     { label: t("nav.dashboard"), path: "/security/dashboard", icon: LayoutGrid },
     { label: t("nav.devices"), path: "/security/devices", icon: Package },
-    { label: t("nav.checkouts"), path: "/security/active-checkouts", icon: ClipboardList },
+    { label: t("nav.tracking"), path: "/security/iot-tracker", icon: Radio },
+    // { label: t("nav.checkouts"), path: "/security/active-checkouts", icon: ClipboardList },
     { label: t("nav.accessLogs"), path: "/security/logs", icon: ShieldAlert },
     { label: t("nav.reports"), path: "/security/reports", icon: FileText },
   ];
@@ -109,11 +109,6 @@ function Topbar() {
         description: null,
         actionButton: { label: tSec("devices.addDevice"), path: "/security/devices", icon: Plus },
         secondaryAction: { label: tSec("browseDevices.bulkUpload"), icon: Upload },
-      },
-      "/security/active-checkouts": {
-        title: tSec("dashboard.stats.activeCheckouts"),
-        description: null,
-        actionButton: null,
       },
       "/security/logs": {
         title: tSec("accessLogs.title"),
@@ -162,11 +157,11 @@ function Topbar() {
 
   return (
     <header className="w-full relative z-20">
-      <div className="mx-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-3 border-b border-slate-700/50">
+      <div className="mx-auto sm:px-4 lg:px-8 py-2 sm:py-3 border-b border-slate-700/50">
         <div className="flex items-center justify-between h-12 sm:h-14">
 
           {/* Left: Hamburger + Logo */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -192,7 +187,7 @@ function Topbar() {
           </div>
 
           {/* Center: Navigation Links — only visible on lg+ */}
-          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 bg-slate-800/50 p-1 rounded-full backdrop-blur-sm border border-slate-700/50 mx-2 flex-shrink min-w-0">
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 bg-slate-800/50 p-1 rounded-full backdrop-blur-sm border border-slate-700/50 mx-2 shrink min-w-0">
             {navigationLinks.map((link) => {
               const Icon = link.icon;
               const active = isLinkActive(link.path);
@@ -208,22 +203,21 @@ function Topbar() {
                     }`
                   }
                 >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <Icon className="h-4 w-4 shrink-0" />
                   <span className="hidden xl:inline">{link.label}</span>
                 </NavLink>
               );
             })}
           </nav>
 
-          {/*Language Switcher, Notifications, User */}
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0">
 
 
             <LanguageSwitcher variant="dark" />
 
             <Link
               to="/security/notifications"
-              className="relative p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
+              className="relative p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors shrink-0"
               aria-label={t("nav.notifications")}
             >
               <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300 hover:text-white transition-colors" />
@@ -237,7 +231,7 @@ function Topbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="h-9 sm:h-11 pl-1 sm:pl-1.5 pr-2 lg:pr-5 rounded-full bg-slate-800/20 backdrop-blur-md border border-white/30 flex items-center gap-2 sm:gap-3 hover:bg-white/30 transition-all hover:shadow-sm group hover:scale-[1.02]">
-                  <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-slate-100 flex items-center justify-center shadow-sm border border-slate-200 flex-shrink-0">
+                  <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-slate-100 flex items-center justify-center shadow-sm border border-slate-200 shrink-0">
                     <span className="text-black font-bold text-xs sm:text-sm">
                       {displayInitial}
                     </span>
