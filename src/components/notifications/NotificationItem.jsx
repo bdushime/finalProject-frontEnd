@@ -74,7 +74,7 @@ export function NotificationItem({
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3">
               <div className="min-w-0">
                 <h4
                   className="font-semibold truncate text-slate-900"
@@ -82,19 +82,19 @@ export function NotificationItem({
                   {title || 'Notification'}
                 </h4>
                 <p
-                  className="mt-1 text-sm leading-relaxed text-slate-700"
+                  className="mt-1 text-sm leading-relaxed text-slate-700 whitespace-normal wrap-break-word"
                 >
                   {message}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-start sm:justify-end">
                 {type && (
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
                     {type}
                   </span>
                 )}
-                <span className="text-xs text-slate-400 whitespace-nowrap">
+                <span className="text-xs text-slate-400 whitespace-normal sm:whitespace-nowrap">
                   {formatTimestamp
                     ? formatTimestamp(createdAt)
                     : createdAt
