@@ -136,44 +136,92 @@ export default function SecurityDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards + Action Buttons in one row */}
-      <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-5 gap-2 relative z-10">
+      {/* Desktop: keep original layout (stats + actions in one row) */}
+      <div className="hidden lg:grid grid-cols-3 md:grid-cols-2 lg:grid-cols-5 gap-2 relative z-10">
         <StatCard
-          title={t('dashboard.stats.activeCheckouts')}
+          title={t("dashboard.stats.activeCheckouts")}
           value={stats.activeCount}
-          subtext={t('dashboard.stats.currentlyOut')}
+          subtext={t("dashboard.stats.currentlyOut")}
           changeType="neutral"
           icon={Clock}
         />
         <StatCard
-          title={t('dashboard.stats.securityAlerts')}
+          title={t("dashboard.stats.securityAlerts")}
           value={stats.overdueCount}
-          subtext={t('dashboard.stats.overdueItems')}
+          subtext={t("dashboard.stats.overdueItems")}
           changeType={stats.overdueCount > 0 ? "negative" : "positive"}
           icon={AlertTriangle}
           isAlert={stats.overdueCount > 0}
         />
         <StatCard
-          title={t('dashboard.stats.systemStatus')}
-          value={t('dashboard.stats.online')}
-          subtext={t('dashboard.stats.allSystemsNormal')}
+          title={t("dashboard.stats.systemStatus")}
+          value={t("dashboard.stats.online")}
+          subtext={t("dashboard.stats.allSystemsNormal")}
           changeType="positive"
           icon={ShieldCheck}
         />
         <ActionButton
-          label={t('dashboard.actions.browseInventory')}
+          label={t("dashboard.actions.browseInventory")}
           icon={Activity}
           variant="primary"
           onClick={() => navigate("/security/devices")}
           className="bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white border-none shadow-lg shadow-[#8D8DC7]/20"
         />
         <ActionButton
-          label={t('dashboard.actions.scanVerify')}
+          label={t("dashboard.actions.scanVerify")}
           icon={ShieldCheck}
           variant="secondary"
           onClick={() => navigate("/security/verify")}
           className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md"
         />
+      </div>
+
+      {/* Mobile: use the improved split layout */}
+      <div className="lg:hidden">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 relative z-10">
+          <StatCard
+            title={t("dashboard.stats.activeCheckouts")}
+            value={stats.activeCount}
+            subtext={t("dashboard.stats.currentlyOut")}
+            changeType="neutral"
+            icon={Clock}
+          />
+          <StatCard
+            title={t("dashboard.stats.securityAlerts")}
+            value={stats.overdueCount}
+            subtext={t("dashboard.stats.overdueItems")}
+            changeType={stats.overdueCount > 0 ? "negative" : "positive"}
+            icon={AlertTriangle}
+            isAlert={stats.overdueCount > 0}
+          />
+          <StatCard
+            title={t("dashboard.stats.systemStatus")}
+            value={t("dashboard.stats.online")}
+            subtext={t("dashboard.stats.allSystemsNormal")}
+            changeType="positive"
+            icon={ShieldCheck}
+            className="md:col-span-1 col-span-2"
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="mt-2 sm:mt-3 grid grid-cols-2 gap-2 sm:gap-3 relative z-10">
+          <ActionButton
+            label={t("dashboard.actions.browseInventory")}
+            icon={Activity}
+            variant="primary"
+            onClick={() => navigate("/security/devices")}
+            className="min-h-[120px] sm:min-h-[140px]"
+          />
+          <ActionButton
+            label={t("dashboard.actions.scanVerify")}
+            icon={ShieldCheck}
+            variant="secondary"
+            onClick={() => navigate("/security/verify")}
+            className="min-h-[120px] sm:min-h-[140px]"
+          />
+        </div>
       </div>
     </div>
   );
@@ -182,7 +230,7 @@ export default function SecurityDashboard() {
     <MainLayout heroContent={HeroSection}>
       <div className="space-y-2">
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           {/* Access Trends Chart */}
           <ChartCard
             title={t('dashboard.charts.activityTrends')}
@@ -217,9 +265,9 @@ export default function SecurityDashboard() {
         </div>
 
         {/* Recent Logs Section */}
-        <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-4xl border border-gray-100 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg sm:text-xl font-bold text-slate-900">{t('dashboard.recentLogs')}</h3>
+        <div className="bg-white p-2 sm:p-6 md:p-8 rounded-2xl sm:rounded-4xl border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-2xl sm:text-xl font-bold text-slate-900">{t('dashboard.recentLogs')}</h3>
             <button onClick={() => navigate('/security/logs')} className="text-sm font-semibold text-[#8D8DC7] hover:bg-slate-50 px-4 py-2 rounded-full transition-colors flex items-center gap-2">
               {t('common:actions.viewAll')}
               <Activity className="h-4 w-4" />
