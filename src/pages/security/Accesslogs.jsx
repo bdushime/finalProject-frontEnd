@@ -80,17 +80,51 @@ export default function AccessLogs({
   const itemsPerPage = 10;
   const [sortBy, setSortBy] = useState("date-desc");
   const shouldLimitToMaxRecords = typeof maxRecords === "number" && maxRecords > 0;
+  const emptyStats = useMemo(
+    () => ({ totalBorrowed: 0, totalLost: 0, totalDamaged: 0, totalOverdue: 0 }),
+    []
+  );
+
+  const deriveStatsFromLogs = (logs) => {
+    const safeLogs = Array.isArray(logs) ? logs : [];
+
+    const normalize = (v) => (typeof v === "string" ? v.trim().toLowerCase() : "");
+
+    let totalBorrowed = 0;
+    let totalOverdue = 0;
+    let totalLost = 0;
+    let totalDamaged = 0;
+
+    for (const log of safeLogs) {
+      const status = normalize(log?.status);
+      const condition = normalize(log?.condition || log?.equipment?.condition);
+      const reportType = normalize(log?.reportType || log?.type);
+
+      if (status === "checked out" || status === "overdue") totalBorrowed += 1;
+      if (status === "overdue") totalOverdue += 1;
+
+      // Best-effort: backend may mark these via equipment condition or report type.
+      if (condition === "lost" || reportType === "lost" || status === "lost") totalLost += 1;
+      if (condition === "damaged" || reportType === "damaged" || status === "damaged") totalDamaged += 1;
+    }
+
+    return { totalBorrowed, totalLost, totalDamaged, totalOverdue };
+  };
 
   // --- FETCH DATA ---
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await api.get('/transactions/security/access-logs?page=1&limit=10');
-        setStats(res.data.stats || { totalBorrowed: 0, totalLost: 0, totalDamaged: 0, totalOverdue: 0 });
+        const limit = shouldLimitToMaxRecords ? maxRecords : 10;
+        const res = await api.get(`/transactions/security/access-logs?page=1&limit=${limit}`);
+
+        const backendLogs = res.data?.logs || [];
+        const backendStats = res.data?.stats;
+        setStats(backendStats || deriveStatsFromLogs(backendLogs) || emptyStats);
 
         // Map Backend Data to Frontend Structure
-        const mappedLogs = (res.data.logs || []).map(log => {
+        const mappedLogs = backendLogs.map(log => {
           // Determine Event Type based on Status
           let type = 'movement';
           if (log.status === 'Checked Out') type = 'checkout';
@@ -107,11 +141,9 @@ export default function AccessLogs({
             deviceName: log.equipment?.name || "Unknown Item",
             deviceId: log.equipment?.serialNumber || "N/A",
             location: log.destination || "Main Storage", // Using destination as location
-            coordinates: { lat: -1.9441, lng: 30.0619 }, // Mock Kigali coords for now
             notes: log.purpose || "No notes provided"
           };
         });
-        console.log(mappedLogs);
         setAllLogs(mappedLogs);
       } catch (err) {
         console.error("Failed to load logs:", err);
@@ -120,7 +152,7 @@ export default function AccessLogs({
       }
     };
     fetchData();
-  }, []);
+  }, [shouldLimitToMaxRecords, maxRecords, emptyStats]);
 
   // --- FILTER LOGIC ---
   const filteredMovements = useMemo(() => {
@@ -215,7 +247,8 @@ export default function AccessLogs({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-start sm:justify-end gap-6 md:gap-8 relative z-10 mb-8">
+      {/* Small screens: improved grid alignment */}
+      <div className="grid grid-cols-2 items-center justify-items-center gap-x-6 gap-y-5 sm:gap-x-10 sm:gap-y-5 md:hidden relative z-10">
         {[
           {
             label: t("accessLogs.stats.totalBorrowed"),
@@ -242,9 +275,61 @@ export default function AccessLogs({
             colorClass: "text-yellow-500",
           },
         ].map((item, idx) => (
-          <div key={idx} className="flex flex-col items-center group cursor-default">
+          <div
+            key={idx}
+            className="flex flex-col items-center justify-center group cursor-default text-center"
+          >
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <item.icon
+                className={`w-5 h-5 ${item.colorClass} transition-colors shrink-0`}
+              />
+              <span className="text-3xl md:text-4xl font-light text-slate-100 tracking-tight leading-none">
+                {item.value}
+              </span>
+            </div>
+            <span className="text-xs font-medium text-gray-300 uppercase tracking-wide leading-snug">
+              {item.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Large screens: keep original layout */}
+      <div className="hidden md:flex flex-wrap items-center justify-start sm:justify-end gap-2 md:gap-8 relative z-10">
+        {[
+          {
+            label: t("accessLogs.stats.totalBorrowed"),
+            value: stats.totalBorrowed,
+            icon: Package,
+            colorClass: "text-primary",
+          },
+          {
+            label: t("accessLogs.stats.totalOverdue"),
+            value: stats.totalOverdue,
+            icon: AlertTriangle,
+            colorClass: "text-red-500",
+          },
+          {
+            label: t("accessLogs.stats.lostItems"),
+            value: stats.totalLost,
+            icon: Search,
+            colorClass: "text-orange-500",
+          },
+          {
+            label: t("accessLogs.stats.damagedItems"),
+            value: stats.totalDamaged,
+            icon: AlertTriangle,
+            colorClass: "text-yellow-500",
+          },
+        ].map((item, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col items-center group cursor-default"
+          >
             <div className="flex items-center gap-3 mb-1">
-              <item.icon className={`w-5 h-5 ${item.colorClass} transition-colors`} />
+              <item.icon
+                className={`w-5 h-5 ${item.colorClass} transition-colors`}
+              />
               <span className="text-3xl md:text-4xl font-light text-slate-100 tracking-tight">
                 {item.value}
               </span>
