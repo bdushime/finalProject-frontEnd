@@ -36,6 +36,7 @@ import DeviceDetailsDialog from "./DeviceDetailsDialog";
 
 import api from "@/utils/api";
 import { UserRoles } from "@/config/roleConfig";
+import Loader from "@/components/common/Loader";
 
 const DEFAULT_CATEGORIES = ['Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Electronics', 'Other'];
 const DEFAULT_CONDITIONS = ['Excellent', 'Good', 'Fair', 'Poor', 'Damaged'];
@@ -55,6 +56,7 @@ function BrowseDevices() {
 
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDevicesLoading, setIsDevicesLoading] = useState(true);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [detailsDeviceId, setDetailsDeviceId] = useState(null);
 
@@ -73,6 +75,7 @@ function BrowseDevices() {
   }, []);
 
   const fetchDevices = async () => {
+    setIsDevicesLoading(true);
     try {
       const devicesRes = await api.get('/equipment');
       if (devicesRes.data) {
@@ -85,6 +88,8 @@ function BrowseDevices() {
       }
     } catch (err) {
       console.error("Failed to fetch equipment list:", err);
+    } finally {
+      setIsDevicesLoading(false);
     }
   };
 
@@ -290,7 +295,9 @@ function BrowseDevices() {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{t('browseDevices.title')}</h1>
           <p className="text-gray-400 flex items-center gap-2 text-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-[#8D8DC7]"></span>
-            {t('browseDevices.showingDevices', { current: filteredDevices.length, total: deviceList.length })}
+            {isDevicesLoading
+              ? t('common:loading', 'Loading...')
+              : t('browseDevices.showingDevices', { current: filteredDevices.length, total: deviceList.length })}
           </p>
         </div>
         <div className="mt-4 sm:mt-6 md:mt-0 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -386,122 +393,129 @@ function BrowseDevices() {
         </div>
 
         {/* Device Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-2">
-          {filteredDevices.map((device) => (
-            <Card
-              key={device.id}
-              className="border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group bg-white rounded-2xl sm:rounded-[2rem] overflow-hidden flex flex-col h-full"
-              onClick={() => navigateToDevice(device)}
-            >
-              <CardHeader className="p-6 pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-[#8D8DC7] transition-colors leading-tight">
-                      {device.name}
-                    </CardTitle>
-                    {device.iotTag ? (
-                      <p className="text-xs text-blue-600 font-mono bg-blue-50 inline-block px-2 py-0.5 mt-2 rounded">IoT: {device.iotTag}</p>
-                    ) : (
-                      <p className="text-xs text-gray-400 italic mt-2">No IoT Tag</p>
-                    )}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigateToDevice(device);
-                    }}
-                    title="View Details"
-                  >
-                    <Eye className="h-5 w-5 text-slate-400 group-hover:text-[#8D8DC7]" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 pt-2 space-y-2 flex-1 flex flex-col">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getStatusColor(device.status))}>
-                    {device.status}
-                  </Badge>
-                  <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getConditionColor(device.condition))}>
-                    {device.condition}
-                  </Badge>
-                </div>
-
-                <div className="space-y-2 text-sm flex-1">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Tag className="h-4 w-4" />
-                    <span>{device.category}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span className="truncate">{device.location || t('common:notSpecified', 'Not specified')}</span>
-                  </div>
-                  <div className="flex flex-col gap-1 items-start mt-2">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-                      <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] uppercase">{t('common:browseDevices.labels.sn')}</span>
-                      <span className="font-mono text-gray-700">{device.serialNumber || 'N/A'}</span>
+        
+          {isDevicesLoading ? (
+            <div className="w-full min-h-[70vh] flex items-center justify-center">
+              <Loader />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-2">
+            {filteredDevices.map((device) => (
+              <Card
+                key={device.id}
+                className="border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group bg-white rounded-2xl sm:rounded-[2rem] overflow-hidden flex flex-col h-full"
+                onClick={() => navigateToDevice(device)}
+              >
+                <CardHeader className="p-6 pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-[#8D8DC7] transition-colors leading-tight">
+                        {device.name}
+                      </CardTitle>
+                      {device.iotTag ? (
+                        <p className="text-xs text-blue-600 font-mono bg-blue-50 inline-block px-2 py-0.5 mt-2 rounded">IoT: {device.iotTag}</p>
+                      ) : (
+                        <p className="text-xs text-gray-400 italic mt-2">No IoT Tag</p>
+                      )}
                     </div>
-                  </div>
-
-                  {device.trackingStatus && device.trackingStatus !== 'Unknown' && (
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                      <Activity className={`h-4 w-4 ${device.trackingStatus === 'Safe' ? 'text-green-500' : 'text-red-500'}`} />
-                      <span className="text-xs font-semibold">{device.trackingStatus}</span>
-                      <span className="text-gray-300 mx-1">•</span>
-                      <Battery className={`h-4 w-4 ${device.batteryLevel > 20 ? 'text-green-500' : 'text-red-500'}`} />
-                      <span className="text-xs">{device.batteryLevel}%</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-4 border-t border-gray-50 flex justify-end gap-2 mt-auto">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-xl hover:bg-blue-50 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/security/device-movement/${device.id}`);
-                    }}
-                    title="View Movement"
-                  >
-                    <MapPin className="h-4 w-4 text-blue-500" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-xl hover:bg-slate-50 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEditDialog(device);
-                    }}
-                    title="Edit Device"
-                  >
-                    <Edit className="h-4 w-4 text-slate-600" />
-                  </Button>
-                  {currentUser.role === 'Admin' && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 rounded-xl hover:bg-red-50 transition-colors"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={(e) => {
                         e.stopPropagation();
-                        openDeleteDialog(device);
+                        navigateToDevice(device);
                       }}
-                      title="Delete Device"
+                      title="View Details"
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Eye className="h-5 w-5 text-slate-400 group-hover:text-[#8D8DC7]" />
                     </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-2 space-y-2 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getStatusColor(device.status))}>
+                      {device.status}
+                    </Badge>
+                    <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getConditionColor(device.condition))}>
+                      {device.condition}
+                    </Badge>
+                  </div>
 
-        {filteredDevices.length === 0 && (
+                  <div className="space-y-2 text-sm flex-1">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Tag className="h-4 w-4" />
+                      <span>{device.category}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span className="truncate">{device.location || t('common:notSpecified', 'Not specified')}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 items-start mt-2">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                        <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] uppercase">{t('common:browseDevices.labels.sn')}</span>
+                        <span className="font-mono text-gray-700">{device.serialNumber || 'N/A'}</span>
+                      </div>
+                    </div>
+
+                    {device.trackingStatus && device.trackingStatus !== 'Unknown' && (
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                        <Activity className={`h-4 w-4 ${device.trackingStatus === 'Safe' ? 'text-green-500' : 'text-red-500'}`} />
+                        <span className="text-xs font-semibold">{device.trackingStatus}</span>
+                        <span className="text-gray-300 mx-1">•</span>
+                        <Battery className={`h-4 w-4 ${device.batteryLevel > 20 ? 'text-green-500' : 'text-red-500'}`} />
+                        <span className="text-xs">{device.batteryLevel}%</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-50 flex justify-end gap-2 mt-auto">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-xl hover:bg-blue-50 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/security/device-movement/${device.id}`);
+                      }}
+                      title="View Movement"
+                    >
+                      <MapPin className="h-4 w-4 text-blue-500" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-xl hover:bg-slate-50 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditDialog(device);
+                      }}
+                      title="Edit Device"
+                    >
+                      <Edit className="h-4 w-4 text-slate-600" />
+                    </Button>
+                    {currentUser.role === 'Admin' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-xl hover:bg-red-50 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteDialog(device);
+                        }}
+                        title="Delete Device"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+        </div>
+          )}
+
+        {!isDevicesLoading && filteredDevices.length === 0 && (
           <Card className="border border-gray-200 shadow-sm mt-6">
             <CardContent className="py-12 text-center">
               <Search className="h-12 w-12 mx-auto mb-4 text-gray-400" />
