@@ -8,7 +8,7 @@ export default function SecurityProfile() {
     const HeroSection = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 mt-4 relative z-10 w-full text-slate-800">
             <div>
-                <h1 className="text-3xl font-bold mb-2 text-slate-900 tracking-tight">{t('profile.title', 'My Profile')}</h1>
+                <h1 className="text-3xl font-bold mb-2 text-slate-100 tracking-tight">{t('profile.title', 'My Profile')}</h1>
                 <p className="text-slate-500 max-w-2xl text-sm leading-relaxed">{t('profile.personal.desc', 'Manage your security account details')}</p>
             </div>
         </div>
