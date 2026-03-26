@@ -17,13 +17,13 @@ export default function ActionButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center gap-4 p-8 rounded-3xl transition-all duration-300 active:scale-95 group",
+        "flex flex-col items-center justify-center gap-3 sm:gap-4 p-5 sm:p-8 rounded-3xl transition-all duration-300 active:scale-95 group text-center",
         variants[variant],
         className
       )}
     >
-      {Icon && <Icon className="h-10 w-10 transition-transform group-hover:scale-110" />}
-      <span className="text-xl font-bold tracking-tight">{label}</span>
+      {Icon && <Icon className="h-8 w-8 sm:h-10 sm:w-10 transition-transform group-hover:scale-110" />}
+      <span className="text-base sm:text-xl font-bold tracking-tight leading-tight">{label}</span>
     </button>
   );
 }
