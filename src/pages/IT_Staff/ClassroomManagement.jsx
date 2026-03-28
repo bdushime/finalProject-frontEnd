@@ -41,7 +41,7 @@ export default function ClassroomManagement() {
 
     const loadClassrooms = async () => {
         try {
-            const res = await api.get('/classrooms');
+            const res = await api.get('/classroom');
             setClassrooms(res.data);
         } catch (err) {
             console.error(err);

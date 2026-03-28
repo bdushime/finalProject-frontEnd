@@ -68,7 +68,7 @@ export default function Report() {
     const filteredData = useMemo(() => {
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
+        const startOfWeek = new Date(startOfDay); startOfWeek.setDate(startOfDay.getDate() - startOfDay.getDay());
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const startOfYear = new Date(now.getFullYear(), 0, 1);
 
@@ -421,9 +421,6 @@ export default function Report() {
                                 >
                                     <option>All Categories</option>
                                     <option>Projector</option>
-                                    <option>Laptop</option>
-                                    <option>Camera</option>
-                                    <option>Audio</option>
                                     <option>General</option>
                                 </select>
                                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />

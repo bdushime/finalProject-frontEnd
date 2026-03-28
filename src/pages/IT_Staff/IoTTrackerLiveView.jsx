@@ -37,7 +37,7 @@ export default function IoTTrackerLiveView() {
   */
   const processTrackers = (rawTrackers) => {
     const now = new Date().getTime();
-    const TIMEOUT_MS = 15000; // 15 seconds allowed silence
+    const TIMEOUT_MS = 300000; // 5 minutes allowed silence
 
     return rawTrackers.map(t => {
       // Create a copy to avoid mutating state directly if using objects

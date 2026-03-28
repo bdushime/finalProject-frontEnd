@@ -61,14 +61,18 @@ export default function QRCodeScanner({ onScanSuccess }) {
         return () => {
             isMounted = false;
             if (scannerRef.current) {
-                scannerRef.current
-                    .stop()
-                    .then(() => {
-                        scannerRef.current?.clear();
-                    })
-                    .catch((e) => {
-                        console.log("Cleanup error:", e);
-                    });
+                try {
+                    scannerRef.current
+                        .stop()
+                        .then(() => {
+                            try { scannerRef.current?.clear(); } catch (e) { }
+                        })
+                        .catch((e) => {
+                            console.log("Cleanup error:", e);
+                        });
+                } catch (err) {
+                    console.log("Sync cleanup error caught:", err);
+                }
             }
         };
     }, [onScanSuccess]);
