@@ -9,13 +9,40 @@ import NotificationsWidget from "./components/Dashboard/NotificationsWidget";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
 
+function parseProfilePayload(payload) {
+    if (!payload || typeof payload !== "object") {
+        return { name: "Student", score: null };
+    }
+    const raw = payload.responsibilityScore ?? payload.user?.responsibilityScore;
+    const score =
+        raw == null || !Number.isFinite(Number(raw))
+            ? null
+            : Math.min(100, Math.max(0, Number(raw)));
+    const name =
+        payload.fullName ||
+        payload.username ||
+        payload.user?.fullName ||
+        payload.user?.username ||
+        "Student";
+    return { name, score };
+}
+
 export default function Dashboard() {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation("student");
     const { t: tCommon } = useTranslation("common");
 
-    // --- STATE ---
-    const [user, setUser] = useState({ name: "Student", score: 0 });
+    // --- STATE (seed from same object login() stores — avoids flash of wrong %) ---
+    const [user, setUser] = useState(() => {
+        try {
+            const raw = localStorage.getItem("user");
+            if (!raw) return { name: "Student", score: 0 };
+            const { name, score } = parseProfilePayload(JSON.parse(raw));
+            return { name, score: score ?? 0 };
+        } catch {
+            return { name: "Student", score: 0 };
+        }
+    });
     const [borrows, setBorrows] = useState([]);
     const [history, setHistory] = useState([]);
     const [devices, setDevices] = useState([]);
@@ -29,11 +56,12 @@ export default function Dashboard() {
             if (!token) return;
 
             try {
-                // A. Profile
+                // A. Profile — align with login payload (responsibilityScore on root or under user)
                 const profileRes = await api.get('/users/profile');
+                const { name, score } = parseProfilePayload(profileRes.data ?? {});
                 setUser({
-                    name: profileRes.data.fullName || profileRes.data.username,
-                    score: profileRes.data.responsibilityScore || 100,
+                    name,
+                    score: score ?? 100,
                 });
 
                 // B. Borrows & History

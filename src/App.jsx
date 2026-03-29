@@ -148,6 +148,9 @@ export default function App() {
                     <Route path="/security/device-movement" element={<DeviceMovementHistory />} />
                     <Route path="/security/device-movement/:deviceId" element={<DeviceMovementHistory />} />
                     <Route path="/security/profile" element={<SecurityProfile />} />
+                </Route>
+
+                <Route element={<ProtectedRoute allowedRoles={['Gate_Keeper']} />}>
                     <Route path="/gate-verification" element={<GateVerification />} />
                 </Route>
 

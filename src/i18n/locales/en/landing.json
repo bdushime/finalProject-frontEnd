@@ -6,7 +6,7 @@
         "startFree": "Start for free",
         "watchDemo": "Watch demo"
     },
-    "features": {
+    "feature": {
         "title": "Everything you need to manage equipment",
         "subtitle": "Powerful tools designed to make equipment tracking effortless for everyone on campus.",
         "iotTracking": "IoT Tracking",
@@ -59,7 +59,7 @@
         "followUs": "Follow us"
     },
     "nav": {
-        "features": "Features",
+        "features": "Feature",
         "howItWorks": "How it Works",
         "users": "Users",
         "contact": "Contact",

@@ -335,7 +335,7 @@ export default function Landing() {
 
                             {/* Desktop Nav */}
                             <div className="hidden md:flex items-center gap-8">
-                                <button onClick={() => scrollTo('features')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.features')}</button>
+                                <button onClick={() => scrollTo('feature')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.features')}</button>
                                 <button onClick={() => scrollTo('how-it-works')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.howItWorks')}</button>
                                 <button onClick={() => scrollTo('users')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.users')}</button>
                                 <button onClick={() => scrollTo('contact')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">{t('nav.contact')}</button>

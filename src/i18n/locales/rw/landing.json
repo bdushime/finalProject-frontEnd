@@ -6,7 +6,7 @@
         "startFree": "Tangira ku Buntu",
         "watchDemo": "Reba Demo"
     },
-    "features": {
+    "feature": {
         "title": "Ibyo ukeneye byose ngo ucunge ibikoresho",
         "subtitle": "Ibikoresho simusiga byagenewe korohereza buri wese mu kigo gukurikirana ibikoresho.",
         "iotTracking": "Gukurikirana hakoreshejwe IoT",

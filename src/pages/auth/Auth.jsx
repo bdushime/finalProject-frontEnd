@@ -70,6 +70,9 @@ export default function Auth() {
                     case 'IT_Staff':
                         navigate("/it/dashboard");
                         break;
+                    case 'Gate_Keeper':
+                        navigate("/gate-verification");
+                        break;
                     default:
                         console.warn("Unknown role detected:", role);
                         navigate("/student/dashboard");
