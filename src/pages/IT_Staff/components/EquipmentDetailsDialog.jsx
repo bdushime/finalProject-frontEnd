@@ -26,7 +26,6 @@ import {
   Battery,
   Thermometer,
   Droplets,
-  Loader2,
   Save,
   X,
   Edit2,
@@ -34,6 +33,7 @@ import {
   Printer,
   Download,
 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -401,7 +401,7 @@ export default function EquipmentDetailsDialog({
                   className="bg-blue-600 text-white"
                 >
                   {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    <Loader variant="inline" className="mr-2" />
                   ) : (
                     <Save className="w-4 h-4 mr-2" />
                   )}

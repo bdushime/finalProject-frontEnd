@@ -4,11 +4,12 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BackButton from "./components/BackButton";
-import { Package, Loader2 } from "lucide-react";
+import { Package } from "lucide-react";
 import { PageContainer } from "@/components/common/Page";
 import api from "@/utils/api";
 import { mockPackages } from "./data/mockPackages";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function EquipmentCatalogue() {
     const navigate = useNavigate();
@@ -128,7 +129,7 @@ export default function EquipmentCatalogue() {
                 {/* LOADING STATE */}
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                        <Loader2 className="w-10 h-10 animate-spin mb-3 text-[#126dd5]" />
+                        <Loader variant="inline" />
                         <p>{t("equipment.loadingCatalog")}</p>
                     </div>
                 ) : (

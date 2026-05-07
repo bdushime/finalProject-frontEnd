@@ -3,7 +3,7 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package, Loader2, CalendarClock, Clock, AlertCircle, CheckCircle, ArrowRight, History, MoreVertical, Calendar, Timer } from "lucide-react";
+import { Package, CalendarClock, Clock, AlertCircle, CheckCircle, ArrowRight, History, MoreVertical, Calendar, Timer } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PageContainer } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner"; // Assuming you use sonner for toasts
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import Loader from "@/components/common/Loader";
 
 export default function MyBorrowedItems() {
     const navigate = useNavigate();
@@ -166,7 +167,7 @@ export default function MyBorrowedItems() {
         return (
             <StudentLayout>
                 <div className="h-screen flex items-center justify-center text-slate-400">
-                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> {t("borrowed.loading")}
+                    <Loader variant="inline" className="mr-2" /> {t("borrowed.loading")}
                 </div>
             </StudentLayout>
         );

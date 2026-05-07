@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Activity, AlertTriangle, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function DeviceMovementHistory() {
   const { t } = useTranslation(["security", "common"]);
@@ -68,7 +69,7 @@ export default function DeviceMovementHistory() {
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400 animate-spin" />
+              <Loader variant="inline" />
               <p className="text-gray-500">{t('deviceMovementHistory.loading')}</p>
             </div>
           </div>

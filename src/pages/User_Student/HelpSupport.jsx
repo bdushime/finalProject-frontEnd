@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { HelpCircle, Mail, MessageSquare, Send, CheckCircle, Loader2 } from "lucide-react";
+import { HelpCircle, Mail, MessageSquare, Send, CheckCircle } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 export default function HelpSupport() {
     const { t } = useTranslation("student");
@@ -183,7 +184,7 @@ export default function HelpSupport() {
                                         >
                                             {isSubmitting ? (
                                                 <>
-                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("help.sending")}
+                                                    <Loader variant="inline" className="mr-2" /> {t("help.sending")}
                                                 </>
                                             ) : (
                                                 <>

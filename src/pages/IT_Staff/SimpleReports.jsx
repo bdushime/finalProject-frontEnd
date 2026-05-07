@@ -3,11 +3,12 @@ import ITStaffLayout from '@/components/layout/ITStaffLayout';
 import api from '@/utils/api';
 import {
     FileText, Monitor, ShieldAlert, Download, ChevronDown,
-    Loader2, ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import { toast } from 'sonner';
 import { generatePDF } from '@/utils/pdfGenerator';
+import Loader from "@/components/common/Loader";
 
 const datePickerStyles = `
   input[type="date"]::-webkit-calendar-picker-indicator {
@@ -485,7 +486,11 @@ const SimpleReports = () => {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {loading ? (
-                                    <tr><td colSpan={columns.length} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#0b1d3a]" /></td></tr>
+                                    <tr>
+                                        <td colSpan={columns.length} className="p-12 text-center">
+                                            <Loader variant="inline" />
+                                        </td>
+                                    </tr>
                                 ) : (!Array.isArray(paginatedData) || paginatedData.length === 0) ? (
                                     <tr><td colSpan={columns.length} className="p-12 text-center text-slate-400">{t('common:misc.noRecords', 'No records found.')}</td></tr>
                                 ) : (

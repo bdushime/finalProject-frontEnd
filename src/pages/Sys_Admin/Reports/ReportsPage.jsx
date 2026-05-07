@@ -3,11 +3,12 @@ import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
 import {
     FileText, Users, Monitor, ShieldAlert, Download, ChevronDown,
-    Loader2, ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import { toast } from 'sonner';
 import { generatePDF } from '@/utils/pdfGenerator';
+import Loader from "@/components/common/Loader";
 
 // const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
 // const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
@@ -645,7 +646,7 @@ const ReportsPage = () => {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {loading ? (
-                                    <tr><td colSpan={columns.length} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-500" /></td></tr>
+                                    <tr><td colSpan={columns.length} className="p-12 text-center"><Loader variant="inline" /></td></tr>
                                 ) : filteredData.length === 0 ? (
                                     <tr><td colSpan={columns.length} className="p-12 text-center text-slate-400">{t('common:misc.noRecords') || "No records found."}</td></tr>
                                 ) : (

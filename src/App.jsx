@@ -34,7 +34,7 @@ import ITStaffProfile from "./pages/IT_Staff/Profile";
 import ITStaffSettings from "./pages/IT_Staff/Settings";
 import ITStaffNotifications from "./pages/IT_Staff/ITStaffNotifications";
 import ITStaffEquipmentDetails from "./pages/IT_Staff/EquipmentDetails";
-import IoTTrackerLiveView from "./pages/IT_Staff/IoTTrackerLiveView";
+// import IoTTrackerLiveView from "./pages/IT_Staff/IoTTrackerLiveView";
 import CurrentCheckouts from "./pages/IT_Staff/CurrentCheckouts";
 import CheckoutHistory from "./pages/IT_Staff/CheckoutHistory";
 import SearchResults from "./pages/IT_Staff/SearchResults";
@@ -119,7 +119,7 @@ export default function App() {
                     <Route path="/it/settings" element={<ITStaffSettings />} />
                     <Route path="/it/notifications" element={<ITStaffNotifications />} />
                     <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
-                    <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} />
+                    {/* <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} /> */}
                     <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
                     <Route path="/it/checkout-history" element={<CheckoutHistory />} />
                     <Route path="/it/search-results" element={<SearchResults />} />

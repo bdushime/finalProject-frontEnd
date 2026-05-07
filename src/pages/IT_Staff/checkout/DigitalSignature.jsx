@@ -3,7 +3,7 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 import api from "@/utils/api";
 import { toast } from "sonner";
 
@@ -72,7 +72,7 @@ export default function DigitalSignature() {
                         <div className="mt-4 flex justify-end gap-3">
                             <Button variant="outline" onClick={() => setSigned(false)}>Clear</Button>
                             <Button onClick={handleSubmit} disabled={!signed || loading}>
-                                {loading ? <Loader2 className="animate-spin" /> : "Complete Checkout"}
+                                {loading ? <Loader variant="inline" /> : "Complete Checkout"}
                             </Button>
                         </div>
                     </CardContent>

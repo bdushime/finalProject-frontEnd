@@ -3,9 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { QrCode, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
+import { QrCode, CheckCircle2, ArrowRight } from "lucide-react";
 import api from "@/utils/api";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 // Helper Component for the Progress Bar
 function Progress({ step }) {
@@ -153,7 +154,7 @@ export default function ReturnScan() {
                                 >
                                     {submitting ? (
                                         <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
+                                            <Loader variant="inline" className="mr-2" /> Processing...
                                         </>
                                     ) : (
                                         <>

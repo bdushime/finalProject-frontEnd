@@ -15,6 +15,7 @@ import {
 import logo from "@/assets/images/logo8noback.png";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import { useAuth } from "@/pages/auth/AuthContext";
 
 export default function ITStaffTopbar({ onMenuClick }) {
     const location = useLocation();
@@ -22,12 +23,12 @@ export default function ITStaffTopbar({ onMenuClick }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const { t } = useTranslation("common");
+    const { user: authUser } = useAuth();
 
     const itStaffLinks = [
         { name: t("nav.dashboard"), path: "/it/dashboard" },
         { name: t("nav.browseInventory"), path: "/it/browse" },
         { name: t("nav.checkouts"), path: "/it/current-checkouts" },
-        { name: t("nav.tracking"), path: "/it/iot-tracker" },
         { name: t("nav.classrooms"), path: "/it/classrooms" },
         { name: t("nav.notifications"), path: "/it/notifications" },
         { name: t("nav.reports"), path: "/it/reports" },
@@ -40,26 +41,18 @@ export default function ITStaffTopbar({ onMenuClick }) {
         role: t("roles.itStaff")
     });
 
-    // --- Load User from Local Storage ---
+    // --- Keep topbar user synced with auth state ---
     useEffect(() => {
-        const userStr = localStorage.getItem("user");
-        if (userStr) {
-            try {
-                const userData = JSON.parse(userStr);
-                const displayName = userData.fullName || userData.username || "IT Staff";
-                const displayInitial = displayName.charAt(0).toUpperCase();
-                const displayRole = userData.role || "IT Staff";
+        const displayName = authUser?.fullName || authUser?.username || "IT Staff";
+        const displayInitial = displayName.charAt(0).toUpperCase();
+        const displayRole = authUser?.role || "IT Staff";
 
-                setUser({
-                    name: displayName,
-                    initial: displayInitial,
-                    role: displayRole
-                });
-            } catch (e) {
-                console.error("Error parsing user data", e);
-            }
-        }
-    }, []);
+        setUser({
+            name: displayName,
+            initial: displayInitial,
+            role: displayRole
+        });
+    }, [authUser]);
 
     // --- Fetch notification count from backend ---
     useEffect(() => {

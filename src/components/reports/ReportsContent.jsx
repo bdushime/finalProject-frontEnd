@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileDown, Download, RefreshCw, Filter, Loader2 } from "lucide-react";
+import { FileDown, Download, RefreshCw, Filter } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/common/PaginationControls";
 import { generateReportData, exportToCSV } from "@/pages/IT_Staff/reports/reportService";
@@ -32,6 +32,7 @@ import { generatePDF } from "@/utils/pdfGenerator";
 import api from "@/utils/api";
 import PropTypes from "prop-types";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 const DATE_PRESETS = [
   { value: "today", label: "Today" },
@@ -979,7 +980,7 @@ export default function ReportsContent({
               >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader variant="inline" className="mr-2" />
                     {t('reports.actions.generating')}
                   </>
                 ) : (

@@ -19,9 +19,9 @@ import {
     FileText,
     Image as ImageIcon,
     Package,
-    Trophy,
-    Loader2
+    Trophy
 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 
 export default function CheckoutDetailsDialog({ isOpen, onOpenChange, checkoutId, selectedCheckout }) {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -111,7 +111,7 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, checkoutId
                 <div className="space-y-6 mt-4">
                     {remoteLoading && (
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader variant="inline" />
                             {t("checkouts.dialog.loadingDetails")}
                         </div>
                     )}

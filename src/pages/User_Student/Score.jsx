@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
-import { Shield, Lock, CheckCircle, History, Loader2 } from "lucide-react";
+import { Shield, Lock, CheckCircle, History } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function Score() {
     const [score, setScore] = useState(100);
@@ -76,7 +77,7 @@ export default function Score() {
         return (
             <StudentLayout>
                 <div className="h-screen flex items-center justify-center text-slate-400">
-                    <Loader2 className="w-8 h-8 animate-spin mr-2" /> {t("score.loading")}
+                    <Loader variant="inline" className="mr-2" /> {t("score.loading")}
                 </div>
             </StudentLayout>
         );

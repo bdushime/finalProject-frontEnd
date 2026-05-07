@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/pages/auth/AuthContext";
-import { Loader2 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 
 /**
  * Public component to handle /equipment/:id QR code scans.
@@ -50,7 +50,7 @@ export default function EquipmentRedirect() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-500">
-            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4" />
+            <Loader variant="inline" className="mb-4" />
             <p className="font-medium animate-pulse">Redirecting to equipment page...</p>
         </div>
     );

@@ -30,7 +30,6 @@ import {
     ArrowRight,
     ChevronLeft,
     Camera,
-    Loader2,
     Clock, // NEW
     AlertTriangle, // Used for the warning UI
     Calendar as CalendarIcon
@@ -38,6 +37,7 @@ import {
 import api from "@/utils/api";
 import PropTypes from "prop-types";
 import EquipmentScanAndPhotoUpload from "@/components/EquipmentScanAndPhotoUpload";
+import Loader from "@/components/common/Loader";
 
 export default function BorrowRequestForm({ onSuccess }) {
     const { t } = useTranslation();
@@ -818,7 +818,7 @@ export default function BorrowRequestForm({ onSuccess }) {
                     >
                         {submitting ? (
                             <>
-                                <Loader2 className="animate-spin w-4 h-4" />
+                                <Loader variant="inline" />
                                 <span>Submitting...</span>
                             </>
                         ) : (

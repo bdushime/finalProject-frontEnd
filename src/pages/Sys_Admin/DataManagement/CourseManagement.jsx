@@ -21,9 +21,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2, Plus, BookOpen, Loader2, Edit } from "lucide-react";
+import { Trash2, Plus, BookOpen, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function CourseManagement() {
     const { t } = useTranslation(["admin", "common"]);
@@ -196,7 +197,7 @@ export default function CourseManagement() {
                         <DialogFooter className="sm:justify-end gap-3 pt-4 border-t border-slate-100">
                             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="rounded-xl border-slate-200 text-slate-600">{t('common:actions.cancel')}</Button>
                             <Button onClick={handleAddCourse} disabled={submitting} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white rounded-xl px-6">
-                                {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                {submitting ? <Loader variant="inline" className="mr-2" /> : null}
                                 {submitting ? t('courses.saving') : t('courses.saveCourse')}
                             </Button>
                         </DialogFooter>
@@ -241,7 +242,7 @@ export default function CourseManagement() {
                         <DialogFooter className="sm:justify-end gap-3 pt-4 border-t border-slate-100">
                             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="rounded-xl border-slate-200 text-slate-600">{t('common:actions.cancel')}</Button>
                             <Button onClick={handleSaveEdit} disabled={savingEdit} className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white rounded-xl px-6">
-                                {savingEdit ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                {savingEdit ? <Loader variant="inline" className="mr-2" /> : null}
                                 {savingEdit ? t('courses.saving') : t('courses.saveChanges')}
                             </Button>
                         </DialogFooter>
@@ -277,7 +278,7 @@ export default function CourseManagement() {
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={3} className="h-64 text-center">
-                                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#8D8DC7]" />
+                                        <Loader variant="inline" />
                                     </TableCell>
                                 </TableRow>
                             ) : courses.length === 0 ? (
@@ -382,7 +383,7 @@ export default function CourseManagement() {
                             }
                             className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-6"
                         >
-                            {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                            {deleting ? <Loader variant="inline" className="mr-2" /> : null}
                             {deleting ? t('courses.deleting') : t('common:actions.delete')}
                         </Button>
                     </DialogFooter>

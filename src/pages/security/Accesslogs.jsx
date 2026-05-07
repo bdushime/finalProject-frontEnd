@@ -56,6 +56,7 @@ const STATUS_COLORS = {
 
 import { useTranslation } from "react-i18next";
 import PaginationControls from "@/components/common/PaginationControls";
+import Loader from "@/components/common/Loader";
 
 export default function AccessLogs({
   showHeader = true,
@@ -225,7 +226,7 @@ export default function AccessLogs({
           showLayout ? "flex h-screen items-center justify-center" : "flex items-center justify-center py-12"
         }
       >
-        <Clock className="h-10 w-10 animate-spin text-[#0b1d3a]" />
+        <Loader variant="inline" />
       </div>
     );
     return (

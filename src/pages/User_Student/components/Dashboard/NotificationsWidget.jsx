@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, CheckCircle, Info, AlertTriangle, Clock } from 'lucide-react';
+import { Bell, CheckCircle, Info, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from "@/utils/api";
+import Loader from "@/components/common/Loader";
 
 export default function NotificationsWidget() {
     const { t } = useTranslation("student");
@@ -47,7 +48,7 @@ export default function NotificationsWidget() {
             <div className="flex-1 space-y-3">
                 {loading ? (
                     <div className="flex items-center justify-center py-4">
-                        <Clock className="w-5 h-5 text-slate-300 animate-spin" />
+                        <Loader variant="inline" />
                     </div>
                 ) : notifications.length > 0 ? (
                     notifications.map((n) => (

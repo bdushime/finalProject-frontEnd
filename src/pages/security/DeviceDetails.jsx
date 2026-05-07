@@ -11,6 +11,7 @@ import {
     QrCode,
 } from "lucide-react";
 import api from "@/utils/api";
+import Loader from "@/components/common/Loader";
 
 
 function DeviceDetails() {
@@ -149,7 +150,7 @@ function DeviceDetails() {
         return (
             <MainLayout>
                 <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A2240]"></div>
+                    <Loader variant="inline" />
                 </div>
             </MainLayout>
         );

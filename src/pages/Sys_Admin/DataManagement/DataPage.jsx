@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout'; // Check path
 import api from '@/utils/api';
-import { Database, Download, Upload, Trash2, Archive, RefreshCw, HardDrive, FileText, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { Database, Download, Upload, Trash2, Archive, RefreshCw, HardDrive, FileText, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 const DataPage = () => {
     const { t } = useTranslation(["admin", "common"]);
@@ -80,7 +81,7 @@ const DataPage = () => {
                     disabled={isCreatingBackup}
                     className="bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white font-medium py-3 px-6 rounded-2xl shadow-lg transition-all flex items-center"
                 >
-                    {isCreatingBackup ? <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> : <Database className="w-5 h-5 mr-2" />}
+                    {isCreatingBackup ? <Loader variant="inline" className="mr-2" /> : <Database className="w-5 h-5 mr-2" />}
                     {isCreatingBackup ? t('data.backups.backingUp') : t('data.backups.create')}
                 </button>
             </div>
@@ -111,7 +112,7 @@ const DataPage = () => {
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan="5" className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-gray-400" /></td></tr>
+                                    <tr><td colSpan="5" className="p-8 text-center"><Loader variant="inline" /></td></tr>
                                 ) : backups.map((backup) => (
                                     <tr key={backup.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="p-4 pl-0 font-medium text-slate-700 font-mono text-sm">{backup.name}</td>

@@ -17,7 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 
 function EditDeviceDialog({
     isOpen,
@@ -164,7 +164,7 @@ function EditDeviceDialog({
                         className="h-12 px-8 rounded-xl bg-[#8D8DC7] hover:bg-[#7A7AB5] text-white font-bold shadow-md shadow-[#8D8DC7]/20"
                         disabled={isLoading}
                     >
-                        {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : "Save Changes"}
+                        {isLoading ? <><Loader variant="inline" className="mr-2" /> Saving...</> : "Save Changes"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

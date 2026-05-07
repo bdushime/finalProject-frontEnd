@@ -19,7 +19,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import Loader from "@/components/common/Loader";
 
 import {
     isFieldHidden,
@@ -279,7 +280,7 @@ function AddDeviceDialog({
                         disabled={isLoading}
                     >
                         {isLoading ? (
-                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</>
+                            <><Loader variant="inline" className="mr-2" /> Adding...</>
                         ) : (
                             "Add Device"
                         )}

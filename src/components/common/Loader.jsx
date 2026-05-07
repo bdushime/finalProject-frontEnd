@@ -1,9 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Loader = () => {
+const Loader = ({ variant = 'full', className = '' }) => {
+  if (variant === 'inline') {
+    return (
+      <div className={`inline-flex items-center justify-center ${className}`}>
+        <div
+          className="h-4 w-4 rounded-full border-2 border-slate-200 border-t-[#8D8DC7] animate-spin"
+          aria-label="Loading"
+          role="status"
+        />
+      </div>
+    );
+  }
+
   return (
-    <StyledWrapper>
+    <StyledWrapper className={className}>
       <div className="loader">
         <div className="loading-text">
           Loading<span className="dot">.</span><span className="dot">.</span><span className="dot">.</span>
@@ -27,7 +39,7 @@ const Loader = () => {
       </div>
     </StyledWrapper>
   );
-}
+};
 
 const StyledWrapper = styled.div`
   .loader {
@@ -39,7 +51,7 @@ const StyledWrapper = styled.div`
   }
 
   .loading-text {
-    color: white;
+    color: #1A2240;
     font-size: 14pt;
     font-weight: 600;
     margin-left: 10px;

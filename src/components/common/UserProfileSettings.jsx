@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Shield, Smartphone, Key, Save, Loader2, Building2 } from 'lucide-react';
+import { User, Mail, Shield, Smartphone, Key, Save, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from "react-i18next";
 import api from '@/utils/api';
+import Loader from "@/components/common/Loader";
 
 export default function UserProfileSettings() {
     const { t } = useTranslation(["common", "admin", "itstaff"]);
@@ -107,7 +108,7 @@ export default function UserProfileSettings() {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-500">
-                <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#0b1d3a]" />
+                <Loader />
                 <p className="font-medium animate-pulse">{t('common:misc.loading', 'Loading Profile...')}</p>
             </div>
         );
@@ -248,7 +249,7 @@ export default function UserProfileSettings() {
                             disabled={saving}
                             className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2.5 disabled:opacity-70 disabled:pointer-events-none"
                         >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {saving ? <Loader variant="inline" /> : <Save className="w-4 h-4" />}
                             {t('admin:profile.save', 'Save Changes')}
                         </button>
                     </div>
@@ -304,7 +305,7 @@ export default function UserProfileSettings() {
                                     disabled={pwdLoading}
                                     className="flex-1 px-4 py-2.5 text-xs font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-800 active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
-                                    {pwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    {pwdLoading ? <Loader variant="inline" /> : <Save className="w-4 h-4" />}
                                     Update Password
                                 </button>
                             </div>

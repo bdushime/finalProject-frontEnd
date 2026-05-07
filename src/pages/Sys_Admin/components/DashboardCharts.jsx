@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import api from '@/utils/api';
-import { Loader2 } from 'lucide-react';
+import Loader from "@/components/common/Loader";
 
 const BRAND_COLOR = '#8D8DC7';
 const COLORS = [BRAND_COLOR, '#1e293b', '#64748b', '#cbd5e1', '#f59e0b', '#10b981'];
@@ -30,7 +30,7 @@ const DashboardCharts = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center h-64 w-full text-gray-400">
-                <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                <Loader variant="inline" />
                 <p className="text-sm">Loading analytics...</p>
             </div>
         );

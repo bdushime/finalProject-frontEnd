@@ -4,10 +4,11 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Scan, Camera, CheckCircle, Package, Clock, QrCode, AlertTriangle, Loader2 } from "lucide-react";
+import { ChevronLeft, Scan, Camera, CheckCircle, Package, Clock, QrCode, AlertTriangle } from "lucide-react";
 import api from "@/utils/api";
 import { toast } from "sonner";
 import QRScanner from "@/components/common/QRScanner";
+import Loader from "@/components/common/Loader";
 
 function useQuery() {
     const { search } = useLocation();
@@ -226,7 +227,7 @@ export default function ReturnEquipment() {
                             disabled={submitting || (step === 1 && !selectedId)}
                             className="bg-[#0b1d3a] hover:bg-[#126dd5] h-12 px-8 rounded-xl"
                         >
-                            {submitting ? <Loader2 className="animate-spin" /> : (step === 3 ? "Confirm Return" : "Next Step")}
+                            {submitting ? <Loader variant="inline" /> : (step === 3 ? "Confirm Return" : "Next Step")}
                         </Button>
                     </div>
                 </div>

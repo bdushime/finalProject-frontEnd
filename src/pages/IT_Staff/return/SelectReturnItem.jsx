@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CalendarClock, User, Package } from "lucide-react";
+import { CalendarClock, User, Package } from "lucide-react";
 import { format } from "date-fns";
 import api from "@/utils/api";
+import Loader from "@/components/common/Loader";
 
 function Progress() {
     return (
@@ -65,7 +66,7 @@ export default function SelectReturnItem() {
                     <CardContent>
                         {loading ? (
                             <div className="flex justify-center py-12">
-                                <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                                <Loader variant="inline" />
                             </div>
                         ) : activeTransactions.length === 0 ? (
                             <div className="text-center py-12 text-slate-500 border-2 border-dashed rounded-xl">
