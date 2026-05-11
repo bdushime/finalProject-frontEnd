@@ -1,11 +1,12 @@
 import MainLayout from "./layout/MainLayout";
-import { Bell, Loader2 } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { NotificationsPagination } from "@/components/common/NotificationsPagination";
 import { useNotifications } from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Loader from "@/components/common/Loader";
 
 export default function SecurityNotifications() {
 	const { t } = useTranslation(["security", "common"]);
@@ -73,12 +74,7 @@ export default function SecurityNotifications() {
 				<div className="bg-white rounded-2xl sm:rounded-4xl shadow-sm border border-slate-100 overflow-hidden p-4 sm:p-6">
 					{loading ? (
 						<div className="h-[50vh] flex items-center justify-center">
-							<div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-10 py-8 flex items-center gap-3">
-								<Loader2 className="w-6 h-6 animate-spin text-[#8D8DC7]" />
-								<span className="text-slate-700 font-medium">
-									{t("notifications.loading", "Loading notifications...")}
-								</span>
-							</div>
+							<Loader />
 						</div>
 					) : (
 						<>

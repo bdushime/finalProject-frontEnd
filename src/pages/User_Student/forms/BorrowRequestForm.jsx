@@ -30,7 +30,7 @@ import {
     ArrowRight,
     ChevronLeft,
     Camera,
-    Loader2,
+    
     Clock,
     AlertTriangle,
     Calendar as CalendarIcon,
@@ -43,6 +43,7 @@ import EquipmentScanAndPhotoUpload from "@/components/EquipmentScanAndPhotoUploa
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import QRScanner from "@/components/common/QRScanner";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess }) {
     const { t } = useTranslation('student');
@@ -1134,7 +1135,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     <Button onClick={handleSubmit} disabled={submitting} className={`h-12 px-10 rounded-xl font-black shadow-xl transition-all active:scale-95 text-white flex gap-2 items-center ${isException ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#126dd5] hover:bg-[#0f5ab1] shadow-blue-200'}`}>
                         {submitting ? (
                             <>
-                                <Loader2 className="animate-spin w-4 h-4" />
+                                <Loader variant="inline" />
                                 <span>{t('equipment.submitting', 'Submitting Request...')}</span>
                             </>
                         ) : (

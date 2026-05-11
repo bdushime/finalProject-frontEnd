@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from './components/AdminLayout'; // Ensure this path matches your folder structure
 import api from '@/utils/api';
-import { Bell, CheckCircle, AlertTriangle, Info, Clock, Loader2, Check } from 'lucide-react';
+import { Bell, CheckCircle, AlertTriangle, Info, Clock, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 const AdminNotifications = () => {
     const { t } = useTranslation(["admin", "common"]);
@@ -125,7 +126,7 @@ const AdminNotifications = () => {
                 <div className="space-y-4">
                     {loading ? (
                         <div className="bg-white rounded-[2rem] p-20 text-center flex justify-center border border-gray-100">
-                            <Loader2 className="w-8 h-8 animate-spin text-[#8D8DC7]" />
+                            <Loader />
                         </div>
                     ) : notifications.length === 0 ? (
                         <div className="bg-white rounded-[2rem] p-20 text-center text-slate-400 border border-gray-100 shadow-sm">

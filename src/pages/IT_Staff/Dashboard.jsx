@@ -4,7 +4,7 @@ import StatsOverview from "./components/Dashboard/StatsOverview";
 import Charts from "@/components/dashboard/Charts";
 import SystemHealth from "./components/Dashboard/SystemHealth";
 import api from "@/utils/api";
-import { Loader2, Plus, CheckCircle, XCircle } from "lucide-react";
+import { Plus, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import { Textarea } from "@/components/ui/textarea";
+import Loader from "@/components/common/Loader";
 
 export function Dashboard() {
     const { t, i18n } = useTranslation(["itstaff", "common"]);
@@ -139,7 +140,7 @@ export function Dashboard() {
         return (
             <ITStaffLayout>
                 <div className="h-[80vh] flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                    <Loader />
                 </div>
             </ITStaffLayout>
         );
@@ -271,7 +272,7 @@ export function Dashboard() {
                                 {t('dashboard.cancel')}
                             </Button>
                             <Button variant="destructive" onClick={handleRejectSubmit} disabled={processing}>
-                                {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                {processing ? <Loader variant="inline" className="mr-2" /> : null}
                                 {t('dashboard.confirmDenial')}
                             </Button>
                         </DialogFooter>

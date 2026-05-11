@@ -114,7 +114,7 @@ export default function Charts({ chartData, recentActivityData, metrics }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-1">
 
       {/* 1. PROFILE CARD */}
-      <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow relative border-none sm:col-span-2 lg:col-span-1 min-h-[200px] sm:min-h-[250px] lg:min-h-[300px]">
+      <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow relative border-none sm:col-span-2 lg:col-span-1 min-h-[200px] sm:min-h-[250px] md:min-h-[220px] md:max-h-[240px] lg:min-h-[300px]">
         <img src={image} alt="Profile" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-linear-to-t from-gray-900/60 via-black/20 to-transparent" />
         <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex items-center justify-between text-white">

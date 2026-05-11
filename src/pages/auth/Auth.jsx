@@ -22,7 +22,7 @@ export default function Auth() {
 
     const { login } = useAuth();
 
-    const [loginData, setLoginData] = useState({ email: "", password: "" });
+    const [loginData, setLoginData] = useState({ loginId: "", password: "" });
 
     const [signUpData, setSignUpData] = useState({
         name: "",
@@ -35,8 +35,43 @@ export default function Auth() {
 
     const clearFeedback = () => setFeedback({ type: null, message: null });
 
-    const handleLoginSubmit = async () => {
-        if (!loginData.email || !loginData.password) {
+    const normalizeRole = (role) => {
+        const value = (role || "").toString().trim().toLowerCase().replace(/[\s-]/g, "_");
+        switch (value) {
+            case "student":
+                return "Student";
+            case "admin":
+                return "Admin";
+            case "security":
+                return "Security";
+            case "it":
+            case "it_staff":
+                return "IT_Staff";
+            default:
+                return role;
+        }
+    };
+
+    const getRoleDashboardPath = (role) => {
+        switch (normalizeRole(role)) {
+            case "Student":
+                return "/student/dashboard";
+            case "Admin":
+                return "/admin/dashboard";
+            case "Security":
+                return "/security/dashboard";
+            case "Gate_Keeper":
+                return "/gate-verification";
+            case "IT_Staff":
+                return "/it/dashboard";
+            default:
+                return "/student/dashboard";
+        }
+    };
+
+    const handleLoginSubmit = async (e) => {
+        e?.preventDefault();
+        if (!loginData.loginId?.trim() || !loginData.password) {
              setFeedback({ type: 'error', message: "Please fill in all fields" });
              return;
         }
@@ -47,7 +82,12 @@ export default function Auth() {
         try {
             const res = await api.post('/auth/login', loginData);
             localStorage.setItem('token', res.data.token);
-            login(res.data);
+            const authUser = {
+                ...res.data,
+                role: normalizeRole(res.data.role),
+                mustChangePassword: Boolean(res.data.mustChangePassword),
+            };
+            login(authUser);
 
             // Success feedback
             setFeedback({ type: 'success', message: t("welcomeUser", { name: res.data.username }) });
@@ -59,6 +99,7 @@ export default function Auth() {
                     return;
                 }
 
+                navigate(getRoleDashboardPath(authUser.role));
                 const role = res.data.role;
                 switch (role) {
                     case 'Student':
@@ -308,10 +349,12 @@ export default function Auth() {
 
                     <div className="flex flex-col gap-5">
                         <div>
-                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("emailAddress")}</label>
+                            <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">
+                                Student ID or Email
+                            </label>
                             <div className="relative">
                                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400 z-[1]" />
-                                <input type="email" placeholder={t("emailPlaceholder")} value={loginData.email} onChange={(e) => setLoginData({ ...loginData, email: e.target.value })} required
+                                <input type="text" placeholder="Enter Student ID or Email" value={loginData.loginId} onChange={(e) => setLoginData({ ...loginData, loginId: e.target.value })} required
                                     className="w-full h-11 pl-11 pr-4 border-2 border-gray-200 rounded-[10px] text-[15px] text-gray-900 bg-white outline-none transition-all focus:border-[#1864ab] focus:ring-2 focus:ring-[#1864ab]/10" />
                             </div>
                         </div>
@@ -344,6 +387,7 @@ export default function Auth() {
                 </div>
 
             </div>
+
         </div>
     );
 }

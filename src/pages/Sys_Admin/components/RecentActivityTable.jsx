@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MoreHorizontal, ArrowUpRight, MapPin, X, User, Calendar, Box, Loader2 } from 'lucide-react';
+import { MoreHorizontal, ArrowUpRight, MapPin, X, User, Calendar, Box } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '@/utils/api'; // Ensure this path matches your project
+import Loader from "@/components/common/Loader";
 
 const getStatusStyles = (status) => {
     switch (status) {
@@ -40,7 +41,7 @@ const RecentActivityTable = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center py-10 text-gray-400">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" /> {t('dashboard.recentActivityTable.loading')}
+                <Loader variant="inline" className="mr-2" /> {t('dashboard.recentActivityTable.loading')}
             </div>
         );
     }

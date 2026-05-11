@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import AdminLayout from '../components/AdminLayout'; // Check Path
 import api from '@/utils/api';
-import { Settings, MapPin, Tags, FileText, Scale, Bell, Mail, MessageSquare, QrCode, PenTool, ChevronRight, X, Save, Loader2, ShieldCheck } from 'lucide-react';
+import { Settings, MapPin, Tags, FileText, Scale, Bell, Mail, MessageSquare, QrCode, PenTool, ChevronRight, X, Save, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import Loader from "@/components/common/Loader";
 
 const ConfigPage = () => {
     const { t } = useTranslation(["admin", "common"]);
@@ -612,7 +613,7 @@ const ConfigPage = () => {
                             )}
 
                             {rolesLoading ? (
-                                <div className="flex justify-center py-10"><Loader2 className="animate-spin text-[#8D8DC7]" /></div>
+                                <div className="flex justify-center py-10"><Loader variant="inline" /></div>
                             ) : roles.length === 0 ? (
                                 <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
                                     <ShieldCheck className="w-12 h-12 text-slate-300 mx-auto mb-3" />
@@ -748,7 +749,7 @@ const ConfigPage = () => {
     const activeSectionData = configSections.find(s => s.id === activeSection);
     const ActiveIcon = activeSectionData?.icon;
 
-    if (loading) return <AdminLayout heroContent={HeroSection}><div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#8D8DC7]" /></div></AdminLayout>;
+    if (loading) return <AdminLayout heroContent={HeroSection}><div className="flex justify-center py-20"><Loader variant="inline" /></div></AdminLayout>;
 
     return (
         <AdminLayout heroContent={HeroSection}>

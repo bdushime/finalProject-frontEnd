@@ -3,7 +3,7 @@ import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { motion } from "framer-motion";
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Loader2, Plus, Check, X, Calendar, Clock } from "lucide-react";
+import { Eye, Plus, Check, X, Calendar, Clock } from "lucide-react";
 import CheckoutDetailsDialog from "./checkout/CheckoutDetailsDialog";
 import api from "@/utils/api";
 import { format } from "date-fns";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function CurrentCheckouts() {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -167,11 +168,11 @@ export default function CurrentCheckouts() {
 
         const autoDenyPending = async () => {
             const now = new Date();
-            const fourHoursInMs = 4 * 60 * 60 * 1000;
+            const minutesInMs = 30 * 1000;
             const pendingToDeny = allTransactions.filter(tx => {
                 if (tx.status !== 'Pending') return false;
                 const createdAt = new Date(tx.fullData.createdAt);
-                return (now - createdAt) > fourHoursInMs;
+                return (now - createdAt) > minutesInMs;
             });
 
             if (pendingToDeny.length > 0) {
@@ -366,7 +367,7 @@ export default function CurrentCheckouts() {
                                     <tr>
                                         <td colSpan="5" className="text-center py-12">
                                             <div className="flex justify-center items-center gap-2 text-gray-500">
-                                                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                                                <Loader variant="inline" />
                                                 {t('checkouts.table.loading')}
                                             </div>
                                         </td>
@@ -515,7 +516,7 @@ export default function CurrentCheckouts() {
                                 onClick={handleRejectSubmit}
                                 disabled={processing}
                             >
-                                {processing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                {processing ? <Loader variant="inline" className="mr-2" /> : null}
                                 {t('checkouts.dialog.confirmDeny')}
                             </Button>
                         </DialogFooter>

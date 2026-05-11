@@ -4,10 +4,11 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Loader2, MapPin, Package } from "lucide-react";
+import { ArrowLeft, MapPin, Package } from "lucide-react";
 import { PageContainer } from "@/components/common/Page";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function EquipmentDetails() {
     const { id } = useParams();
@@ -42,7 +43,7 @@ export default function EquipmentDetails() {
         return (
             <StudentLayout>
                 <div className="h-[80vh] flex flex-col items-center justify-center text-slate-400">
-                    <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#126dd5]" />
+                    <Loader variant="inline" />
                     <p>Loading equipment details...</p>
                 </div>
             </StudentLayout>

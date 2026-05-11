@@ -5,6 +5,7 @@ import api from '@/utils/api';
 import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle, MessageSquare, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from "@/components/ui/utils";
+import Loader from "@/components/common/Loader";
 
 // Default system roles
 const DEFAULT_ROLES = ['Student', 'IT_Staff', 'Security', 'Admin'];
@@ -647,7 +648,7 @@ const UsersList = () => {
                             <div className="pt-4 flex gap-3">
                                 <button type="button" onClick={() => setShowMessageModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors">{t('common:actions.cancel')}</button>
                                 <button type="submit" disabled={submitting} className="flex-1 py-3.5 rounded-xl font-bold text-white bg-slate-900 hover:bg-slate-800 flex items-center justify-center gap-2 shadow-lg transition-all">
-                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> {t('users.sendNotification')}</>}
+                                    {submitting ? <Loader variant="inline" /> : <><Send className="w-4 h-4" /> {t('users.sendNotification')}</>}
                                 </button>
                             </div>
                         </form>

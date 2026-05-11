@@ -3,13 +3,14 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, CheckCircle, XCircle, AlertCircle, Clock, Info, Trash2, CheckCheck, Loader2 } from "lucide-react";
+import { Bell, CheckCircle, XCircle, AlertCircle, Clock, Info, Trash2, CheckCheck } from "lucide-react";
 import { PageContainer, PageHeader } from "@/components/common/Page";
 import BackButton from "./components/BackButton";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function Notifications() {
     const navigate = useNavigate();
@@ -95,7 +96,7 @@ export default function Notifications() {
         return (
             <StudentLayout>
                 <div className="h-screen flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                    <Loader />
                 </div>
             </StudentLayout>
         );

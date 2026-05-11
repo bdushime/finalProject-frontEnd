@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"; // Make sure Input path is correc
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import api from "@/utils/api";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 import { PageHeader } from "@/components/common/Page";
 
 export default function CheckoutHistory() {
@@ -73,7 +73,7 @@ export default function CheckoutHistory() {
                                     <TableRow>
                                         <TableCell colSpan="5" className="text-center py-8">
                                             <div className="flex justify-center">
-                                                <Loader2 className="animate-spin h-6 w-6 text-blue-500" />
+                                                <Loader variant="inline" />
                                             </div>
                                         </TableCell>
                                     </TableRow>

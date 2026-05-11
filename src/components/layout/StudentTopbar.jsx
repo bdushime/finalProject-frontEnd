@@ -15,6 +15,7 @@ import logo from "@/assets/images/logo8noback.png";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import { useAuth } from "@/pages/auth/AuthContext";
 
 export default function StudentTopbar({ onMenuClick }) {
     const location = useLocation();
@@ -22,6 +23,7 @@ export default function StudentTopbar({ onMenuClick }) {
     const [unreadCount, setUnreadCount] = useState(0);
     const { t } = useTranslation("common");
     const { t: tStudent } = useTranslation("student");
+    const { user: authUser } = useAuth();
 
     const studentLinks = [
         { name: t("nav.dashboard"), path: "/student/dashboard" },
@@ -62,26 +64,18 @@ export default function StudentTopbar({ onMenuClick }) {
         return () => clearInterval(interval);
     }, [location.pathname]);
 
-    // --- 2. Load User from Local Storage ---
+    // --- 2. Keep topbar user synced with auth state ---
     useEffect(() => {
-        const userStr = localStorage.getItem("user");
-        if (userStr) {
-            try {
-                const userData = JSON.parse(userStr);
-                const displayName = userData.fullName || userData.username || "Student";
-                const displayInitial = displayName.charAt(0).toUpperCase();
-                const displayRole = userData.role || "Student";
+        const displayName = authUser?.fullName || authUser?.username || "Student";
+        const displayInitial = displayName.charAt(0).toUpperCase();
+        const displayRole = authUser?.role || "Student";
 
-                setUser({
-                    name: displayName,
-                    initial: displayInitial,
-                    role: displayRole
-                });
-            } catch (e) {
-                console.error("Error parsing user data", e);
-            }
-        }
-    }, []);
+        setUser({
+            name: displayName,
+            initial: displayInitial,
+            role: displayRole
+        });
+    }, [authUser]);
 
     // Close mobile menu on route change
     useEffect(() => {

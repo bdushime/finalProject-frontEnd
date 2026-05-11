@@ -3,13 +3,11 @@ import MainLayout from "./layout/MainLayout";
 import StatCard from "@/components/security/StatCard";
 import ActionButton from "@/components/security/ActionButton";
 import ChartCard from "@/components/security/ChartCard";
-import { Activity, ShieldCheck, AlertTriangle, Clock, Loader2, MapPin, Package, CheckCircle, ArrowRight } from "lucide-react";
+import { Activity, ShieldCheck, AlertTriangle, Clock} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AccessLogs from "./Accesslogs";
-import api from "@/utils/api"; // Import your API helper
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/components/ui/utils";
+import api from "@/utils/api";
+import Loader from "@/components/common/Loader";
 import {
   BarChart,
   Bar,
@@ -29,7 +27,6 @@ export default function SecurityDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  // Real Data State
   const [stats, setStats] = useState({
     activeCount: 0,
     overdueCount: 0,
@@ -37,7 +34,6 @@ export default function SecurityDashboard() {
     equipmentTypeData: []
   });
   const [recentLogs, setRecentLogs] = useState([]);
-  // Fetch Data on Load
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -46,7 +42,6 @@ export default function SecurityDashboard() {
           api.get('/transactions/security/access-logs?limit=500')
         ]);
         
-        // Calculate Top Mostly Borrowed Equipment dynamically from logs
         const allLogs = logsRes.data.logs || [];
         const deviceCounts = {};
         allLogs.forEach(log => {
@@ -74,7 +69,6 @@ export default function SecurityDashboard() {
         }
         setStats(statsData);
 
-        // Map logs into the same structure used by `Accesslogs.jsx`
         const mappedLogs = allLogs.slice(0, 5).map((log) => {
           let type = "movement";
           if (log.status === "Checked Out") type = "checkout";
@@ -115,7 +109,7 @@ export default function SecurityDashboard() {
     return (
       <MainLayout>
         <div className="h-screen flex items-center justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-[#1A2240]" />
+          <Loader />
         </div>
       </MainLayout>
     );

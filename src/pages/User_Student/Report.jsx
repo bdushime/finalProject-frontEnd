@@ -10,7 +10,6 @@ import {
     Download,
     FileText,
     Filter,
-    Loader2,
     ChevronDown,
     ArrowLeft,
     ChevronLeft, // 👈 Added for pagination
@@ -21,6 +20,7 @@ import logo from "@/assets/logo_tracknity.png";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function Report() {
     // --- STATE ---
@@ -346,7 +346,7 @@ export default function Report() {
         document.body.removeChild(link);
     };
 
-    if (loading) return <StudentLayout><div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-slate-400" /></div></StudentLayout>;
+    if (loading) return <StudentLayout><div className="h-screen flex items-center justify-center"><Loader variant="inline" /></div></StudentLayout>;
 
     return (
         <StudentLayout>

@@ -25,9 +25,9 @@ import {
     AlertCircle,
     CheckCircle,
     XCircle,
-    Loader2,
     Info,
 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 import * as XLSX from "xlsx";
 import api from "@/utils/api";
 
@@ -340,7 +340,7 @@ function BulkUploadDialog({
 
                 {uploadStatus === "validating" && (
                     <div className="text-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3 text-[#343264]" />
+                        <Loader variant="inline" />
                         <p className="text-gray-600">Validating file...</p>
                     </div>
                 )}
@@ -440,7 +440,7 @@ function BulkUploadDialog({
 
                 {uploadStatus === "uploading" && (
                     <div className="text-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3 text-[#343264]" />
+                        <Loader variant="inline" />
                         <p className="text-gray-600">Uploading devices...</p>
                     </div>
                 )}

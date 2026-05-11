@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/pages/Sys_Admin/components/AdminLayout';
 import StatsCard from '@/pages/Sys_Admin/components/StatsCard';
 import api from '@/utils/api';
-import { Activity, Server, Cpu, Zap, AlertCircle, Clock, Shield, Loader2 } from 'lucide-react';
+import { Activity, Server, Cpu, Zap, AlertCircle, Clock, Shield } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from "@/components/ui/utils";
 
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 const MonitoringPage = () => {
     const { t } = useTranslation(["admin", "common"]);
@@ -78,7 +79,9 @@ const MonitoringPage = () => {
     if (loading) {
         return (
             <AdminLayout heroContent={HeroSection}>
-                <div className="flex h-screen items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-[#8D8DC7]" /></div>
+                <div className="flex h-screen items-center justify-center">
+                    <Loader />
+                </div>
             </AdminLayout>
         );
     }

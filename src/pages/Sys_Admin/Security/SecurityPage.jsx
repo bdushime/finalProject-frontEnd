@@ -4,12 +4,13 @@ import AdminLayout from '../components/AdminLayout'; // Ensure path is correct (
 import api from '@/utils/api';
 import {
     Shield, Lock, FileText, Users, AlertTriangle, CheckCircle, Search,
-    Filter, Download, Activity, Globe, Smartphone, Monitor, Clock, XCircle, Loader2
+    Filter, Download, Activity, Globe, Smartphone, Monitor, Clock, XCircle
 } from 'lucide-react';
 
 import { useTranslation } from "react-i18next";
 import { generatePDF } from '@/utils/pdfGenerator';
 import { toast } from 'sonner';
+import Loader from "@/components/common/Loader";
 
 const SecurityPage = () => {
     const navigate = useNavigate();
@@ -81,7 +82,7 @@ const SecurityPage = () => {
         return (
             <AdminLayout heroContent={HeroSection}>
                 <div className="flex h-96 items-center justify-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-[#8D8DC7]" />
+                    <Loader />
                 </div>
             </AdminLayout>
         );

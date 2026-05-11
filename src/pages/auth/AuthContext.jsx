@@ -63,6 +63,15 @@ export function AuthProvider({ children }) {
     localStorage.setItem("user", JSON.stringify(userData));
   };
 
+  const updateUser = (updates) => {
+    setUser((prevUser) => {
+      if (!prevUser) return prevUser;
+      const nextUser = { ...prevUser, ...updates };
+      localStorage.setItem("user", JSON.stringify(nextUser));
+      return nextUser;
+    });
+  };
+
   const logout = () => {
     setUser(null);
     // 👇 CHANGED: Clear 'user' AND 'token' so you are fully logged out
@@ -74,7 +83,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

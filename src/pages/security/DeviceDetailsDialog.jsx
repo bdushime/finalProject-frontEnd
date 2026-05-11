@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Printer, QrCode, Loader2, Download } from "lucide-react";
+import { Printer, QrCode, Download } from "lucide-react";
 import api from "@/utils/api";
 import PropTypes from "prop-types";
+import Loader from "@/components/common/Loader";
 
 export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
     const [device, setDevice] = useState(null);
@@ -136,7 +137,7 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
             <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
-                        <Loader2 className="h-8 w-8 animate-spin text-[#1A2240]" />
+                        <Loader variant="inline" />
                         <p className="text-sm text-gray-500">Loading device details...</p>
                     </div>
                 ) : error || !device ? (

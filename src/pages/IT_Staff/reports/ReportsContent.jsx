@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, FileText, Search, Filter, RefreshCw, Loader2, FileBarChart2 } from "lucide-react";
+import { Download, FileText, Search, Filter, RefreshCw, FileBarChart2 } from "lucide-react";
 import { generateReportData, exportToCSV, exportToPDF } from "./reportService";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 export default function ReportsContent({
   reportTypes = [],
@@ -198,7 +199,7 @@ export default function ReportsContent({
               <RefreshCw className="mr-2 h-4 w-4" /> Reset Filters
             </Button>
             <Button onClick={handleGenerateReport} disabled={loading} className="bg-[#0b1d3a] hover:bg-[#1a2f55] min-w-[140px]">
-              {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : "Generate Report"}
+              {loading ? <Loader variant="inline" className="mr-2" /> : "Generate Report"}
             </Button>
           </div>
         </CardContent>

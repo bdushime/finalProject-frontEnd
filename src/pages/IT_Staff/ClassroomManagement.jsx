@@ -22,9 +22,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2, Monitor, MonitorOff, Plus, School, Loader2 } from "lucide-react";
+import { Trash2, Monitor, MonitorOff, Plus, School } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 export default function ClassroomManagement() {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -169,7 +170,9 @@ export default function ClassroomManagement() {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="h-48 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-slate-400" /></TableCell>
+                                    <TableCell colSpan={3} className="h-48 text-center">
+                                        <Loader variant="inline" />
+                                    </TableCell>
                                 </TableRow>
                             ) : classrooms.length === 0 ? (
                                 <TableRow>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import api from "@/utils/api";
-import { Loader2, Download, Search, AlertCircle, FileBarChart } from "lucide-react";
+import { Download, Search, AlertCircle, FileBarChart } from "lucide-react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { toast } from "sonner";
+import Loader from "@/components/common/Loader";
 
 export default function ReportsPage() {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -124,7 +125,7 @@ export default function ReportsPage() {
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
                     {loading ? (
                         <div className="h-[400px] flex flex-col items-center justify-center text-[#0b1d3a] gap-3">
-                            <Loader2 className="w-10 h-10 animate-spin" />
+                            <Loader variant="inline" />
                             <p className="font-medium animate-pulse">{t('reports.loading')}</p>
                         </div>
                     ) : error ? (

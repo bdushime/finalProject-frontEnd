@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Grid3x3, List, Package, Eye, Loader2, RefreshCcw, WifiOff } from 'lucide-react';
+import { Search, Grid3x3, List, Package, Eye, RefreshCcw, WifiOff } from 'lucide-react';
 import { PageContainer, PageHeader } from '@/components/common/Page';
 import CategoryBadge from '../User_Student/components/CategoryBadge';
 import ITStaffLayout from '@/components/layout/ITStaffLayout';
@@ -15,6 +15,7 @@ import PaginationControls from '@/components/common/PaginationControls';
 import EquipmentDetailsDialog from './components/EquipmentDetailsDialog';
 import api from '@/utils/api';
 import { useTranslation } from "react-i18next";
+import Loader from "@/components/common/Loader";
 
 // Schema-defined categories to ensure dropdown always has options
 const STATIC_CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
@@ -225,7 +226,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
                   />
                 </div>
                 <Button type="submit" className="rounded-full border-gray-300 shadow-sm">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('equipment.search')}
+                  {loading ? <Loader variant="inline" /> : t('equipment.search')}
                 </Button>
               </div>
 
@@ -301,7 +302,7 @@ export function BrowseEquipment({ onViewDetails, onCheckout, onSearch }) {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="h-11 w-11 rounded-2xl bg-[#0b1d3a] text-white flex items-center justify-center shadow-sm">
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader variant="inline" />
                   </div>
                   <div>
                     <p className="text-sm font-black text-[#0b1d3a]">

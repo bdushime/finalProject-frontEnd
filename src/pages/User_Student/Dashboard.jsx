@@ -8,11 +8,13 @@ import TimeTracker from "./components/Dashboard/TimeTracker";
 import NotificationsWidget from "./components/Dashboard/NotificationsWidget";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/pages/auth/AuthContext";
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation("student");
     const { t: tCommon } = useTranslation("common");
+    const { user: authUser } = useAuth();
 
     // --- STATE ---
     const [user, setUser] = useState({ name: "Student", score: 0 });
@@ -31,9 +33,14 @@ export default function Dashboard() {
             try {
                 // A. Profile
                 const profileRes = await api.get('/users/profile');
+                const p = profileRes.data;
+                const profileName =
+                    p.fullName ||
+                    [p.firstName, p.lastName].filter(Boolean).join(" ").trim() ||
+                    p.username;
                 setUser({
-                    name: profileRes.data.fullName || profileRes.data.username,
-                    score: profileRes.data.responsibilityScore || 100,
+                    name: profileName || "Student",
+                    score: p.responsibilityScore ?? 100,
                 });
 
                 // B. Borrows & History
@@ -109,6 +116,12 @@ export default function Dashboard() {
     };
 
     const formattedDate = getFormattedDate();
+
+    // Same order as StudentTopbar: first-time full name lives on auth after profile completion.
+    const greetingName =
+        authUser?.fullName ||
+        authUser?.username ||
+        user.name;
     // 1. Chart Data Calculator (Counts items per day: Sun-Sat)
     const getChartData = () => {
         const days = [0, 0, 0, 0, 0, 0, 0]; // Index 0=Sun, 6=Sat
@@ -189,7 +202,7 @@ export default function Dashboard() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-light text-[#0b1d3a] tracking-tight mb-2">
-                            {getGreeting()}, <span className="font-medium">{user.name}</span>
+                            {getGreeting()}, <span className="font-medium">{greetingName}</span>
                         </h1>
                         <p className="text-slate-500 text-lg font-light">{formattedDate}</p>
 

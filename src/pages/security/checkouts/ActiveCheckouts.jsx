@@ -3,7 +3,7 @@ import MainLayout from '@/pages/security/layout/MainLayout'
 import StatCard from '@/components/security/StatCard'
 import AccessLogsTable from '@/components/security/AccessLogsTable'
 import { useTranslation } from 'react-i18next'
-import { Package, AlertTriangle, Clock, Loader2 } from 'lucide-react'
+import { Package, AlertTriangle, Clock } from 'lucide-react'
 import api from '@/utils/api'
 
 function ActiveCheckouts() {
