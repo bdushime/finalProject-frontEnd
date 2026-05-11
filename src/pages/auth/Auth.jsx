@@ -100,6 +100,26 @@ export default function Auth() {
                 }
 
                 navigate(getRoleDashboardPath(authUser.role));
+                const role = res.data.role;
+                switch (role) {
+                    case 'Student':
+                        navigate("/student/dashboard");
+                        break;
+                    case 'Admin':
+                        navigate("/admin/dashboard");
+                        break;
+                    case 'Security':
+                    case 'Gate_Keeper': // 👇 FIXED: Gate_Keeper now routes correctly!
+                        navigate("/security/dashboard");
+                        break;
+                    case 'IT':
+                    case 'IT_Staff':
+                        navigate("/it/dashboard");
+                        break;
+                    default:
+                        console.warn("Unknown role detected:", role);
+                        navigate("/student/dashboard");
+                }
             }, 1000);
 
         } catch (err) {
@@ -149,7 +169,6 @@ export default function Auth() {
 
         } catch (err) {
             console.error(err);
-            // 👇 FIX: This will now show the exact backend message (e.g. "User already exists!")
             const errorMsg = err.response?.data?.message || t("registrationFailed");
             setFeedback({ type: 'error', message: errorMsg });
         } finally {
