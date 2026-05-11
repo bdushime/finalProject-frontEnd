@@ -14,7 +14,7 @@ export default function Auth() {
     const [isLoading, setIsLoading] = useState(false);
 
     // Feedback state for inline alerts
-    const [feedback, setFeedback] = useState({ type: null, message: null }); // type: 'success' | 'error'
+    const [feedback, setFeedback] = useState({ type: null, message: null }); 
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -38,17 +38,13 @@ export default function Auth() {
     const normalizeRole = (role) => {
         const value = (role || "").toString().trim().toLowerCase().replace(/[\s-]/g, "_");
         switch (value) {
-            case "student":
-                return "Student";
-            case "admin":
-                return "Admin";
-            case "security":
-                return "Security";
+            case "student": return "Student";
+            case "admin": return "Admin";
+            case "security": return "Security";
+            case "gate_keeper": return "Gate_Keeper"; // Ensure it catches it!
             case "it":
-            case "it_staff":
-                return "IT_Staff";
-            default:
-                return role;
+            case "it_staff": return "IT_Staff";
+            default: return role;
         }
     };
 
@@ -59,9 +55,8 @@ export default function Auth() {
             case "Admin":
                 return "/admin/dashboard";
             case "Security":
+            case "Gate_Keeper": // Both route to the security dashboard!
                 return "/security/dashboard";
-            case "Gate_Keeper":
-                return "/gate-verification";
             case "IT_Staff":
                 return "/it/dashboard";
             default:
@@ -80,46 +75,35 @@ export default function Auth() {
         clearFeedback();
 
         try {
-            const res = await api.post('/auth/login', loginData);
+            // 👇 Map loginId to email so the backend Auth route understands it!
+            const payload = {
+                email: loginData.loginId, 
+                password: loginData.password
+            };
+
+            const res = await api.post('/auth/login', payload);
+            
             localStorage.setItem('token', res.data.token);
             const authUser = {
                 ...res.data,
                 role: normalizeRole(res.data.role),
                 mustChangePassword: Boolean(res.data.mustChangePassword),
             };
+            
             login(authUser);
 
-            // Success feedback
             setFeedback({ type: 'success', message: t("welcomeUser", { name: res.data.username }) });
 
-            // Small delay to let user see success message before redirect
             setTimeout(() => {
-                if (from) {
+                // 👇 Prevent root-redirect loops! Ignore '/' and '/login' deep links
+                if (from && from !== "/" && from !== "/login" && from !== "/signup") {
                     navigate(from, { replace: true });
                     return;
                 }
 
-                navigate(getRoleDashboardPath(authUser.role));
-                const role = res.data.role;
-                switch (role) {
-                    case 'Student':
-                        navigate("/student/dashboard");
-                        break;
-                    case 'Admin':
-                        navigate("/admin/dashboard");
-                        break;
-                    case 'Security':
-                    case 'Gate_Keeper': // 👇 FIXED: Gate_Keeper now routes correctly!
-                        navigate("/security/dashboard");
-                        break;
-                    case 'IT':
-                    case 'IT_Staff':
-                        navigate("/it/dashboard");
-                        break;
-                    default:
-                        console.warn("Unknown role detected:", role);
-                        navigate("/student/dashboard");
-                }
+                // 👇 Removed the redundant switch statement. Just use your clean helper function!
+                navigate(getRoleDashboardPath(authUser.role), { replace: true });
+                
             }, 1000);
 
         } catch (err) {
@@ -134,7 +118,6 @@ export default function Auth() {
     const handleSignUpSubmit = async () => {
         clearFeedback();
 
-        // Basic validation before hitting the server
         if (!signUpData.name || !signUpData.username || !signUpData.email || !signUpData.password) {
             setFeedback({ type: 'error', message: "Please fill in all required fields." });
             return;
@@ -160,11 +143,10 @@ export default function Auth() {
 
             setFeedback({ type: 'success', message: t("accountCreatedSuccess") });
 
-            // Clear form and toggle mode after success
             setTimeout(() => {
                 toggleMode();
                 setSignUpData({ name: "", username: "", studentId: "", email: "", password: "", confirmPassword: "" });
-                clearFeedback(); // Clear feedback when switching to login view
+                clearFeedback();
             }, 1500);
 
         } catch (err) {
@@ -180,10 +162,9 @@ export default function Auth() {
         setIsSignUp(!isSignUp);
         setShowPassword(false);
         setShowConfirmPassword(false);
-        clearFeedback(); // Clear feedback on toggle
+        clearFeedback(); 
     };
 
-    // Inline Alert Component
     const FeedbackAlert = () => {
         if (!feedback.message) return null;
 
@@ -202,21 +183,17 @@ export default function Auth() {
 
     return (
         <div className="min-h-screen bg-[#FAFAF8] flex justify-center items-center p-4 sm:p-8 relative overflow-hidden font-['DM_Sans',sans-serif]">
-            {/* Language Switcher - top right */}
             <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50">
                 <LanguageSwitcher variant="light" />
             </div>
 
-            {/* Background blobs */}
             <div className="absolute -top-[150px] -right-[100px] w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] rounded-[42%_58%_70%_30%/45%_45%_55%_55%] blur-[40px] z-0"
                 style={{ background: "linear-gradient(135deg, rgba(0, 180, 216, 0.25) 0%, rgba(24, 100, 171, 0.15) 100%)" }} />
             <div className="absolute -bottom-[100px] -left-[80px] w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] rounded-[58%_42%_30%_70%/55%_55%_45%_45%] blur-[40px] z-0"
                 style={{ background: "linear-gradient(135deg, rgba(144, 224, 239, 0.2) 0%, rgba(0, 180, 216, 0.1) 100%)" }} />
 
-            {/* Main Container */}
             <div className="w-full max-w-[900px] bg-white rounded-2xl sm:rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.08)] relative overflow-hidden z-10 border border-black/[0.04] flex flex-col md:flex-row md:h-[650px]">
 
-                {/* ===== SLIDING OVERLAY  — hidden on mobile, visible md+ ===== */}
                 <div
                     className="hidden md:flex absolute top-0 w-1/2 h-full flex-col justify-center items-center p-8 lg:p-12 z-10 transition-[left] duration-[600ms] ease-[cubic-bezier(0.68,-0.15,0.32,1.15)]"
                     style={{
@@ -237,7 +214,6 @@ export default function Auth() {
                     </div>
                 </div>
 
-                {/* ===== MOBILE MODE TOGGLE — visible only on mobile ===== */}
                 <div className="md:hidden p-6 pb-0 text-center"
                     style={{ background: isSignUp ? "transparent" : "transparent" }}
                 >
@@ -387,7 +363,6 @@ export default function Auth() {
                 </div>
 
             </div>
-
         </div>
     );
 }
