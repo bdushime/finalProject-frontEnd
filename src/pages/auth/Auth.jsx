@@ -68,6 +68,7 @@ export default function Auth() {
                         navigate("/admin/dashboard");
                         break;
                     case 'Security':
+                    case 'Gate_Keeper': // 👇 FIXED: Gate_Keeper now routes correctly!
                         navigate("/security/dashboard");
                         break;
                     case 'IT':
@@ -127,7 +128,6 @@ export default function Auth() {
 
         } catch (err) {
             console.error(err);
-            // 👇 FIX: This will now show the exact backend message (e.g. "User already exists!")
             const errorMsg = err.response?.data?.message || t("registrationFailed");
             setFeedback({ type: 'error', message: errorMsg });
         } finally {
