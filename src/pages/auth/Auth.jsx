@@ -35,15 +35,31 @@ export default function Auth() {
 
     const clearFeedback = () => setFeedback({ type: null, message: null });
 
+    const normalizeRole = (role) => {
+        const value = (role || "").toString().trim().toLowerCase().replace(/[\s-]/g, "_");
+        switch (value) {
+            case "student":
+                return "Student";
+            case "admin":
+                return "Admin";
+            case "security":
+                return "Security";
+            case "it":
+            case "it_staff":
+                return "IT_Staff";
+            default:
+                return role;
+        }
+    };
+
     const getRoleDashboardPath = (role) => {
-        switch (role) {
+        switch (normalizeRole(role)) {
             case "Student":
                 return "/student/dashboard";
             case "Admin":
                 return "/admin/dashboard";
             case "Security":
                 return "/security/dashboard";
-            case "IT":
             case "IT_Staff":
                 return "/it/dashboard";
             default:
@@ -59,7 +75,11 @@ export default function Auth() {
         try {
             const res = await api.post('/auth/login', loginData);
             localStorage.setItem('token', res.data.token);
-            const authUser = { ...res.data, mustChangePassword: Boolean(res.data.mustChangePassword) };
+            const authUser = {
+                ...res.data,
+                role: normalizeRole(res.data.role),
+                mustChangePassword: Boolean(res.data.mustChangePassword),
+            };
             login(authUser);
 
             // Success feedback
@@ -72,7 +92,7 @@ export default function Auth() {
                     return;
                 }
 
-                navigate(getRoleDashboardPath(res.data.role));
+                navigate(getRoleDashboardPath(authUser.role));
             }, 1000);
 
         } catch (err) {
