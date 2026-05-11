@@ -41,7 +41,7 @@ export default function Auth() {
             case "student": return "Student";
             case "admin": return "Admin";
             case "security": return "Security";
-            case "gate_keeper": return "Gate_Keeper"; // Ensure it catches it!
+            case "gate_keeper": return "Gate_Keeper"; 
             case "it":
             case "it_staff": return "IT_Staff";
             default: return role;
