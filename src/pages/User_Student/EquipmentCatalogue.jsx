@@ -7,7 +7,6 @@ import BackButton from "./components/BackButton";
 import { Package } from "lucide-react";
 import { PageContainer } from "@/components/common/Page";
 import api from "@/utils/api";
-import { mockPackages } from "./data/mockPackages";
 import { useTranslation } from "react-i18next";
 import Loader from "@/components/common/Loader";
 
@@ -15,6 +14,7 @@ export default function EquipmentCatalogue() {
     const navigate = useNavigate();
     const [availability, setAvailability] = useState("all");
     const [equipmentList, setEquipmentList] = useState([]);
+    const [packageList, setPackageList] = useState([]); // --- NEW: State for real packages ---
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState("single");
     const { t } = useTranslation("student");
@@ -22,10 +22,11 @@ export default function EquipmentCatalogue() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch both equipment and active transactions to map the real-time locations
-                const [eqRes, txRes] = await Promise.all([
+                // --- NEW: Added packages to the Promise.all fetch ---
+                const [eqRes, txRes, pkgRes] = await Promise.all([
                     api.get('/equipment'),
-                    api.get('/transactions/my-borrowed').catch(() => ({ data: [] }))
+                    api.get('/transactions/my-borrowed').catch(() => ({ data: [] })),
+                    api.get('/packages').catch(() => ({ data: [] })) 
                 ]);
 
                 // Map active borrows by equipmentId to easily pull their real-time destination
@@ -53,9 +54,14 @@ export default function EquipmentCatalogue() {
                 }));
 
                 setEquipmentList(mergedEquipment);
+                
+                // --- NEW: Set the packages from the database ---
+                setPackageList(pkgRes?.data || []);
+
             } catch (err) {
-                console.error("Failed to load equipment:", err);
+                console.error("Failed to load catalog data:", err);
                 setEquipmentList([]);
+                setPackageList([]);
             } finally {
                 setLoading(false);
             }
@@ -189,9 +195,9 @@ export default function EquipmentCatalogue() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {mockPackages.map((pkg) => (
+                            {packageList.map((pkg) => (
                                 <div
-                                    key={pkg.id}
+                                    key={pkg._id} // Fixed to use MongoDB _id
                                     className="group relative bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#126dd5]/30 hover:shadow-md transition-all duration-300 flex flex-col"
                                 >
                                     <div className="flex justify-between items-start mb-4">
@@ -211,7 +217,7 @@ export default function EquipmentCatalogue() {
 
                                         <div className="bg-slate-50 rounded-lg p-3 space-y-1.5">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t("equipment.includes")}</p>
-                                            {pkg.items.map((item, idx) => (
+                                            {pkg.items && pkg.items.map((item, idx) => (
                                                 <div key={idx} className="flex items-center gap-2 text-xs text-slate-600">
                                                     <div className="w-1 h-1 rounded-full bg-[#126dd5]"></div>
                                                     {item}
@@ -223,19 +229,26 @@ export default function EquipmentCatalogue() {
                                     <div className="pt-4 mt-auto">
                                         <Button
                                             className="w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all bg-[#0b1d3a] hover:bg-[#2c3e50] text-white"
-                                            onClick={() => navigate(`/student/package/${pkg.id}`)}
+                                            onClick={() => navigate(`/student/package/${pkg._id}`)} // Fixed to use MongoDB _id
                                         >
                                             {t("equipment.viewPackage")}
                                         </Button>
                                     </div>
                                 </div>
                             ))}
+
+                            {/* Empty state for packages if none exist in the DB */}
+                            {packageList.length === 0 && (
+                                <div className="col-span-full text-center py-10 text-slate-500">
+                                    No equipment packages available at the moment.
+                                </div>
+                            )}
                         </div>
                     )
                 )}
 
-                {/* Empty State */}
-                {!loading && filteredEquipment.length === 0 && (
+                {/* Empty State for Single Items */}
+                {!loading && viewMode === 'single' && filteredEquipment.length === 0 && (
                     <div className="text-center py-20">
                         <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4 text-slate-300">
                             <Package className="w-8 h-8" />

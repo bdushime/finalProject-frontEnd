@@ -1,21 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, ArrowLeft } from "lucide-react";
+import { Package, ArrowLeft, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageContainer } from "@/components/common/Page";
-import { mockPackages } from "./data/mockPackages";
+import api from "@/utils/api";
 
 export default function PackageDetails() {
     const { packageId } = useParams();
     const navigate = useNavigate();
 
-    const pkg = mockPackages.find(p => p.id === packageId);
+    // --- NEW: State for real API data ---
+    const [pkg, setPkg] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [selectedItems, setSelectedItems] = useState([]);
 
-    // Default to all items selected
-    const [selectedItems, setSelectedItems] = useState(pkg ? pkg.items : []);
+    // --- NEW: Fetch package from backend ---
+    useEffect(() => {
+        const fetchPackage = async () => {
+            try {
+                const res = await api.get(`/packages/${packageId}`);
+                setPkg(res.data);
+                setSelectedItems(res.data.items); // Default to all items selected
+            } catch (err) {
+                console.error("Error fetching package:", err);
+                setError("Failed to load package details.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPackage();
+    }, [packageId]);
 
     const toggleItem = (item) => {
         setSelectedItems(prev =>
@@ -25,7 +44,28 @@ export default function PackageDetails() {
         );
     };
 
-    if (!pkg) {
+    const handleRequest = () => {
+        const itemsParam = encodeURIComponent(selectedItems.join(','));
+        // Using pkg._id to match MongoDB's ID format
+        navigate(`/student/borrow-request?packageId=${pkg._id}&items=${itemsParam}`);
+    };
+
+    // --- NEW: Loading UI ---
+    if (loading) {
+        return (
+            <StudentLayout>
+                <PageContainer>
+                    <div className="min-h-[60vh] flex flex-col items-center justify-center text-[#0b1d3a] gap-4">
+                        <Loader2 className="w-12 h-12 animate-spin text-[#126dd5]" />
+                        <p className="font-medium animate-pulse">Loading package details...</p>
+                    </div>
+                </PageContainer>
+            </StudentLayout>
+        );
+    }
+
+    // --- Error or Not Found UI ---
+    if (error || !pkg) {
         return (
             <StudentLayout>
                 <PageContainer>
@@ -33,8 +73,8 @@ export default function PackageDetails() {
                         <div className="p-4 rounded-full bg-slate-50 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                             <Package className="h-10 w-10 text-slate-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-[#0b1d3a] mb-2">Package not found</h3>
-                        <Button onClick={() => navigate('/student/browse')} className="bg-[#0b1d3a]">
+                        <h3 className="text-xl font-bold text-[#0b1d3a] mb-2">{error || "Package not found"}</h3>
+                        <Button onClick={() => navigate('/student/browse')} className="bg-[#0b1d3a] mt-4 hover:bg-[#1a3b6e]">
                             Back to Catalogue
                         </Button>
                     </div>
@@ -42,13 +82,6 @@ export default function PackageDetails() {
             </StudentLayout>
         );
     }
-
-    const handleRequest = () => {
-        // Construct URL with selected items
-        // Since we are mocking, we'll just pass them as a query param list
-        const itemsParam = encodeURIComponent(selectedItems.join(','));
-        navigate(`/student/borrow-request?packageId=${pkg.id}&items=${itemsParam}`);
-    };
 
     return (
         <StudentLayout>
@@ -94,8 +127,8 @@ export default function PackageDetails() {
                                                 <div
                                                     key={idx}
                                                     className={`flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${isSelected
-                                                            ? 'bg-[#126dd5]/5 border-[#126dd5]/30 shadow-sm'
-                                                            : 'bg-white border-slate-200 hover:border-slate-300'
+                                                        ? 'bg-[#126dd5]/5 border-[#126dd5]/30 shadow-sm'
+                                                        : 'bg-white border-slate-200 hover:border-slate-300'
                                                         }`}
                                                     onClick={() => toggleItem(item)}
                                                 >
