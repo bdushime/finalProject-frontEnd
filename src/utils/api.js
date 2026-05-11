@@ -22,15 +22,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         const status = error.response?.status;
-        const errorCode = error.response?.data?.code;
 
-        // During first login, backend may block protected actions with 403 + PASSWORD_RESET_REQUIRED.
-        // Keep the user authenticated so the profile-completion modal can finish.
-        if (status === 403 && errorCode === "PASSWORD_RESET_REQUIRED") {
-            return Promise.reject(error);
-        }
-
-        if (status === 401 || status === 403) {
+        // Only 401 means the session/token is invalid or missing. 403 means "authenticated but
+        // not allowed for this resource" — clearing storage here logged IT staff out when e.g.
+        // /analytics/dashboard returned 403 while their JWT was still valid.
+        if (status === 401) {
             console.warn("Session expired or unauthorized. Redirecting to login...");
             localStorage.removeItem('token');
             localStorage.removeItem('user');

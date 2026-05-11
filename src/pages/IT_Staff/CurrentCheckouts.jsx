@@ -168,11 +168,11 @@ export default function CurrentCheckouts() {
 
         const autoDenyPending = async () => {
             const now = new Date();
-            const fourHoursInMs = 4 * 60 * 60 * 1000;
+            const minutesInMs = 30 * 1000;
             const pendingToDeny = allTransactions.filter(tx => {
                 if (tx.status !== 'Pending') return false;
                 const createdAt = new Date(tx.fullData.createdAt);
-                return (now - createdAt) > fourHoursInMs;
+                return (now - createdAt) > minutesInMs;
             });
 
             if (pendingToDeny.length > 0) {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield, LogOut, BookOpen } from 'lucide-react';
 import logo from '../../../assets/images/logo8noback.png';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, NavLink } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,14 +87,20 @@ const AdminLayout = ({ children, heroContent }) => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-0.5 bg-slate-800/40 p-1 rounded-full backdrop-blur-md border border-slate-700/30">
               {navItems.map((item) => (
-                <a
+                <NavLink
                   key={item.label}
-                  href={item.href}
-                  className="px-3 py-2 rounded-full text-[13px] font-medium text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all flex items-center space-x-1.5 whitespace-nowrap"
+                  to={item.href}
+                  className={({ isActive }) =>
+                    `px-3 py-2 rounded-full text-[13px] font-medium transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+                      isActive
+                        ? "text-white bg-slate-700/70"
+                        : "text-gray-300 hover:text-white hover:bg-slate-700/50"
+                    }`
+                  }
                 >
                   <item.icon className="w-4 h-4" />
                   <span>{item.label}</span>
-                </a>
+                </NavLink>
               ))}
             </nav>
 
@@ -156,10 +162,21 @@ const AdminLayout = ({ children, heroContent }) => {
             <div className="lg:hidden mt-4 pt-4 border-t border-slate-800 animate-in slide-in-from-top-2">
               <nav className="flex flex-col space-y-2">
                 {navItems.map((item) => (
-                  <a key={item.label} href={item.href} className="block px-4 py-3 rounded-xl hover:bg-slate-800 text-gray-300 hover:text-white font-medium flex items-center space-x-3">
+                  <NavLink
+                    key={item.label}
+                    to={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `block px-4 py-3 rounded-xl font-medium flex items-center space-x-3 ${
+                        isActive
+                          ? "bg-slate-800 text-white"
+                          : "text-gray-300 hover:bg-slate-800 hover:text-white"
+                      }`
+                    }
+                  >
                     <item.icon className="w-5 h-5" />
                     <span>{item.label}</span>
-                  </a>
+                  </NavLink>
                 ))}
               </nav>
             </div>

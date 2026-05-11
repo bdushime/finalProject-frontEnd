@@ -68,9 +68,8 @@ export default function Auth() {
     };
 
     const handleLoginSubmit = async (e) => {
-        e.preventDefault();
-    const handleLoginSubmit = async () => {
-        if (!loginData.email || !loginData.password) {
+        e?.preventDefault();
+        if (!loginData.loginId?.trim() || !loginData.password) {
              setFeedback({ type: 'error', message: "Please fill in all fields" });
              return;
         }
