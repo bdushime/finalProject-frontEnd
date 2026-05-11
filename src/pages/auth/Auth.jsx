@@ -69,6 +69,12 @@ export default function Auth() {
 
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
+    const handleLoginSubmit = async () => {
+        if (!loginData.email || !loginData.password) {
+             setFeedback({ type: 'error', message: "Please fill in all fields" });
+             return;
+        }
+
         setIsLoading(true);
         clearFeedback();
 
@@ -104,10 +110,14 @@ export default function Auth() {
         }
     };
 
-
-    const handleSignUpSubmit = async (e) => {
-        e.preventDefault();
+    const handleSignUpSubmit = async () => {
         clearFeedback();
+
+        // Basic validation before hitting the server
+        if (!signUpData.name || !signUpData.username || !signUpData.email || !signUpData.password) {
+            setFeedback({ type: 'error', message: "Please fill in all required fields." });
+            return;
+        }
 
         if (signUpData.password !== signUpData.confirmPassword) {
             setFeedback({ type: 'error', message: t("passwordsDoNotMatch") });
@@ -138,7 +148,9 @@ export default function Auth() {
 
         } catch (err) {
             console.error(err);
-            setFeedback({ type: 'error', message: t("registrationFailed") });
+            // 👇 FIX: This will now show the exact backend message (e.g. "User already exists!")
+            const errorMsg = err.response?.data?.message || t("registrationFailed");
+            setFeedback({ type: 'error', message: errorMsg });
         } finally {
             setIsLoading(false);
         }
@@ -238,7 +250,7 @@ export default function Auth() {
 
                     <FeedbackAlert />
 
-                    <form onSubmit={handleSignUpSubmit} className="flex flex-col gap-3 overflow-y-auto max-h-[60vh] md:max-h-[500px] pr-1">
+                    <div className="flex flex-col gap-3 overflow-y-auto max-h-[60vh] md:max-h-[500px] pr-1">
                         <div>
                             <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">{t("fullName")}</label>
                             <div className="relative">
@@ -299,12 +311,12 @@ export default function Auth() {
                             </div>
                         </div>
 
-                        <button type="submit" disabled={isLoading}
+                        <button type="button" disabled={isLoading} onClick={handleSignUpSubmit}
                             className="w-full h-11 text-white border-none rounded-[10px] font-semibold cursor-pointer mt-2 flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{ background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)" }}>
                             {isLoading ? t("creating") : <>{t("createAccount")} <ArrowRight size={18} /></>}
                         </button>
-                    </form>
+                    </div>
                 </div>
 
                 {/* ===== SIGN IN FORM ===== */}
@@ -315,7 +327,7 @@ export default function Auth() {
 
                     <FeedbackAlert />
 
-                    <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-5">
                         <div>
                             <label className="block mb-1 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">
                                 Student ID or Email
@@ -346,12 +358,12 @@ export default function Auth() {
                             <Link to="/forgot-password" className="text-[#1864ab] no-underline text-sm font-semibold hover:underline">{t("forgotPassword")}</Link>
                         </div>
 
-                        <button type="submit" disabled={isLoading}
+                        <button type="button" disabled={isLoading} onClick={handleLoginSubmit}
                             className="w-full h-12 text-white border-none rounded-[10px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{ background: isLoading ? "#9ca3af" : "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)" }}>
                             {isLoading ? t("signingIn") : <>{t("signIn")} <ArrowRight size={18} /></>}
                         </button>
-                    </form>
+                    </div>
                 </div>
 
             </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import AdminLayout from '../components/AdminLayout';
 import api from '@/utils/api';
-import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle, MessageSquare, Send } from 'lucide-react';
+import { Search, Filter, Plus, Shield, Edit, Trash2, ChevronDown, Clock, X, Loader2, Gavel, MinusCircle, PlusCircle, CreditCard, Lock, Ban, CheckCircle, MessageSquare, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from "@/components/ui/utils";
 import Loader from "@/components/common/Loader";
@@ -16,11 +16,15 @@ const UsersList = () => {
     const [roleFilter, setRoleFilter] = useState('All Roles');
     const [showFilters, setShowFilters] = useState(false);
 
+    // --- NEW: Pagination State ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 10;
+
     // Modals State
     const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
     const [showScoreModal, setShowScoreModal] = useState(false);
-    const [showMessageModal, setShowMessageModal] = useState(false); // <--- NEW: Message Modal
+    const [showMessageModal, setShowMessageModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [statusUser, setStatusUser] = useState(null);
 
@@ -46,14 +50,14 @@ const UsersList = () => {
     });
 
     // Message Data
-    const [messageData, setMessageData] = useState({ subject: '', body: '' }); // <--- NEW
+    const [messageData, setMessageData] = useState({ subject: '', body: '' });
     const [submitting, setSubmitting] = useState(false);
 
-    // 1. FETCH USERS
+    // 1. FETCH USERS (Requesting up to 200 to allow local search/pagination)
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/users');
+            const res = await api.get('/users?limit=200');
 
             const payload = res?.data;
             const list =
@@ -83,7 +87,6 @@ const UsersList = () => {
             const res = await api.get('/roles');
             const data = Array.isArray(res.data) ? res.data : [];
             const customRoles = data.map(r => r.name);
-            // Unique roles: default + custom
             setRoles([...DEFAULT_ROLES, ...customRoles.filter(r => !DEFAULT_ROLES.includes(r))]);
         } catch (err) {
             console.error("Failed to fetch roles", err);
@@ -94,6 +97,11 @@ const UsersList = () => {
         fetchUsers();
         fetchRoles();
     }, []);
+
+    // --- NEW: Reset to page 1 whenever search or filter changes ---
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, roleFilter]);
 
     // 2. HANDLE ADD USER
     const handleAddUser = async () => {
@@ -161,7 +169,7 @@ const UsersList = () => {
             setShowEditUserModal(false);
             fetchUsers();
         } catch (err) {
-            console.error(err);
+            console.error("🚨 TRUE BACKEND ERROR:", err.response?.data);
             toast.error(t('users.failedUpdate'));
         } finally {
             setSubmitting(false);
@@ -178,7 +186,6 @@ const UsersList = () => {
         if (!statusUser) return;
         const newStatus = statusUser.status === 'Suspended' ? 'Active' : 'Suspended';
 
-        // Optimistic UI update
         setUsers(safeUsers.map(u => u._id === statusUser._id ? { ...u, status: newStatus } : u));
         setShowStatusModal(false);
 
@@ -191,8 +198,6 @@ const UsersList = () => {
         }
     };
 
-
-
     // 7. SCORE LOGIC
     const openScoreModal = (user) => {
         setSelectedUser(user);
@@ -203,7 +208,6 @@ const UsersList = () => {
     const handleSaveScore = async () => {
         if (!selectedUser) return;
 
-        // Optimistic UI Update
         const updatedUsers = safeUsers.map(u =>
             u._id === selectedUser._id ? { ...u, responsibilityScore: newScore } : u
         );
@@ -257,6 +261,12 @@ const UsersList = () => {
         const matchesRole = roleFilter === 'All Roles' || user.role === roleFilter;
         return matchesSearch && matchesRole;
     });
+
+    // --- NEW: Pagination Logic ---
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
     const getRoleBadgeColor = (role) => {
         switch (role) {
@@ -347,92 +357,128 @@ const UsersList = () => {
                 </div>
 
                 {/* Users Table */}
-                <div className="overflow-hidden rounded-2xl border border-gray-50">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                <th className="px-6 py-5">{t('users.userIdentity')}</th>
-                                <th className="px-6 py-5">{t('users.assignedRole')}</th>
-                                <th className="px-6 py-5">{t('users.status')}</th>
-                                <th className="px-6 py-5">{t('users.department')}</th>
-                                <th className="px-6 py-5">{t('users.respScore')}</th>
-                                <th className="px-6 py-5 text-right">{t('users.actions')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr><td colSpan="6" className="p-8 text-center"><Loader variant="inline" /></td></tr>
-                            ) : filteredUsers.length > 0 ? (
-                                filteredUsers.map((user) => (
-                                    <tr key={user._id} className={`hover:bg-[#8D8DC7]/5 transition-all group ${user.status === 'Suspended' ? 'bg-red-50/30' : ''}`}>
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center">
-                                                <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] font-black mr-4 border border-indigo-100 uppercase shadow-sm group-hover:scale-110 transition-transform">
-                                                    {(user.fullName || user.username || "U").charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-slate-900 text-base">{user.fullName || user.username}</div>
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        <span className="text-xs text-slate-400 font-medium">{user.email}</span>
-                                                        {user.role === 'Student' && user.studentId && (
-                                                            <span className="bg-gray-100 px-2 py-0.5 rounded-lg text-[10px] text-slate-500 font-black tracking-wider border border-gray-200 uppercase">#{user.studentId}</span>
-                                                        )}
+                <div className="overflow-hidden rounded-2xl border border-gray-50 flex flex-col">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-gray-100">
+                                    <th className="px-6 py-5">{t('users.userIdentity')}</th>
+                                    <th className="px-6 py-5">{t('users.assignedRole')}</th>
+                                    <th className="px-6 py-5">{t('users.status')}</th>
+                                    <th className="px-6 py-5">{t('users.department')}</th>
+                                    <th className="px-6 py-5">{t('users.respScore')}</th>
+                                    <th className="px-6 py-5 text-right">{t('users.actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {loading ? (
+                                    <tr><td colSpan="6" className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#8D8DC7]" /></td></tr>
+                                ) : currentUsers.length > 0 ? (
+                                    currentUsers.map((user) => (
+                                        <tr key={user._id} className={`hover:bg-[#8D8DC7]/5 transition-all group ${user.status === 'Suspended' ? 'bg-red-50/30' : ''}`}>
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center">
+                                                    <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] font-black mr-4 border border-indigo-100 uppercase shadow-sm group-hover:scale-110 transition-transform">
+                                                        {(user.fullName || user.username || "U").charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-slate-900 text-base">{user.fullName || user.username}</div>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            <span className="text-xs text-slate-400 font-medium">{user.email}</span>
+                                                            {user.role === 'Student' && user.studentId && (
+                                                                <span className="bg-gray-100 px-2 py-0.5 rounded-lg text-[10px] text-slate-500 font-black tracking-wider border border-gray-200 uppercase">#{user.studentId}</span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getRoleBadgeColor(user.role)} shadow-sm`}>
-                                                {user.role === 'Admin' && <Shield className="w-3.5 h-3.5 mr-2" />}
-                                                {t(`common:roles.${user.role === 'IT_Staff' ? 'itStaff' : user.role.toLowerCase()}`)}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(user.status || 'Active')} shadow-sm`}>
-                                                {user.status === 'Suspended' ? t('users.suspended') : t('users.activeStatus')}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-5 text-sm text-slate-600 font-bold">{user.department || t('users.general')}</td>
-                                        <td className="px-6 py-5">
-                                            <span className={`inline-flex items-center justify-center min-w-12 h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore ?? 100)} shadow-sm`}>
-                                                {user.responsibilityScore ?? 100}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-5 text-right">
-                                            <div className="flex items-center justify-end space-x-2">
-
-                                                {/* MESSAGE BUTTON */}
-                                                <button onClick={() => openMessageModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-blue-500 transition-colors" title="Send Message">
-                                                    <MessageSquare className="w-4 h-4" />
-                                                </button>
-
-                                                <button onClick={() => openEditModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Edit User">
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-
-                                                <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
-                                                    <Gavel className="w-4 h-4" />
-                                                </button>
-
-                                                {user.role !== 'Admin' && (
-                                                    <button
-                                                        onClick={() => openStatusModal(user)}
-                                                        className={`p-2 rounded-lg transition-colors ${user.status === 'Suspended' ? 'hover:bg-emerald-50 text-emerald-500' : 'hover:bg-orange-50 text-orange-500'}`}
-                                                        title={user.status === 'Suspended' ? "Activate User" : "Suspend User"}
-                                                    >
-                                                        {user.status === 'Suspended' ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getRoleBadgeColor(user.role)} shadow-sm`}>
+                                                    {user.role === 'Admin' && <Shield className="w-3.5 h-3.5 mr-2" />}
+                                                    {t(`common:roles.${user.role === 'IT_Staff' ? 'itStaff' : user.role.toLowerCase()}`)}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(user.status || 'Active')} shadow-sm`}>
+                                                    {user.status === 'Suspended' ? t('users.suspended') : t('users.activeStatus')}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5 text-sm text-slate-600 font-bold">{user.department || t('users.general')}</td>
+                                            <td className="px-6 py-5">
+                                                <span className={`inline-flex items-center justify-center min-w-12 h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore ?? 100)} shadow-sm`}>
+                                                    {user.responsibilityScore ?? 100}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5 text-right">
+                                                <div className="flex items-center justify-end space-x-2">
+                                                    <button onClick={() => openMessageModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-blue-500 transition-colors" title="Send Message">
+                                                        <MessageSquare className="w-4 h-4" />
                                                     </button>
-                                                )}
+                                                    <button onClick={() => openEditModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Edit User">
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
+                                                        <Gavel className="w-4 h-4" />
+                                                    </button>
+                                                    {user.role !== 'Admin' && (
+                                                        <button
+                                                            onClick={() => openStatusModal(user)}
+                                                            className={`p-2 rounded-lg transition-colors ${user.status === 'Suspended' ? 'hover:bg-emerald-50 text-emerald-500' : 'hover:bg-orange-50 text-orange-500'}`}
+                                                            title={user.status === 'Suspended' ? "Activate User" : "Suspend User"}
+                                                        >
+                                                            {user.status === 'Suspended' ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr><td colSpan="6" className="p-12 text-center text-gray-400 font-medium">{t('users.noUsersFound', 'No users found.')}</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
 
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr><td colSpan="6" className="p-8 text-center text-gray-400">{t('users.noUsersFound')}</td></tr>
-                            )}
-                        </tbody>
-                    </table>
+                    {/* --- NEW: Pagination Controls --- */}
+                    {!loading && filteredUsers.length > 0 && (
+                        <div className="flex items-center justify-between px-6 py-4 bg-gray-50/50 border-t border-gray-100">
+                            <span className="text-sm font-medium text-slate-500">
+                                Showing <span className="font-bold text-slate-700">{indexOfFirstUser + 1}</span> to <span className="font-bold text-slate-700">{Math.min(indexOfLastUser, filteredUsers.length)}</span> of <span className="font-bold text-slate-700">{filteredUsers.length}</span> entries
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg border border-gray-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-[#8D8DC7] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${
+                                                currentPage === page
+                                                    ? 'bg-[#8D8DC7] text-white shadow-md'
+                                                    : 'text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg border border-gray-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-[#8D8DC7] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -443,8 +489,6 @@ const UsersList = () => {
                         <button onClick={() => setShowAddUserModal(false)} className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"><X className="w-5 h-5" /></button>
                         <div className="mb-8"><h2 className="text-2xl font-bold text-slate-900 mb-2">{t('users.newUserProfile')}</h2><p className="text-gray-500">{t('users.defaultPassword')}</p></div>
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleAddUser(); }}>
-                            {/* ... (Existing form inputs for First Name, Last Name, Email, Role, Dept) ... */}
-                            {/* I'll abbreviate to save space, assuming you keep your existing form inputs here */}
                             <div className="grid grid-cols-2 gap-5">
                                 <input type="text" placeholder={t('users.firstName')} className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
                                 <input type="text" placeholder={t('users.lastName')} className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-slate-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8D8DC7]/20" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} required />
