@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
     ArrowRight, BookOpen, Clock, Shield, Users,
-    Zap, Star, Rocket, ChevronRight, Play, MapPin,
+    Zap, Rocket, ChevronRight, Play, MapPin,
     Mail, Phone, Send, Check, Moon, Sun, Menu, X,
     Laptop, QrCode, Bell, BarChart3, Package, UserCheck,
     GraduationCap, Presentation, Terminal, ShieldCheck, DoorOpen, Settings
@@ -152,7 +152,6 @@ export default function Landing() {
     const { t } = useTranslation('landing');
     // Theme state with persistence
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [activeTestimonial, setActiveTestimonial] = useState(0);
     const [videoModalOpen, setVideoModalOpen] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -192,14 +191,6 @@ export default function Landing() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Auto rotate testimonials
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setActiveTestimonial(prev => (prev + 1) % 4);
-        }, 5000);
-        return () => clearInterval(timer);
-    }, []);
-
     const scrollTo = (id) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
         setMobileMenuOpen(false);
@@ -220,13 +211,6 @@ export default function Landing() {
         { icon: <Settings className="w-7 h-7" />, color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300", title: t('users.admins'), desc: t('users.adminsDesc') },
     ];
 
-    const testimonials = [
-        { quote: "Tracknity cut our equipment losses by 80%. The QR system is genius!", name: "Sarah M.", role: "CS Graduate Student", avatar: "👩‍💻" },
-        { quote: "Finally, I can see where every laptop and camera is in real-time.", name: "James K.", role: "IT Support Lead", avatar: "👨‍💼" },
-        { quote: "Booking lab equipment is now a 30-second task. Love it!", name: "Dr. Amina R.", role: "Engineering Lecturer", avatar: "👩‍🔬" },
-        { quote: "The analytics helped us justify new equipment purchases to admin.", name: "David T.", role: "Media Lab Coordinator", avatar: "🎬" },
-    ];
-
     const steps = [
         { num: "01", title: t('howItWorks.step1'), desc: t('howItWorks.step1Desc') },
         { num: "02", title: t('howItWorks.step2'), desc: t('howItWorks.step2Desc') },
@@ -239,7 +223,6 @@ export default function Landing() {
     const [featuresRef, featuresInView] = useInView();
     const [howRef, howInView] = useInView();
     const [usersRef, usersInView] = useInView();
-    const [testimonialsRef, testimonialsInView] = useInView();
 
     return (
         <div>
@@ -305,13 +288,6 @@ export default function Landing() {
                     .noise {
                         background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
                         opacity: 0.03;
-                    }
-                    
-                    .testimonial-card {
-                        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-                    }
-                    .testimonial-card.active {
-                        transform: scale(1.02);
                     }
                 `}</style>
 
@@ -560,53 +536,6 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* Testimonials */}
-                <section ref={testimonialsRef} className="py-14 bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-cyan-950/30" >
-                    <div className="max-w-6xl mx-auto px-6">
-                        <div className={`text-center mb-8 slide-up ${testimonialsInView ? 'visible' : ''}`}>
-                            <h2 className="text-4xl md:text-5xl font-bold font-display mb-4 text-slate-800 dark:text-white">
-                                {t('testimonials.title').split(' ').slice(0, -1).join(' ')}{' '}
-                                <span className="gradient-text">{t('testimonials.title').split(' ').slice(-1)}</span>
-                            </h2>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-                            {testimonials.map((t, i) => (
-                                <div
-                                    key={i}
-                                    className={`testimonial-card bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm ${activeTestimonial === i ? 'active shadow-lg border-[#1864ab] dark:border-cyan-800' : ''} slide-up ${testimonialsInView ? 'visible' : ''}`}
-                                    style={{ transitionDelay: `${i * 0.1}s` }}
-                                >
-                                    <div className="flex gap-1 mb-4">
-                                        {[...Array(5)].map((_, j) => (
-                                            <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                        ))}
-                                    </div>
-                                    <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed">"{t.quote}"</p>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-3xl">{t.avatar}</span>
-                                        <div>
-                                            <p className="font-semibold text-slate-800 dark:text-white">{t.name}</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{t.role}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Dots */}
-                        <div className="flex justify-center gap-2 mt-6">
-                            {testimonials.map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setActiveTestimonial(i)}
-                                    className={`w-2 h-2 rounded-full transition-all ${activeTestimonial === i ? 'w-8 bg-[#1864ab]' : 'bg-slate-300 dark:bg-slate-700'}`}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
                 {/* Contact Section - Redesigned */}
                 <section id="contact" className="py-14" >
                     <div className="max-w-6xl mx-auto px-6">
@@ -718,14 +647,14 @@ export default function Landing() {
                         {/* Map - Full Width, Shorter */}
                         <div className="mt-6 bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm h-[220px]">
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127672.75772082945!2d30.0018954!3d-1.9402881!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca42e29a5b491%3A0x3c05c8ba0c5af308!2sKigali%2C%20Rwanda!5e0!3m2!1sen!2s!4v1699000000000!5m2!1sen!2s"
+                                src="https://www.google.com/maps?q=-1.9554801,30.1042722+(Adventist+University+of+Central+Africa+-+Gishushu+Campus)&z=17&hl=en&output=embed"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0, filter: isDark ? 'invert(90%) hue-rotate(180deg)' : 'none' }}
                                 allowFullScreen=""
                                 loading="lazy"
                                 referrerPolicy="no-referrer-when-downgrade"
-                                title="Location"
+                                title="AUCA – Gishushu Campus (Science & Technology), Kigali"
                             />
                         </div>
                     </div>

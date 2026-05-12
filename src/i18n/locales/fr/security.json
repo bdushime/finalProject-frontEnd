@@ -134,7 +134,8 @@
         "emptyState": {
             "title": "Aucun appareil trouvé",
             "description": "Ajustez vos filtres ou essayez un autre terme de recherche."
-        }
+        },
+        "defaultStorage": "Stockage principal"
     },
     "activeCheckouts": {
         "stats": {
@@ -158,6 +159,38 @@
             "utilization": "Rapport d'Utilisation",
             "logs": "Rapport des Journaux d'Accès"
         }
+    },
+    "reportsDashboard": {
+        "allStatuses": "Tous les statuts",
+        "loadError": "Échec du chargement des données du rapport.",
+        "noExport": "Aucune donnée à exporter.",
+        "exportCsvOk": "Export Excel (CSV) réussi",
+        "exportFail": "Échec de l'export",
+        "recordsLabel": "Enregistrements correspondants",
+        "showing": "Affichage de {{from}} à {{to}} sur {{total}} entrées",
+        "pageOf": "Page {{current}} sur {{total}}",
+        "heroSubtitle": "Appareils, forfaits et activité d'accès gérés par la sécurité.",
+        "heroDevices": "Inventaire des appareils",
+        "heroPackages": "Forfaits d'équipement",
+        "heroLogs": "Accès et mouvements",
+        "heroExceptions": "Éléments à surveiller",
+        "cardDevicesTitle": "Inventaire des appareils",
+        "cardDevicesDesc": "Tout l'équipement enregistré : statut, état et emplacement.",
+        "cardPackagesTitle": "Forfaits",
+        "cardPackagesDesc": "Lots d'équipement configurés dans le système.",
+        "cardLogsTitle": "Activité d'accès",
+        "cardLogsDesc": "Sorties, retours et mouvements depuis les journaux de sécurité.",
+        "cardExceptionsTitle": "Éléments à surveiller",
+        "cardExceptionsDesc": "Biens endommagés, perdus, en maintenance, prêts en retard et autres sujets à suivre.",
+        "colPackageName": "Nom du forfait",
+        "colDescription": "Description",
+        "colItemCount": "Articles",
+        "colPackageId": "Référence",
+        "colCondition": "État",
+        "logStatusReturned": "Retourné",
+        "logStatusOverdue": "En retard",
+        "logStatusDenied": "Refusé",
+        "logStatusCanceled": "Annulé"
     },
     "notifications": {
         "title": "Notifications",
