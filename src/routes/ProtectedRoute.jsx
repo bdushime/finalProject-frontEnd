@@ -139,7 +139,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
       case "IT":  return "/it/dashboard";
       case "IT_Staff":  return "/it/dashboard";
       case "Security":  return "/security/dashboard";
-      case "Gate_Keeper": return "/security/dashboard";
+      case "Gate_Keeper": return "/gate-verification";
       case "Admin":     return "/admin/dashboard";
       default:          console.log("No role found"); return "/login";
     }
