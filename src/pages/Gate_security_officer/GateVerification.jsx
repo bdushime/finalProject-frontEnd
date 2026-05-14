@@ -22,7 +22,7 @@ const MOCK_STUDENT_DB = {
 const GateVerification = () => {
     const { t, i18n } = useTranslation("gate");
     const [studentId, setStudentId] = useState('');
-    const [status, setStatus] = useState('idle'); // idle, loading, not_found, clear, pending
+    const [status, setStatus] = useState('idle');
     const [studentData, setStudentData] = useState(null);
     const [pendingItems, setPendingItems] = useState([]);
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -52,7 +52,7 @@ const GateVerification = () => {
                 setStudentData(null);
                 setPendingItems([]);
             }
-        }, 800); // slight delay for effect
+        }, 800);
     };
 
     const handleCheck = (e) => {
@@ -68,58 +68,51 @@ const GateVerification = () => {
         setTimeout(() => inputRef.current?.focus(), 0);
     };
 
-    // Framer Motion variants
     const containerVariants = {
-        hidden: { opacity: 0, scale: 0.95, y: 20 },
-        visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', bounce: 0.4, duration: 0.6 } },
-        exit: { opacity: 0, scale: 0.95, y: -20, transition: { duration: 0.2 } }
+        hidden: { opacity: 0, scale: 0.98, y: 10 },
+        visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', bounce: 0.3, duration: 0.5 } },
+        exit: { opacity: 0, scale: 0.98, y: -10, transition: { duration: 0.2 } }
     };
 
     const iconVariants = {
-        hidden: { scale: 0, rotate: -180 },
-        visible: { scale: 1, rotate: 0, transition: { type: 'spring', bounce: 0.5, duration: 0.8, delay: 0.1 } }
+        hidden: { scale: 0.5, opacity: 0 },
+        visible: { scale: 1, opacity: 1, transition: { type: 'spring', bounce: 0.5, duration: 0.6, delay: 0.1 } }
     };
 
     return (
-        <div className="min-h-screen bg-[#0a0f1c] font-sans text-slate-200 selection:bg-blue-500/30 overflow-hidden relative">
-            {/* Ambient Background Effects */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="min-h-screen bg-slate-950 font-sans text-slate-200 selection:bg-blue-500/30 overflow-hidden relative flex flex-col">
             
-            {status === 'pending' && <div className="absolute inset-0 bg-red-600/10 mix-blend-overlay animate-pulse pointer-events-none" />}
-            {status === 'clear' && <div className="absolute inset-0 bg-emerald-600/10 mix-blend-overlay pointer-events-none" />}
-
             {/* Header */}
-            <header className="relative z-10 bg-white/5 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex flex-wrap justify-between items-center shadow-2xl">
+            <header className="relative z-10 bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-wrap justify-between items-center shadow-sm">
                 <div className="flex items-center gap-4">
-                    <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-                        <Search size={22} className="text-white" />
+                    <div className="bg-blue-600 p-2 rounded-lg">
+                        <Search size={20} className="text-white" />
                     </div>
-                    <h1 className="text-2xl font-black tracking-widest uppercase bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                    <h1 className="text-xl font-bold tracking-wide uppercase text-white">
                         {t('app_title')}
                     </h1>
                 </div>
-                <div className="flex gap-5 items-center">
+                <div className="flex gap-4 items-center">
                     <button
                         onClick={toggleLanguage}
-                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl font-semibold transition-all hover:scale-105 active:scale-95"
+                        className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                     >
-                        <Languages size={18} className="text-blue-400" />
+                        <Languages size={16} className="text-slate-300" />
                         {i18n.language === 'en' ? 'KINY' : 'ENG'}
                     </button>
 
-                    <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                        <User size={18} className="text-indigo-400" />
-                        <span className="font-semibold text-slate-300 tracking-wide">{t('gate_label')}</span>
+                    <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-sm">
+                        <User size={16} className="text-slate-400" />
+                        <span className="font-medium text-slate-200">{t('gate_label')}</span>
                     </div>
-                    <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                        <Clock size={18} className="text-blue-400" />
-                        <span className="tabular-nums font-mono font-bold text-slate-200">{currentTime.toLocaleTimeString()}</span>
+                    <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-sm">
+                        <Clock size={16} className="text-slate-400" />
+                        <span className="tabular-nums font-mono font-medium text-slate-200">{currentTime.toLocaleTimeString()}</span>
                     </div>
                 </div>
             </header>
 
-            <main className="relative z-10 max-w-5xl mx-auto p-6 md:p-12 flex flex-col items-center justify-center min-h-[calc(100vh-88px)]">
+            <main className="relative z-10 flex-1 w-full max-w-5xl mx-auto p-6 md:p-12 flex flex-col items-center justify-center">
                 <AnimatePresence mode="wait">
                     
                     {/* IDLE & LOADING STATE */}
@@ -130,30 +123,29 @@ const GateVerification = () => {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="w-full max-w-xl bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] p-10 text-center relative overflow-hidden"
+                            className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-10 text-center relative overflow-hidden"
                         >
                             {status === 'loading' && (
-                                <div className="absolute inset-0 bg-blue-500/10 backdrop-blur-sm z-20 flex flex-col items-center justify-center">
-                                    <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin shadow-[0_0_30px_rgba(59,130,246,0.6)]" />
-                                    <p className="mt-6 text-blue-400 font-bold tracking-widest uppercase animate-pulse">{t('btn_verifying')}</p>
+                                <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center">
+                                    <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                                    <p className="mt-4 text-blue-400 font-semibold tracking-wider uppercase text-sm animate-pulse">{t('btn_verifying')}</p>
                                 </div>
                             )}
 
-                            <div className="mb-10">
-                                <h2 className="text-3xl font-black text-white tracking-wide uppercase drop-shadow-lg">{t('scan_title')}</h2>
-                                <p className="text-slate-400 mt-3 text-lg font-medium">{t('scan_hint')}</p>
+                            <div className="mb-8">
+                                <h2 className="text-2xl font-bold text-white tracking-wide uppercase">{t('scan_title')}</h2>
+                                <p className="text-slate-400 mt-2 text-sm">{t('scan_hint')}</p>
                             </div>
 
                             <form onSubmit={handleCheck} className="space-y-6">
-                                <div className="relative group">
-                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-30 group-focus-within:opacity-100 transition duration-500"></div>
+                                <div>
                                     <input
                                         ref={inputRef}
                                         type="text"
                                         value={studentId}
                                         onChange={(e) => setStudentId(e.target.value)}
                                         placeholder={t('placeholder_id')}
-                                        className="relative w-full px-8 py-6 text-4xl font-mono text-center font-bold text-white bg-[#0f172a] border border-white/10 rounded-2xl outline-none placeholder:text-slate-600 focus:bg-[#1e293b] transition-all shadow-inner"
+                                        className="w-full px-6 py-5 text-3xl font-mono text-center font-bold text-white bg-slate-950 border border-slate-700 rounded-xl outline-none placeholder:text-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
                                         autoFocus
                                         disabled={status === 'loading'}
                                     />
@@ -162,7 +154,7 @@ const GateVerification = () => {
                                 <button
                                     type="submit"
                                     disabled={status === 'loading' || !studentId.trim()}
-                                    className="w-full py-6 text-xl font-black tracking-widest uppercase rounded-2xl transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)] border border-white/20"
+                                    className="w-full py-4 text-lg font-bold tracking-wide uppercase rounded-xl transition-colors active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 bg-blue-600 hover:bg-blue-500 text-white shadow-md border border-blue-500"
                                 >
                                     {t('btn_verify')}
                                 </button>
@@ -178,22 +170,22 @@ const GateVerification = () => {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="w-full max-w-xl bg-slate-900/80 backdrop-blur-2xl border-2 border-slate-700/50 rounded-[2rem] p-12 text-center shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                            className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center shadow-xl"
                         >
-                            <motion.div variants={iconVariants} className="mx-auto bg-slate-800 w-32 h-32 rounded-full flex items-center justify-center mb-8 border border-slate-600 shadow-inner">
-                                <UserX size={64} className="text-slate-400" />
+                            <motion.div variants={iconVariants} className="mx-auto bg-slate-800 w-24 h-24 rounded-full flex items-center justify-center mb-6 border border-slate-700">
+                                <UserX size={48} className="text-slate-400" />
                             </motion.div>
-                            <h2 className="text-4xl font-black text-white mb-3 tracking-wide">{t('status_not_found')}</h2>
-                            <p className="text-xl text-slate-400 mb-10 uppercase tracking-wider">
-                                ID <span className="font-mono font-bold text-white bg-white/10 px-3 py-1 rounded-lg ml-2 shadow-inner">"{studentId}"</span> <br/><span className="mt-2 inline-block text-slate-500">{t('not_registered')}</span>
+                            <h2 className="text-3xl font-bold text-white mb-2">{t('status_not_found')}</h2>
+                            <p className="text-lg text-slate-400 mb-8">
+                                ID <span className="font-mono font-bold text-white bg-slate-800 px-2 py-1 rounded mx-1">"{studentId}"</span> {t('not_registered')}
                             </p>
                             
-                            <div className="bg-amber-500/10 border border-amber-500/30 py-5 px-6 rounded-2xl mb-10 shadow-inner">
-                                <p className="text-amber-400 font-bold tracking-wider uppercase text-lg">{t('hold_student')}</p>
+                            <div className="bg-amber-500/10 border border-amber-500/20 py-4 px-6 rounded-xl mb-8">
+                                <p className="text-amber-400 font-medium text-sm tracking-wide uppercase">{t('hold_student')}</p>
                             </div>
 
-                            <button onClick={handleReset} className="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white px-10 py-6 rounded-2xl text-xl font-bold flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-lg">
-                                <RotateCcw size={24} /> {t('btn_retry')}
+                            <button onClick={handleReset} className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-8 py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.98]">
+                                <RotateCcw size={20} /> {t('btn_retry')}
                             </button>
                         </motion.div>
                     )}
@@ -206,23 +198,21 @@ const GateVerification = () => {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="w-full max-w-2xl bg-emerald-950/40 backdrop-blur-2xl border-2 border-emerald-500/50 rounded-[2.5rem] p-12 text-center shadow-[0_0_80px_rgba(16,185,129,0.3)] relative overflow-hidden"
+                            className="w-full max-w-xl bg-emerald-950/20 border border-emerald-900/50 rounded-2xl p-10 text-center shadow-xl"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
-                            
-                            <motion.div variants={iconVariants} className="mx-auto bg-emerald-500/20 w-40 h-40 rounded-full flex items-center justify-center mb-8 border-2 border-emerald-400/50 shadow-[0_0_50px_rgba(16,185,129,0.4)]">
-                                <CheckCircle size={80} className="text-emerald-400" />
+                            <motion.div variants={iconVariants} className="mx-auto bg-emerald-900/50 w-28 h-28 rounded-full flex items-center justify-center mb-6 border border-emerald-800/50">
+                                <CheckCircle size={56} className="text-emerald-500" />
                             </motion.div>
                             
-                            <h2 className="text-6xl font-black text-emerald-400 mb-4 tracking-tight drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]">{t('status_clear')}</h2>
-                            <p className="text-3xl font-bold text-white mb-10 uppercase tracking-widest">{studentData?.name}</p>
+                            <h2 className="text-4xl font-bold text-emerald-500 mb-2">{t('status_clear')}</h2>
+                            <p className="text-2xl font-semibold text-white mb-8 uppercase tracking-wide">{studentData?.name}</p>
                             
-                            <div className="bg-emerald-900/50 border border-emerald-500/30 py-5 px-10 rounded-2xl inline-block mb-12 shadow-inner">
-                                <p className="text-emerald-300 text-xl font-bold tracking-widest uppercase">{t('no_items')}</p>
+                            <div className="bg-emerald-900/20 border border-emerald-800/30 py-4 px-8 rounded-xl inline-block mb-10">
+                                <p className="text-emerald-400 text-sm font-medium tracking-wide uppercase">{t('no_items')}</p>
                             </div>
                             
-                            <button onClick={handleReset} className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white px-12 py-6 rounded-2xl text-2xl font-black uppercase tracking-widest flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-95 shadow-[0_0_40px_rgba(16,185,129,0.5)] border border-emerald-300/50">
-                                <RotateCcw size={28} /> {t('btn_next')}
+                            <button onClick={handleReset} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl text-lg font-bold uppercase tracking-wide flex items-center justify-center gap-2 transition-colors active:scale-[0.98]">
+                                <RotateCcw size={20} /> {t('btn_next')}
                             </button>
                         </motion.div>
                     )}
@@ -235,39 +225,35 @@ const GateVerification = () => {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="w-full max-w-4xl bg-red-950/60 backdrop-blur-2xl border-2 border-red-500/60 rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(220,38,38,0.4)] flex flex-col"
+                            className="w-full max-w-3xl bg-slate-900 border border-red-900/50 rounded-2xl overflow-hidden shadow-xl flex flex-col"
                         >
-                            <div className="p-10 bg-gradient-to-r from-red-600 to-rose-700 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-                                <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-                                
-                                <motion.div variants={iconVariants} className="bg-white/20 p-5 rounded-3xl backdrop-blur-sm border border-white/30 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                                    <AlertTriangle size={80} className="text-white" />
+                            <div className="p-8 bg-red-950/30 flex flex-col md:flex-row items-center gap-6 border-b border-red-900/50">
+                                <motion.div variants={iconVariants} className="bg-red-900/50 p-4 rounded-2xl border border-red-800/50">
+                                    <AlertTriangle size={48} className="text-red-500" />
                                 </motion.div>
-                                <div className="text-center md:text-left z-10">
-                                    <h2 className="text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">{t('status_stop')}</h2>
-                                    <p className="text-2xl font-bold text-red-100 uppercase tracking-widest opacity-90">{t('items_owed_by')} <span className="text-white bg-black/20 px-4 py-1 rounded-xl ml-2">{studentData?.name}</span></p>
+                                <div className="text-center md:text-left">
+                                    <h2 className="text-4xl font-bold text-red-500 mb-1">{t('status_stop')}</h2>
+                                    <p className="text-lg text-slate-300 font-medium">{t('items_owed_by')} <span className="text-white font-bold ml-1">{studentData?.name}</span></p>
                                 </div>
                             </div>
                             
-                            <div className="p-10 relative">
-                                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 to-transparent pointer-events-none" />
-                                
-                                <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-2xl border border-red-500/30 overflow-hidden mb-10 shadow-inner">
+                            <div className="p-8">
+                                <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden mb-8">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
-                                            <tr className="bg-red-900/30 border-b border-red-500/30">
-                                                <th className="p-6 font-bold text-red-300 uppercase tracking-wider">{t('table_item')}</th>
-                                                <th className="p-6 font-bold text-red-300 uppercase tracking-wider text-center">{t('table_qty')}</th>
-                                                <th className="p-6 font-bold text-red-300 uppercase tracking-wider">{t('table_dept')}</th>
+                                            <tr className="bg-slate-900 border-b border-slate-800">
+                                                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('table_item')}</th>
+                                                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">{t('table_qty')}</th>
+                                                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('table_dept')}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {pendingItems.map((item) => (
-                                                <tr key={item.id} className="border-t border-red-900/50 hover:bg-red-500/5 transition-colors">
-                                                    <td className="p-6 font-bold text-white text-xl">{item.name}</td>
-                                                    <td className="p-6 text-red-200 font-mono text-center text-2xl font-bold bg-red-900/20">{item.quantity}</td>
-                                                    <td className="p-6">
-                                                        <span className="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-2 rounded-xl text-sm font-black uppercase tracking-widest shadow-inner">
+                                                <tr key={item.id} className="border-b border-slate-800 last:border-0 hover:bg-slate-900/50">
+                                                    <td className="p-4 font-medium text-white text-sm">{item.name}</td>
+                                                    <td className="p-4 text-slate-300 font-mono text-center font-bold text-sm">{item.quantity}</td>
+                                                    <td className="p-4">
+                                                        <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded text-xs font-semibold uppercase">
                                                             {item.dept || 'N/A'}
                                                         </span>
                                                     </td>
@@ -277,14 +263,14 @@ const GateVerification = () => {
                                     </table>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row justify-between items-center bg-black/40 backdrop-blur-md p-8 rounded-2xl border border-red-500/40 shadow-[0_0_30px_rgba(0,0,0,0.5)] gap-6">
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.6)]">
-                                            <div className="w-8 h-2 bg-white rounded-full" />
+                                <div className="flex flex-col md:flex-row justify-between items-center bg-red-950/20 p-6 rounded-xl border border-red-900/30 gap-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-red-900/50 rounded-full flex items-center justify-center border border-red-800/50">
+                                            <div className="w-5 h-1.5 bg-red-500 rounded-full" />
                                         </div>
-                                        <p className="text-red-400 font-black text-3xl uppercase tracking-widest drop-shadow-md">{t('block_exit')}</p>
+                                        <p className="text-red-400 font-bold text-xl uppercase tracking-wide">{t('block_exit')}</p>
                                     </div>
-                                    <button onClick={handleReset} className="w-full md:w-auto bg-white hover:bg-slate-200 text-red-900 px-12 py-6 rounded-2xl text-2xl font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                                    <button onClick={handleReset} className="w-full md:w-auto bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-wide transition-colors active:scale-[0.98] border border-slate-700">
                                         {t('btn_scan_next')}
                                     </button>
                                 </div>
