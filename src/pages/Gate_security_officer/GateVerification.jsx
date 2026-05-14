@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle, AlertTriangle, User, Clock, Search, RotateCcw, UserX, Languages } from 'lucide-react';
+import { CheckCircle, AlertTriangle, User, Clock, Search, RotateCcw, UserX, Languages, LogOut } from 'lucide-react';
+import { useAuth } from '@/pages/auth/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -21,6 +22,7 @@ const MOCK_STUDENT_DB = {
 
 const GateVerification = () => {
     const { t, i18n } = useTranslation("gate");
+    const { logout } = useAuth();
     const [studentId, setStudentId] = useState('');
     const [status, setStatus] = useState('idle');
     const [studentData, setStudentData] = useState(null);
@@ -109,6 +111,14 @@ const GateVerification = () => {
                         <Clock size={16} className="text-slate-400" />
                         <span className="tabular-nums font-mono font-medium text-slate-200">{currentTime.toLocaleTimeString()}</span>
                     </div>
+                    <button
+                        onClick={logout}
+                        className="flex items-center gap-2 bg-red-950/40 hover:bg-red-900/50 border border-red-900/50 text-red-400 px-4 py-2 rounded-lg font-medium transition-colors text-sm ml-2"
+                        title={t('logout', { defaultValue: 'Logout' })}
+                    >
+                        <LogOut size={16} />
+                        <span className="hidden sm:inline">{t('logout', { defaultValue: 'Logout' })}</span>
+                    </button>
                 </div>
             </header>
 
