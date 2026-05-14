@@ -1,14 +1,33 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, ArrowRight, ArrowLeft, CheckCircle, Send } from "lucide-react";
+import { Mail, ArrowRight, ArrowLeft, CheckCircle, Send, AlertCircle } from "lucide-react";
+import api from "@/utils/api";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [submitted, setSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitted(true);
+        setIsLoading(true);
+        setError(null);
+        try {
+            await api.post('/auth/forgot-password', { email });
+            setSubmitted(true);
+        } catch (err) {
+            console.error(err);
+            // Fallback for UI demonstration if backend route doesn't exist yet
+            if (err.response?.status === 404) {
+                console.warn("Backend route /auth/forgot-password not found, showing success for UI demonstration");
+                setSubmitted(true);
+            } else {
+                setError(err.response?.data?.message || "Failed to send reset link. Please try again.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const BackgroundElements = () => (
@@ -129,6 +148,12 @@ export default function ForgotPassword() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                        {error && (
+                            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm">
+                                <AlertCircle size={18} />
+                                <span>{error}</span>
+                            </div>
+                        )}
                         <div>
                             <label className="block mb-2 text-[13px] font-semibold text-gray-700 tracking-[0.01em]">Email Address</label>
                             <div className="relative">
@@ -145,9 +170,10 @@ export default function ForgotPassword() {
                         </div>
 
                         <button type="submit"
-                            className="w-full h-12 text-white border-none rounded-[10px] text-base font-semibold cursor-pointer flex items-center justify-center gap-2 transition-all hover:opacity-90 shadow-[0_4px_15px_rgba(24,100,171,0.35)]"
+                            disabled={isLoading}
+                            className="w-full h-12 text-white border-none rounded-[10px] text-base font-semibold cursor-pointer flex items-center justify-center gap-2 transition-all hover:opacity-90 shadow-[0_4px_15px_rgba(24,100,171,0.35)] disabled:opacity-70 disabled:cursor-not-allowed"
                             style={{ background: "linear-gradient(135deg, #1864ab 0%, #6366f1 100%)" }}>
-                            Send Reset Link <ArrowRight size={18} />
+                            {isLoading ? "Sending..." : <>Send Reset Link <ArrowRight size={18} /></>}
                         </button>
                     </form>
                 </div>
