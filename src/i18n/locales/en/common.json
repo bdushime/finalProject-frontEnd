@@ -99,6 +99,7 @@
         "admin": "Admin",
         "itStaff": "IT Staff",
         "security": "Security",
+        "gate_keeper": "Gate Keeper",
         "staff": "Staff"
     },
     "time": {

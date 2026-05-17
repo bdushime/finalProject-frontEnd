@@ -1,7 +1,219 @@
 /**
  * Device Movement History Data
- * This file contains mock data for equipment movement tracking
+ * Mock fallbacks + helpers to build timeline rows from checkout transactions
  */
+
+const CAMPUS_COORDS = { lat: -1.9554801, lng: 30.1042722 };
+const MAIN_STORAGE_LABEL = "Main Storage";
+
+function formatMovementLocation(tx, eventType) {
+  if (eventType === "return") {
+    const back = (tx.returnLocation || tx.equipment?.location || "").toString().trim();
+    if (!back) return MAIN_STORAGE_LABEL;
+    const shortBack = back.split(" (")[0].trim();
+    return shortBack || MAIN_STORAGE_LABEL;
+  }
+  const raw = (tx.destination || tx.location || "").toString().trim();
+  if (!raw) return MAIN_STORAGE_LABEL;
+  const shortDest = raw.split(" (")[0].trim();
+  if (shortDest && shortDest !== raw) {
+    const roomMatch = shortDest.match(/(?:room|rm\.?)\s*([a-z0-9-]+)/i);
+    if (roomMatch) return `Room ${roomMatch[1]}`;
+    return shortDest;
+  }
+  const roomMatch = raw.match(/(?:room|rm\.?)\s*([a-z0-9-]+)/i);
+  if (roomMatch) return `Room ${roomMatch[1]}`;
+  const leadingRoom = raw.match(/^([a-z0-9-]+)\s*\(/i);
+  if (leadingRoom && /^\d{2,4}$/i.test(leadingRoom[1])) return `Room ${leadingRoom[1]}`;
+  if (raw.length > 42) return `${raw.slice(0, 40)}…`;
+  return raw;
+}
+
+function resolveBorrowerName(tx) {
+  return (
+    tx.user?.fullName ||
+    tx.user?.username ||
+    tx.user?.email ||
+    tx.borrowerName ||
+    "Unknown user"
+  );
+}
+
+/** One row per transaction id */
+export function dedupeTransactions(transactions = []) {
+  const map = new Map();
+  (Array.isArray(transactions) ? transactions : []).forEach((tx) => {
+    const id = tx?._id || tx?.id;
+    if (id != null) map.set(String(id), tx);
+  });
+  return [...map.values()];
+}
+
+export function dedupeMovements(movements = []) {
+  const map = new Map();
+  for (const m of movements) {
+    const key = m.id || `${m.eventType}|${m.timestamp}|${m.userName}|${m.location}`;
+    if (!map.has(key)) map.set(key, m);
+  }
+  return [...map.values()].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+}
+
+export function transactionsToMovements(transactions = [], deviceName = "Equipment") {
+  const movements = [];
+  const seen = new Set();
+
+  dedupeTransactions(transactions).forEach((tx, idx) => {
+    const txKey = String(tx._id || tx.id || idx);
+    const userName = resolveBorrowerName(tx);
+    const statusNorm = String(tx.status || "")
+      .toLowerCase()
+      .replace(/-/g, " ");
+    const checkoutAt = tx.checkoutTime || tx.checkoutDate || tx.createdAt;
+    const returnAt = tx.returnTime || tx.returnDate || tx.actualReturnDate;
+    const isReturned = statusNorm === "returned" || statusNorm === "return";
+    const isOverdue = statusNorm === "overdue";
+    const isCheckedOut =
+      statusNorm === "checked out" ||
+      (statusNorm.includes("checked") && statusNorm.includes("out"));
+
+    if (checkoutAt) {
+      const id = `checkout-${txKey}`;
+      if (!seen.has(id)) {
+        seen.add(id);
+        const dest = formatMovementLocation(tx, "checkout");
+        movements.push({
+          id,
+          timestamp: checkoutAt,
+          location: dest,
+          coordinates: CAMPUS_COORDS,
+          eventType: "checkout",
+          userId: tx.user?._id || tx.userId,
+          userName,
+          action: `Checked out by ${userName} → ${dest}`,
+          duration: null,
+          status: isCheckedOut || isOverdue ? "active" : "completed",
+          deviceName,
+        });
+      }
+    }
+
+    if (returnAt || isReturned) {
+      const id = `return-${txKey}`;
+      if (!seen.has(id)) {
+        seen.add(id);
+        const loc = formatMovementLocation(tx, "return");
+        movements.push({
+          id,
+          timestamp: returnAt || tx.updatedAt || checkoutAt,
+          location: loc,
+          coordinates: CAMPUS_COORDS,
+          eventType: "return",
+          userId: tx.user?._id || tx.userId,
+          userName,
+          action: `Returned by ${userName} → ${loc}`,
+          duration: null,
+          status: "completed",
+          deviceName,
+        });
+      }
+    }
+
+    if (isOverdue && checkoutAt) {
+      const id = `overdue-${txKey}`;
+      if (!seen.has(id)) {
+        seen.add(id);
+        const dest = formatMovementLocation(tx, "checkout");
+        movements.push({
+          id,
+          timestamp: tx.updatedAt || checkoutAt,
+          location: dest,
+          coordinates: CAMPUS_COORDS,
+          eventType: "geofence_violation",
+          userId: tx.user?._id || tx.userId,
+          userName,
+          action: `Overdue — ${userName} has not returned the item`,
+          duration: null,
+          status: "violation",
+          severity: "medium",
+          deviceName,
+        });
+      }
+    }
+  });
+
+  return dedupeMovements(movements);
+}
+
+/** Merge history + active loans, build timeline, optional storage baseline */
+export function buildEquipmentMovementTimeline({
+  transactions = [],
+  deviceName = "Equipment",
+  includeStorageBaseline = true,
+}) {
+  const loanEvents = transactionsToMovements(dedupeTransactions(transactions), deviceName);
+  const hasLoanActivity = loanEvents.some(
+    (m) => m.eventType === "checkout" || m.eventType === "return" || m.eventType === "geofence_violation"
+  );
+
+  if (hasLoanActivity) {
+    return dedupeMovements(loanEvents);
+  }
+
+  if (includeStorageBaseline) {
+    return buildMainStoragePlaceholderMovements(deviceName);
+  }
+
+  return [];
+}
+
+export function computeMovementStats(movements = []) {
+  return {
+    totalMovements: movements.length,
+    checkouts: movements.filter((m) => m.eventType === "checkout").length,
+    returns: movements.filter((m) => m.eventType === "return").length,
+    violations: movements.filter((m) => m.eventType === "geofence_violation").length,
+    activeCheckouts: movements.filter((m) => m.status === "active").length,
+    lastMovement: movements.length > 0 ? movements[0].timestamp : null,
+    uniqueLocations: new Set(movements.map((m) => m.location)).size,
+  };
+}
+
+export function filterTransactionsForEquipment(transactions, equipmentId, equipmentName = "") {
+  const target = String(equipmentId || "");
+  const nameLower = String(equipmentName || "").toLowerCase().trim();
+  return (Array.isArray(transactions) ? transactions : []).filter((tx) => {
+    const txEqId =
+      tx.equipment?._id ||
+      tx.equipment?.id ||
+      tx.equipmentId ||
+      tx.equipment_id;
+    if (txEqId != null && String(txEqId) === target) return true;
+    const txName = String(tx.equipment?.name || "").toLowerCase().trim();
+    if (nameLower && txName && txName === nameLower) return true;
+    return false;
+  });
+}
+
+/** Shown when there are no checkout/return records yet — equipment is still in storage */
+export function buildMainStoragePlaceholderMovements(deviceName = "Equipment") {
+  return [
+    {
+      id: "main-storage",
+      timestamp: new Date().toISOString(),
+      location: "Main Storage",
+      coordinates: CAMPUS_COORDS,
+      eventType: "storage",
+      userId: null,
+      userName: "—",
+      action: "In main storage — not checked out yet",
+      duration: null,
+      status: "completed",
+      deviceName,
+    },
+  ];
+}
 
 // Generate movement history for a device
 export function getDeviceMovementHistory(deviceId) {

@@ -22,6 +22,7 @@ export default function IoTStatsCards({
       value: onlineCount,
       icon: Wifi,
       colorClass: "text-green-500",
+      pulse: true,
     },
     {
       label: t("itstaff:iot.stats.offline"),
@@ -42,6 +43,12 @@ export default function IoTStatsCards({
       {items.map((item, idx) => (
         <div key={idx} className="flex flex-col items-center group cursor-default">
           <div className="flex items-center gap-3 mb-1">
+            {item.pulse && (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+            )}
             <item.icon className={`w-5 h-5 ${item.colorClass} transition-colors`} />
             <span className="text-3xl md:text-4xl font-light text-slate-100 tracking-tight">
               {item.value}

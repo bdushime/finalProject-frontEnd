@@ -121,6 +121,11 @@
             "allCategories": "All Categories",
             "status": "Status",
             "allStatus": "All Status",
+            "available": "Available",
+            "checkedOut": "Checked Out",
+            "maintenance": "Maintenance",
+            "lost": "Lost",
+            "damaged": "Damaged",
             "clearFilters": "Clear Filters"
         },
         "labels": {
@@ -210,6 +215,55 @@
         "actions": {
             "device": "View Device",
             "logs": "Trace Movement"
+        }
+    },
+    "deviceMovementHistory": {
+        "loading": "Loading movement history…",
+        "title": "Device Movement History",
+        "backToDevices": "Back to Devices",
+        "totalEvents": "events",
+        "unknownDevice": "Equipment",
+        "noDeviceSelected": {
+            "title": "No device selected",
+            "description": "Open movement history from a device card in Device Management.",
+            "button": "Go to Device Management"
+        },
+        "noHistory": {
+            "title": "No movement history yet",
+            "description": "No checkout or return events recorded for {{name}} ({{id}})."
+        },
+        "stats": {
+            "totalMovements": "Total events",
+            "checkouts": "Checkouts",
+            "violations": "Alerts",
+            "uniqueLocations": "Locations"
+        },
+        "timeline": {
+            "empty": "No events match these filters.",
+            "events": "events",
+            "event": "event",
+            "filters": {
+                "label": "Filter timeline",
+                "type": "Event type",
+                "status": "Status",
+                "allEvents": "All events",
+                "allStatus": "All statuses",
+                "checkouts": "Checkouts",
+                "returns": "Returns",
+                "storage": "In storage",
+                "movements": "Movements",
+                "violations": "Violations",
+                "active": "Active",
+                "completed": "Completed",
+                "resolved": "Resolved",
+                "export": "Export"
+            },
+            "details": {
+                "location": "Location",
+                "user": "User",
+                "duration": "Duration",
+                "coordinates": "Coordinates"
+            }
         }
     },
     "profile": {

@@ -64,6 +64,7 @@
         "assignedRole": "Rôle Attribué",
         "department": "Département",
         "score": "Score",
+        "respScore": "Score de responsabilité",
         "firstName": "Prénom",
         "lastName": "Nom de famille",
         "status": "Statut",
