@@ -134,7 +134,8 @@
         "emptyState": {
             "title": "No devices found",
             "description": "Adjust your filters or try a different search term."
-        }
+        },
+        "defaultStorage": "Main storage"
     },
     "activeCheckouts": {
         "stats": {
@@ -158,6 +159,38 @@
             "utilization": "Utilization Report",
             "logs": "Access Logs Report"
         }
+    },
+    "reportsDashboard": {
+        "allStatuses": "All statuses",
+        "loadError": "Failed to load report data.",
+        "noExport": "No data to export.",
+        "exportCsvOk": "Excel (CSV) export successful",
+        "exportFail": "Export failed",
+        "recordsLabel": "Matching records",
+        "showing": "Showing {{from}} to {{to}} of {{total}} entries",
+        "pageOf": "Page {{current}} of {{total}}",
+        "heroSubtitle": "Devices, packages, and access activity you manage as a security officer.",
+        "heroDevices": "Device inventory",
+        "heroPackages": "Equipment packages",
+        "heroLogs": "Access & movement",
+        "heroExceptions": "Attention items",
+        "cardDevicesTitle": "Device inventory",
+        "cardDevicesDesc": "All registered equipment: status, condition, and location.",
+        "cardPackagesTitle": "Packages",
+        "cardPackagesDesc": "Borrowable equipment bundles configured in the system.",
+        "cardLogsTitle": "Access activity",
+        "cardLogsDesc": "Checkout, return, and movement from security access logs.",
+        "cardExceptionsTitle": "Attention items",
+        "cardExceptionsDesc": "Damaged, lost, in maintenance, overdue loans, and other items that need follow-up.",
+        "colPackageName": "Package name",
+        "colDescription": "Description",
+        "colItemCount": "Items",
+        "colPackageId": "Reference",
+        "colCondition": "Condition",
+        "logStatusReturned": "Returned",
+        "logStatusOverdue": "Overdue",
+        "logStatusDenied": "Denied",
+        "logStatusCanceled": "Canceled"
     },
     "notifications": {
         "title": "Notifications",

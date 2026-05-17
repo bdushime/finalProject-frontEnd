@@ -37,6 +37,11 @@ import DeviceDetailsDialog from "./DeviceDetailsDialog";
 import api from "@/utils/api";
 import { UserRoles } from "@/config/roleConfig";
 import Loader from "@/components/common/Loader";
+import { toast } from "sonner";
+import {
+  buildBorrowDestinationMap,
+  getEquipmentDisplayLocation,
+} from "@/utils/equipmentDisplayLocation";
 
 const DEFAULT_CATEGORIES = ['Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Electronics', 'Other'];
 const DEFAULT_CONDITIONS = ['Excellent', 'Good', 'Fair', 'Poor', 'Damaged'];
@@ -61,6 +66,7 @@ function BrowseDevices() {
   const [detailsDeviceId, setDetailsDeviceId] = useState(null);
 
   const [deviceList, setDeviceList] = useState([]);
+  const [borrowDestinationByEquipmentId, setBorrowDestinationByEquipmentId] = useState({});
   const [categories, setCategories] = useState(["All", ...DEFAULT_CATEGORIES]);
   const [conditions, setConditions] = useState(DEFAULT_CONDITIONS);
   const [statuses, setStatuses] = useState(DEFAULT_STATUSES);
@@ -74,12 +80,23 @@ function BrowseDevices() {
     }
   }, []);
 
+  const storageLabel = t("browseDevices.defaultStorage", "Main storage");
+
   const fetchDevices = async () => {
     setIsDevicesLoading(true);
     try {
-      const devicesRes = await api.get('/equipment');
-      if (devicesRes.data) {
-        const mappedDevices = devicesRes.data.items.map(d => ({
+      const [devicesRes, activeRes] = await Promise.all([
+        api.get("/equipment"),
+        api.get("/transactions/active").catch(() => ({ data: [] })),
+      ]);
+
+      const activeList = Array.isArray(activeRes.data)
+        ? activeRes.data
+        : activeRes.data?.data || [];
+      setBorrowDestinationByEquipmentId(buildBorrowDestinationMap(activeList));
+
+      if (devicesRes.data?.items) {
+        const mappedDevices = devicesRes.data.items.map((d) => ({
           ...d,
           id: d._id,
           category: d.type || d.category,
@@ -449,7 +466,13 @@ function BrowseDevices() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      <span className="truncate">{device.location || t('common:notSpecified', 'Not specified')}</span>
+                      <span className="truncate">
+                        {getEquipmentDisplayLocation(
+                          device,
+                          borrowDestinationByEquipmentId,
+                          storageLabel
+                        )}
+                      </span>
                     </div>
                     <div className="flex flex-col gap-1 items-start mt-2">
                       <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">

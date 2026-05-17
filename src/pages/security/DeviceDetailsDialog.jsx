@@ -13,11 +13,20 @@ import { Printer, QrCode, Download } from "lucide-react";
 import api from "@/utils/api";
 import PropTypes from "prop-types";
 import Loader from "@/components/common/Loader";
+import { useTranslation } from "react-i18next";
+import {
+    buildBorrowDestinationMap,
+    getEquipmentDisplayLocation,
+} from "@/utils/equipmentDisplayLocation";
 
 export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
+    const { t } = useTranslation(["security"]);
     const [device, setDevice] = useState(null);
+    const [borrowDestinationByEquipmentId, setBorrowDestinationByEquipmentId] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const storageLabel = t("browseDevices.defaultStorage", "Main storage");
 
     useEffect(() => {
         if (!deviceId || !open) return;
@@ -26,9 +35,20 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
             setLoading(true);
             setError(null);
             try {
-                const res = await api.get(`/equipment/${deviceId}`);
-                if (res.data) {
-                    const d = res.data;
+                const [deviceRes, activeRes] = await Promise.all([
+                    api.get(`/equipment/${deviceId}`),
+                    api.get("/transactions/active").catch(() => ({ data: [] })),
+                ]);
+
+                const activeList = Array.isArray(activeRes.data)
+                    ? activeRes.data
+                    : activeRes.data?.data || [];
+                setBorrowDestinationByEquipmentId(
+                    buildBorrowDestinationMap(activeList)
+                );
+
+                if (deviceRes.data) {
+                    const d = deviceRes.data;
                     setDevice({
                         ...d,
                         id: d._id,
@@ -200,12 +220,16 @@ export default function DeviceDetailsDialog({ deviceId, open, onOpenChange }) {
                                         <span className="text-sm font-medium text-gray-800">{device.category}</span>
                                     </div>
                                 )}
-                                {device.location && (
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-500 text-sm">Location</span>
-                                        <span className="text-sm font-medium text-gray-800">{device.location}</span>
-                                    </div>
-                                )}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-500 text-sm">Location</span>
+                                    <span className="text-sm font-medium text-gray-800 text-right max-w-[65%]">
+                                        {getEquipmentDisplayLocation(
+                                            device,
+                                            borrowDestinationByEquipmentId,
+                                            storageLabel
+                                        )}
+                                    </span>
+                                </div>
                                 {device.purchaseDate && (
                                     <div className="flex items-center justify-between">
                                         <span className="text-gray-500 text-sm">Purchase Date</span>
