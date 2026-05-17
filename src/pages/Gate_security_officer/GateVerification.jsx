@@ -3,22 +3,8 @@ import { CheckCircle, AlertTriangle, User, Clock, Search, RotateCcw, UserX, Lang
 import { useAuth } from '@/pages/auth/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const MOCK_STUDENT_DB = {
-    "25148": {
-        name: 'Julie MUGANZA',
-        status: 'pending',
-        items: [
-            { id: 1, name: 'PROJECTOR', quantity: 1, date: '2023-10-25', dept: 'IT' },
-            { id: 2, name: 'PROJECTOR + EXTENSION', quantity: 1, date: '2023-10-25', dept: 'IT' },
-        ]
-    },
-    "26577": {
-        name: 'IZERE INEZA Promise',
-        status: 'clear',
-        items: []
-    }
-};
+import api from '@/utils/api';
+import { toast } from 'sonner';
 
 const GateVerification = () => {
     const { t, i18n } = useTranslation("gate");
@@ -41,25 +27,44 @@ const GateVerification = () => {
         return () => clearInterval(timer);
     }, []);
 
-    const mockCheck = (id) => {
+    const checkStudent = async (id) => {
         setStatus('loading');
-        setTimeout(() => {
-            const student = MOCK_STUDENT_DB[id];
-            if (student) {
-                setStudentData({ name: student.name, id: id });
-                setPendingItems(student.items);
-                setStatus(student.status);
+        try {
+            // Fetch validation status directly from our secure backend endpoint
+            const res = await api.get(`/gate/check-status/${id.trim()}`);
+            const data = res.data;
+
+            setStudentData({ 
+                name: data.studentName || 'Unknown User', 
+                id: id 
+            });
+
+            if (!data.allowed) {
+                // User has active loans, block exit and list their items
+                setPendingItems(data.items || []);
+                setStatus('pending');
             } else {
+                // User has no active loans, clear exit
+                setPendingItems([]);
+                setStatus('clear');
+            }
+        } catch (err) {
+            // Handle if student ID isn't found in database (returns 404)
+            if (err.response && err.response.status === 404) {
                 setStatus('not_found');
                 setStudentData(null);
                 setPendingItems([]);
+            } else {
+                console.error("Gate verification failed", err);
+                toast.error(t('verify_error', { defaultValue: 'Gate verification failed. Please try again.' }));
+                setStatus('idle');
             }
-        }, 800);
+        }
     };
 
     const handleCheck = (e) => {
         e.preventDefault();
-        if (studentId.trim()) mockCheck(studentId);
+        if (studentId.trim()) checkStudent(studentId);
     };
 
     const handleReset = () => {
