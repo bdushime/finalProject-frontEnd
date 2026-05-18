@@ -55,8 +55,9 @@ export default function Auth() {
             case "Admin":
                 return "/admin/dashboard";
             case "Security":
-            case "Gate_Keeper": // Both route to the security dashboard!
                 return "/security/dashboard";
+            case "Gate_Keeper":
+                return "/gate-verification";
             case "IT_Staff":
                 return "/it/dashboard";
             default:
