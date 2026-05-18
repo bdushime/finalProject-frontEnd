@@ -99,6 +99,7 @@
         "admin": "Administrateur",
         "itStaff": "Personnel IT",
         "security": "Sécurité",
+        "gate_keeper": "Gardien de porte",
         "staff": "Personnel"
     },
     "time": {

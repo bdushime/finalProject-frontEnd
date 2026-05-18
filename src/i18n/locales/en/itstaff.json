@@ -349,14 +349,58 @@
             "desc": "Real-time tracking of all tagged equipment",
             "youAreHere": "You are here",
             "status": "Status:",
-            "warningNoGps": "Warning: {{count}} devices reporting without valid GPS coordinates."
+            "warningNoGps": "Warning: {{count}} devices reporting without valid GPS coordinates.",
+            "onMap": "on map",
+            "approximateHint": "{{count}} tag(s) at campus zone (no GPS yet)",
+            "campusOnly": "AUCA campus — your position and active device",
+            "liveLocation": "Your live position from this browser",
+            "centerOnMe": "Center on me",
+            "locating": "Getting your location…",
+            "accuracy": "Accuracy",
+            "liveActive": "Live — map is tracking your browser location",
+            "locationDenied": "Location blocked — click Center on me and allow access in your browser.",
+            "locationUnsupported": "Geolocation is not supported on this device.",
+            "noLiveDevice": "No online device to show — map is centered on you."
         },
         "filters": {
             "searchPlaceholder": "Search by equipment name or tracker ID...",
             "statusPlaceholder": "Filter by status",
             "allStatus": "All Status",
             "online": "Online",
-            "offline": "Offline"
+            "weak": "Weak signal",
+            "offline": "Offline",
+            "mapView": "Map",
+            "tableView": "Devices"
+        },
+        "status": {
+            "onlineSafe": "Online (Safe)",
+            "weakSignal": "Weak signal",
+            "offlineLost": "Offline"
+        },
+        "activity": {
+            "title": "Recent activity",
+            "subtitle": "Live tag events from heartbeat polling",
+            "liveSnapshot": "Current status of all tags",
+            "empty": "No trackers loaded yet",
+            "now": "now",
+            "isOnline": "Tag {{tag}} is online{{equipment}}",
+            "isOffline": "Tag {{tag}} is offline{{location}}",
+            "weakOnline": "Tag {{tag}} online — weak signal ({{battery}}%)",
+            "reconnected": "Tag {{tag}} reconnected{{equipment}}",
+            "offline": "Tag {{tag}} went offline{{equipment}}",
+            "lowBattery": "Tag {{tag}} low battery ({{battery}}%)"
+        },
+        "chart": {
+            "title": "Online devices",
+            "subtitle": "Heartbeat trend (last few minutes)",
+            "collecting": "Collecting live data…"
+        },
+        "fleet": {
+            "title": "Fleet health",
+            "subtitle": "Live tag status breakdown",
+            "onlineLabel": "online",
+            "lowBatteryNote": "{{count}} device(s) below 30% battery",
+            "totalTags": "{{online}} of {{total}} tags reporting"
         },
         "table": {
             "title": "Device Trackers",
@@ -367,11 +411,22 @@
                 "id": "Tracker ID",
                 "location": "Location",
                 "status": "Status",
+                "assignedTo": "Assigned to",
                 "battery": "Battery",
                 "temp": "Temp",
                 "humidity": "Humidity",
                 "lastSeen": "Last Seen"
             },
+            "tempMaintenance": "Maintenance",
+            "tempMaintenanceHint": "High temperature — schedule maintenance",
+            "tempHumidityNote": "Temperature is monitored; devices above safe limits are flagged for maintenance.",
+            "sensorMonitoring": "Monitoring",
+            "sensorOffline": "—",
+            "checkedOutBy": "Checked out by",
+            "inStorage": "In storage",
+            "heartbeatTimeline": "Heartbeat timeline",
+            "seenAt": "Seen {{time}}",
+            "checkedOutShort": "On loan",
             "noTrackers": "No trackers found matching your filters.",
             "lastSeen": "Last seen: {{time}}",
             "viewHistory": "View History",

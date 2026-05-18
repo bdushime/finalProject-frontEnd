@@ -42,24 +42,33 @@ export default function IoTFiltersBar({
             <SelectContent>
               <SelectItem value="all">{t("iot.filters.allStatus")}</SelectItem>
               <SelectItem value="online">{t("iot.filters.online")}</SelectItem>
+              <SelectItem value="weak">{t("iot.filters.weak", "Weak signal")}</SelectItem>
               <SelectItem value="offline">{t("iot.filters.offline")}</SelectItem>
             </SelectContent>
           </Select>
 
-          <div className="flex gap-2">
+          <div className="flex rounded-lg border border-slate-200 p-1 bg-slate-50 gap-1">
             <Button
-              variant={viewMode === "map" ? "default" : "outline"}
-              size="icon"
+              variant={viewMode === "map" ? "default" : "ghost"}
+              size="sm"
+              className="gap-1.5 h-9 px-3"
               onClick={() => onViewModeChange("map")}
             >
               <MapIcon className="h-4 w-4" />
+              <span className="text-xs font-medium hidden sm:inline">
+                {t("iot.filters.mapView", "Map")}
+              </span>
             </Button>
             <Button
-              variant={viewMode === "table" ? "default" : "outline"}
-              size="icon"
+              variant={viewMode === "table" ? "default" : "ghost"}
+              size="sm"
+              className="gap-1.5 h-9 px-3"
               onClick={() => onViewModeChange("table")}
             >
               <List className="h-4 w-4" />
+              <span className="text-xs font-medium hidden sm:inline">
+                {t("iot.filters.tableView", "Devices")}
+              </span>
             </Button>
           </div>
         </div>
