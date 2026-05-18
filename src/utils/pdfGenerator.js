@@ -84,7 +84,7 @@ export const generatePDF = (
                 item.equipment?.category || "General",
                 formatDate(item.createdAt),
                 formatDate(item.expectedReturnTime || item.actualReturnTime || item.updatedAt),
-                item.user?.username || item.user?.email || "Unknown",
+                item.user?.fullName || item.user?.username || item.user?.email || "Unknown",
                 item.status
             ];
             tableRows.push(rowData);

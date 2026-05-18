@@ -18,6 +18,7 @@ import Profile from "./pages/User_Student/Profile";
 import EquipmentCatalogue from "./pages/User_Student/EquipmentCatalogue";
 import EquipmentDetails from "./pages/User_Student/EquipmentDetails";
 import PackageDetails from "./pages/User_Student/PackageDetails";
+import Packages from "./pages/User_Student/Packages";
 import BorrowRequest from "./pages/User_Student/BorrowRequest";
 import MyBorrowedItems from "./pages/User_Student/MyBorrowedItems";
 import Notifications from "./pages/User_Student/Notifications";
@@ -57,6 +58,7 @@ import SecurityDashboard from "./pages/security/SecurityDashboard";
 import Accesslogs from "./pages/security/Accesslogs";
 import ActiveCheckouts from "./pages/security/checkouts/ActiveCheckouts";
 import BrowseDevices from "./pages/security/BrowseDevices";
+import PackageManagement from "./pages/security/PackageManagement";
 import SecurityReports from "./pages/security/Reports";
 import SecurityNotifications from "./pages/security/Notifications";
 import DeviceMovementHistory from "./pages/security/DeviceMovementHistory";
@@ -101,6 +103,7 @@ export default function App() {
                     <Route path="/student/browse" element={<EquipmentCatalogue />} />
                     <Route path="/student/equipment/:id" element={<EquipmentDetails />} />
                     <Route path="/student/package/:packageId" element={<PackageDetails />} />
+                    <Route path="/student/packages" element={<Packages />} />
                     <Route path="/student/borrow-request" element={<BorrowRequest />} />
                     <Route path="/student/borrowed-items" element={<MyBorrowedItems />} />
                     <Route path="/student/return" element={<ReturnEquipment />} />
@@ -144,6 +147,7 @@ export default function App() {
                     <Route path="/security/logs" element={<Accesslogs />} />
                     <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />
                     <Route path="/security/devices" element={<BrowseDevices />} />
+                    <Route path="/security/packages" element={<PackageManagement />} />
                     <Route path="/security/iot-tracker" element={<SecurityIoTTrackerLiveView />} />
                     <Route path="/security/reports" element={<SecurityReports />} />
                     <Route path="/security/notifications" element={<SecurityNotifications />} />
@@ -157,6 +161,7 @@ export default function App() {
                 <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/users" element={<UsersList />} />
+                    <Route path="/admin/packages" element={<PackageManagement />} />
                     <Route path="/admin/config" element={<ConfigPage />} />
                     <Route path="/admin/data" element={<DataPage />} />
                     <Route path="/admin/monitoring" element={<MonitoringPage />} />

@@ -1,27 +1,46 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { toast } from "sonner";
 
 const AuthContext = createContext(null);
+
+// Helper: decode the JWT payload (returns null if not decodable).
+const decodeToken = (token) => {
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return null;
+  }
+};
+
+// Helper: check if a JWT token is expired
+const isTokenExpired = (token) => {
+  const payload = decodeToken(token);
+  if (!payload || !payload.exp) return true;
+  return payload.exp * 1000 < Date.now();
+};
+
+// Module-level helper so both the timer AND the Axios interceptor (via the
+// "auth:force-logout" event below) can trigger a uniform logout flow.
+const forceLogout = (reason) => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  if (reason) {
+    try { toast.error(reason); } catch (_) { /* sonner may not be mounted yet */ }
+  }
+  if (typeof window !== "undefined") {
+    // Small delay so the toast has a chance to render before the hard nav.
+    setTimeout(() => { window.location.href = "/login"; }, 800);
+  }
+};
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // { role: "Student" | "IT" | "Admin" | "Security", ... }
 
-  // Helper: check if a JWT token is expired
-  const isTokenExpired = (token) => {
-    if (!token) return true;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      // exp is in seconds, Date.now() is in milliseconds
-      return payload.exp * 1000 < Date.now();
-    } catch {
-      return true; // If we can't decode it, treat as expired
-    }
-  };
-
   // 1. Load auth state from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    // TODO: Re-enable token expiry check after testing
     const token = localStorage.getItem("token");
     if (isTokenExpired(token)) {
       localStorage.removeItem("user");
@@ -41,21 +60,40 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // 2. Periodically check token expiry (every 60 seconds)
-  // TODO: Re-enable after testing
-  // useEffect(() => {
-  //   const checkExpiry = () => {
-  //     const token = localStorage.getItem("token");
-  //     if (token && isTokenExpired(token)) {
-  //       setUser(null);
-  //       localStorage.removeItem("user");
-  //       localStorage.removeItem("token");
-  //       window.location.href = "/login";
-  //     }
-  //   };
-  //   const interval = setInterval(checkExpiry, 60000);
-  //   return () => clearInterval(interval);
-  // }, []);
+  // 2. Schedule a precise auto-logout at the token's exp time.
+  // Re-runs whenever the user changes (e.g. on login), which picks up the
+  // freshly-stored token and arms a new timer.
+  useEffect(() => {
+    if (!user) return;
+    const token = localStorage.getItem("token");
+    const payload = decodeToken(token);
+    if (!payload || !payload.exp) return;
+
+    const msUntilExpiry = payload.exp * 1000 - Date.now();
+    if (msUntilExpiry <= 0) {
+      setUser(null);
+      forceLogout("Your session has expired. Please log in again.");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setUser(null);
+      forceLogout("Your session has expired. Please log in again.");
+    }, msUntilExpiry);
+
+    return () => clearTimeout(timer);
+  }, [user]);
+
+  // 3. Listen for force-logout events from the Axios interceptor
+  // (fires when a 401 comes back from the API — i.e. the server rejected the token).
+  useEffect(() => {
+    const handler = (e) => {
+      setUser(null);
+      forceLogout(e?.detail?.reason || "Your session is invalid. Please log in again.");
+    };
+    window.addEventListener("auth:force-logout", handler);
+    return () => window.removeEventListener("auth:force-logout", handler);
+  }, []);
 
   const login = (userData) => {
     setUser(userData);

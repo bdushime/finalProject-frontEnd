@@ -7,6 +7,7 @@ import api from "@/utils/api";
 import { format } from "date-fns";
 import Loader from "@/components/common/Loader";
 import { PageHeader } from "@/components/common/Page";
+import { displayName } from "@/utils/helpers";
 
 export default function CheckoutHistory() {
     const [q, setQ] = useState("");
@@ -32,7 +33,7 @@ export default function CheckoutHistory() {
     const filteredRows = history.filter((item) => {
         const searchLower = q.toLowerCase();
         const itemName = item.equipment?.name?.toLowerCase() || "";
-        const userName = item.user?.username?.toLowerCase() || "";
+        const userName = (item.user?.fullName || item.user?.username || "").toLowerCase();
         const status = item.status?.toLowerCase() || "";
 
         return itemName.includes(searchLower) ||
@@ -95,7 +96,7 @@ export default function CheckoutHistory() {
                                                 {r.equipment?.name || "Unknown Item"}
                                             </TableCell>
                                             <TableCell className="px-4 py-3">
-                                                {r.user?.username || "Unknown User"}
+                                                {displayName(r.user)}
                                             </TableCell>
                                             <TableCell className="px-4 py-3 text-gray-500">
                                                 {r.createdAt ? format(new Date(r.createdAt), 'MMM dd, HH:mm') : '-'}

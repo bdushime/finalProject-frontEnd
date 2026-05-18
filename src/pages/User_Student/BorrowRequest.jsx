@@ -10,14 +10,21 @@ export default function BorrowRequest() {
     const navigate = useNavigate();
     const { t } = useTranslation("student");
 
-    const handleSuccess = (formData) => {
-        // Show success notification depending on action
-        if (formData && formData.action === 'reserve') {
-            toast.success(`Reservation submitted successfully for equipment ${formData.equipmentId}! You will be notified once it is confirmed.`);
+    const handleSuccess = (result) => {
+        if (result?.bookingType === "package") {
+            toast.success(
+                t("equipment.packageRequestSuccess", "Package request submitted successfully! You will be notified once it is reviewed.")
+            );
+        } else if (result?.action === "reserve" || result?.reservationDate) {
+            toast.success(
+                t("equipment.reserveSuccess", "Reservation submitted successfully! You will be notified once it is confirmed.")
+            );
         } else {
-            toast.success(`Borrow request submitted successfully for equipment ${formData.equipmentId}! You will be notified once it is reviewed.`);
+            toast.success(
+                t("equipment.borrowSuccess", "Borrow request submitted successfully! You will be notified once it is reviewed.")
+            );
         }
-        navigate('/student/borrowed-items');
+        navigate("/student/borrowed-items");
     };
 
     return (

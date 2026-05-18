@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from 'sonner';
 import { generatePDF } from '@/utils/pdfGenerator';
 import Loader from "@/components/common/Loader";
+import { displayName } from "@/utils/helpers";
 
 const datePickerStyles = `
   input[type="date"]::-webkit-calendar-picker-indicator {
@@ -189,7 +190,7 @@ const SimpleReports = () => {
                     {
                         header: t('admin:reports.userIdentity', 'User Identity'), render: (row) => (
                             <div>
-                                <div className="font-bold text-slate-900">{row.user?.username || row.user || "Unknown User"}</div>
+                                <div className="font-bold text-slate-900">{displayName(row.user, row.user || "Unknown User")}</div>
                                 <div className="text-xs text-slate-400">{row.user?.email || row.email || "N/A"}</div>
                             </div>
                         )
@@ -257,7 +258,7 @@ const SimpleReports = () => {
                     {
                         header: t('admin:reports.user', 'User'), render: (row) => (
                             <div>
-                                <div className="font-medium text-slate-700">{row.user?.username || row.user || "Unknown"}</div>
+                                <div className="font-medium text-slate-700">{displayName(row.user, row.user || "Unknown")}</div>
                                 <div className="text-xs text-slate-400">{row.user?.role || "User"}</div>
                             </div>
                         )
@@ -303,6 +304,7 @@ const SimpleReports = () => {
                 category: row.category || row.type || "N/A"
             },
             user: {
+                fullName: row.user?.fullName || row.fullName || null,
                 username: row.user?.username || row.user || row.fullName || "N/A",
                 email: row.user?.email || row.email || "N/A"
             }
@@ -329,7 +331,7 @@ const SimpleReports = () => {
                     if (col.header === t('admin:reports.location', 'Location')) return val || row.equipment?.location || t('admin:reports.mainStorage', 'Main Storage');
                     if (col.header === t('admin:reports.deviceName', 'Device Name')) return val || row.name || row.item || row.equipment?.name || "N/A";
                     if (col.header === t('admin:reports.item', 'Item')) return val || row.name || row.item || row.equipment?.name || "N/A";
-                    if (col.header === t('admin:reports.user', 'User')) return val || row.user?.username || row.user || row.fullName || "N/A";
+                    if (col.header === t('admin:reports.user', 'User')) return val || displayName(row.user, row.user || row.fullName || "N/A");
                     if (col.header === t('admin:reports.statusFilter', 'Status')) return val || row.status || "N/A";
 
                     return val || "N/A";

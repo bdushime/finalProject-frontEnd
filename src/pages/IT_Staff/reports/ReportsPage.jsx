@@ -5,6 +5,7 @@ import { Download, Search, AlertCircle, FileBarChart } from "lucide-react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
 import { toast } from "sonner";
 import Loader from "@/components/common/Loader";
+import { displayName } from "@/utils/helpers";
 
 export default function ReportsPage() {
     const { t } = useTranslation(["itstaff", "common"]);
@@ -158,7 +159,7 @@ export default function ReportsPage() {
 
                                             {/* 1. Student Info */}
                                             <td className="p-5">
-                                                <div className="font-medium text-[#0b1d3a]">{t.user?.username || t('common:status.na', 'Unknown')}</div>
+                                                <div className="font-medium text-[#0b1d3a]">{displayName(t.user, t('common:status.na', 'Unknown'))}</div>
                                                 <div className="text-xs text-slate-500 mt-0.5">{t.user?.email}</div>
                                             </td>
 

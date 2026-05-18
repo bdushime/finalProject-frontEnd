@@ -35,6 +35,7 @@ import BulkUploadDialog from "./dialogs/BulkUploadDialog";
 import DeviceDetailsDialog from "./DeviceDetailsDialog";
 
 import api from "@/utils/api";
+import { buildEquipmentCreatePayload, buildEquipmentUpdatePayload } from "@/utils/equipmentPayload";
 import { UserRoles } from "@/config/roleConfig";
 import Loader from "@/components/common/Loader";
 import { toast } from "sonner";
@@ -195,17 +196,7 @@ function BrowseDevices() {
   const handleAddDevice = async (completeData) => {
     setIsLoading(true);
     try {
-      const newDeviceData = {
-        name: completeData.name,
-        type: completeData.category,
-        description: completeData.description,
-        serialNumber: completeData.serialNumber,
-        status: completeData.status || 'Available',
-        condition: completeData.condition || 'Good',
-        location: completeData.location || 'Main Storage',
-        iotTag: completeData.iotTag || undefined
-      };
-
+      const newDeviceData = buildEquipmentCreatePayload(completeData);
       const response = await api.post('/equipment', newDeviceData);
 
       if (response.data) {
@@ -227,17 +218,7 @@ function BrowseDevices() {
   const handleEditDevice = async () => {
     setIsLoading(true);
     try {
-      const updateData = {
-        name: formData.name,
-        type: formData.category,
-        description: formData.description,
-        serialNumber: formData.serialNumber,
-        status: formData.status,
-        condition: formData.condition,
-        location: formData.location,
-        iotTag: formData.iotTag || undefined
-      };
-
+      const updateData = buildEquipmentUpdatePayload(formData);
       await api.put(`/equipment/${selectedDevice.id}`, updateData);
       await fetchDevices();
       setIsEditDialogOpen(false);
