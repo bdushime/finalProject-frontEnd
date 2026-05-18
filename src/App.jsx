@@ -40,6 +40,7 @@ import CurrentCheckouts from "./pages/IT_Staff/CurrentCheckouts";
 import CheckoutHistory from "./pages/IT_Staff/CheckoutHistory";
 import SearchResults from "./pages/IT_Staff/SearchResults";
 import ClassroomManagement from "./pages/IT_Staff/ClassroomManagement";
+import ITStaffTickets from "./pages/IT_Staff/ITStaffTickets";
 
 // IT Staff Checkout Flow
 import ScanQRCode from "./pages/IT_Staff/checkout/ScanQRCode";
@@ -127,6 +128,7 @@ export default function App() {
                     <Route path="/it/checkout-history" element={<CheckoutHistory />} />
                     <Route path="/it/search-results" element={<SearchResults />} />
                     <Route path="/it/classrooms" element={<ClassroomManagement />} />
+                    <Route path="/it/tickets" element={<ITStaffTickets />} />
 
                     {/* Checkout Flow */}
                     <Route path="/it/checkout/scan" element={<ScanQRCode />} />
