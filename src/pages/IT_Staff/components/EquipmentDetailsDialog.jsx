@@ -36,13 +36,15 @@ import {
 import Loader from "@/components/common/Loader";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
+import { useItStaffConfirm } from "@/pages/IT_Staff/components/ItStaffConfirmProvider";
 
 export default function EquipmentDetailsDialog({
   equipment,
   open,
   onOpenChange,
 }) {
+  const { confirm } = useItStaffConfirm();
   const { t } = useTranslation(["itstaff", "common"]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -112,12 +114,13 @@ export default function EquipmentDetailsDialog({
   };
 
   const handleDelete = async () => {
-    if (
-      !confirm(
-        t('equipment.dialog.confirmDelete')
-      )
-    )
-      return;
+    const confirmed = await confirm({
+      title: t('equipment.dialog.confirmDeleteTitle', 'Delete equipment?'),
+      description: t('equipment.dialog.confirmDelete'),
+      confirmText: t('common:actions.delete', 'Delete'),
+      variant: 'destructive',
+    });
+    if (!confirmed) return;
 
     try {
       await api.delete(`/equipment/${equipment.id}`);

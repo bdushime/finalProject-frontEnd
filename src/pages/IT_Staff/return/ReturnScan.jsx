@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { QrCode, CheckCircle2, ArrowRight } from "lucide-react";
 import api from "@/utils/api";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
 import Loader from "@/components/common/Loader";
 
 // Helper Component for the Progress Bar

@@ -8,7 +8,8 @@ import CheckoutDetailsDialog from "./checkout/CheckoutDetailsDialog";
 import api from "@/utils/api";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
+import { useItStaffConfirm } from "@/pages/IT_Staff/components/ItStaffConfirmProvider";
 import {
     Dialog,
     DialogContent,
@@ -23,6 +24,7 @@ import Loader from "@/components/common/Loader";
 
 export default function CurrentCheckouts() {
     const { t } = useTranslation(["itstaff", "common"]);
+    const { confirm } = useItStaffConfirm();
     const navigate = useNavigate();
     const [allTransactions, setAllTransactions] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -222,7 +224,12 @@ export default function CurrentCheckouts() {
             return;
         }
 
-        if (!confirm(t('checkouts.messages.confirmApprove'))) return;
+        const approved = await confirm({
+            title: t('checkouts.messages.confirmApproveTitle', 'Approve request?'),
+            description: t('checkouts.messages.confirmApprove'),
+            confirmText: t('common:actions.approve', 'Approve'),
+        });
+        if (!approved) return;
 
         try {
             if (isReturn && equipmentId && userId) {
@@ -273,7 +280,13 @@ export default function CurrentCheckouts() {
     // Cancel Reservation
     const handleCancel = async (e, id) => {
         e.stopPropagation();
-        if (!confirm(t('checkouts.messages.confirmCancel'))) return;
+        const confirmed = await confirm({
+            title: t('checkouts.messages.confirmCancelTitle', 'Cancel reservation?'),
+            description: t('checkouts.messages.confirmCancel'),
+            confirmText: t('common:actions.confirm', 'Confirm'),
+            variant: 'destructive',
+        });
+        if (!confirmed) return;
 
         try {
             await api.post(`/transactions/cancel/${id}`);

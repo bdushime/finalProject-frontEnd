@@ -23,11 +23,13 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Trash2, Monitor, MonitorOff, Plus, School } from "lucide-react";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
+import { useItStaffConfirm } from "@/pages/IT_Staff/components/ItStaffConfirmProvider";
 import { useTranslation } from "react-i18next";
 import Loader from "@/components/common/Loader";
 
 export default function ClassroomManagement() {
+    const { confirm } = useItStaffConfirm();
     const { t } = useTranslation(["itstaff", "common"]);
     const [classrooms, setClassrooms] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -87,14 +89,20 @@ export default function ClassroomManagement() {
     };
 
     const handleDelete = async (id) => {
-        if (confirm(t('classrooms.messages.confirmDelete'))) {
-            try {
-                await api.delete(`/classrooms/${id}`);
-                toast.success(t('classrooms.messages.deleteSuccess'));
-                setClassrooms(prev => prev.filter(room => room._id !== id));
-            } catch (err) {
-                toast.error(t('classrooms.messages.deleteError'));
-            }
+        const confirmed = await confirm({
+            title: t('classrooms.messages.confirmDeleteTitle', 'Delete classroom?'),
+            description: t('classrooms.messages.confirmDelete'),
+            confirmText: t('common:actions.delete', 'Delete'),
+            variant: 'destructive',
+        });
+        if (!confirmed) return;
+
+        try {
+            await api.delete(`/classrooms/${id}`);
+            toast.success(t('classrooms.messages.deleteSuccess'));
+            setClassrooms(prev => prev.filter(room => room._id !== id));
+        } catch (err) {
+            toast.error(t('classrooms.messages.deleteError'));
         }
     };
 
