@@ -38,6 +38,31 @@ export function buildBorrowDestinationMap(activeTransactions) {
  * @param {Record<string, string>} borrowMap - equipment id -> destination label
  * @param {string} storageLabel - e.g. translated "Main storage"
  */
+/** Map API rows to Projector | Extension Cable | Cable for filters and forms */
+export function inferDeviceCategory(device) {
+  const name = String(device?.name || device?.equipment || "").toLowerCase();
+  const type = String(device?.type || device?.category || "").toLowerCase();
+
+  if (/extension\s*cable/.test(name) || type === "extension cable") {
+    return "Extension Cable";
+  }
+  if (/projector/.test(name) || type === "projector") {
+    return "Projector";
+  }
+  if (/\bcable\b/.test(name) && !/extension/.test(name)) {
+    return "Cable";
+  }
+  if (type === "cable") return "Cable";
+  if (type === "projector") return "Projector";
+
+  return device?.category || device?.type || "Other";
+}
+
+export function deviceMatchesCategoryFilter(device, categoryFilter) {
+  if (!categoryFilter || categoryFilter === "All") return true;
+  return inferDeviceCategory(device) === categoryFilter;
+}
+
 export function getEquipmentDisplayLocation(device, borrowMap, storageLabel) {
   const label = storageLabel || "Main Storage";
   if (!device) return label;

@@ -42,11 +42,20 @@ import { toast } from "sonner";
 import {
   buildBorrowDestinationMap,
   getEquipmentDisplayLocation,
+  inferDeviceCategory,
+  deviceMatchesCategoryFilter,
 } from "@/utils/equipmentDisplayLocation";
 
-const DEFAULT_CATEGORIES = ['Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Electronics', 'Other'];
-const DEFAULT_CONDITIONS = ['Excellent', 'Good', 'Fair', 'Poor', 'Damaged'];
-const DEFAULT_STATUSES = ['Available', 'Checked Out', 'Maintenance', 'Lost'];
+const DEVICE_CATEGORIES = ["Projector", "Extension Cable", "Cable"];
+const DEFAULT_CONDITIONS = ["Excellent", "Good", "Fair", "Poor", "Damaged"];
+const STATUS_FILTER_OPTIONS = [
+  { value: "all", labelKey: "allStatus" },
+  { value: "Available", labelKey: "available", fields: ["status"] },
+  { value: "Checked Out", labelKey: "checkedOut", fields: ["status"] },
+  { value: "Maintenance", labelKey: "maintenance", fields: ["status"] },
+  { value: "Lost", labelKey: "lost", fields: ["status"] },
+  { value: "Damaged", labelKey: "damaged", fields: ["condition", "status"] },
+];
 
 function BrowseDevices() {
   const { t } = useTranslation(["security", "common"]);
@@ -68,9 +77,13 @@ function BrowseDevices() {
 
   const [deviceList, setDeviceList] = useState([]);
   const [borrowDestinationByEquipmentId, setBorrowDestinationByEquipmentId] = useState({});
-  const [categories, setCategories] = useState(["All", ...DEFAULT_CATEGORIES]);
+  const categories = useMemo(() => ["All", ...DEVICE_CATEGORIES], []);
+  const formCategories = DEVICE_CATEGORIES;
+  const deviceStatuses = useMemo(
+    () => STATUS_FILTER_OPTIONS.filter((o) => o.value !== "all").map((o) => o.value),
+    []
+  );
   const [conditions, setConditions] = useState(DEFAULT_CONDITIONS);
-  const [statuses, setStatuses] = useState(DEFAULT_STATUSES);
 
   const currentUser = useMemo(() => {
     try {
@@ -100,7 +113,7 @@ function BrowseDevices() {
         const mappedDevices = devicesRes.data.items.map((d) => ({
           ...d,
           id: d._id,
-          category: d.type || d.category,
+          category: inferDeviceCategory(d),
         }));
         setDeviceList(mappedDevices);
       }
@@ -117,14 +130,8 @@ function BrowseDevices() {
         const optionsRes = await api.get('/config/options');
         // 👇 BULLETPROOF FIX: Only override defaults if arrays are actually returned and not empty
         if (optionsRes.data) {
-          if (Array.isArray(optionsRes.data.categories) && optionsRes.data.categories.length > 0) {
-            setCategories(["All", ...optionsRes.data.categories]);
-          }
           if (Array.isArray(optionsRes.data.conditions) && optionsRes.data.conditions.length > 0) {
             setConditions(optionsRes.data.conditions);
-          }
-          if (Array.isArray(optionsRes.data.statuses) && optionsRes.data.statuses.length > 0) {
-            setStatuses(optionsRes.data.statuses);
           }
         }
       } catch (err) {
@@ -172,8 +179,15 @@ function BrowseDevices() {
         (device.serialNumber && device.serialNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (device.iotTag && device.iotTag.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesCategory = categoryFilter === "All" || device.category === categoryFilter;
-      const matchesStatus = statusFilter === "all" || device.status?.toLowerCase() === statusFilter.toLowerCase();
+      const matchesCategory = deviceMatchesCategoryFilter(device, categoryFilter);
+
+      const norm = (v) => String(v || "").toLowerCase().trim();
+      const matchesStatus = (() => {
+        if (statusFilter === "all") return true;
+        const opt = STATUS_FILTER_OPTIONS.find((o) => o.value === statusFilter);
+        const fields = opt?.fields || ["status"];
+        return fields.some((field) => norm(device[field]) === norm(statusFilter));
+      })();
 
       return matchesSearch && matchesCategory && matchesStatus;
     });
@@ -361,16 +375,13 @@ function BrowseDevices() {
                 </div>
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-slate-100 shadow-xl z-[100]">
-                <SelectItem value="all" className="rounded-xl focus:bg-slate-50">{t('browseDevices.filters.allStatus')}</SelectItem>
-                {statuses.map((status) => {
-                  const statusKey = status.replace(/\s+/g, '').replace(/^[A-Z]/, c => c.toLowerCase());
-                  const fallback = status.charAt(0).toUpperCase() + status.slice(1);
-                  return (
-                    <SelectItem key={status} value={status} className="rounded-xl focus:bg-slate-50">
-                      {t(`browseDevices.labels.${statusKey}`, { defaultValue: fallback })}
-                    </SelectItem>
-                  );
-                })}
+                {STATUS_FILTER_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="rounded-xl focus:bg-slate-50">
+                    {t(`browseDevices.filters.${opt.labelKey}`, {
+                      defaultValue: opt.value === "all" ? "All Status" : opt.value,
+                    })}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -548,9 +559,9 @@ function BrowseDevices() {
           onOpenChange={setIsAddDialogOpen}
           formData={formData}
           setFormData={setFormData}
-          categories={categories}
+          categories={formCategories}
           conditions={conditions}
-          statuses={statuses}
+          statuses={deviceStatuses}
           onSubmit={handleAddDevice}
           onCancel={() => {
             setIsAddDialogOpen(false);
@@ -565,9 +576,9 @@ function BrowseDevices() {
           onOpenChange={setIsEditDialogOpen}
           formData={formData}
           setFormData={setFormData}
-          categories={categories}
+          categories={formCategories}
           conditions={conditions}
-          statuses={statuses}
+          statuses={deviceStatuses}
           selectedDevice={selectedDevice}
           onSubmit={handleEditDevice}
           onCancel={() => {

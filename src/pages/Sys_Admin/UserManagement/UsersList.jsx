@@ -357,34 +357,42 @@ const UsersList = () => {
                 </div>
 
                 {/* Users Table */}
-                <div className="overflow-hidden rounded-2xl border border-gray-50 flex flex-col">
+                <div className="overflow-hidden rounded-2xl border border-gray-100 flex flex-col">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full table-fixed border-collapse text-left">
+                            <colgroup>
+                                <col style={{ width: "28%" }} />
+                                <col style={{ width: "17%" }} />
+                                <col style={{ width: "13%" }} />
+                                <col style={{ width: "15%" }} />
+                                <col style={{ width: "13%" }} />
+                                <col style={{ width: "14%" }} />
+                            </colgroup>
                             <thead>
-                                <tr className="bg-gray-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-gray-100">
-                                    <th className="px-6 py-5">{t('users.userIdentity')}</th>
-                                    <th className="px-6 py-5">{t('users.assignedRole')}</th>
-                                    <th className="px-6 py-5">{t('users.status')}</th>
-                                    <th className="px-6 py-5">{t('users.department')}</th>
-                                    <th className="px-6 py-5">{t('users.respScore')}</th>
-                                    <th className="px-6 py-5 text-right">{t('users.actions')}</th>
+                                <tr className="bg-gray-50/80 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-gray-100">
+                                    <th className="px-4 py-4 align-middle">{t('users.userIdentity')}</th>
+                                    <th className="px-3 py-4 align-middle text-center">{t('users.assignedRole')}</th>
+                                    <th className="px-3 py-4 align-middle text-center">{t('users.status')}</th>
+                                    <th className="px-3 py-4 align-middle text-center">{t('users.department')}</th>
+                                    <th className="px-3 py-4 align-middle text-center">{t('users.score')}</th>
+                                    <th className="px-3 py-4 align-middle text-right">{t('users.actions')}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr><td colSpan="6" className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#8D8DC7]" /></td></tr>
                                 ) : currentUsers.length > 0 ? (
                                     currentUsers.map((user) => (
-                                        <tr key={user._id} className={`hover:bg-[#8D8DC7]/5 transition-all group ${user.status === 'Suspended' ? 'bg-red-50/30' : ''}`}>
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center">
-                                                    <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] font-black mr-4 border border-indigo-100 uppercase shadow-sm group-hover:scale-110 transition-transform">
+                                        <tr key={user._id} className={`hover:bg-[#8D8DC7]/5 transition-colors group align-middle ${user.status === 'Suspended' ? 'bg-red-50/30' : ''}`}>
+                                            <td className="px-4 py-4 align-middle">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="h-11 w-11 shrink-0 rounded-xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] font-black border border-indigo-100 uppercase">
                                                         {(user.fullName || user.username || "U").charAt(0)}
                                                     </div>
-                                                    <div>
-                                                        <div className="font-bold text-slate-900 text-base">{user.fullName || user.username}</div>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            <span className="text-xs text-slate-400 font-medium">{user.email}</span>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="font-semibold text-slate-900 truncate">{user.fullName || user.username}</div>
+                                                        <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                                                            <span className="text-xs text-slate-500 truncate">{user.email}</span>
                                                             {user.role === 'Student' && user.studentId && (
                                                                 <span className="bg-gray-100 px-2 py-0.5 rounded-lg text-[10px] text-slate-500 font-black tracking-wider border border-gray-200 uppercase">#{user.studentId}</span>
                                                             )}
@@ -392,25 +400,25 @@ const UsersList = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getRoleBadgeColor(user.role)} shadow-sm`}>
-                                                    {user.role === 'Admin' && <Shield className="w-3.5 h-3.5 mr-2" />}
+                                            <td className="px-3 py-4 align-middle text-center">
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${getRoleBadgeColor(user.role)}`}>
+                                                    {user.role === 'Admin' && <Shield className="w-3 h-3 mr-1" />}
                                                     {t(`common:roles.${user.role === 'IT_Staff' ? 'itStaff' : user.role.toLowerCase()}`)}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(user.status || 'Active')} shadow-sm`}>
+                                            <td className="px-3 py-4 align-middle text-center">
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border ${getStatusColor(user.status || 'Active')}`}>
                                                     {user.status === 'Suspended' ? t('users.suspended') : t('users.activeStatus')}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5 text-sm text-slate-600 font-bold">{user.department || t('users.general')}</td>
-                                            <td className="px-6 py-5">
-                                                <span className={`inline-flex items-center justify-center min-w-12 h-9 px-2 rounded-xl text-xs font-black border ${getScoreColor(user.responsibilityScore ?? 100)} shadow-sm`}>
+                                            <td className="px-3 py-4 align-middle text-center text-sm text-slate-600 font-semibold">{user.department || t('users.general')}</td>
+                                            <td className="px-3 py-4 align-middle text-center">
+                                                <span className={`inline-flex items-center justify-center min-w-[2.5rem] h-8 px-2 rounded-lg text-xs font-black border ${getScoreColor(user.responsibilityScore ?? 100)}`}>
                                                     {user.responsibilityScore ?? 100}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5 text-right">
-                                                <div className="flex items-center justify-end space-x-2">
+                                            <td className="px-3 py-4 align-middle text-right">
+                                                <div className="inline-flex items-center justify-end gap-0.5">
                                                     <button onClick={() => openMessageModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-blue-500 transition-colors" title="Send Message">
                                                         <MessageSquare className="w-4 h-4" />
                                                     </button>
