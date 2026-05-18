@@ -134,7 +134,8 @@
         "emptyState": {
             "title": "Nta gikoresho cyabonetse",
             "description": "Hindura utuyunguruzo cyangwa ibyo ushakisha."
-        }
+        },
+        "defaultStorage": "Ububiko bw'ibanze"
     },
     "activeCheckouts": {
         "stats": {
@@ -158,6 +159,38 @@
             "utilization": "Raporo y'Ikoreshwa",
             "logs": "Raporo y'Imigendekere"
         }
+    },
+    "reportsDashboard": {
+        "allStatuses": "Imiterere yose",
+        "loadError": "Ntibyashobotse kuzana amakuru y'urupapuro.",
+        "noExport": "Nta makuru ahari yo kohereza.",
+        "exportCsvOk": "Kohereza CSV byagenze neza",
+        "exportFail": "Kohereza byanze",
+        "recordsLabel": "Inyandiko zihuye",
+        "showing": "Garagaza {{from}} kugeza {{to}} muri {{total}}",
+        "pageOf": "Paji {{current}} muri {{total}}",
+        "heroSubtitle": "Ibikoresho, imifuka, n'ibikorwa by'ingenzi ukurikirana nk'umukozi w'umutekano.",
+        "heroDevices": "Urutonde rw'ibikoresho",
+        "heroPackages": "Imifuka y'ibikoresho",
+        "heroLogs": "Kwinjira no guhinduka",
+        "heroExceptions": "Ibikeneye kwitaho",
+        "cardDevicesTitle": "Urutonde rw'ibikoresho",
+        "cardDevicesDesc": "Ibikoresho byose byanditswe: imiterere, uko biri, n'aho biri.",
+        "cardPackagesTitle": "Imifuka",
+        "cardPackagesDesc": "Imifuka y'ibikoresho yashyizweho muri sisitemu.",
+        "cardLogsTitle": "Ibikorwa byo kwinjira",
+        "cardLogsDesc": "Gutwara, gutanga, no guhinduka biturutse ku nyandiko z'umutekano.",
+        "cardExceptionsTitle": "Ibikeneye kwitaho",
+        "cardExceptionsDesc": "Byangiritse, byatakaye, biri mu isuzuma, ibyacuruwe byarengeje igihe, n'ibindi bisaba gukurikiranwa.",
+        "colPackageName": "Izina ry'umufuka",
+        "colDescription": "Ibisobanuro",
+        "colItemCount": "Ibintu",
+        "colPackageId": "Indangantego",
+        "colCondition": "Uko bimeze",
+        "logStatusReturned": "Byasubijwe",
+        "logStatusOverdue": "Byarengeje igihe",
+        "logStatusDenied": "Byanze",
+        "logStatusCanceled": "Byahagaritswe"
     },
     "notifications": {
         "title": "Inyabutsa",

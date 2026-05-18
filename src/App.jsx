@@ -142,7 +142,7 @@ export default function App() {
                 </Route>
 
                 {/* 🔒 SECURITY ROUTES */}
-                <Route element={<ProtectedRoute allowedRoles={['Security']} />}>
+                <Route element={<ProtectedRoute allowedRoles={['Security', 'Gate_Keeper']} />}>
                     <Route path="/security/dashboard" element={<SecurityDashboard />} />
                     <Route path="/security/logs" element={<Accesslogs />} />
                     <Route path="/security/active-checkouts" element={<ActiveCheckouts />} />

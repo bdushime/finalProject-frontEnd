@@ -165,7 +165,7 @@ export default function SecurityDashboard() {
           label={t("dashboard.actions.scanVerify")}
           icon={ShieldCheck}
           variant="secondary"
-          onClick={() => navigate("/security/verify")}
+          onClick={() => navigate("/gate-verification")}
           className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md"
         />
       </div>
@@ -212,7 +212,7 @@ export default function SecurityDashboard() {
             label={t("dashboard.actions.scanVerify")}
             icon={ShieldCheck}
             variant="secondary"
-            onClick={() => navigate("/security/verify")}
+            onClick={() => navigate("/gate-verification")}
             className="min-h-[120px] sm:min-h-[140px]"
           />
         </div>
