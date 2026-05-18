@@ -84,8 +84,8 @@ function Topbar() {
   const navigationLinks = [
     { label: t("nav.dashboard"), path: "/security/dashboard", icon: LayoutGrid },
     { label: t("nav.devices"), path: "/security/devices", icon: Package },
+    { label: "Packages", path: "/security/packages", icon: ClipboardList },
     { label: t("nav.tracking"), path: "/security/iot-tracker", icon: Radio },
-    // { label: t("nav.checkouts"), path: "/security/active-checkouts", icon: ClipboardList },
     { label: t("nav.accessLogs"), path: "/security/logs", icon: ShieldAlert },
     { label: t("nav.reports"), path: "/security/reports", icon: FileText },
   ];

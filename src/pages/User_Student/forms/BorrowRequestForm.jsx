@@ -30,7 +30,6 @@ import {
     ArrowRight,
     ChevronLeft,
     Camera,
-    
     Clock,
     AlertTriangle,
     Calendar as CalendarIcon,
@@ -44,6 +43,8 @@ import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import QRScanner from "@/components/common/QRScanner";
 import { toast } from "sonner";
 import Loader from "@/components/common/Loader";
+import { getPackageId, normalizePackages } from "@/pages/User_Student/data/packageUtils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess }) {
     const { t } = useTranslation('student');
@@ -52,21 +53,30 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const equipmentIdParam = searchParams.get("equipmentId");
+    const packageIdParam = searchParams.get("packageId");
+    const itemsParam = searchParams.get("items");
     const actionParam = searchParams.get("action");
     const scanMode = searchParams.get("scan") === "true";
 
     const videoRef = useRef(null);
 
     // --- STATE ---
-    // Flow: null = choice screen, 'borrow' = borrow wizard, 'reserve' = reserve wizard
-    const [flowType, setFlowType] = useState(actionParam || null);
+    const [flowType, setFlowType] = useState(
+        actionParam || (equipmentIdParam || packageIdParam ? "borrow" : null)
+    );
+    const [bookingType, setBookingType] = useState(
+        packageIdParam ? "package" : "equipment"
+    );
+    const [selectedPackage, setSelectedPackage] = useState(null);
+    const [selectedPackageItems, setSelectedPackageItems] = useState([]);
     const [step, setStep] = useState(1);
-    const totalSteps = 2; // Both borrow and reserve are now 2 steps
+    const totalSteps = 2;
 
     // Data States
     const [equipmentList, setEquipmentList] = useState([]);
     const [classroomList, setClassroomList] = useState([]);
     const [equipment, setEquipment] = useState(null);
+    const [packages, setPackages] = useState([]);
     const [courses, setCourses] = useState([]);
     const [coursesLoading, setCoursesLoading] = useState(false);
     const [coursesLoadError, setCoursesLoadError] = useState(null);
@@ -74,6 +84,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     // Form Data
     const [formData, setFormData] = useState({
         equipmentId: equipmentIdParam || "",
+        packageId: packageIdParam || "",
         courseId: "",
         course: "",
         courseName: "",
@@ -90,6 +101,18 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     const [isScanning, setIsScanning] = useState(scanMode);
     const [scanError, setScanError] = useState(null);
     const [conditionPhotos, setConditionPhotos] = useState({ front: null, back: null });
+    // Per-device photos for package bookings: { [deviceId]: { front, back } }
+    const [packageDevicePhotos, setPackageDevicePhotos] = useState({});
+    // Stable per-device onPhotosChange callbacks — created once per deviceId
+    // so EquipmentScanAndPhotoUpload's effect doesn't re-fire each render.
+    const devicePhotoCallbacksRef = useRef({});
+    const getDevicePhotoCallback = (deviceId) => {
+        if (!devicePhotoCallbacksRef.current[deviceId]) {
+            devicePhotoCallbacksRef.current[deviceId] = (photos) =>
+                setPackageDevicePhotos((prev) => ({ ...prev, [deviceId]: photos }));
+        }
+        return devicePhotoCallbacksRef.current[deviceId];
+    };
     const [timeSlots, setTimeSlots] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
@@ -99,7 +122,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     const [isException, setIsException] = useState(false);
     const [showScreenWarning, setShowScreenWarning] = useState(false);
 
-    // --- Modal State for Date & Time Pickers ---
+    // Modal State for Date & Time Pickers
     const [showDateModal, setShowDateModal] = useState(false);
     const [showTimeModal, setShowTimeModal] = useState(false);
     const [calendarMonth, setCalendarMonth] = useState(new Date());
@@ -117,6 +140,17 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                 const normalizedList = Array.isArray(eqList) ? eqList : [];
                 const availableItems = normalizedList.filter(item => item?.status === 'Available');
                 setEquipmentList(availableItems);
+
+                try {
+                    const pkgRes = await api.get('/packages');
+                    const pkgList = Array.isArray(pkgRes.data)
+                        ? pkgRes.data
+                        : (pkgRes.data?.data || pkgRes.data?.packages || []);
+                    setPackages(normalizePackages(pkgList.filter(p => p.isActive !== false)));
+                } catch (pkgErr) {
+                    console.warn("Could not load packages:", pkgErr);
+                    setPackages([]);
+                }
 
                 try {
                     const roomRes = await api.get('/classrooms');
@@ -153,6 +187,19 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         loadInitialData();
     }, [equipmentIdParam]);
 
+    useEffect(() => {
+        if (!packageIdParam) return;
+        const pkg = packages.find(p => getPackageId(p) === packageIdParam);
+        if (!pkg) return;
+        setSelectedPackage(pkg);
+        setFormData(prev => ({ ...prev, packageId: getPackageId(pkg) }));
+        const parsedItems = itemsParam
+            ? decodeURIComponent(itemsParam).split(",").map(s => s.trim()).filter(Boolean)
+            : pkg.items || [];
+        setSelectedPackageItems(parsedItems);
+        setBookingType("package");
+    }, [packageIdParam, itemsParam, packages]);
+
     const handleCourseSelect = (courseId) => {
         const selected = courses.find(c => c._id === courseId);
         setFormData(prev => ({
@@ -168,7 +215,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         `${a?.name || ""}`.localeCompare(`${b?.name || ""}`, undefined, { sensitivity: "base" })
     );
 
-    // --- 2. HELPER: Time Slots (For Reservation) ---
+    // --- 2. HELPER: Time Slots ---
     useEffect(() => {
         if (formData.reservationDate) {
             const slots = [];
@@ -195,13 +242,8 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         }
     };
 
-    const handleScanQR = () => {
-        setIsScanning(true);
-    };
-
-    const stopCamera = () => {
-        setIsScanning(false);
-    };
+    const handleScanQR = () => setIsScanning(true);
+    const stopCamera = () => setIsScanning(false);
 
     const handleScanSuccess = (decodedText) => {
         setIsScanning(false);
@@ -222,7 +264,38 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         const found = equipmentList.find(e => e._id === id);
         if (found) {
             setEquipment(found);
-            setFormData(prev => ({ ...prev, equipmentId: id }));
+            setFormData(prev => ({ ...prev, equipmentId: id, packageId: "" }));
+            setSelectedPackage(null);
+            setSelectedPackageItems([]);
+        }
+    };
+
+    const handlePackageSelect = (pkg) => {
+        const id = getPackageId(pkg);
+        setSelectedPackage(pkg);
+        setFormData(prev => ({ ...prev, packageId: id, equipmentId: "" }));
+        setEquipment(null);
+        setSelectedPackageItems(pkg.items || []);
+        setErrors(prev => ({ ...prev, packageId: null, packageItems: null, equipmentId: null }));
+    };
+
+    const togglePackageItem = (item) => {
+        setSelectedPackageItems(prev =>
+            prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+        );
+        setErrors(prev => ({ ...prev, packageItems: null }));
+    };
+
+    const handleBookingTypeChange = (type) => {
+        setBookingType(type);
+        setErrors(prev => ({ ...prev, equipmentId: null, packageId: null, packageItems: null }));
+        if (type === "equipment") {
+            setSelectedPackage(null);
+            setSelectedPackageItems([]);
+            setFormData(prev => ({ ...prev, packageId: "" }));
+        } else {
+            setEquipment(null);
+            setFormData(prev => ({ ...prev, equipmentId: "" }));
         }
     };
 
@@ -253,27 +326,15 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     equipString.includes('powerlite') ||
                     equipString.includes('epson');
 
-                if (!isProjector) {
-                    setIsException(false);
-                    return;
-                }
+                if (!isProjector) { setIsException(false); return; }
 
                 const normalize = (str) => str?.toLowerCase().replace(/(room|salle|-|_|\s+)/g, '') || '';
                 const inputLoc = normalize(formData.location);
-
                 let foundRoom = null;
                 if (inputLoc.length > 0) {
-                    foundRoom = classroomList.find(c => {
-                        const dbRoom = normalize(c.name);
-                        return dbRoom === inputLoc;
-                    });
+                    foundRoom = classroomList.find(c => normalize(c.name) === inputLoc);
                 }
-
-                if (foundRoom && foundRoom.hasScreen) {
-                    setIsException(true);
-                } else {
-                    setIsException(false);
-                }
+                setIsException(!!(foundRoom && foundRoom.hasScreen));
             };
 
             const timer = setTimeout(checkException, 300);
@@ -281,11 +342,60 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         }
     }, [formData.location, equipment, step, classroomList, flowType]);
 
-    // --- VALIDATION LOGIC ---
+    // --- VALIDATION ---
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.equipmentId) newErrors.equipmentId = "Please select equipment";
+        if (bookingType === "equipment") {
+            if (!formData.equipmentId) newErrors.equipmentId = "Please select equipment";
+        } else {
+            // ── PACKAGE BOOKING VALIDATION ──────────────────────────────────
+            // The backend's POST /packages/:id/book requires the same destination
+            // fields as single checkout: purpose, destination, and expectedReturnTime.
+            // Validate them all here so nothing is missing on submit.
+            if (!formData.packageId) {
+                newErrors.packageId = t("equipment.selectPackageError", "Please select a package");
+            }
+            if (selectedPackageItems.length === 0) {
+                newErrors.packageItems = t("equipment.selectPackageItemsError", "Select at least one item from the package");
+            }
+            if (!formData.courseId) newErrors.courseId = "Course is required";
+            if (!formData.lecturer.trim()) newErrors.lecturer = "Lecturer Name is required";
+            if (!formData.location.trim()) newErrors.location = "Room is required";
+            if (!formData.purpose.trim()) newErrors.purpose = "Purpose is required.";
+
+            if (!formData.sessionDateTime) {
+                newErrors.sessionDateTime = "Return time is required";
+            } else {
+                const now = new Date();
+                const returnTime = new Date(formData.sessionDateTime);
+                const diffHours = (returnTime - now) / (1000 * 60 * 60);
+                if (returnTime.getDate() !== now.getDate()) {
+                    newErrors.sessionDateTime = "Borrowing is only allowed for today.";
+                } else if (diffHours <= 0) {
+                    newErrors.sessionDateTime = "Return time must be in the future.";
+                } else if (diffHours > 5) {
+                    newErrors.sessionDateTime = "Maximum borrowing duration is 5 hours.";
+                }
+            }
+
+            // Require front + back photos for every selected device
+            if (selectedPackageItems.length > 0) {
+                const photoErrors = {};
+                for (const deviceId of selectedPackageItems) {
+                    const photos = packageDevicePhotos[deviceId];
+                    if (!photos || !photos.front || !photos.back) {
+                        photoErrors[deviceId] = "Both front and back photos are required for this device.";
+                    }
+                }
+                if (Object.keys(photoErrors).length > 0) {
+                    newErrors.packagePhotos = photoErrors;
+                }
+            }
+
+            setErrors(newErrors);
+            return Object.keys(newErrors).length === 0;
+        }
 
         if (step === 1) {
             if (flowType === 'borrow') {
@@ -299,7 +409,6 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     const now = new Date();
                     const returnTime = new Date(formData.sessionDateTime);
                     const diffHours = (returnTime - now) / (1000 * 60 * 60);
-
                     if (returnTime.getDate() !== now.getDate()) {
                         newErrors.sessionDateTime = "Borrowing is only allowed for today.";
                     } else if (diffHours <= 0) {
@@ -317,7 +426,6 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                 if (!formData.lecturer.trim()) newErrors.lecturer = "Lecturer Name is required";
                 if (!formData.location.trim()) newErrors.location = "Room is required";
                 if (!formData.purpose.trim()) newErrors.purpose = "Reason for reservation is required";
-
                 if (!formData.reservationDate) newErrors.reservationDate = "Date is required";
                 if (!formData.reservationTime) newErrors.reservationTime = "Time is required";
 
@@ -342,6 +450,12 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     const handleNextStep = () => {
         if (!validateForm()) return;
 
+        // Package bookings skip the review step — they submit directly
+        if (bookingType === "package") {
+            handleSubmit();
+            return;
+        }
+
         if (step === 1 && flowType === 'borrow' && isException) {
             setShowScreenWarning(true);
             return;
@@ -350,7 +464,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         setStep(step + 1);
     };
 
-    // --- IMAGE COMPRESSION HELPER ---
+    // --- IMAGE COMPRESSION ---
     const compressImage = (base64Str, maxWidth = 800, maxHeight = 800, quality = 0.7) => {
         return new Promise((resolve) => {
             const img = new Image();
@@ -359,19 +473,11 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-
                 if (width > height) {
-                    if (width > maxWidth) {
-                        height *= maxWidth / width;
-                        width = maxWidth;
-                    }
+                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
                 } else {
-                    if (height > maxHeight) {
-                        width *= maxHeight / height;
-                        height = maxHeight;
-                    }
+                    if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
                 }
-
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
@@ -381,32 +487,74 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         });
     };
 
-    // --- SUBMIT HANDLER ---
+    // --- SUBMIT ---
     const handleSubmit = async () => {
         if (!validateForm()) return;
         setSubmitting(true);
 
         try {
+            const purposeBase = isException
+                ? `[EXCEPTION: Projector in Screen Room] ${formData.purpose}`
+                : formData.purpose;
+
+            // ── PACKAGE BOOKING ───────────────────────────────────────────────
+            if (bookingType === "package") {
+                const packageId = formData.packageId;
+                if (!packageId) {
+                    toast.error("No package selected.");
+                    setSubmitting(false);
+                    return;
+                }
+
+                // Compress per-device photos before sending so the payload stays small.
+                const devicePhotos = {};
+                for (const deviceId of selectedPackageItems) {
+                    const photos = packageDevicePhotos[deviceId];
+                    if (!photos) continue;
+                    devicePhotos[deviceId] = {
+                        front: photos.front ? await compressImage(photos.front) : null,
+                        back: photos.back ? await compressImage(photos.back) : null,
+                    };
+                }
+
+                await api.post(`/packages/${packageId}/book`, {
+                    purpose: purposeBase,
+                    destination: `${formData.location} (${formData.course} - ${formData.courseName}, Lecturer: ${formData.lecturer})`,
+                    expectedReturnTime: formData.sessionDateTime,
+                    devicePhotos,
+                });
+
+                setStatusModal({
+                    type: 'pending',
+                    message: "Package booking submitted! You will be notified once it is reviewed."
+                });
+
+                if (onSuccess) onSuccess({
+                    bookingType: "package",
+                    packageId,
+                    packageItems: selectedPackageItems,
+                });
+                return;
+            }
+
+            // ── SINGLE EQUIPMENT BORROW / RESERVE ────────────────────────────
             const payload = {
-                equipmentId: formData.equipmentId,
                 courseId: formData.courseId,
-                purpose: isException ? `[EXCEPTION: Projector in Screen Room] ${formData.purpose}` : formData.purpose,
+                purpose: purposeBase,
                 destination: `${formData.location} (${formData.course} - ${formData.courseName}, Lecturer: ${formData.lecturer})`,
+                bookingType,
+                equipmentId: formData.equipmentId,
             };
 
             if (flowType === 'borrow') {
                 payload.expectedReturnTime = formData.sessionDateTime;
 
-                // Compress photos before submission to avoid 413 Payload Too Large
                 const compressedPhotos = {};
                 if (conditionPhotos.front) compressedPhotos.front = await compressImage(conditionPhotos.front);
                 if (conditionPhotos.back) compressedPhotos.back = await compressImage(conditionPhotos.back);
 
                 payload.conditionPhotos = compressedPhotos;
-
-                // Add granular fields for backend compatibility
                 payload.location = formData.location;
-                payload.courseId = formData.courseId;
                 payload.course = formData.course;
                 payload.courseName = formData.courseName;
                 payload.lecturer = formData.lecturer;
@@ -428,25 +576,20 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     });
                 }
 
-                // Trigger parent success logic if available
-                if (onSuccess) onSuccess(res.data);
+                if (onSuccess) onSuccess({ ...res.data, bookingType });
 
             } else {
                 payload.reservationDate = formData.reservationDate;
                 payload.reservationTime = formData.reservationTime;
                 payload.location = formData.location;
-                payload.courseId = formData.courseId;
                 payload.course = formData.course;
                 payload.courseName = formData.courseName;
                 payload.lecturer = formData.lecturer;
 
                 const res = await api.post('/transactions/reserve', payload);
-                setStatusModal({
-                    type: 'success',
-                    message: "Reservation confirmed successfully!"
-                });
+                setStatusModal({ type: 'success', message: "Reservation confirmed successfully!" });
 
-                if (onSuccess) onSuccess(res.data);
+                if (onSuccess) onSuccess({ ...res.data, bookingType });
             }
 
         } catch (err) {
@@ -458,13 +601,8 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         }
     };
 
-    const getDaysInMonth = (date) => {
-        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    };
-
-    const getFirstDayOfMonth = (date) => {
-        return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    };
+    const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const getFirstDayOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
     const renderCalendarDays = () => {
         const today = startOfDay(new Date());
@@ -585,9 +723,180 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                 />
             </div>
 
-            {/* STEP 1: DETAILS & CONDITION (For Borrow) / SCHEDULE (For Reserve) */}
+            {/* STEP 1 */}
             {step === 1 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                    <div className="space-y-4 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                        <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">
+                            {t("equipment.bookingTypeLabel", "What are you booking?")}
+                        </Label>
+                        <div className="p-1 bg-slate-100 rounded-xl flex">
+                            <button
+                                type="button"
+                                disabled={!!packageIdParam}
+                                onClick={() => handleBookingTypeChange("equipment")}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all",
+                                    bookingType === "equipment"
+                                        ? "bg-white text-[#0b1d3a] shadow-sm"
+                                        : "text-slate-500 hover:text-slate-700"
+                                )}
+                            >
+                                {t("equipment.bookSingleItem", "Single Equipment")}
+                            </button>
+                            <button
+                                type="button"
+                                disabled={!!equipmentIdParam}
+                                onClick={() => handleBookingTypeChange("package")}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all",
+                                    bookingType === "package"
+                                        ? "bg-white text-[#0b1d3a] shadow-sm"
+                                        : "text-slate-500 hover:text-slate-700"
+                                )}
+                            >
+                                {t("equipment.bookPackage", "Equipment Package")}
+                            </button>
+                        </div>
+
+                        {bookingType === "equipment" ? (
+                            <div className="space-y-2 pt-2">
+                                <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                    {t("equipment.stepSelectItem", "Select Item")}
+                                </Label>
+                                <Select value={formData.equipmentId} onValueChange={handleEquipmentSelect}>
+                                    <SelectTrigger className="h-12 rounded-xl bg-white border border-slate-200 text-[#0b1d3a] font-medium">
+                                        <SelectValue placeholder={t("equipment.stepSelectItem", "Select equipment")} />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl max-h-[280px]">
+                                        {equipmentList.map(item => (
+                                            <SelectItem key={item._id} value={item._id}>
+                                                {item.name}
+                                                {item.serialNumber && (
+                                                    <span className="text-slate-400 text-xs ml-2">({item.serialNumber})</span>
+                                                )}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.equipmentId && <p className="text-xs text-rose-500 font-bold px-1">{errors.equipmentId}</p>}
+                            </div>
+                        ) : (
+                            <div className="space-y-4 pt-2">
+                                <div>
+                                    <p className="text-sm font-semibold text-[#0b1d3a]">{t("equipment.selectPackage", "Select a package")}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">{t("equipment.selectPackageDesc", "Choose a pre-defined bundle of equipment for your session.")}</p>
+                                </div>
+                                {packages.length === 0 ? (
+                                    <p className="text-sm text-slate-500">{t("equipment.noPackagesAvailable", "No packages available at the moment.")}</p>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {packages.map(pkg => {
+                                            const id = getPackageId(pkg);
+                                            const isSelected = formData.packageId === id;
+                                            return (
+                                                <button
+                                                    key={id}
+                                                    type="button"
+                                                    onClick={() => handlePackageSelect(pkg)}
+                                                    className={cn(
+                                                        "text-left p-4 rounded-xl border transition-all",
+                                                        isSelected
+                                                            ? "bg-[#126dd5]/5 border-[#126dd5]/40 ring-2 ring-[#126dd5]/20"
+                                                            : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                                                    )}
+                                                >
+                                                    <p className="font-bold text-sm text-[#0b1d3a]">{pkg.name}</p>
+                                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">{pkg.description}</p>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                                {errors.packageId && <p className="text-xs text-rose-500 font-bold">{errors.packageId}</p>}
+
+                                {selectedPackage && (
+                                    <div className="space-y-2">
+                                        <Label className="text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                            {t("equipment.packageItemsLabel", "Items in this package")}
+                                        </Label>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {(selectedPackage.devices || selectedPackage.items || []).map((device, idx) => {
+                                                const id = typeof device === 'object' ? (device._id || device.id || String(idx)) : device;
+                                                const name = typeof device === 'object' ? (device.name || device.serialNumber || 'Unknown') : device;
+                                                const isChecked = selectedPackageItems.includes(id);
+                                                return (
+                                                    <div
+                                                        key={id}
+                                                        className={cn(
+                                                            "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
+                                                            isChecked ? "bg-[#126dd5]/5 border-[#126dd5]/30" : "bg-white border-slate-200"
+                                                        )}
+                                                        onClick={() => togglePackageItem(id)}
+                                                    >
+                                                        <Checkbox
+                                                            checked={isChecked}
+                                                            onCheckedChange={() => togglePackageItem(id)}
+                                                            className="data-[state=checked]:bg-[#126dd5] data-[state=checked]:border-[#126dd5]"
+                                                        />
+                                                        <span className="text-sm font-medium text-[#0b1d3a]">{name}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        {errors.packageItems && <p className="text-xs text-rose-500 font-bold">{errors.packageItems}</p>}
+                                    </div>
+                                )}
+
+                                {/* Per-device condition photos (front + back per selected device) */}
+                                {selectedPackage && selectedPackageItems.length > 0 && (
+                                    <div className="space-y-4 pt-2">
+                                        <div>
+                                            <p className="text-sm font-semibold text-[#0b1d3a]">
+                                                {t("equipment.packagePhotosLabel", "Condition photos (per device)")}
+                                            </p>
+                                            <p className="text-xs text-slate-500 mt-0.5">
+                                                {t("equipment.packagePhotosDesc", "Take a front and back photo of each device you are borrowing.")}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-6">
+                                            {(selectedPackage.devices || selectedPackage.items || [])
+                                                .filter((device, idx) => {
+                                                    const id = typeof device === 'object' ? (device._id || device.id || String(idx)) : device;
+                                                    return selectedPackageItems.includes(id);
+                                                })
+                                                .map((device, idx) => {
+                                                    const id = typeof device === 'object' ? (device._id || device.id || String(idx)) : device;
+                                                    const name = typeof device === 'object' ? (device.name || device.serialNumber || 'Device') : device;
+                                                    const photoError = errors.packagePhotos?.[id];
+                                                    return (
+                                                        <div key={id} className="rounded-2xl border border-slate-200 bg-slate-50/40 p-4 space-y-3">
+                                                            <div className="flex items-center justify-between">
+                                                                <div>
+                                                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                                                                        {t("equipment.deviceLabel", "Device")}
+                                                                    </p>
+                                                                    <p className="text-sm font-bold text-[#0b1d3a]">{name}</p>
+                                                                </div>
+                                                            </div>
+                                                            <EquipmentScanAndPhotoUpload
+                                                                hideScanner={true}
+                                                                requireBothPhotos={true}
+                                                                onPhotosChange={getDevicePhotoCallback(id)}
+                                                            />
+                                                            {photoError && (
+                                                                <p className="text-xs text-rose-500 font-bold px-1">{photoError}</p>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     {flowType === 'borrow' ? (
                         <div className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -635,13 +944,13 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Room</Label>
-                                    <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all"
+                                    <Input
+                                        className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all"
                                         value={formData.location}
                                         onChange={(e) => handleInputChange("location", e.target.value)}
                                         placeholder="e.g. Room 304"
                                     />
                                     {errors.location && <p className="text-xs text-rose-500 font-bold px-1">{errors.location}</p>}
-
                                     {isException && (
                                         <div className="mt-2 p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                                             <AlertTriangle className="w-4 h-4 text-amber-600" />
@@ -721,18 +1030,21 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-slate-100">
-                                <EquipmentScanAndPhotoUpload
-                                    equipment={equipment}
-                                    scanError={scanError}
-                                    hideScanner={true}
-                                    onReset={() => {
-                                        setScanError(null);
-                                        setEquipment(null);
-                                    }}
-                                    onPhotosChange={setConditionPhotos}
-                                />
-                            </div>
+                            {bookingType === "equipment" && (
+                                <div className="pt-6 border-t border-slate-100">
+                                    <EquipmentScanAndPhotoUpload
+                                        equipment={equipment}
+                                        scanError={scanError}
+                                        hideScanner={true}
+                                        onReset={() => {
+                                            setScanError(null);
+                                            setEquipment(null);
+                                            setFormData(prev => ({ ...prev, equipmentId: "" }));
+                                        }}
+                                        onPhotosChange={setConditionPhotos}
+                                    />
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="space-y-8">
@@ -784,7 +1096,8 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-[#0b1d3a] font-black uppercase text-[10px] tracking-widest px-1">Room</Label>
-                                            <Input className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all"
+                                            <Input
+                                                className="text-[#0b1d3a] font-medium h-12 bg-white border-slate-200 rounded-xl focus:border-[#126dd5] transition-all"
                                                 value={formData.location}
                                                 onChange={(e) => handleInputChange("location", e.target.value)}
                                                 placeholder="e.g. Room 304"
@@ -841,9 +1154,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                                     <div className="w-[240px]">
                                                         <div className="grid grid-cols-7 gap-1">
                                                             {['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].map(day => (
-                                                                <div key={day} className="text-center text-[10px] font-bold text-slate-500 py-1">
-                                                                    {day}
-                                                                </div>
+                                                                <div key={day} className="text-center text-[10px] font-bold text-slate-500 py-1">{day}</div>
                                                             ))}
                                                         </div>
                                                         <div className="grid grid-cols-7 gap-1 mt-1">
@@ -916,7 +1227,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                 </div>
             )}
 
-            {/* STEP 2: REVIEW (Borrow) / DETAILS (Reserve) */}
+            {/* STEP 2: REVIEW */}
             {step === 2 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                     {flowType === 'borrow' ? (
@@ -940,20 +1251,35 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end">
-                                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-1">Equipment Category</p>
-                                        <p className="text-[#0b1d3a] font-black text-sm">{equipment?.category?.name || "Equipment"}</p>
+                                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-1">
+                                            {bookingType === "package" ? t("equipment.package", "Package") : "Equipment Category"}
+                                        </p>
+                                        <p className="text-[#0b1d3a] font-black text-sm">
+                                            {bookingType === "package" ? selectedPackage?.name : (equipment?.category?.name || "Equipment")}
+                                        </p>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Selected Equipment</Label>
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">
+                                                {bookingType === "package" ? t("equipment.selectedPackage", "Selected Package") : "Selected Equipment"}
+                                            </Label>
                                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
                                                 <div className="p-2 bg-white rounded-xl shadow-sm"><Package className="w-5 h-5 text-[#126dd5]" /></div>
                                                 <div>
-                                                    <p className="text-[#0b1d3a] font-bold text-sm">{equipment?.name}</p>
-                                                    <p className="text-slate-400 text-[10px] font-medium">{equipment?.serialNumber}</p>
+                                                    {bookingType === "package" ? (
+                                                        <>
+                                                            <p className="text-[#0b1d3a] font-bold text-sm">{selectedPackage?.name}</p>
+                                                            <p className="text-slate-400 text-[10px] font-medium">{selectedPackageItems.length} item(s) selected</p>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <p className="text-[#0b1d3a] font-bold text-sm">{equipment?.name}</p>
+                                                            <p className="text-slate-400 text-[10px] font-medium">{equipment?.serialNumber}</p>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -1009,23 +1335,25 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Verification Photos</Label>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                {['front', 'back'].map(side => (
-                                                    <div key={side} className="aspect-video bg-slate-50 rounded-xl border border-slate-100 overflow-hidden relative group">
-                                                        {conditionPhotos[side] ? (
-                                                            <img src={conditionPhotos[side]} alt={side} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center">
-                                                                <Camera className="w-4 h-4 text-slate-300" />
-                                                            </div>
-                                                        )}
-                                                        <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded text-[8px] text-white font-semibold uppercase">{side}</div>
-                                                    </div>
-                                                ))}
+                                        {bookingType === "equipment" && (
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Verification Photos</Label>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {['front', 'back'].map(side => (
+                                                        <div key={side} className="aspect-video bg-slate-50 rounded-xl border border-slate-100 overflow-hidden relative group">
+                                                            {conditionPhotos[side] ? (
+                                                                <img src={conditionPhotos[side]} alt={side} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center">
+                                                                    <Camera className="w-4 h-4 text-slate-300" />
+                                                                </div>
+                                                            )}
+                                                            <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded text-[8px] text-white font-semibold uppercase">{side}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1051,20 +1379,35 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end">
-                                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-1">Equipment Category</p>
-                                        <p className="text-[#0b1d3a] font-black text-sm">{equipment?.category?.name || "Equipment"}</p>
+                                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none mb-1">
+                                            {bookingType === "package" ? t("equipment.package", "Package") : "Equipment Category"}
+                                        </p>
+                                        <p className="text-[#0b1d3a] font-black text-sm">
+                                            {bookingType === "package" ? selectedPackage?.name : (equipment?.category?.name || "Equipment")}
+                                        </p>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">Target Equipment</Label>
+                                            <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-1">
+                                                {bookingType === "package" ? t("equipment.selectedPackage", "Selected Package") : "Target Equipment"}
+                                            </Label>
                                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
                                                 <div className="p-2 bg-white rounded-xl shadow-sm"><Package className="w-5 h-5 text-blue-600" /></div>
                                                 <div>
-                                                    <p className="text-[#0b1d3a] font-bold text-sm">{equipment?.name || "Selected Item"}</p>
-                                                    <p className="text-slate-400 text-[10px] font-medium">{equipment?.serialNumber || "N/A"}</p>
+                                                    {bookingType === "package" ? (
+                                                        <>
+                                                            <p className="text-[#0b1d3a] font-bold text-sm">{selectedPackage?.name || "Selected Package"}</p>
+                                                            <p className="text-slate-400 text-[10px] font-medium">{selectedPackageItems.length} item(s)</p>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <p className="text-[#0b1d3a] font-bold text-sm">{equipment?.name || "Selected Item"}</p>
+                                                            <p className="text-slate-400 text-[10px] font-medium">{equipment?.serialNumber || "N/A"}</p>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -1120,6 +1463,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                 </div>
             )}
 
+            {/* NAVIGATION BUTTONS */}
             <div className="mt-8 flex justify-end gap-4">
                 {step > 1 && (
                     <Button variant="outline" onClick={() => setStep(step - 1)} className="h-12 px-6 rounded-xl border-slate-200 text-[#0b1d3a] font-bold">

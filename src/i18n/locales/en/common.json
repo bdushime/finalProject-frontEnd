@@ -21,7 +21,8 @@
         "classrooms": "Classrooms",
         "tracking": "Tracking",
         "accessLogs": "Access Logs",
-        "devices": "Devices"
+        "devices": "Devices",
+        "packages": "Packages"
     },
     "actions": {
         "save": "Save",

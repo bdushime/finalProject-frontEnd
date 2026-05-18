@@ -7,27 +7,31 @@ import { Package, ArrowLeft, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageContainer } from "@/components/common/Page";
 import api from "@/utils/api";
+import { getPackageId, getPackageDevices, getDeviceId, getDeviceName } from "./data/packageUtils";
 
 export default function PackageDetails() {
     const { packageId } = useParams();
     const navigate = useNavigate();
 
-    // --- NEW: State for real API data ---
     const [pkg, setPkg] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedItems, setSelectedItems] = useState([]);
 
-    // --- NEW: Fetch package from backend ---
     useEffect(() => {
         const fetchPackage = async () => {
             try {
                 const res = await api.get(`/packages/${packageId}`);
-                setPkg(res.data);
-                setSelectedItems(res.data.items); // Default to all items selected
+                const data = res.data?.data || res.data;
+                setPkg(data);
+                // Pre-select all devices by their ID (real API) or name (legacy)
+                const devices = getPackageDevices(data);
+                setSelectedItems(devices.map(getDeviceId));
             } catch (err) {
-                console.error("Error fetching package:", err);
-                setError("Failed to load package details.");
+                console.error("Failed to load package:", err);
+                setError(err.response?.status === 404
+                    ? "This package is not available."
+                    : "Failed to load package details.");
             } finally {
                 setLoading(false);
             }
@@ -36,21 +40,20 @@ export default function PackageDetails() {
         fetchPackage();
     }, [packageId]);
 
-    const toggleItem = (item) => {
-        setSelectedItems(prev =>
-            prev.includes(item)
-                ? prev.filter(i => i !== item)
-                : [...prev, item]
+    const devices = getPackageDevices(pkg);
+
+    const toggleItem = (id) => {
+        setSelectedItems((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
         );
     };
 
     const handleRequest = () => {
-        const itemsParam = encodeURIComponent(selectedItems.join(','));
-        // Using pkg._id to match MongoDB's ID format
-        navigate(`/student/borrow-request?packageId=${pkg._id}&items=${itemsParam}`);
+        // Pass selected device IDs as the items param so BorrowRequestForm can use them
+        const itemsParam = encodeURIComponent(selectedItems.join(","));
+        navigate(`/student/borrow-request?packageId=${getPackageId(pkg)}&items=${itemsParam}`);
     };
 
-    // --- NEW: Loading UI ---
     if (loading) {
         return (
             <StudentLayout>
@@ -64,7 +67,6 @@ export default function PackageDetails() {
         );
     }
 
-    // --- Error or Not Found UI ---
     if (error || !pkg) {
         return (
             <StudentLayout>
@@ -86,7 +88,6 @@ export default function PackageDetails() {
     return (
         <StudentLayout>
             <PageContainer>
-                {/* Back Button */}
                 <button
                     onClick={() => navigate('/student/browse')}
                     className="flex items-center text-slate-500 hover:text-[#0b1d3a] transition-colors mb-6 text-sm font-medium"
@@ -95,7 +96,6 @@ export default function PackageDetails() {
                 </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* LEFT COLUMN: MAIN DETAILS */}
                     <div className="lg:col-span-2 space-y-6">
                         <Card className="border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                             <div className="h-2 bg-[#126dd5] w-full" />
@@ -117,41 +117,48 @@ export default function PackageDetails() {
                                     <h3 className="font-semibold text-[#0b1d3a] mb-4 flex items-center gap-2">
                                         Included Items
                                         <span className="text-xs font-normal text-slate-400 ml-2">
-                                            (Uncheck items you don't need)
+                                            (Uncheck items you don&apos;t need)
                                         </span>
                                     </h3>
                                     <div className="grid grid-cols-1 gap-3">
-                                        {pkg.items.map((item, idx) => {
-                                            const isSelected = selectedItems.includes(item);
+                                        {devices.map((device) => {
+                                            const id = getDeviceId(device);
+                                            const name = getDeviceName(device);
+                                            const isSelected = selectedItems.includes(id);
                                             return (
                                                 <div
-                                                    key={idx}
+                                                    key={id}
                                                     className={`flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${isSelected
                                                         ? 'bg-[#126dd5]/5 border-[#126dd5]/30 shadow-sm'
                                                         : 'bg-white border-slate-200 hover:border-slate-300'
                                                         }`}
-                                                    onClick={() => toggleItem(item)}
+                                                    onClick={() => toggleItem(id)}
                                                 >
                                                     <Checkbox
                                                         checked={isSelected}
-                                                        onCheckedChange={() => toggleItem(item)}
+                                                        onCheckedChange={() => toggleItem(id)}
                                                         className="mt-1 data-[state=checked]:bg-[#126dd5] data-[state=checked]:border-[#126dd5]"
                                                     />
                                                     <div>
                                                         <span className={`font-semibold text-sm transition-colors ${isSelected ? 'text-[#0b1d3a]' : 'text-slate-600'}`}>
-                                                            {item}
+                                                            {name}
                                                         </span>
+                                                        {typeof device === 'object' && device.serialNumber && (
+                                                            <p className="text-xs text-slate-400 mt-0.5">{device.serialNumber}</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
                                         })}
+                                        {devices.length === 0 && (
+                                            <p className="text-sm text-slate-400 italic py-2">No devices assigned to this package yet.</p>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
 
-                    {/* RIGHT COLUMN: ACTION PANEL */}
                     <div className="space-y-6">
                         <Card className="border border-slate-200 shadow-lg shadow-slate-200/50 sticky top-6">
                             <CardHeader className="bg-slate-50 border-b border-slate-100">
@@ -166,7 +173,7 @@ export default function PackageDetails() {
                                     <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-[#126dd5] transition-all duration-300"
-                                            style={{ width: `${(selectedItems.length / pkg.items.length) * 100}%` }}
+                                            style={{ width: `${devices.length > 0 ? (selectedItems.length / devices.length) * 100 : 0}%` }}
                                         />
                                     </div>
                                 </div>

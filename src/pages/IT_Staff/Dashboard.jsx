@@ -20,6 +20,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Textarea } from "@/components/ui/textarea";
 import Loader from "@/components/common/Loader";
+import { displayName } from "@/utils/helpers";
 
 export function Dashboard() {
     const { t, i18n } = useTranslation(["itstaff", "common"]);
@@ -190,7 +191,7 @@ export function Dashboard() {
                                 <div key={req._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg bg-gray-50 gap-4">
                                     <div>
                                         <p className="font-semibold text-gray-900">
-                                            {req.user?.username || t('common.unknownUser')}
+                                            {displayName(req.user, t('common.unknownUser'))}
                                             <span className="font-normal text-gray-500"> {t('dashboard.wants')} </span>
                                             {req.equipment?.name || t('common.unknownItem')}
                                         </p>
@@ -228,7 +229,7 @@ export function Dashboard() {
                                 <div key={req._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border rounded-lg bg-blue-50/30 gap-4">
                                     <div>
                                         <p className="font-semibold text-gray-900">
-                                            {req.user?.username || t('common.unknownUser')}
+                                            {displayName(req.user, t('common.unknownUser'))}
                                             <span className="font-normal text-gray-500"> {t('dashboard.returning')} </span>
                                             {req.equipment?.name || t('common.unknownItem')}
                                         </p>

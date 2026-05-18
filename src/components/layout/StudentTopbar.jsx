@@ -28,6 +28,7 @@ export default function StudentTopbar({ onMenuClick }) {
     const studentLinks = [
         { name: t("nav.dashboard"), path: "/student/dashboard" },
         { name: t("nav.equipment"), path: "/student/browse" },
+        { name: "Packages", path: "/student/packages" },
         { name: t("nav.borrowedItems"), path: "/student/borrowed-items" },
         { name: t("nav.score"), path: "/student/score" },
         { name: t("nav.report"), path: "/student/report" },
@@ -143,7 +144,6 @@ export default function StudentTopbar({ onMenuClick }) {
                         </Link>
                     </div>
 
-                    {/* Center: Navigation (Desktop only) */}
                     <nav className="hidden lg:flex items-center">
                         <div className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-white shadow-[0_2px_8px_-2px_rgba(0,0,0,0.12)]">
                             {studentLinks.map((link) => {
@@ -164,7 +164,6 @@ export default function StudentTopbar({ onMenuClick }) {
                         </div>
                     </nav>
 
-                    {/* Right: Language Switcher, Notification, Profile */}
                     <div className="flex items-center gap-3">
                         <LanguageSwitcher variant="light" />
 
@@ -204,8 +203,8 @@ export default function StudentTopbar({ onMenuClick }) {
                                         <p className="text-xs text-[#126dd5] font-medium uppercase tracking-wider">{user.role}</p>
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-50 focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
-                                    <Link to="/student/profile" className="flex items-center gap-2 font-medium">
+                                <DropdownMenuItem asChild className="rounded-lg focus:text-[#126dd5] cursor-pointer p-3 transition-colors">
+                                    <Link to="/student/profile" className="flex items-center text-slate-800 gap-2 font-medium">
                                         {t("auth.myProfile")}
                                     </Link>
                                 </DropdownMenuItem>

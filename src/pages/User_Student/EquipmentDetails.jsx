@@ -4,7 +4,7 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Package } from "lucide-react";
+import { ArrowLeft, MapPin, Package, Layers } from "lucide-react";
 import { PageContainer } from "@/components/common/Page";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
@@ -143,6 +143,25 @@ export default function EquipmentDetails() {
 
                     {/* RIGHT COLUMN: ACTION PANEL */}
                     <div className="space-y-6">
+                        {/* Package-only notice banner */}
+                        {equipment.inPackage && (
+                            <div className="flex items-start gap-3 p-4 rounded-xl bg-violet-50 border border-violet-200">
+                                <div className="w-9 h-9 rounded-lg bg-violet-100 flex items-center justify-center text-violet-600 shrink-0">
+                                    <Layers className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-violet-800">Package-only device</p>
+                                    <p className="text-xs text-violet-600 mt-0.5 leading-relaxed">
+                                        This device belongs to
+                                        {equipment.packageInfo?.packageName
+                                            ? ` the "${equipment.packageInfo.packageName}" package`
+                                            : " a package"
+                                        } and cannot be borrowed individually.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         <Card className="border border-slate-200 shadow-lg shadow-slate-200/50 sticky top-6">
                             <CardHeader className="bg-slate-50 border-b border-slate-100">
                                 <CardTitle className="font-bold text-[#0b1d3a] text-lg">{t('equipment.quickInfo', 'Quick Info')}</CardTitle>
@@ -170,14 +189,40 @@ export default function EquipmentDetails() {
                                     </div>
                                 </div>
 
-                                {/* REQUEST BUTTON - GOES TO FORM */}
-                                <Button
-                                    className="w-full bg-[#0b1d3a] hover:bg-[#1a3b6e] text-white font-bold h-12 rounded-xl shadow-md transition-all active:scale-95"
-                                    disabled={equipment.status !== 'Available'}
-                                    onClick={() => navigate(`/student/borrow-request?equipmentId=${equipment._id}`)}
-                                >
-                                    {equipment.status === 'Available' ? t('equipment.proceedToRequest', 'Proceed to Request') : t('equipment.unavailable', 'Item Unavailable')}
-                                </Button>
+                                {/* Package membership info row */}
+                                {equipment.inPackage && equipment.packageInfo?.packageName && (
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center text-violet-600">
+                                            <Layers className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-slate-400 uppercase font-bold">Package</div>
+                                            <div className="font-medium text-violet-700">{equipment.packageInfo.packageName}</div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ACTION BUTTON — context-aware */}
+                                {equipment.inPackage ? (
+                                    <Button
+                                        className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold h-12 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                                        onClick={() => equipment.packageInfo?.packageId
+                                            ? navigate(`/student/package/${equipment.packageInfo.packageId}`)
+                                            : navigate("/student/packages")
+                                        }
+                                    >
+                                        <Layers className="w-4 h-4" />
+                                        View Package to Book
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        className="w-full bg-[#0b1d3a] hover:bg-[#1a3b6e] text-white font-bold h-12 rounded-xl shadow-md transition-all active:scale-95"
+                                        disabled={equipment.status !== 'Available'}
+                                        onClick={() => navigate(`/student/borrow-request?equipmentId=${equipment._id}`)}
+                                    >
+                                        {equipment.status === 'Available' ? t('equipment.proceedToRequest', 'Proceed to Request') : t('equipment.unavailable', 'Item Unavailable')}
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
                     </div>

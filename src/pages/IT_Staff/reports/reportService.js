@@ -25,9 +25,11 @@ export async function generateReportData(filters) {
         ? true
         : (tx.equipment?.category === filters.category);
 
-      // Borrower Name Search
+      // Borrower Name Search — match against both fullName and username so
+      // either the displayed name or the original handle finds the record.
       const borrowerMatch = filters.borrower
-        ? (tx.user?.username?.toLowerCase().includes(filters.borrower.toLowerCase()))
+        ? ((tx.user?.fullName?.toLowerCase().includes(filters.borrower.toLowerCase())) ||
+           (tx.user?.username?.toLowerCase().includes(filters.borrower.toLowerCase())))
         : true;
 
       return dateMatch && categoryMatch && borrowerMatch;
@@ -45,7 +47,7 @@ export async function generateReportData(filters) {
             equipmentName: tx.equipment?.name || "Unknown Device",
             serialNumber: tx.equipment?.serialNumber || "N/A",
             category: tx.equipment?.category || "General",
-            borrowerName: tx.user?.username || "Unknown User",
+            borrowerName: tx.user?.fullName || tx.user?.username || "Unknown User",
             lendingDate: format(new Date(tx.createdAt), 'yyyy-MM-dd'),
             dueDate: format(new Date(tx.expectedReturnTime), 'yyyy-MM-dd'),
             status: tx.status
@@ -60,7 +62,7 @@ export async function generateReportData(filters) {
             equipmentName: tx.equipment?.name || "Unknown",
             serialNumber: tx.equipment?.serialNumber || "N/A",
             category: tx.equipment?.category || "General",
-            borrowerName: tx.user?.username || "Unknown",
+            borrowerName: tx.user?.fullName || tx.user?.username || "Unknown",
             reservationStart: format(new Date(tx.startTime), 'yyyy-MM-dd HH:mm'),
             reservationEnd: format(new Date(tx.expectedReturnTime), 'yyyy-MM-dd HH:mm'),
             status: 'RESERVED'

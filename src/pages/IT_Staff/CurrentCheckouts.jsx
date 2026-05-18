@@ -162,17 +162,17 @@ export default function CurrentCheckouts() {
         setFilteredData(result);
     }, [currentTab, allTransactions, nowTick]);
 
-    // --- 2.5 AUTOMATIC DENIAL LOGIC (4 HOURS) ---
+    // --- 2.5 AUTOMATIC DENIAL LOGIC (30 MINUTES) ---
     useEffect(() => {
         if (!allTransactions || allTransactions.length === 0) return;
 
         const autoDenyPending = async () => {
             const now = new Date();
-            const minutesInMs = 30 * 1000;
+            const expiryMs = 30 * 60 * 1000;
             const pendingToDeny = allTransactions.filter(tx => {
                 if (tx.status !== 'Pending') return false;
                 const createdAt = new Date(tx.fullData.createdAt);
-                return (now - createdAt) > minutesInMs;
+                return (now - createdAt) > expiryMs;
             });
 
             if (pendingToDeny.length > 0) {
@@ -182,7 +182,7 @@ export default function CurrentCheckouts() {
                     try {
                         await api.put(`/transactions/${tx.checkoutId}/respond`, {
                             action: 'Deny',
-                            reason: "Automatic system denial: Request expired after 4 hours of inactivity."
+                            reason: "Automatic system denial: Request expired after 30 minutes of inactivity."
                         });
                         console.log(`[Auto-Deny] Denied ${tx.checkoutId}`);
                     } catch (err) {
