@@ -6,7 +6,7 @@ import {
     ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
-import { toast } from 'sonner';
+import { itStaffToast as toast } from '@/pages/IT_Staff/utils/itStaffToast';
 import { generatePDF } from '@/utils/pdfGenerator';
 import Loader from "@/components/common/Loader";
 import { displayName } from "@/utils/helpers";

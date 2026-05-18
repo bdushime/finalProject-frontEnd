@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import Loader from "@/components/common/Loader";
 import api from "@/utils/api";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
 
 function Progress() {
     return (
