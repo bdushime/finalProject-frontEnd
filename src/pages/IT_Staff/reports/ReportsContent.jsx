@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download, FileText, Search, Filter, RefreshCw, FileBarChart2 } from "lucide-react";
 import { generateReportData, exportToCSV, exportToPDF } from "./reportService";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
 import Loader from "@/components/common/Loader";
 
 export default function ReportsContent({

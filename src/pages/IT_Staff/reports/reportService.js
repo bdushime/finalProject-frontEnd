@@ -1,6 +1,6 @@
 import api from "@/utils/api";
 import { format } from "date-fns";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
 
 export async function generateReportData(filters) {
   try {

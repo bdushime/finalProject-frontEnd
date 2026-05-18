@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import api from "@/utils/api";
 import { Download, Search, AlertCircle, FileBarChart } from "lucide-react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
-import { toast } from "sonner";
+import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
 import Loader from "@/components/common/Loader";
 import { displayName } from "@/utils/helpers";
 
