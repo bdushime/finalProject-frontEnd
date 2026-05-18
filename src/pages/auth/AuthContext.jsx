@@ -35,30 +35,34 @@ const forceLogout = (reason) => {
   }
 };
 
+// Read + validate the stored session synchronously. Returns the user object if
+// the token is still valid, or null otherwise (clearing storage in that case).
+// Done outside the component so it can seed useState's initializer on the
+// very first render — before ProtectedRoute checks for a user.
+const hydrateStoredUser = () => {
+  if (typeof window === "undefined") return null;
+  const token = localStorage.getItem("token");
+  if (isTokenExpired(token)) {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    return null;
+  }
+  const storedUser = localStorage.getItem("user");
+  if (!storedUser) return null;
+  try {
+    return JSON.parse(storedUser);
+  } catch {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    return null;
+  }
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { role: "Student" | "IT" | "Admin" | "Security", ... }
-
-  // 1. Load auth state from localStorage on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (isTokenExpired(token)) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      setUser(null);
-      return;
-    }
-
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        // If JSON is broken, clear everything
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-      }
-    }
-  }, []);
+  // Hydrate synchronously so a refresh on a protected route doesn't bounce to
+  // /login during the first render. Previously this lived in a useEffect that
+  // ran after ProtectedRoute had already redirected.
+  const [user, setUser] = useState(hydrateStoredUser);
 
   // 2. Schedule a precise auto-logout at the token's exp time.
   // Re-runs whenever the user changes (e.g. on login), which picks up the

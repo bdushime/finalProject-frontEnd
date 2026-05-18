@@ -148,6 +148,12 @@ function DeviceMultiSelect({ allDevices, selectedIds, onChange, placeholder = "S
 
 const emptyCreateForm = { name: "", description: "", deviceIds: [] };
 
+const getDeviceId = (d) => {
+    if (!d) return null;
+    if (typeof d === "string") return d;
+    return d._id || d.id || null;
+};
+
 // ── Main component ────────────────────────────────────────────────────────────
 export default function PackageManagement() {
     const { user } = useAuth();
@@ -184,7 +190,7 @@ export default function PackageManagement() {
         try {
             const [pkgData, devRes] = await Promise.all([
                 fetchPackages(),
-                api.get('/equipment'),
+                api.get('/equipment', { params: { limit: 200, raw: true } }),
             ]);
             const pkgList = Array.isArray(pkgData) ? pkgData : (pkgData?.data || pkgData?.packages || []);
             setPackages(pkgList);
@@ -287,14 +293,18 @@ export default function PackageManagement() {
     };
 
     const handleRemoveDevice = async (deviceId) => {
+        if (!deviceId) {
+            console.warn("handleRemoveDevice called without a deviceId", { manageTarget });
+            toast.error("Cannot remove this device — its ID is missing. Try refreshing the page.");
+            return;
+        }
         setManageLoading(true);
         try {
             await removeDeviceFromPackage(manageTarget._id, deviceId);
             toast.success("Device removed from package.");
-            // Optimistically update manageTarget devices
             setManageTarget((prev) => ({
                 ...prev,
-                devices: (prev.devices || []).filter((d) => (d._id || d.id) !== deviceId),
+                devices: (prev.devices || []).filter((d) => getDeviceId(d) !== deviceId),
             }));
             loadData();
         } catch (err) {
@@ -320,7 +330,15 @@ export default function PackageManagement() {
             setManageTarget(pkg);
             loadData();
         } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to add devices.");
+            const data = err.response?.data;
+            const detail = data?.error || data?.message;
+            console.error("addDevicesToPackage failed:", {
+                status: err.response?.status,
+                data,
+                deviceIds: addDeviceIds,
+                packageId: manageTarget?._id,
+            });
+            toast.error(detail ? `Add failed: ${detail}` : "Failed to add devices.");
         } finally {
             setManageLoading(false);
         }
@@ -341,8 +359,8 @@ export default function PackageManagement() {
     // Devices already in the package (for the manage modal)
     const manageCurrentDevices = manageTarget?.devices || [];
     // Devices not yet in the package (for the add dropdown)
-    const currentDeviceIds = manageCurrentDevices.map((d) => d._id || d.id);
-    const availableToAdd = allDevices.filter((d) => !currentDeviceIds.includes(d._id || d.id));
+    const currentDeviceIds = manageCurrentDevices.map(getDeviceId).filter(Boolean);
+    const availableToAdd = allDevices.filter((d) => !currentDeviceIds.includes(getDeviceId(d)));
 
     const HeroSection = (
         <div>
@@ -553,6 +571,57 @@ export default function PackageManagement() {
                             />
                         </div>
                         <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-sm font-semibold text-slate-700">
+                                    Devices ({(editTarget?.devices || []).length})
+                                </Label>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 px-2 text-[#126dd5] hover:bg-blue-50 rounded-lg text-xs font-semibold"
+                                    onClick={() => {
+                                        const pkg = editTarget;
+                                        setEditOpen(false);
+                                        if (pkg) openManage(pkg);
+                                    }}
+                                >
+                                    <Settings className="w-3.5 h-3.5 mr-1" />
+                                    Manage
+                                </Button>
+                            </div>
+                            {((editTarget?.devices) || []).length === 0 ? (
+                                <p className="text-sm text-slate-400 italic p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                    No devices in this package yet.
+                                </p>
+                            ) : (
+                                <ul className="space-y-2 max-h-48 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50 p-2">
+                                    {(editTarget?.devices || []).map((device, index) => {
+                                        const id = getDeviceId(device);
+                                        const isString = typeof device === "string";
+                                        const displayName = isString
+                                            ? `Device ${id?.slice(-6) || index + 1}`
+                                            : device?.name || "Unknown device";
+                                        return (
+                                            <li
+                                                key={id || `edit-device-${index}`}
+                                                className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-white border border-slate-100"
+                                            >
+                                                <span className="text-sm font-medium text-[#0b1d3a] truncate">
+                                                    {displayName}
+                                                </span>
+                                                {!isString && device?.serialNumber && (
+                                                    <span className="text-xs text-slate-400 shrink-0">
+                                                        {device.serialNumber}
+                                                    </span>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </div>
+                        <div className="space-y-2">
                             <Label className="text-sm font-semibold text-slate-700">Status</Label>
                             <div className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 bg-white">
                                 <button
@@ -607,16 +676,20 @@ export default function PackageManagement() {
                                 <p className="text-sm text-slate-400 italic">No devices in this package yet.</p>
                             ) : (
                                 <ul className="space-y-2">
-                                    {manageCurrentDevices.map((device) => {
-                                        const id = device._id || device.id;
+                                    {manageCurrentDevices.map((device, index) => {
+                                        const id = getDeviceId(device);
+                                        const isString = typeof device === "string";
+                                        const displayName = isString
+                                            ? `Device ${id?.slice(-6) || index + 1}`
+                                            : device?.name || "Unknown device";
                                         return (
                                             <li
-                                                key={id}
+                                                key={id || `device-${index}`}
                                                 className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100"
                                             >
                                                 <div>
-                                                    <p className="text-sm font-semibold text-[#0b1d3a]">{device.name}</p>
-                                                    {device.serialNumber && (
+                                                    <p className="text-sm font-semibold text-[#0b1d3a]">{displayName}</p>
+                                                    {!isString && device?.serialNumber && (
                                                         <p className="text-xs text-slate-400">{device.serialNumber}</p>
                                                     )}
                                                 </div>
@@ -625,8 +698,8 @@ export default function PackageManagement() {
                                                     size="sm"
                                                     className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 rounded-lg"
                                                     onClick={() => handleRemoveDevice(id)}
-                                                    disabled={manageLoading}
-                                                    title="Remove device"
+                                                    disabled={manageLoading || !id}
+                                                    title={id ? "Remove device" : "Cannot remove — missing ID"}
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </Button>
