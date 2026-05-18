@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
     Dialog,
     DialogContent,
@@ -19,8 +19,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Search, X } from "lucide-react";
 import Loader from "@/components/common/Loader";
+import { fetchPackages } from "@/services/packagesService";
 
 import {
     isFieldHidden,
@@ -29,6 +30,78 @@ import {
     validateDeviceData,
     UserRoles,
 } from "@/config/roleConfig";
+
+function PackageSearchSelect({ packages, value, onChange, inputClass }) {
+    const [query, setQuery] = useState("");
+    const [open, setOpen] = useState(false);
+
+    const filtered = useMemo(() => {
+        if (!query.trim()) return packages;
+        const q = query.toLowerCase();
+        return packages.filter((p) => p.name?.toLowerCase().includes(q));
+    }, [packages, query]);
+
+    const selected = packages.find((p) => p._id === value);
+
+    return (
+        <div className="relative">
+            {selected && (
+                <span className="inline-flex items-center gap-1 bg-[#126dd5]/10 text-[#126dd5] text-xs font-semibold px-2.5 py-1 rounded-full mb-2">
+                    {selected.name}
+                    <button
+                        type="button"
+                        onClick={() => { onChange(""); setQuery(""); }}
+                        className="hover:text-rose-600 transition-colors"
+                    >
+                        <X className="w-3 h-3" />
+                    </button>
+                </span>
+            )}
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                    value={selected ? selected.name : query}
+                    onChange={(e) => { setQuery(e.target.value); onChange(""); setOpen(true); }}
+                    onFocus={() => setOpen(true)}
+                    placeholder="Search packages (optional)..."
+                    className={`${inputClass} pl-9`}
+                />
+            </div>
+            {open && (
+                <div className="absolute z-[110] mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                    <button
+                        type="button"
+                        onClick={() => { onChange(""); setQuery(""); setOpen(false); }}
+                        className="w-full flex items-center px-4 py-2.5 text-left text-sm text-slate-400 hover:bg-slate-50"
+                    >
+                        None
+                    </button>
+                    {filtered.length === 0 ? (
+                        <p className="text-sm text-slate-400 text-center py-4">No packages found</p>
+                    ) : (
+                        filtered.map((pkg) => (
+                            <button
+                                key={pkg._id}
+                                type="button"
+                                onClick={() => { onChange(pkg._id); setQuery(""); setOpen(false); }}
+                                className={`w-full flex items-center px-4 py-2.5 text-left text-sm hover:bg-slate-50 transition-colors ${value === pkg._id ? "bg-[#126dd5]/5" : ""}`}
+                            >
+                                <span className="font-medium text-[#0b1d3a]">{pkg.name}</span>
+                            </button>
+                        ))
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        className="w-full text-center text-xs text-slate-400 hover:text-slate-600 py-2 border-t border-slate-100"
+                    >
+                        Close
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 function AddDeviceDialog({
     isOpen,
@@ -44,6 +117,8 @@ function AddDeviceDialog({
     isLoading = false,
 }) {
     const [validationErrors, setValidationErrors] = useState({});
+    const [packages, setPackages] = useState([]);
+    const [selectedPackageId, setSelectedPackageId] = useState("");
 
     useEffect(() => {
         if (isOpen) {
@@ -53,6 +128,18 @@ function AddDeviceDialog({
                 ...defaults,
             }));
             setValidationErrors({});
+            setSelectedPackageId("");
+
+            // Load active packages for the optional assignment dropdown
+            fetchPackages()
+                .then((data) => {
+                    const list = Array.isArray(data) ? data : (data?.data || data?.packages || []);
+                    setPackages(list.filter((p) => p.isActive !== false));
+                })
+                .catch(() => {
+                    // Non-critical — silently ignore if packages endpoint is unavailable
+                    setPackages([]);
+                });
         }
     }, [isOpen, userRole, setFormData]);
 
@@ -65,7 +152,13 @@ function AddDeviceDialog({
             return;
         }
 
-        onSubmit(formData);
+        // Include packageId only when the user selected one
+        const submitData = { ...formData };
+        if (selectedPackageId) {
+            submitData.packageId = selectedPackageId;
+        }
+
+        onSubmit(submitData);
     };
 
     const shouldShowField = (fieldName) => {
@@ -169,7 +262,35 @@ function AddDeviceDialog({
                         </div>
                     </div>
 
-                    {/* Row 3 */}
+                    {/* Row 3 — optional brand & model */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                        <div className="space-y-2">
+                            <Label htmlFor="brand" className="text-sm font-semibold text-slate-700">
+                                Brand <span className="text-slate-400 font-normal">(optional)</span>
+                            </Label>
+                            <Input
+                                id="brand"
+                                value={formData.brand || ""}
+                                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                                placeholder="e.g., Epson"
+                                className={inputClass}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="model" className="text-sm font-semibold text-slate-700">
+                                Model <span className="text-slate-400 font-normal">(optional)</span>
+                            </Label>
+                            <Input
+                                id="model"
+                                value={formData.model || ""}
+                                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                                placeholder="e.g., PowerLite X5"
+                                className={inputClass}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Row 4 */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="location" className="text-sm font-semibold text-slate-700">
@@ -203,11 +324,11 @@ function AddDeviceDialog({
                         </div>
                     </div>
 
-                    {/* Row 4 */}
+                    {/* Row 5 — optional purchase info */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="purchaseDate" className="text-sm font-semibold text-slate-700">
-                                Purchase Date {fieldRequired("purchaseDate") && <span className="text-red-500">*</span>}
+                                Purchase Date <span className="text-slate-400 font-normal">(optional)</span>
                             </Label>
                             <Input
                                 id="purchaseDate"
@@ -219,7 +340,7 @@ function AddDeviceDialog({
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="amount" className="text-sm font-semibold text-slate-700">
-                                Amount {fieldRequired("amount") && <span className="text-red-500">*</span>}
+                                Purchase Price <span className="text-slate-400 font-normal">(optional)</span>
                             </Label>
                             <Input
                                 id="amount"
@@ -266,6 +387,23 @@ function AddDeviceDialog({
                                 rows={3}
                                 className="w-full p-4 rounded-xl border border-gray-200 bg-white text-gray-900 focus:ring-2 focus:ring-[#8D8DC7]/50 focus:border-[#8D8DC7] transition-all shadow-sm"
                             />
+                        </div>
+
+                        {/* Assign to Package (optional) */}
+                        <div className="space-y-2">
+                            <Label htmlFor="packageId" className="text-sm font-semibold text-slate-700">
+                                Assign to Package{" "}
+                                <span className="text-slate-400 font-normal">(optional)</span>
+                            </Label>
+                            <PackageSearchSelect
+                                packages={packages}
+                                value={selectedPackageId}
+                                onChange={setSelectedPackageId}
+                                inputClass={inputClass}
+                            />
+                            <p className="text-xs text-slate-400">
+                                If selected, this device will be added to the chosen package after registration.
+                            </p>
                         </div>
                     </div>
                 </div>

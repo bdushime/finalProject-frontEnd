@@ -4,11 +4,12 @@ import StudentLayout from "@/components/layout/StudentLayout";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BackButton from "./components/BackButton";
-import { Package } from "lucide-react";
+import { Package, Layers } from "lucide-react";
 import { PageContainer } from "@/components/common/Page";
 import api from "@/utils/api";
 import { useTranslation } from "react-i18next";
 import Loader from "@/components/common/Loader";
+import { getPackageId, getDeviceNames } from "./data/packageUtils";
 
 export default function EquipmentCatalogue() {
     const navigate = useNavigate();
@@ -55,8 +56,8 @@ export default function EquipmentCatalogue() {
 
                 setEquipmentList(mergedEquipment);
                 
-                // --- NEW: Set the packages from the database ---
-                setPackageList(pkgRes?.data || []);
+                const apiPackages = Array.isArray(pkgRes?.data) ? pkgRes.data : (pkgRes?.data?.data || pkgRes?.data?.packages || []);
+                setPackageList(apiPackages);
 
             } catch (err) {
                 console.error("Failed to load catalog data:", err);
@@ -143,26 +144,55 @@ export default function EquipmentCatalogue() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredEquipment.map((item) => {
                                 const status = item.status?.toLowerCase() || "";
+                                const inPackage = !!item.inPackage;
+                                const packageName = item.packageInfo?.packageName || null;
+                                const packageId = item.packageInfo?.packageId || null;
+
+                                // A device in a package is never individually borrowable,
+                                // regardless of its availability status.
+                                const isActionable = status === "available" && !inPackage;
+
                                 return (
                                     <div
                                         key={item._id}
-                                        className="group relative bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#126dd5]/30 hover:shadow-md transition-all duration-300"
+                                        className={`group relative bg-white rounded-2xl p-5 border shadow-sm transition-all duration-300 flex flex-col ${
+                                            inPackage
+                                                ? "border-violet-200 bg-violet-50/30 hover:border-violet-300 hover:shadow-md"
+                                                : "border-slate-200 hover:border-[#126dd5]/30 hover:shadow-md"
+                                        }`}
                                     >
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#126dd5] transition-colors">
+                                        {/* Package-only ribbon */}
+                                        {inPackage && (
+                                            <div className="absolute top-0 left-0 right-0 flex items-center gap-1.5 bg-violet-600 text-white text-[10px] font-bold px-3 py-1 rounded-t-2xl">
+                                                <Layers className="w-3 h-3 shrink-0" />
+                                                <span className="truncate">
+                                                    Package only{packageName ? ` · ${packageName}` : ""}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        <div className={`flex justify-between items-start mb-4 ${inPackage ? "mt-5" : ""}`}>
+                                            <div className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-colors ${
+                                                inPackage
+                                                    ? "bg-violet-100 border-violet-200 text-violet-500"
+                                                    : "bg-slate-50 border-slate-100 text-slate-400 group-hover:text-[#126dd5]"
+                                            }`}>
                                                 <Package className="w-5 h-5" />
                                             </div>
-                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${status === "available"
-                                                ? "bg-[#126dd5]/5 text-[#126dd5] border-[#126dd5]/10"
-                                                : status === "reserved"
-                                                    ? "bg-amber-50 text-amber-600 border-amber-100"
-                                                    : "bg-rose-50 text-rose-600 border-rose-100"
-                                                }`}>
-                                                {getStatusLabel(status)}
+                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${
+                                                inPackage
+                                                    ? "bg-violet-100 text-violet-700 border-violet-200"
+                                                    : status === "available"
+                                                        ? "bg-[#126dd5]/5 text-[#126dd5] border-[#126dd5]/10"
+                                                        : status === "reserved"
+                                                            ? "bg-amber-50 text-amber-600 border-amber-100"
+                                                            : "bg-rose-50 text-rose-600 border-rose-100"
+                                            }`}>
+                                                {inPackage ? "In Package" : getStatusLabel(status)}
                                             </div>
                                         </div>
 
-                                        <div className="space-y-3">
+                                        <div className="space-y-3 flex-1">
                                             <div>
                                                 <h3 className="text-base font-bold text-[#0b1d3a] leading-tight mb-1">{item.name}</h3>
                                                 <p className="text-xs text-slate-500 font-medium">
@@ -170,24 +200,47 @@ export default function EquipmentCatalogue() {
                                                 </p>
                                             </div>
 
-                                            <div className="flex items-center gap-2 text-xs text-slate-500 border-t border-slate-50 pt-3 mt-3">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${status === 'available' ? 'bg-emerald-400' : 'bg-slate-300'}`}></div>
-                                                {status === 'available' ? t("equipment.itStaff", "Equipment Storage") : (item.activeLocation || t("equipment.itStaff", "Equipment Storage"))}
+                                            {/* Location row */}
+                                            <div className="flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-3 mt-3">
+                                                <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                                    inPackage ? "bg-violet-400" : status === "available" ? "bg-emerald-400" : "bg-slate-300"
+                                                }`} />
+                                                {inPackage
+                                                    ? (packageName ? `Part of "${packageName}"` : "Part of a package")
+                                                    : (status === "available"
+                                                        ? t("equipment.itStaff", "Equipment Storage")
+                                                        : (item.activeLocation || t("equipment.itStaff", "Equipment Storage")))
+                                                }
                                             </div>
+                                        </div>
 
-                                            <div className="pt-2">
+                                        {/* Action button */}
+                                        <div className="pt-3 mt-auto">
+                                            {inPackage ? (
                                                 <Button
-                                                    variant={status === "available" ? "default" : "outline"}
-                                                    className={`w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all ${status === "available"
-                                                        ? "bg-[#0b1d3a] hover:bg-[#2c3e50] text-white"
-                                                        : "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
-                                                        }`}
-                                                    onClick={() => status === "available" && navigate(`/student/equipment/${item._id}`)}
-                                                    disabled={status !== "available"}
+                                                    className="w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all bg-violet-600 hover:bg-violet-700 text-white"
+                                                    onClick={() => packageId
+                                                        ? navigate(`/student/package/${packageId}`)
+                                                        : navigate("/student/packages")
+                                                    }
                                                 >
-                                                    {status === "available" ? t("equipment.viewDetails") : t("equipment.unavailable")}
+                                                    <Layers className="w-3.5 h-3.5 mr-1.5" />
+                                                    View Package
                                                 </Button>
-                                            </div>
+                                            ) : (
+                                                <Button
+                                                    variant={isActionable ? "default" : "outline"}
+                                                    className={`w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all ${
+                                                        isActionable
+                                                            ? "bg-[#0b1d3a] hover:bg-[#2c3e50] text-white"
+                                                            : "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
+                                                    }`}
+                                                    onClick={() => isActionable && navigate(`/student/equipment/${item._id}`)}
+                                                    disabled={!isActionable}
+                                                >
+                                                    {isActionable ? t("equipment.viewDetails") : t("equipment.unavailable")}
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -197,7 +250,7 @@ export default function EquipmentCatalogue() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {packageList.map((pkg) => (
                                 <div
-                                    key={pkg._id} // Fixed to use MongoDB _id
+                                    key={getPackageId(pkg)}
                                     className="group relative bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#126dd5]/30 hover:shadow-md transition-all duration-300 flex flex-col"
                                 >
                                     <div className="flex justify-between items-start mb-4">
@@ -217,19 +270,22 @@ export default function EquipmentCatalogue() {
 
                                         <div className="bg-slate-50 rounded-lg p-3 space-y-1.5">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{t("equipment.includes")}</p>
-                                            {pkg.items && pkg.items.map((item, idx) => (
+                                            {getDeviceNames(pkg).map((name, idx) => (
                                                 <div key={idx} className="flex items-center gap-2 text-xs text-slate-600">
                                                     <div className="w-1 h-1 rounded-full bg-[#126dd5]"></div>
-                                                    {item}
+                                                    {name}
                                                 </div>
                                             ))}
+                                            {getDeviceNames(pkg).length === 0 && (
+                                                <p className="text-xs text-slate-400 italic">No devices assigned yet.</p>
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="pt-4 mt-auto">
                                         <Button
                                             className="w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all bg-[#0b1d3a] hover:bg-[#2c3e50] text-white"
-                                            onClick={() => navigate(`/student/package/${pkg._id}`)} // Fixed to use MongoDB _id
+                                            onClick={() => navigate(`/student/package/${getPackageId(pkg)}`)}
                                         >
                                             {t("equipment.viewPackage")}
                                         </Button>

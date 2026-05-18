@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from 'sonner';
 import { generatePDF } from '@/utils/pdfGenerator';
 import Loader from "@/components/common/Loader";
+import { displayName } from "@/utils/helpers";
 
 // const CATEGORIES = ['All Categories', 'Laptop', 'Projector', 'Camera', 'Microphone', 'Tablet', 'Audio', 'Accessories', 'Other'];
 // const COLORS = ['#8D8DC7', '#10b981', '#f59e0b', '#ef4444'];
@@ -291,11 +292,11 @@ const UnifiedReportsView = ({ Layout }) => {
                     {
                         header: t('reports.userIdentity'), render: (row) => (
                             <div>
-                                <div className="font-bold text-slate-900">{row.user?.username || row.user || "Unknown User"}</div>
+                                <div className="font-bold text-slate-900">{displayName(row.user, row.user || "Unknown User")}</div>
                                 <div className="text-xs text-slate-400">{row.user?.email || row.email || "N/A"}</div>
                             </div>
                         ),
-                        pdf: (row) => row.user?.username || row.user || "Unknown User"
+                        pdf: (row) => displayName(row.user, row.user || "Unknown User")
                     },
                     {
                         header: t('reports.riskLevel'), render: (row) => {
@@ -367,11 +368,11 @@ const UnifiedReportsView = ({ Layout }) => {
                     {
                         header: t('reports.user'), render: (row) => (
                             <div>
-                                <div className="font-medium text-slate-700">{row.user?.username || row.user || "Unknown"}</div>
+                                <div className="font-medium text-slate-700">{displayName(row.user, row.user || "Unknown")}</div>
                                 <div className="text-xs text-slate-400">{ROLES.find(r => r.value === (row.role || row.user?.role))?.label || row.role || row.user?.role || "User"}</div>
                             </div>
                         ),
-                        pdf: (row) => row.user?.username || row.user || "Unknown"
+                        pdf: (row) => displayName(row.user, row.user || "Unknown")
                     },
                     {
                         header: t('reports.date'), render: (row) => {

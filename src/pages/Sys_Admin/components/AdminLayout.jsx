@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield, LogOut, BookOpen } from 'lucide-react';
+import { Search, Bell, User, Menu, X, LayoutDashboard, Users, Settings, Database, Activity, FileText, Shield, LogOut, BookOpen, Package } from 'lucide-react';
 import logo from '../../../assets/images/logo8noback.png';
 import { useNavigate, Link, NavLink } from 'react-router-dom';
 import {
@@ -44,6 +44,7 @@ const AdminLayout = ({ children, heroContent }) => {
   const navItems = [
     { label: t("nav.dashboard"), href: '/admin/dashboard', icon: LayoutDashboard },
     { label: t("nav.userMgmt"), href: '/admin/users', icon: Users },
+    { label: t("nav.packages", "Packages"), href: '/admin/packages', icon: Package },
     { label: t("nav.courses"), href: '/admin/courses', icon: BookOpen },
     { label: t("nav.config"), href: '/admin/config', icon: Settings },
     { label: t("nav.data"), href: '/admin/data', icon: Database },

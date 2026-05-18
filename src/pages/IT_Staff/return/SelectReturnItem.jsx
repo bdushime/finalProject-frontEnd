@@ -7,6 +7,7 @@ import { CalendarClock, User, Package } from "lucide-react";
 import { format } from "date-fns";
 import api from "@/utils/api";
 import Loader from "@/components/common/Loader";
+import { displayName } from "@/utils/helpers";
 
 function Progress() {
     return (
@@ -47,7 +48,7 @@ export default function SelectReturnItem() {
                 equipmentId: transaction.equipment?._id,
                 userId: transaction.user?._id,
                 equipmentName: transaction.equipment?.name,
-                studentName: transaction.user?.username
+                studentName: displayName(transaction.user, "Unknown Student")
             }
         });
     };
@@ -98,7 +99,7 @@ export default function SelectReturnItem() {
                                             <div className="flex items-center gap-2 text-sm text-slate-700 bg-slate-50 p-2 rounded border border-slate-100">
                                                 <User className="w-4 h-4 text-slate-400" />
                                                 <span className="truncate font-medium">
-                                                    {tx.user?.username || "Unknown Student"}
+                                                    {displayName(tx.user, "Unknown Student")}
                                                 </span>
                                             </div>
 

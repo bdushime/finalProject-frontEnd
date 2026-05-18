@@ -9,6 +9,26 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Resolve the best display name for a user object.
+ * Order: fullName -> username -> email -> fallback.
+ * Used so a student's chosen name from first-login propagates everywhere.
+ */
+type UserLike = {
+  fullName?: string | null;
+  username?: string | null;
+  email?: string | null;
+} | null | undefined;
+
+export function displayName(user: UserLike, fallback: string = "Unknown User"): string {
+  if (!user) return fallback;
+  const full = (user.fullName || "").trim();
+  if (full) return full;
+  if (user.username) return user.username;
+  if (user.email) return user.email;
+  return fallback;
+}
+
+/**
  * Format date to readable string
  */
 export function formatDate(date: string | Date, format: 'short' | 'long' | 'time' = 'short'): string {
