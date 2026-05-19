@@ -467,7 +467,7 @@ const SecurityReportsDashboard = () => {
               <div>
                 <div className="font-bold text-slate-900">{row.name || "—"}</div>
                 <div className="text-xs text-slate-400">
-                  {(row._id || row.id || "").toString().slice(-8)}
+                  {row.serialNumber || "—"}
                 </div>
               </div>
             ),

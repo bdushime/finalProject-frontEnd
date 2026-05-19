@@ -1,76 +1,146 @@
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+import { Package } from "lucide-react";
+
+// Brand palette — used in order for whichever categories actually show up.
+const DEFAULT_PALETTE = [
+  "#0b1d3a",
+  "#8D8DC7",
+  "#126dd5",
+  "#22c55e",
+  "#f59e0b",
+  "#ef4444",
+];
+
+const renderTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null;
+  const item = payload[0]?.payload || {};
+  return (
+    <div className="bg-white rounded-xl shadow-lg border border-slate-100 px-3 py-2 text-xs">
+      <div className="font-semibold text-slate-900">{item.name}</div>
+      <div className="text-slate-500 mt-0.5">
+        <span className="font-bold text-slate-700">{item.value}</span> checkouts ·{" "}
+        <span className="font-bold text-slate-700">{item.percent}%</span>
+      </div>
+    </div>
+  );
+};
 
 const DeviceUsage = ({ data: serverData }) => {
   const { t } = useTranslation(["security"]);
 
-  const displayData = useMemo(() => {
-    let processedList = [];
-
-    if (serverData && serverData.length > 0) {
-      // Sort by value (count) descending
-      const sorted = [...serverData].sort((a, b) => b.value - a.value);
-      const total = sorted.reduce((sum, item) => sum + item.value, 0);
-
-      // Take top 3 for the bubble visualization
-      processedList = sorted.slice(0, 3).map(item => ({
-        name: item.name,
-        percent: total > 0 ? Math.round((item.value / total) * 100) : 0,
-        color: item.color || "#1A2240"
+  // Normalize + drop zero/N/A entries so the chart doesn't render empty slices.
+  const { rows, total, dominant } = useMemo(() => {
+    const raw = Array.isArray(serverData) ? serverData : [];
+    const cleaned = raw
+      .filter((d) => d && d.value > 0 && d.name && d.name !== "N/A")
+      .map((d, i) => ({
+        name: d.name,
+        value: d.value,
+        color: d.color || DEFAULT_PALETTE[i % DEFAULT_PALETTE.length],
       }));
-    } else {
-      // Default fallback if database is empty
-      processedList = [
-        { name: t('deviceUsage.projectors', 'Projectors'), percent: 56, color: "#1A2240" },
-        { name: t('deviceUsage.extensionCables', 'Cables'), percent: 14, color: "#BEBEE0" },
-        { name: t('deviceUsage.tablets', 'Tablets'), percent: 30, color: "#343264" },
-      ];
-    }
 
-    // Safely pad to exactly 3 items to avoid UI crashes
-    while (processedList.length < 3) {
-      processedList.push({ name: "N/A", percent: 0, color: "#e2e8f0" });
-    }
+    const sum = cleaned.reduce((s, r) => s + r.value, 0);
+    const withPct = cleaned
+      .map((r) => ({ ...r, percent: sum > 0 ? Math.round((r.value / sum) * 100) : 0 }))
+      .sort((a, b) => b.value - a.value);
 
-    return processedList;
-  }, [serverData, t]);
+    return {
+      rows: withPct,
+      total: sum,
+      dominant: withPct[0] || null,
+    };
+  }, [serverData]);
+
+  // Empty state — no real data yet
+  if (rows.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+          <Package className="w-7 h-7 text-slate-300" />
+        </div>
+        <p className="text-sm font-semibold text-slate-700">
+          {t("dashboard.charts.noEquipmentData", "No equipment activity yet")}
+        </p>
+        <p className="text-xs text-slate-400 mt-1">
+          {t(
+            "dashboard.charts.noEquipmentDataHint",
+            "Categories will appear here once devices are checked out."
+          )}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-3 sm:p-6 w-full">
-      <div className="relative h-56 sm:h-60 md:h-72 group flex items-center justify-center w-full mb-4 md:mb-0">
-        {/* Double room - largest, back */}
-        <div
-          className="absolute left-[16%] sm:left-[20%] md:left-[18%] top-[-4%] sm:top-[-10%] md:top-[-8%] z-1 w-[150px] h-[150px] sm:w-[190px] sm:h-[190px] md:w-[210px] md:h-[210px] flex items-center justify-center rounded-full border-2 border-gray-200"
-          style={{ backgroundColor: displayData[0].color }}
-        >
-          <div className="text-center text-white">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold">{displayData[0].percent}%</div>
-            <div className="text-[10px] sm:text-sm mt-1">{displayData[0].name}</div>
-          </div>
-        </div>
+    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-6 items-center px-2 py-2">
+      {/* Donut */}
+      <div className="relative h-52 sm:h-60 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={rows}
+              dataKey="value"
+              nameKey="name"
+              innerRadius="62%"
+              outerRadius="92%"
+              paddingAngle={rows.length > 1 ? 3 : 0}
+              startAngle={90}
+              endAngle={-270}
+              stroke="none"
+              isAnimationActive
+              animationDuration={650}
+            >
+              {rows.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip content={renderTooltip} />
+          </PieChart>
+        </ResponsiveContainer>
 
-        {/* Single room - medium, front left */}
-        <div
-          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[150px] md:h-[150px] left-[12%] bottom-[-12%] md:left-[14%] md:bottom-[-10%] z-2"
-          style={{ backgroundColor: displayData[1].color }}
-        >
-          <div className="text-center text-white">
-            <div className="text-xl sm:text-2xl md:text-3xl font-bold">{displayData[1].percent}%</div>
-            <div className="text-[10px] sm:text-xs mt-1">{displayData[1].name}</div>
+        {/* Center label */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="text-3xl sm:text-4xl font-black text-[#0b1d3a] leading-none">
+            {dominant.percent}%
           </div>
-        </div>
-
-        {/* Deluxe room - smallest, front right */}
-        <div
-          className="absolute flex items-center justify-center rounded-full border-2 border-gray-200 w-[100px] h-[100px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] right-[12%] bottom-[-8%] md:right-[10%] md:bottom-[-6%] z-3"
-          style={{ backgroundColor: displayData[2].color }}
-        >
-          <div className="text-center text-gray-200">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">{displayData[2].percent}%</div>
-            <div className="text-[10px] sm:text-xs mt-1 text-white">{displayData[2].name}</div>
+          <div className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-slate-400 mt-1">
+            {dominant.name}
           </div>
         </div>
       </div>
+
+      {/* Side legend */}
+      <ul className="flex sm:flex-col gap-2 sm:gap-3 flex-wrap sm:flex-nowrap justify-center sm:min-w-[140px]">
+        {rows.map((row) => (
+          <li
+            key={row.name}
+            className="flex items-center gap-2 sm:gap-3 text-sm"
+          >
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ background: row.color }}
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="font-semibold text-slate-800">{row.name}</span>
+              <span className="text-[11px] text-slate-400">
+                {row.value} · {row.percent}%
+              </span>
+            </div>
+          </li>
+        ))}
+        <li className="text-[10px] uppercase tracking-widest text-slate-400 pt-1 sm:pt-3 sm:border-t sm:border-slate-100 sm:mt-1">
+          {t("dashboard.charts.total", "Total")}:{" "}
+          <span className="font-bold text-slate-700">{total}</span>
+        </li>
+      </ul>
     </div>
   );
 };
