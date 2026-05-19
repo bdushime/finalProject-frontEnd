@@ -294,21 +294,35 @@ const SimpleReports = () => {
     const handleExportPDF = () => {
         if (filteredData.length === 0) return toast.error(t('itstaff:reports.messages.noData', "No data to export!"));
 
-        const formattedForPdf = filteredData.map(row => ({
-            createdAt: row.dateOut || row.createdAt || row.startTime || new Date().toISOString(),
-            expectedReturnTime: row.actualReturnTime || row.expectedReturnTime || row.updatedAt,
-            status: row.status || 'Active',
-            equipment: {
-                name: row.item || row.name || row.equipment?.name || "N/A",
-                serialNumber: (row.id || row._id || "").slice(-6).toUpperCase(),
-                category: row.category || row.type || "N/A"
-            },
-            user: {
-                fullName: row.user?.fullName || row.fullName || null,
-                username: row.user?.username || row.user || row.fullName || "N/A",
-                email: row.user?.email || row.email || "N/A"
-            }
-        }));
+        const formattedForPdf = filteredData.map(row => {
+            // pdfGenerator.js prefers fullName → username → email when rendering
+            // the user column, so we resolve the display name here (fullName,
+            // then "Student {studentId}" placeholder, then username) and route
+            // it through `fullName` so the PDF never falls back to the raw
+            // auto-generated student handle.
+            const userObj = typeof row.user === "object" && row.user !== null ? row.user : {};
+            const studentPlaceholder = userObj.studentId ? `Student ${userObj.studentId}` : null;
+            const resolvedName = userObj.fullName
+                || row.fullName
+                || studentPlaceholder
+                || userObj.username
+                || (typeof row.user === "string" ? row.user : null);
+            return {
+                createdAt: row.dateOut || row.createdAt || row.startTime || new Date().toISOString(),
+                expectedReturnTime: row.actualReturnTime || row.expectedReturnTime || row.updatedAt,
+                status: row.status || 'Active',
+                equipment: {
+                    name: row.item || row.name || row.equipment?.name || "N/A",
+                    serialNumber: (row.id || row._id || "").slice(-6).toUpperCase(),
+                    category: row.category || row.type || "N/A"
+                },
+                user: {
+                    fullName: resolvedName,
+                    username: userObj.username || null,
+                    email: userObj.email || row.email || "N/A"
+                }
+            };
+        });
 
         generatePDF(formattedForPdf, currentUser, `${currentReport.toUpperCase()} ${t('admin:reports.title', 'REPORT').toUpperCase()}`);
     };

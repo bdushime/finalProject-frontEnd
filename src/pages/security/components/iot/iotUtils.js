@@ -745,6 +745,7 @@ export const buildBorrowerMapFromTransactions = (transactions) => {
     const entry = {
       name:
         tx.user?.fullName ||
+        (tx.user?.studentId ? `Student ${tx.user.studentId}` : null) ||
         tx.user?.username ||
         tx.user?.email ||
         "Unknown",

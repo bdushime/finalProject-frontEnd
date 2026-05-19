@@ -194,7 +194,7 @@ export default function ITStaffTickets() {
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-[#0b1d3a]">{tkt.user?.username || "Guest User"}</span>
+                                                    <span className="text-sm font-bold text-[#0b1d3a]">{tkt.user?.fullName || (tkt.user?.studentId ? `Student ${tkt.user.studentId}` : tkt.user?.username) || "Guest User"}</span>
                                                     <span className="text-xs text-slate-500">{tkt.email}</span>
                                                 </div>
                                             </TableCell>

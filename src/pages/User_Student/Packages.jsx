@@ -258,11 +258,11 @@ export default function Packages() {
                                             <ul className="space-y-1.5">
                                                 {(isExpanded ? devices : devices.slice(0, PREVIEW_LIMIT)).map((device, idx) => (
                                                     <li
-                                                        key={device._id || idx}
+                                                        key={getDeviceId(device) || idx}
                                                         className="flex items-center gap-2 text-sm text-slate-700"
                                                     >
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[#126dd5] shrink-0" />
-                                                        {device.name || device}
+                                                        {getDeviceName(device)}
                                                     </li>
                                                 ))}
                                             </ul>

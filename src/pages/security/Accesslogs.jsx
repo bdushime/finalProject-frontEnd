@@ -144,7 +144,7 @@ export default function AccessLogs({
             timestamp: log.updatedAt || log.createdAt, // Use update time for returns
             eventType: type,
             status: log.status,
-            userName: log.user?.username || "Unknown",
+            userName: log.user?.fullName || (log.user?.studentId ? `Student ${log.user.studentId}` : log.user?.username) || "Unknown",
             userId: log.user?.email || "N/A",
             deviceName: log.equipment?.name || "Unknown Item",
             deviceId: log.equipment?.serialNumber || "N/A",

@@ -59,7 +59,7 @@ export default function CurrentCheckouts() {
             const mappedData = res.data.map(tx => ({
                 checkoutId: tx._id,
                 equipmentName: tx.equipment?.name || "Unknown Item",
-                borrower: tx.user?.fullName || tx.user?.username || "Unknown User",
+                borrower: tx.user?.fullName || (tx.user?.studentId ? `Student ${tx.user.studentId}` : tx.user?.username) || "Unknown User",
                 borrowerEmail: tx.user?.email || "",
                 dateDisplay: tx.status === 'Reserved'
                     ? format(new Date(tx.startTime), 'MMM dd, HH:mm')

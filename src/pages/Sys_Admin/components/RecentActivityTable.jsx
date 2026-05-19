@@ -79,10 +79,10 @@ const RecentActivityTable = () => {
                             <td className="py-4 px-4">
                                 <div className="flex items-center">
                                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[#8D8DC7] font-bold text-xs mr-3 uppercase">
-                                        {(activity.user?.username || "U").charAt(0)}
+                                        {(activity.user?.fullName || (activity.user?.studentId ? `Student ${activity.user.studentId}` : activity.user?.username) || "U").charAt(0)}
                                     </div>
                                     <div>
-                                        <div className="font-semibold text-slate-800">{activity.user?.username || "Unknown"}</div>
+                                        <div className="font-semibold text-slate-800">{activity.user?.fullName || (activity.user?.studentId ? `Student ${activity.user.studentId}` : activity.user?.username) || "Unknown"}</div>
                                         <div className="text-xs text-gray-400">{activity.user?.email}</div>
                                     </div>
                                 </div>
@@ -138,7 +138,7 @@ const RecentActivityTable = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-400">{t('dashboard.recentActivityTable.borrower')}</p>
-                                    <p className="font-bold text-slate-900">{selectedActivity.user?.username}</p>
+                                    <p className="font-bold text-slate-900">{selectedActivity.user?.fullName || (selectedActivity.user?.studentId ? `Student ${selectedActivity.user.studentId}` : selectedActivity.user?.username)}</p>
                                     <p className="text-xs text-gray-500">{selectedActivity.user?.email}</p>
                                 </div>
                             </div>

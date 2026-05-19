@@ -58,7 +58,7 @@ export default function SecurityDashboard() {
             timestamp: log.updatedAt || log.createdAt,
             eventType: type,
             status: log.status,
-            userName: log.user?.username || log.user?.fullName || "Unknown",
+            userName: log.user?.fullName || (log.user?.studentId ? `Student ${log.user.studentId}` : log.user?.username) || "Unknown",
             userId: log.user?.email || "N/A",
             deviceName: log.equipment?.name || "Unknown Item",
             deviceId: log.equipment?.serialNumber || "N/A",

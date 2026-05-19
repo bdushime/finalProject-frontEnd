@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import AdminLayout from "@/pages/Sys_Admin/components/AdminLayout";
 import api from "@/utils/api";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2, Plus, BookOpen, Edit } from "lucide-react";
+import { Trash2, Plus, BookOpen, Edit, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import Loader from "@/components/common/Loader";
@@ -51,9 +51,36 @@ export default function CourseManagement() {
     const [editCourseName, setEditCourseName] = useState("");
     const [savingEdit, setSavingEdit] = useState(false);
 
+    // Pagination + search state
+    const [searchQuery, setSearchQuery] = useState("");
+    const [page, setPage] = useState(1);
+    const PAGE_SIZE = 10;
+
     useEffect(() => {
         loadCourses();
     }, []);
+
+    const filteredCourses = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return courses;
+        return courses.filter(
+            (c) =>
+                (c.code || "").toLowerCase().includes(q) ||
+                (c.name || "").toLowerCase().includes(q)
+        );
+    }, [courses, searchQuery]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredCourses.length / PAGE_SIZE));
+    const safePage = Math.min(page, totalPages);
+    const paginatedCourses = useMemo(
+        () => filteredCourses.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+        [filteredCourses, safePage]
+    );
+
+    useEffect(() => {
+        // Reset to page 1 whenever the search filters the list down.
+        setPage(1);
+    }, [searchQuery]);
 
     const loadCourses = async () => {
         try {
@@ -255,13 +282,24 @@ export default function CourseManagement() {
     return (
         <AdminLayout heroContent={HeroContent}>
             <div className="bg-white rounded-4xl border border-slate-100 shadow-sm overflow-hidden p-6 mt-6">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-indigo-50 rounded-2xl">
-                        <BookOpen className="w-6 h-6 text-slate-800" />
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-indigo-50 rounded-2xl">
+                            <BookOpen className="w-6 h-6 text-slate-800" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-slate-900">{t('courses.allCourses')}</h2>
+                            <p className="text-sm text-slate-500">{t('courses.listSubtitle')}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-slate-900">{t('courses.allCourses')}</h2>
-                        <p className="text-sm text-slate-500">{t('courses.listSubtitle')}</p>
+                    <div className="relative w-full sm:w-72">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <Input
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={t('courses.searchPlaceholder', 'Search by code or name...')}
+                            className="pl-9 h-10 rounded-xl border-slate-200"
+                        />
                     </div>
                 </div>
 
@@ -281,19 +319,23 @@ export default function CourseManagement() {
                                         <Loader variant="inline" />
                                     </TableCell>
                                 </TableRow>
-                            ) : courses.length === 0 ? (
+                            ) : filteredCourses.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={3} className="h-64 text-center text-slate-500">
                                         <div className="flex flex-col items-center justify-center gap-3">
                                             <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
                                                 <BookOpen className="h-8 w-8 text-slate-300" />
                                             </div>
-                                            <p className="font-medium">{t('courses.noCourses')}</p>
+                                            <p className="font-medium">
+                                                {searchQuery
+                                                    ? t('courses.noMatch', 'No courses match your search.')
+                                                    : t('courses.noCourses')}
+                                            </p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                courses.map((course) => (
+                                paginatedCourses.map((course) => (
                                     <TableRow key={course._id} className="hover:bg-slate-50/80 border-b border-slate-100 transition-colors group">
                                         <TableCell className="py-5 pl-6">
                                             <div className="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-700 font-bold text-sm rounded-lg border border-slate-200">
@@ -331,6 +373,46 @@ export default function CourseManagement() {
                         </TableBody>
                     </Table>
                 </div>
+
+                {!loading && filteredCourses.length > 0 && (
+                    <div className="flex items-center justify-between mt-4 px-1 text-sm text-slate-600">
+                        <p>
+                            {t('courses.pagerSummary', {
+                                from: (safePage - 1) * PAGE_SIZE + 1,
+                                to: Math.min(safePage * PAGE_SIZE, filteredCourses.length),
+                                total: filteredCourses.length,
+                                defaultValue: 'Showing {{from}}–{{to}} of {{total}}',
+                            })}
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                disabled={safePage <= 1}
+                                className="h-9 rounded-lg border-slate-200"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </Button>
+                            <span className="px-3 text-sm font-semibold text-slate-700">
+                                {t('courses.pageOf', {
+                                    page: safePage,
+                                    total: totalPages,
+                                    defaultValue: 'Page {{page}} of {{total}}',
+                                })}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={safePage >= totalPages}
+                                className="h-9 rounded-lg border-slate-200"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Delete Confirmation Dialog */}

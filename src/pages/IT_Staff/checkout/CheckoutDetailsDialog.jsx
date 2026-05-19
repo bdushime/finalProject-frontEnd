@@ -92,7 +92,7 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, checkoutId
             equipmentType: tx.equipment?.type || tx.equipment?.category || null,
             checkedOutAt: formatDateTime(tx.checkedOutAt || tx.checkoutDate || tx.createdAt),
             dueDate: formatDateTime(tx.dueDate || tx.expectedReturnTime),
-            userName: tx.user?.fullName || tx.userName || tx.user?.username || "Unknown User",
+            userName: tx.user?.fullName || tx.userName || (tx.user?.studentId ? `Student ${tx.user.studentId}` : tx.user?.username) || "Unknown User",
             userEmail: tx.userEmail || tx.user?.email || "N/A",
             userPhone: tx.user?.phone || tx.userPhone || null,
             userStudentId: tx.user?.studentId || null,
