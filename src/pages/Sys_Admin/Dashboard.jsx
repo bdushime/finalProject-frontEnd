@@ -167,7 +167,7 @@ const Dashboard = () => {
                                     ) : (
                                         data.recentActivity.map((tx) => (
                                             <tr key={tx._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-6 py-4 font-bold text-slate-900">{tx.user?.username || t('dashboard.status.unknown')}</td>
+                                                <td className="px-6 py-4 font-bold text-slate-900">{tx.user?.fullName || (tx.user?.studentId ? `Student ${tx.user.studentId}` : tx.user?.username) || t('dashboard.status.unknown')}</td>
                                                 <td className="px-6 py-4 font-medium text-slate-600">{tx.equipment?.name || t('dashboard.status.deletedItem')}</td>
                                                 <td className="px-6 py-4 text-slate-500 font-medium">{new Date(tx.createdAt).toLocaleDateString()}</td>
                                                 <td className="px-6 py-4 text-center">

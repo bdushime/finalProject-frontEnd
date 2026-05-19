@@ -30,10 +30,12 @@ function formatMovementLocation(tx, eventType) {
 }
 
 function resolveBorrowerName(tx) {
+  const u = tx.user;
   return (
-    tx.user?.fullName ||
-    tx.user?.username ||
-    tx.user?.email ||
+    u?.fullName ||
+    (u?.studentId ? `Student ${u.studentId}` : null) ||
+    u?.username ||
+    u?.email ||
     tx.borrowerName ||
     "Unknown user"
   );

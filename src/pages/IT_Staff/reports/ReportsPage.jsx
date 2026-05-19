@@ -40,9 +40,11 @@ export default function ReportsPage() {
         let result = transactions;
 
         if (search) {
+            const q = search.toLowerCase();
             result = result.filter(t =>
-                t.user?.username?.toLowerCase().includes(search.toLowerCase()) ||
-                t.equipment?.name?.toLowerCase().includes(search.toLowerCase())
+                t.user?.fullName?.toLowerCase().includes(q) ||
+                t.user?.username?.toLowerCase().includes(q) ||
+                t.equipment?.name?.toLowerCase().includes(q)
             );
         }
 
@@ -60,9 +62,12 @@ export default function ReportsPage() {
         // Added Score and Due Date to CSV headers
         const headers = "Student,Email,Score,Equipment,Category,Date Borrowed,Due Date,Status\n";
 
-        const rows = filteredData.map(t =>
-            `${t.user?.username},${t.user?.email},${t.user?.responsibilityScore ?? 100},${t.equipment?.name},${t.equipment?.category || 'N/A'},${new Date(t.createdAt).toLocaleDateString()},${new Date(t.expectedReturnTime).toLocaleDateString()},${t.status}`
-        ).join("\n");
+        const rows = filteredData.map(t => {
+            const name = t.user?.fullName
+                || (t.user?.studentId ? `Student ${t.user.studentId}` : t.user?.username)
+                || "Unknown";
+            return `${name},${t.user?.email},${t.user?.responsibilityScore ?? 100},${t.equipment?.name},${t.equipment?.category || 'N/A'},${new Date(t.createdAt).toLocaleDateString()},${new Date(t.expectedReturnTime).toLocaleDateString()},${t.status}`;
+        }).join("\n");
 
         const blob = new Blob([headers + rows], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);

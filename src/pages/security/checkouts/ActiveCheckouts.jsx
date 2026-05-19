@@ -22,7 +22,7 @@ function ActiveCheckouts() {
         const mappedLogs = (res.data.logs || []).map(log => ({
           id: log._id,
           timestamp: log.updatedAt || log.createdAt,
-          user: log.user?.username || log.user?.fullName || "Unknown",
+          user: log.user?.fullName || (log.user?.studentId ? `Student ${log.user.studentId}` : log.user?.username) || "Unknown",
           userId: log.user?.studentId || log.user?._id || "N/A",
           email: log.user?.email || "N/A",
           action: log.status === 'Checked Out' ? 'Checkout' : log.status === 'Returned' ? 'Return' : log.status === 'Overdue' ? 'Overdue' : 'Checkout',

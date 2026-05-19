@@ -225,8 +225,15 @@ function BrowseDevices() {
       setSelectedDevice(null);
       resetForm();
     } catch (err) {
-      console.error(err);
-      alert("Failed to update device");
+      console.error("Failed to update device:", err.response?.data || err);
+      const data = err.response?.data;
+      // Mongoose validation errors come back as { errors: { field: { message } } }.
+      // Surface the first one so the user knows what's actually wrong.
+      const validationMsg = data?.errors
+        ? Object.values(data.errors).map((e) => e.message || e).join(", ")
+        : null;
+      const msg = validationMsg || data?.message || data?.error || "Failed to update device";
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

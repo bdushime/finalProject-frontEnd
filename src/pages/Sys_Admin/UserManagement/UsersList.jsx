@@ -387,10 +387,10 @@ const UsersList = () => {
                                             <td className="px-4 py-4 align-middle">
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <div className="h-11 w-11 shrink-0 rounded-xl bg-indigo-50 flex items-center justify-center text-[#8D8DC7] font-black border border-indigo-100 uppercase">
-                                                        {(user.fullName || user.username || "U").charAt(0)}
+                                                        {(user.fullName || (user.studentId ? `Student ${user.studentId}` : user.username) || "U").charAt(0)}
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <div className="font-semibold text-slate-900 truncate">{user.fullName || user.username}</div>
+                                                        <div className="font-semibold text-slate-900 truncate">{user.fullName || (user.studentId ? `Student ${user.studentId}` : user.username)}</div>
                                                         <div className="flex items-center gap-2 mt-0.5 min-w-0">
                                                             <span className="text-xs text-slate-500 truncate">{user.email}</span>
                                                             {user.role === 'Student' && user.studentId && (

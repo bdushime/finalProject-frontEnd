@@ -257,9 +257,11 @@ export default function ITStaffTickets() {
                                             <TableCell className="px-4 py-3.5 align-middle text-sm text-slate-600 whitespace-nowrap">
                                                 {tkt.date || (tkt.createdAt ? new Date(tkt.createdAt).toLocaleDateString() : '—')}
                                             </TableCell>
-                                            <TableCell className="px-4 py-3.5 align-middle">
-                                                <p className="text-sm font-medium text-slate-800">{tkt.user?.username || "Guest"}</p>
-                                                <p className="text-xs text-slate-500 mt-0.5">{tkt.email}</p>
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-[#0b1d3a]">{tkt.user?.fullName || (tkt.user?.studentId ? `Student ${tkt.user.studentId}` : tkt.user?.username) || "Guest User"}</span>
+                                                    <span className="text-xs text-slate-500">{tkt.email}</span>
+                                                </div>
                                             </TableCell>
                                             <TableCell className="px-4 py-3.5 align-middle max-w-sm">
                                                 <p className="text-sm font-medium text-slate-800 line-clamp-1">{tkt.subject}</p>

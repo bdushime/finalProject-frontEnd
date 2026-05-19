@@ -47,7 +47,7 @@ export async function generateReportData(filters) {
             equipmentName: tx.equipment?.name || "Unknown Device",
             serialNumber: tx.equipment?.serialNumber || "N/A",
             category: tx.equipment?.category || "General",
-            borrowerName: tx.user?.fullName || tx.user?.username || "Unknown User",
+            borrowerName: tx.user?.fullName || (tx.user?.studentId ? `Student ${tx.user.studentId}` : tx.user?.username) || "Unknown User",
             lendingDate: format(new Date(tx.createdAt), 'yyyy-MM-dd'),
             dueDate: format(new Date(tx.expectedReturnTime), 'yyyy-MM-dd'),
             status: tx.status
@@ -62,7 +62,7 @@ export async function generateReportData(filters) {
             equipmentName: tx.equipment?.name || "Unknown",
             serialNumber: tx.equipment?.serialNumber || "N/A",
             category: tx.equipment?.category || "General",
-            borrowerName: tx.user?.fullName || tx.user?.username || "Unknown",
+            borrowerName: tx.user?.fullName || (tx.user?.studentId ? `Student ${tx.user.studentId}` : tx.user?.username) || "Unknown",
             reservationStart: format(new Date(tx.startTime), 'yyyy-MM-dd HH:mm'),
             reservationEnd: format(new Date(tx.expectedReturnTime), 'yyyy-MM-dd HH:mm'),
             status: 'RESERVED'

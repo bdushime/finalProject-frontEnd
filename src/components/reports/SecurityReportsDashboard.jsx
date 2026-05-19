@@ -393,12 +393,18 @@ const SecurityReportsDashboard = () => {
           },
           {
             header: t("security:accessLogs.table.user"),
-            render: (row) => (
-              <span className="text-slate-700">
-                {row.user?.username || row.user?.email || "—"}
-              </span>
-            ),
-            pdf: (row) => row.user?.username || row.user?.email || "—",
+            render: (row) => {
+              const u = row.user;
+              const name = u?.fullName
+                || (u?.studentId ? `Student ${u.studentId}` : u?.username)
+                || u?.email
+                || "—";
+              return <span className="text-slate-700">{name}</span>;
+            },
+            pdf: (row) => row.user?.fullName
+              || (row.user?.studentId ? `Student ${row.user.studentId}` : row.user?.username)
+              || row.user?.email
+              || "—",
           },
           {
             header: t("admin:reports.date"),
@@ -461,7 +467,7 @@ const SecurityReportsDashboard = () => {
               <div>
                 <div className="font-bold text-slate-900">{row.name || "—"}</div>
                 <div className="text-xs text-slate-400">
-                  {(row._id || row.id || "").toString().slice(-8)}
+                  {row.serialNumber || "—"}
                 </div>
               </div>
             ),

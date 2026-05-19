@@ -106,8 +106,10 @@ const generateSecurityReportData = async ({
     }
 
     if (borrower) {
-      const name = log.user?.username || log.user?.fullName || "";
-      if (!name.toLowerCase().includes(borrower.toLowerCase())) return false;
+      const q = borrower.toLowerCase();
+      const fullName = (log.user?.fullName || "").toLowerCase();
+      const username = (log.user?.username || "").toLowerCase();
+      if (!fullName.includes(q) && !username.includes(q)) return false;
     }
 
     if (deviceId && log.equipment?.serialNumber !== deviceId) return false;
@@ -137,7 +139,9 @@ const generateSecurityReportData = async ({
       deviceId: log.equipment?.serialNumber || "N/A",
       eventType: mapEventType(log.status),
       location: log.destination || "Main Storage",
-      userName: log.user?.username || "Unknown",
+      userName: log.user?.fullName
+        || (log.user?.studentId ? `Student ${log.user.studentId}` : log.user?.username)
+        || "Unknown",
       timestamp: log.updatedAt || log.createdAt,
       status: (status === "all" || !status) ?
         (log.status === "Checked Out"
@@ -716,6 +720,10 @@ export default function ReportsContent({
             category: item.eventType,
           },
           user: {
+            // pdfGenerator prefers fullName when rendering the USER column.
+            // item.userName already holds the resolved display name (fullName
+            // ?? username), so route it through fullName so the PDF picks it up.
+            fullName: item.userName,
             username: item.userName,
             email: "-",
           },
@@ -730,6 +738,7 @@ export default function ReportsContent({
             category: item.category || item.eventType || "N/A",
           },
           user: {
+            fullName: item.userName || "-",
             username: item.userName || "-",
             email: "-",
           },

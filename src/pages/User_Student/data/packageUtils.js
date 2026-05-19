@@ -19,10 +19,17 @@ export const getPackageDevices = (pkg) => {
 export const getDeviceId = (device) =>
     typeof device === "object" ? (device._id ?? device.id ?? "") : String(device);
 
-export const getDeviceName = (device) =>
-    typeof device === "object"
-        ? (device.name || device.serialNumber || "Unknown device")
-        : String(device);
+// Render-safe label. If the entry is just a bare ObjectId string (un-populated
+// package response), don't dump the raw 24-char hex into the UI — use the last
+// 6 chars as a stable short tag so users see "Device #a1b2c3" instead.
+export const getDeviceName = (device) => {
+    if (device && typeof device === "object") {
+        return device.name || device.serialNumber || "Unknown device";
+    }
+    const id = String(device || "");
+    if (!id) return "Unknown device";
+    return `Device #${id.slice(-6)}`;
+};
 
 export const getDeviceNames = (pkg) => getPackageDevices(pkg).map(getDeviceName);
 

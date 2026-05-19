@@ -28,7 +28,6 @@ export default function StudentTopbar({ onMenuClick }) {
     const studentLinks = [
         { name: t("nav.dashboard"), path: "/student/dashboard" },
         { name: t("nav.equipment"), path: "/student/browse" },
-        { name: "Packages", path: "/student/packages" },
         { name: t("nav.borrowedItems"), path: "/student/borrowed-items" },
         { name: t("nav.score"), path: "/student/score" },
         { name: t("nav.report"), path: "/student/report" },

@@ -10,19 +10,30 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Resolve the best display name for a user object.
- * Order: fullName -> username -> email -> fallback.
- * Used so a student's chosen name from first-login propagates everywhere.
+ *
+ * Order:
+ *   1. user.fullName  — set by the seed ("Student 26668") and overwritten on
+ *      first-login profile completion with the user's real name.
+ *   2. "Student {studentId}" — placeholder for any student-shaped record where
+ *      fullName somehow isn't on the response. Mirrors the seed convention so
+ *      the UI stays consistent whether the field made it through or not.
+ *   3. username / email — last-resort fallbacks for non-students.
+ *
+ * We deliberately avoid showing the lowercase auto-generated `student26668`
+ * username in tables — that's the bug this helper is here to prevent.
  */
 type UserLike = {
   fullName?: string | null;
   username?: string | null;
   email?: string | null;
+  studentId?: string | null;
 } | null | undefined;
 
 export function displayName(user: UserLike, fallback: string = "Unknown User"): string {
   if (!user) return fallback;
   const full = (user.fullName || "").trim();
   if (full) return full;
+  if (user.studentId) return `Student ${user.studentId}`;
   if (user.username) return user.username;
   if (user.email) return user.email;
   return fallback;

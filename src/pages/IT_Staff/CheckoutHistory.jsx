@@ -33,7 +33,10 @@ export default function CheckoutHistory() {
     const filteredRows = history.filter((item) => {
         const searchLower = q.toLowerCase();
         const itemName = item.equipment?.name?.toLowerCase() || "";
-        const userName = (item.user?.fullName || item.user?.username || "").toLowerCase();
+        // Search across fullName, "Student {id}" placeholder, and username so
+        // either display value or original handle finds the record.
+        const studentLabel = item.user?.studentId ? `Student ${item.user.studentId}` : "";
+        const userName = (item.user?.fullName || studentLabel || item.user?.username || "").toLowerCase();
         const status = item.status?.toLowerCase() || "";
 
         return itemName.includes(searchLower) ||

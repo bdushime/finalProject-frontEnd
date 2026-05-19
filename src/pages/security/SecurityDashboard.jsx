@@ -9,8 +9,9 @@ import AccessLogs from "./Accesslogs";
 import api from "@/utils/api";
 import Loader from "@/components/common/Loader";
 import {
-  BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -58,7 +59,7 @@ export default function SecurityDashboard() {
             timestamp: log.updatedAt || log.createdAt,
             eventType: type,
             status: log.status,
-            userName: log.user?.username || log.user?.fullName || "Unknown",
+            userName: log.user?.fullName || (log.user?.studentId ? `Student ${log.user.studentId}` : log.user?.username) || "Unknown",
             userId: log.user?.email || "N/A",
             deviceName: log.equipment?.name || "Unknown Item",
             deviceId: log.equipment?.serialNumber || "N/A",
@@ -209,21 +210,121 @@ export default function SecurityDashboard() {
             description={t('dashboard.charts.checkoutsVsOverdue')}
             className="lg:col-span-2 border border-gray-100 shadow-sm bg-white rounded-4xl"
           >
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={stats.trendData.length > 0 ? stats.trendData : [{ name: t('dashboard.charts.noData'), checkouts: 0 }]}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} />
-                <Tooltip
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ backgroundColor: "#fff", borderRadius: "1rem", border: "1px solid #e2e8f0", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
-                  formatter={(value, name) => [value, name === 'checkouts' ? t('dashboard.charts.checkouts') : t('dashboard.charts.failedOverdue')]}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="checkouts" fill="#1e293b" radius={[6, 6, 0, 0]} name={t('dashboard.charts.checkouts')} barSize={32} />
-                <Bar dataKey="failed" fill="#ef4444" radius={[6, 6, 0, 0]} name={t('dashboard.charts.failedOverdue')} barSize={32} />
-              </BarChart>
-            </ResponsiveContainer>
+            {(() => {
+              const rows = stats.trendData.length > 0
+                ? stats.trendData.map((r) => ({ ...r, total: (r.checkouts || 0) + (r.failed || 0) }))
+                : [{ name: t('dashboard.charts.noData'), checkouts: 0, failed: 0, total: 0 }];
+              const totalCheckouts = rows.reduce((s, r) => s + (r.checkouts || 0), 0);
+              const totalFailed = rows.reduce((s, r) => s + (r.failed || 0), 0);
+              const failureRate = totalCheckouts + totalFailed > 0
+                ? Math.round((totalFailed / (totalCheckouts + totalFailed)) * 100)
+                : 0;
+
+              return (
+                <>
+                  {/* KPI strip */}
+                  <div className="grid grid-cols-3 gap-3 px-1 mb-4">
+                    <div className="rounded-2xl bg-slate-50/70 border border-slate-100 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        {t('dashboard.charts.checkouts')}
+                      </p>
+                      <p className="text-xl font-black text-[#0b1d3a] leading-tight mt-0.5">
+                        {totalCheckouts}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-rose-50/60 border border-rose-100 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400">
+                        {t('dashboard.charts.failedOverdue')}
+                      </p>
+                      <p className="text-xl font-black text-rose-600 leading-tight mt-0.5">
+                        {totalFailed}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-indigo-50/60 border border-indigo-100 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
+                        {t('dashboard.charts.failureRate', 'Failure rate')}
+                      </p>
+                      <p className="text-xl font-black text-[#8D8DC7] leading-tight mt-0.5">
+                        {failureRate}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <ResponsiveContainer width="100%" height={250}>
+                    <ComposedChart data={rows} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="checkoutsGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0b1d3a" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#1e293b" stopOpacity={0.7} />
+                        </linearGradient>
+                        <linearGradient id="failedGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ef4444" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#fca5a5" stopOpacity={0.75} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="#f1f5f9" />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 600 }}
+                        dy={10}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#94a3b8", fontSize: 12 }}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        cursor={{ fill: "rgba(141,141,199,0.06)" }}
+                        contentStyle={{
+                          backgroundColor: "#fff",
+                          borderRadius: "0.75rem",
+                          border: "1px solid #e2e8f0",
+                          boxShadow: "0 10px 25px -5px rgba(15, 23, 42, 0.12)",
+                          fontSize: 12,
+                        }}
+                        labelStyle={{ fontWeight: 700, color: "#0b1d3a" }}
+                        formatter={(value, name) => {
+                          if (name === t('dashboard.charts.checkouts')) return [value, t('dashboard.charts.checkouts')];
+                          if (name === t('dashboard.charts.failedOverdue')) return [value, t('dashboard.charts.failedOverdue')];
+                          if (name === t('dashboard.charts.total', 'Total')) return [value, t('dashboard.charts.total', 'Total')];
+                          return [value, name];
+                        }}
+                      />
+                      <Legend iconType="circle" wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
+                      <Bar
+                        dataKey="checkouts"
+                        fill="url(#checkoutsGradient)"
+                        radius={[8, 8, 0, 0]}
+                        name={t('dashboard.charts.checkouts')}
+                        barSize={28}
+                        animationDuration={650}
+                      />
+                      <Bar
+                        dataKey="failed"
+                        fill="url(#failedGradient)"
+                        radius={[8, 8, 0, 0]}
+                        name={t('dashboard.charts.failedOverdue')}
+                        barSize={28}
+                        animationDuration={650}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="total"
+                        name={t('dashboard.charts.total', 'Total')}
+                        stroke="#8D8DC7"
+                        strokeWidth={2.5}
+                        dot={{ r: 3, fill: "#8D8DC7", strokeWidth: 0 }}
+                        activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                        animationDuration={800}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </>
+              );
+            })()}
           </ChartCard>
 
           {/* Equipment Type Distribution */}
