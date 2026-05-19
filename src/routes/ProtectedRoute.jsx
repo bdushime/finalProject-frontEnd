@@ -226,12 +226,12 @@ export default function ProtectedRoute({ children, allowedRoles }) {
       {children ? children : <Outlet />}
 
       {userRole === "Student" && user.mustChangePassword && (
-        <div className="fixed inset-0 z-999 bg-black/95 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 sm:p-6 overflow-y-auto">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className="w-full max-w-1/3 bg-white rounded-[20px] shadow-2xl p-8"
+            className="w-full max-w-[min(100%,28rem)] sm:max-w-lg bg-white rounded-[20px] shadow-2xl p-6 sm:p-8 my-auto max-h-[calc(100dvh-2rem)] overflow-y-auto"
           >
             {/* Badge */}
             <div className="inline-flex items-center gap-1.5 text-navy-blue text-xs font-semibold px-3 py-1 rounded-full mb-5"

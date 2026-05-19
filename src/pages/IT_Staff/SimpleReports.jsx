@@ -19,6 +19,83 @@ const datePickerStyles = `
   }
 `;
 
+const formatTimeOnly = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const normalizeActivityStatus = (row) =>
+    (row.status || '').toLowerCase().replace(/-/g, ' ').trim();
+
+const isStillBorrowed = (row) => {
+    const s = normalizeActivityStatus(row);
+    return s !== 'returned' && s !== 'return';
+};
+
+const isCheckedOut = (row) => {
+    const s = normalizeActivityStatus(row);
+    return (
+        s === 'checked out' ||
+        s === 'active' ||
+        s === 'overdue' ||
+        (s.includes('checked') && s.includes('out'))
+    );
+};
+
+const getStorageLocation = (row) => {
+    const loc =
+        row.equipment?.location ||
+        row.checkoutLocation ||
+        row.fromLocation ||
+        row.sourceLocation;
+    const trimmed = loc && String(loc).trim();
+    return trimmed || 'Main Storage';
+};
+
+const getBorrowRoom = (row) => {
+    const raw = (row.destination || row.classroom || row.room || '').toString().trim();
+    if (!raw) return '';
+    const short = raw.split(' (')[0].trim();
+    return short || raw;
+};
+
+/** One location: Main Storage until checked out, then the borrow destination room. */
+const getActivityLocation = (row) => {
+    if (isCheckedOut(row)) {
+        const room = getBorrowRoom(row);
+        if (room) return room;
+    }
+    return getStorageLocation(row);
+};
+
+const getTakenTime = (row) =>
+    row.checkedOutAt ||
+    row.checkoutTime ||
+    row.startTime ||
+    row.dateOut ||
+    row.createdAt;
+
+const getReturnTime = (row) => {
+    if (isStillBorrowed(row)) return null;
+    return (
+        row.actualReturnTime ||
+        row.returnTime ||
+        row.returnDate ||
+        (normalizeActivityStatus(row) === 'returned' ? row.updatedAt : null)
+    );
+};
+
+const formatActivityTimeRange = (row) => {
+    const takenLabel = formatTimeOnly(getTakenTime(row)) || 'N/A';
+    if (isStillBorrowed(row)) {
+        return `${takenLabel} – Active`;
+    }
+    const returnLabel = formatTimeOnly(getReturnTime(row));
+    return returnLabel ? `${takenLabel} – ${returnLabel}` : takenLabel;
+};
+
 const SimpleReports = () => {
     const { t } = useTranslation(["admin", "itstaff", "common"]);
 
@@ -270,10 +347,31 @@ const SimpleReports = () => {
                         }
                     },
                     {
-                        header: t('itstaff:reports.table.returned', 'Returned Date'), render: (row) => {
-                            const date = row.actualReturnTime || row.expectedReturnTime || row.updatedAt;
-                            return date ? new Date(date).toLocaleDateString() : "N/A";
-                        }
+                        header: t('itstaff:reports.table.time', 'Time (Taken – Return)'),
+                        render: (row) => {
+                            const takenLabel = formatTimeOnly(getTakenTime(row)) || 'N/A';
+                            if (isStillBorrowed(row)) {
+                                return (
+                                    <span className="text-sm text-slate-600 whitespace-nowrap">
+                                        {takenLabel}
+                                        <span className="text-slate-400"> – </span>
+                                        <span className="text-slate-500">Active</span>
+                                    </span>
+                                );
+                            }
+                            const returnLabel = formatTimeOnly(getReturnTime(row));
+                            return (
+                                <span className="text-sm text-slate-600 whitespace-nowrap">
+                                    {returnLabel ? `${takenLabel} – ${returnLabel}` : takenLabel}
+                                </span>
+                            );
+                        },
+                    },
+                    {
+                        header: t('admin:reports.location', 'Location'),
+                        render: (row) => (
+                            <span className="text-sm text-slate-600">{getActivityLocation(row)}</span>
+                        ),
                     },
                     {
                         header: t('admin:reports.statusFilter', 'Status'), render: (row) => (
@@ -325,7 +423,8 @@ const SimpleReports = () => {
                     let val = col.accessor ? row[col.accessor] : null;
 
                     if (col.header === t('itstaff:reports.table.borrowed', 'Borrowed Date')) return val || row.createdAt || row.dateOut || row.startTime || "N/A";
-                    if (col.header === t('itstaff:reports.table.returned', 'Returned Date')) return val || row.actualReturnTime || row.expectedReturnTime || row.updatedAt || "N/A";
+                    if (col.header === t('itstaff:reports.table.time', 'Time (Taken – Return)')) return formatActivityTimeRange(row);
+                    if (col.header === t('admin:reports.location', 'Location')) return getActivityLocation(row);
                     if (col.header === t('admin:reports.category', 'Category')) return val || row.type || row.equipment?.category || row.equipment?.type || "N/A";
                     if (col.header === t('admin:reports.serialNumber', 'Serial Number')) return val || row.equipment?.serialNumber || (row.id || row._id || "").slice(-6);
                     if (col.header === t('admin:reports.location', 'Location')) return val || row.equipment?.location || t('admin:reports.mainStorage', 'Main Storage');

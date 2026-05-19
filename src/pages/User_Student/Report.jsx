@@ -44,7 +44,15 @@ export default function Report() {
             try {
                 // Fetch real history
                 const res = await api.get('/transactions/my-history');
-                setHistoryData(res.data);
+                const raw = res?.data;
+                const list = Array.isArray(raw)
+                    ? raw
+                    : Array.isArray(raw?.data)
+                        ? raw.data
+                        : Array.isArray(raw?.items)
+                            ? raw.items
+                            : [];
+                setHistoryData(list);
             } catch (err) {
                 console.error("Failed to load history:", err);
             } finally {
@@ -63,6 +71,27 @@ export default function Report() {
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, timeRange, statusFilter, categoryFilter]);
+
+    const resolveEquipmentCategory = (item) => {
+        const cat = String(item.equipment?.category || item.equipment?.type || "").trim();
+        const name = String(item.equipment?.name || "").toLowerCase();
+        if (/projector/.test(name) || /^projector$/i.test(cat)) return "Projector";
+        if (/extension\s*cable/.test(name) || /^extension cable$/i.test(cat)) return "Extension Cable";
+        if (/\bcable\b/.test(name) && !/extension/.test(name)) return "Cable";
+        if (/electronic/.test(name) || /^electronics$/i.test(cat)) return "Electronics";
+        return cat || "General";
+    };
+
+    const matchesStatusFilter = (itemStatus, filter) => {
+        if (filter === "All Status") return true;
+        const normalized = String(itemStatus || "").toLowerCase().replace(/-/g, " ");
+        const target = filter.toLowerCase().replace(/-/g, " ");
+        if (normalized === target) return true;
+        if (target === "checked out" && (normalized === "borrowed" || normalized.includes("checked"))) {
+            return true;
+        }
+        return false;
+    };
 
     // --- FILTER LOGIC ---
     const filteredData = useMemo(() => {
@@ -83,15 +112,12 @@ export default function Report() {
             else if (timeRange === "This Year") matchesTime = dateOut >= startOfYear;
 
             // 2. Status
-            let matchesStatus = true;
-            if (statusFilter !== "All Status") {
-                matchesStatus = item.status === statusFilter;
-            }
+            const matchesStatus = matchesStatusFilter(item.status, statusFilter);
 
             // 3. Category Filter
             let matchesCategory = true;
             if (categoryFilter !== "All Categories") {
-                matchesCategory = (item.equipment?.category || "General") === categoryFilter;
+                matchesCategory = resolveEquipmentCategory(item) === categoryFilter;
             }
 
             // 4. Search
@@ -125,7 +151,7 @@ export default function Report() {
                 equipmentName: item.equipment?.name || "Unknown",
                 // Mock Serial if missing
                 serialNumber: item.equipment?.serialNumber || `SN-00${index + 1}`,
-                category: item.equipment?.category || "General",
+                category: resolveEquipmentCategory(item),
                 displayDate,
                 displayDuration,
                 // Hardcoded Location for "University" feel
@@ -133,7 +159,7 @@ export default function Report() {
                 status: item.status ? item.status.toUpperCase() : "UNKNOWN"
             };
         });
-    }, [historyData, timeRange, statusFilter, searchTerm]);
+    }, [historyData, timeRange, statusFilter, categoryFilter, searchTerm]);
 
 
     // --- PAGINATION LOGIC ---
@@ -374,7 +400,7 @@ export default function Report() {
                                 placeholder={t("report.searchReport")}
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#126dd5] transition-colors"
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#126dd5] transition-colors"
                             />
                         </div>
 
@@ -403,6 +429,7 @@ export default function Report() {
                                     onChange={e => setStatusFilter(e.target.value)}
                                 >
                                     <option>All Status</option>
+                                    <option value="Checked Out">Checkout</option>
                                     <option>Returned</option>
                                     <option>Active</option>
                                     <option>Overdue</option>
@@ -421,10 +448,9 @@ export default function Report() {
                                 >
                                     <option>All Categories</option>
                                     <option>Projector</option>
-                                    <option>Laptop</option>
-                                    <option>Camera</option>
-                                    <option>Audio</option>
-                                    <option>General</option>
+                                    <option>Cable</option>
+                                    <option>Extension Cable</option>
+                                    <option>Electronics</option>
                                 </select>
                                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             </div>

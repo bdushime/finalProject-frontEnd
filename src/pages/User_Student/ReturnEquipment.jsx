@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+﻿import { useState, useRef, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import StudentLayout from "@/components/layout/StudentLayout";
+import { PageContainer } from "@/components/common/Page";
+import BackButton from "./components/BackButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Scan, Camera, CheckCircle, Package, Clock, QrCode, AlertTriangle } from "lucide-react";
+import { Scan, CheckCircle, Package, QrCode, AlertTriangle } from "lucide-react";
 import api from "@/utils/api";
 import { toast } from "sonner";
 import QRScanner from "@/components/common/QRScanner";
@@ -152,7 +154,18 @@ export default function ReturnEquipment() {
         return name.toLowerCase().includes("projector") || categoryName.toLowerCase().includes("projector");
     }, [selectedTransaction]);
 
-    if (loading) return <div className="p-10 text-center">Loading returnable items...</div>;
+    if (loading) {
+        return (
+            <StudentLayout>
+                <PageContainer>
+                    <BackButton to="/student/borrowed-items" className="mb-4" />
+                    <div className="flex items-center gap-2 text-slate-400 py-8">
+                        <Loader variant="inline" />
+                    </div>
+                </PageContainer>
+            </StudentLayout>
+        );
+    }
 
     const steps = [
         { label: "Select Item", icon: Package },
@@ -162,13 +175,19 @@ export default function ReturnEquipment() {
 
     return (
         <StudentLayout>
-            <div className="max-w-4xl mx-auto py-8 px-4">
-                {/* Header */}
-                <div className="mb-8 flex justify-between items-center">
-                    <button onClick={() => step > 1 ? setStep(s => s - 1) : navigate('/student/borrowed-items')} className="flex items-center text-slate-500">
-                        <ChevronLeft className="w-4 h-4 mr-1" /> Back
-                    </button>
-                    <div className="text-sm text-slate-500">Step {step} of 3</div>
+            <PageContainer>
+                {/* Header — aligned with My Borrowed Items / Equipment Catalogue */}
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
+                    <div>
+                        {step > 1 ? (
+                            <BackButton onClick={() => setStep((s) => s - 1)} className="mb-4" />
+                        ) : (
+                            <BackButton to="/student/borrowed-items" className="mb-4" />
+                        )}
+                        <h1 className="text-3xl font-bold text-[#0b1d3a] tracking-tight">Return Equipment</h1>
+                        <p className="text-slate-500 mt-1">Select an item and complete verification to return it.</p>
+                    </div>
+                    <p className="text-sm text-slate-500 md:pt-12 shrink-0">Step {step} of 3</p>
                 </div>
 
                 {/* Progress Bar */}
@@ -208,22 +227,22 @@ export default function ReturnEquipment() {
                     {/* STEP 2: VERIFY (Camera & QR) */}
                     {step === 2 && (
                         <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-4 bg-slate-50/50 p-6 rounded-3xl border border-slate-100 flex flex-col justify-between">
+                            <div className="space-y-4 bg-slate-50/50 p-5 rounded-3xl border border-slate-100 flex flex-col">
                                 <div>
                                     <Label className="text-sm font-bold text-[#0b1d3a]">Scan QR Code (Optional)</Label>
-                                    <p className="text-xs text-slate-500 mt-1 mb-4">Verification scan to instantly identify this item's details.</p>
+                                    <p className="text-xs text-slate-500 mt-1 mb-3">Verification scan to instantly identify this item's details.</p>
                                 </div>
-                                <div className="aspect-square bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden shadow-inner mb-4 relative">
+                                <div className="mx-auto w-full max-w-[300px] aspect-square bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden shadow-inner mb-4 relative">
                                     {isScanning ? (
-                                        <QRScanner onScanSuccess={handleScanSuccess} />
+                                        <QRScanner onScanSuccess={handleScanSuccess} compact />
                                     ) : (
                                         <div className="text-center text-slate-500 animate-fade-in">
-                                            <QrCode className="w-12 h-12 mx-auto mb-2 opacity-50 text-slate-400" />
+                                            <QrCode className="w-10 h-10 mx-auto mb-2 opacity-50 text-slate-400" />
                                             <p className="text-sm font-semibold">Camera Off</p>
                                         </div>
                                     )}
                                 </div>
-                                <Button onClick={() => setIsScanning(!isScanning)} variant="outline" className="w-full h-11 rounded-xl">
+                                <Button onClick={() => setIsScanning(!isScanning)} variant="outline" className="w-full max-w-[300px] mx-auto h-11 rounded-xl">
                                     {isScanning ? "Cancel Scanning" : "Start Scanning"}
                                 </Button>
                             </div>
@@ -255,7 +274,7 @@ export default function ReturnEquipment() {
                     {/* STEP 3: CONFIRM */}
                     {step === 3 && selectedTransaction && (
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                            <h3 className="font-bold mb-4">Confirm Return</h3>
+                            <h3 className="font-bold mb-4 text-[#0b1d3a]">Confirm Return</h3>
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
                                     <Package className="w-6 h-6 text-[#126dd5]" />
@@ -277,13 +296,17 @@ export default function ReturnEquipment() {
                         <Button
                             onClick={handleNext}
                             disabled={submitting || (step === 1 && !selectedId)}
-                            className="bg-[#0b1d3a] hover:bg-[#126dd5] h-12 px-8 rounded-xl"
+                            className={
+                                step === 3
+                                    ? "bg-white text-[#0b1d3a] border-2 border-[#0b1d3a] hover:bg-slate-50 h-12 px-8 rounded-xl font-semibold"
+                                    : "bg-[#0b1d3a] text-white hover:bg-[#126dd5] h-12 px-8 rounded-xl"
+                            }
                         >
                             {submitting ? <Loader variant="inline" /> : (step === 3 ? "Confirm Return" : "Next Step")}
                         </Button>
                     </div>
                 </div>
-            </div>
+            </PageContainer>
 
             {/* SUCCESS MODAL */}
             {showSuccess && (
