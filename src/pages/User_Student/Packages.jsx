@@ -13,11 +13,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Package, Box, ChevronDown, ChevronUp } from "lucide-react";
+import { Package, Box, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/utils/api";
 import { fetchPackages, bookPackage, cancelPackageBooking } from "@/services/packagesService";
 import { findPendingPackageBooking, getDeviceNames } from "./data/packageUtils";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Packages() {
     const [packages, setPackages] = useState([]);
@@ -30,6 +33,12 @@ export default function Packages() {
 
     const [bookModalPkg, setBookModalPkg] = useState(null);
     const [bookSubmitting, setBookSubmitting] = useState(false);
+
+    // Form fields for package booking
+    const [destination, setDestination] = useState("");
+    const [purpose, setPurpose] = useState("");
+    const [durationHours, setDurationHours] = useState(2.5);
+    const [customReturnTime, setCustomReturnTime] = useState("");
 
     // Confirmation modal state (cancel booking)
     const [confirmModal, setConfirmModal] = useState({
@@ -92,14 +101,42 @@ export default function Packages() {
 
     const handleConfirmBook = async () => {
         if (!bookModalPkg) return;
+        if (!destination.trim()) {
+            toast.error("Please enter a room / destination.");
+            return;
+        }
+        if (!purpose.trim()) {
+            toast.error("Please enter the purpose of booking.");
+            return;
+        }
+
+        let expectedReturnTime = "";
+        if (customReturnTime) {
+            const date = new Date().toLocaleDateString('en-CA');
+            expectedReturnTime = `${date}T${customReturnTime}:00`;
+        } else {
+            const target = new Date();
+            target.setMinutes(target.getMinutes() + durationHours * 60);
+            expectedReturnTime = target.toISOString();
+        }
+
         const packageId = bookModalPkg._id;
         setBookSubmitting(true);
         setActionLoading((prev) => ({ ...prev, [packageId]: true }));
         try {
-            await bookPackage(packageId);
+            await bookPackage(packageId, {
+                destination,
+                purpose,
+                expectedReturnTime,
+            });
             setPendingBookings((prev) => ({ ...prev, [packageId]: true }));
             toast.success("Package booked successfully! You will be notified once it is reviewed.");
             setBookModalPkg(null);
+            // Reset form fields
+            setDestination("");
+            setPurpose("");
+            setDurationHours(2.5);
+            setCustomReturnTime("");
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to book package.");
         } finally {
@@ -301,22 +338,83 @@ export default function Packages() {
                             Book &quot;{bookModalPkg?.name}&quot;
                         </DialogTitle>
                         <DialogDescription className="text-slate-500">
-                            You are about to book this package. The following devices will be included:
+                            Confirm booking this package bundle. The following devices will be included:
                         </DialogDescription>
                     </DialogHeader>
-                    <ul className="max-h-48 overflow-y-auto space-y-2 my-4 border border-slate-100 rounded-xl p-3 bg-slate-50">
+                    <ul className="max-h-24 overflow-y-auto space-y-1.5 my-2 border border-slate-100 rounded-xl p-3 bg-slate-50">
                         {bookModalPkg && getDeviceNames(bookModalPkg).length > 0 ? (
                             getDeviceNames(bookModalPkg).map((name, idx) => (
-                                <li key={idx} className="flex items-center gap-2 text-sm text-slate-700">
+                                <li key={idx} className="flex items-center gap-2 text-xs text-slate-700">
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#126dd5] shrink-0" />
                                     {name}
                                 </li>
                             ))
                         ) : (
-                            <li className="text-sm text-slate-400 italic">No devices listed for this package.</li>
+                            <li className="text-xs text-slate-400 italic">No devices listed for this package.</li>
                         )}
                     </ul>
-                    <DialogFooter className="flex gap-3 sm:justify-end">
+
+                    <div className="space-y-4 my-2 text-left">
+                        <div className="space-y-1.5">
+                            <Label className="text-slate-700 font-bold text-xs uppercase tracking-wider">Destination / Room</Label>
+                            <Input
+                                placeholder="e.g. Room 204, Lab A"
+                                value={destination}
+                                onChange={(e) => setDestination(e.target.value)}
+                                className="rounded-xl border-slate-200 focus:border-[#126dd5] focus:ring-[#126dd5]/10 h-10 text-sm font-medium"
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-slate-700 font-bold text-xs uppercase tracking-wider">Purpose of Booking</Label>
+                            <Textarea
+                                placeholder="e.g. Practical class session, presentation"
+                                value={purpose}
+                                onChange={(e) => setPurpose(e.target.value)}
+                                className="rounded-xl border-slate-200 focus:border-[#126dd5] focus:ring-[#126dd5]/10 min-h-[60px] text-sm font-medium"
+                            />
+                        </div>
+
+                        <div className="space-y-2.5 pt-1">
+                            <Label className="text-slate-700 font-bold text-xs uppercase tracking-wider">Borrowing Duration</Label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {[2, 2.5, 3, 3.5, 4, 4.5, 5].map((hrs) => (
+                                    <button
+                                        key={hrs}
+                                        type="button"
+                                        onClick={() => {
+                                            setDurationHours(hrs);
+                                            setCustomReturnTime("");
+                                        }}
+                                        className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all border ${
+                                            durationHours === hrs && !customReturnTime
+                                                ? "bg-[#126dd5] border-[#126dd5] text-white shadow-md"
+                                                : "bg-slate-50 border-slate-100 text-[#0b1d3a] hover:bg-slate-100"
+                                        }`}
+                                    >
+                                        {hrs}h
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex items-center gap-3 pt-1">
+                                <div className="bg-blue-50 px-2.5 py-1.5 rounded-xl border border-blue-100 flex items-center gap-2 w-fit shrink-0">
+                                    <Clock className="w-4 h-4 text-[#126dd5]" />
+                                    <Input
+                                        type="time"
+                                        value={customReturnTime}
+                                        onChange={(e) => {
+                                            setCustomReturnTime(e.target.value);
+                                        }}
+                                        className="bg-transparent border-none text-[#0b1d3a] font-black text-xs h-6 w-20 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 tabular-nums cursor-pointer"
+                                    />
+                                </div>
+                                <span className="text-[11px] text-slate-500 font-medium">Or set custom return time today</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="flex gap-3 sm:justify-end pt-2 border-t border-slate-100">
                         <Button
                             variant="ghost"
                             onClick={() => setBookModalPkg(null)}
@@ -328,7 +426,7 @@ export default function Packages() {
                         <Button
                             onClick={handleConfirmBook}
                             disabled={bookSubmitting}
-                            className="rounded-xl h-11 font-bold bg-[#0b1d3a] hover:bg-[#126dd5] text-white"
+                            className="rounded-xl h-11 font-bold bg-[#0b1d3a] hover:bg-[#126dd5] text-white px-6"
                         >
                             {bookSubmitting ? (
                                 <><Loader variant="inline" className="mr-2" /> Booking...</>

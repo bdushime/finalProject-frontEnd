@@ -44,7 +44,24 @@ export default function ITStaffNotifications() {
       if (!notification) return;
       const notifId = notification?._id || notification?.id;
       if (notifId) markAsRead(notifId); // Keep parity with the previous IT Staff behavior.
-      navigate("/it/current-checkouts");
+      
+      const title = (notification?.title || "").toLowerCase();
+      const message = (notification?.message || "").toLowerCase();
+      const type = (notification?.type || "").toLowerCase();
+
+      // Dynamic routing based on notification content/type
+      if (title.includes("return") || type === "return") {
+        navigate("/it/current-checkouts", { state: { tab: 'returns' } });
+      } else if (title.includes("checkout") || title.includes("request") || type === "checkout") {
+        navigate("/it/current-checkouts", { state: { tab: 'requests' } });
+      } else if (title.includes("reservation") || type === "reservation") {
+        navigate("/it/current-checkouts", { state: { tab: 'reservations' } });
+      } else if (title.includes("ticket") || title.includes("support") || title.includes("help") || type === "ticket") {
+        navigate("/it/tickets");
+      } else {
+        // Fallback
+        navigate("/it/current-checkouts", { state: { tab: 'active' } });
+      }
     },
     [markAsRead, navigate],
   );

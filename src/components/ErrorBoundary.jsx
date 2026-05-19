@@ -38,6 +38,13 @@ export default class ErrorBoundary extends Component {
                             An unexpected error occurred. Please try reloading the page.
                             If the problem persists, contact support.
                         </p>
+                        {this.state.error && (
+                            <pre className="text-left text-xs bg-red-50 text-red-600 p-4 rounded-xl overflow-auto mb-8 max-h-64 border border-red-100">
+                                {this.state.error.toString()}
+                                {"\n\n"}
+                                {this.state.error.stack}
+                            </pre>
+                        )}
 
                         <button
                             onClick={this.handleReload}

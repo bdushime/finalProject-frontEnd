@@ -7,7 +7,7 @@ import { Eye, Plus, Check, X, Calendar, Clock } from "lucide-react";
 import CheckoutDetailsDialog from "./checkout/CheckoutDetailsDialog";
 import api from "@/utils/api";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
 import { useItStaffConfirm } from "@/pages/IT_Staff/components/ItStaffConfirmProvider";
 import {
@@ -34,12 +34,14 @@ export default function CurrentCheckouts() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [nowTick, setNowTick] = useState(0);
 
-    // Borrowing sessions are capped at 5 hours in the student flow.
-    // The "Active" tab should show sessions within this window (and any overdue sessions).
     const ACTIVE_CHECKOUT_WINDOW_HOURS = 5;
 
-    // Tabs state: 'requests' | 'reservations' | 'active'
-    const [currentTab, setCurrentTab] = useState('requests');
+    // We can read location state to set initial tab
+    const location = useLocation();
+    const initialTab = location.state?.tab || 'requests';
+
+    // Tabs state: 'requests' | 'reservations' | 'returns' | 'active'
+    const [currentTab, setCurrentTab] = useState(initialTab);
 
 
     const [isRejectOpen, setIsRejectOpen] = useState(false);

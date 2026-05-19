@@ -43,30 +43,8 @@ export default function SecurityDashboard() {
         ]);
         
         const allLogs = logsRes.data.logs || [];
-        const deviceCounts = {};
-        allLogs.forEach(log => {
-          if (log.equipment && log.equipment.name) {
-            const name = log.equipment.name;
-            deviceCounts[name] = (deviceCounts[name] || 0) + 1;
-          }
-        });
-
-        const sortedDevices = Object.entries(deviceCounts)
-          .map(([name, value]) => ({ name, value }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 3);
-
-        const colors = ["#1A2240", "#BEBEE0", "#343264"];
-        const equipmentTypeData = sortedDevices.map((item, index) => ({
-          name: item.name,
-          value: item.value,
-          color: colors[index]
-        }));
-        
         const statsData = { ...statsRes.data };
-        if (equipmentTypeData.length > 0) {
-          statsData.equipmentTypeData = equipmentTypeData;
-        }
+        setStats(statsData);
         setStats(statsData);
 
         const mappedLogs = allLogs.slice(0, 5).map((log) => {

@@ -9,6 +9,7 @@ import api from "@/utils/api";
 import { toast } from "sonner";
 import QRScanner from "@/components/common/QRScanner";
 import Loader from "@/components/common/Loader";
+import EquipmentScanAndPhotoUpload from "@/components/EquipmentScanAndPhotoUpload";
 
 function useQuery() {
     const { search } = useLocation();
@@ -27,10 +28,34 @@ export default function ReturnEquipment() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [photoError, setPhotoError] = useState("");
 
     // Camera State
     const [isScanning, setIsScanning] = useState(false);
     const [conditionPhotos, setConditionPhotos] = useState({ front: null, back: null });
+
+    // Compression utility
+    const compressImage = (base64Str, maxWidth = 800, maxHeight = 800, quality = 0.7) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = base64Str;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                } else {
+                    if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+        });
+    };
 
     // --- 1. FETCH ACTIVE BORROWS ---
     useEffect(() => {
@@ -84,22 +109,32 @@ export default function ReturnEquipment() {
         if (step === 1 && selectedId) {
             setStep(2);
         } else if (step === 2) {
+            if (isProjector) {
+                if (!conditionPhotos.front || !conditionPhotos.back) {
+                    setPhotoError("Both front and back photos are required for returning a projector.");
+                    return;
+                }
+            }
+            setPhotoError("");
             setIsScanning(false);
             setStep(3);
         } else if (step === 3) {
             // --- SUBMIT RETURN ---
             setSubmitting(true);
             try {
+                const compressedPhotos = {};
+                if (conditionPhotos.front) compressedPhotos.front = await compressImage(conditionPhotos.front);
+                if (conditionPhotos.back) compressedPhotos.back = await compressImage(conditionPhotos.back);
+
                 const payload = {
-                    equipmentId: selectedId,
-                    condition: "Good" // You can add a dropdown for this later
+                    conditionPhotos: compressedPhotos,
+                    condition: "Good"
                 };
 
-                await api.post('/transactions/checkin', payload);
+                await api.put(`/transactions/${selectedTransaction._id}/request-return`, payload);
                 setShowSuccess(true);
             } catch (err) {
                 console.error("Return failed:", err);
-                // For errors, we can keep alert for now or use toast, but I'll stick to simple toast if available or just log
                 toast.error(err.response?.data?.message || "Return failed. Try again.");
             } finally {
                 setSubmitting(false);
@@ -109,6 +144,13 @@ export default function ReturnEquipment() {
 
     // Find the full transaction object for the selected ID
     const selectedTransaction = activeItems.find(t => t.equipment._id === selectedId);
+
+    const isProjector = useMemo(() => {
+        if (!selectedTransaction) return false;
+        const name = selectedTransaction.equipment?.name || "";
+        const categoryName = selectedTransaction.equipment?.category?.name || selectedTransaction.equipment?.category || "";
+        return name.toLowerCase().includes("projector") || categoryName.toLowerCase().includes("projector");
+    }, [selectedTransaction]);
 
     if (loading) return <div className="p-10 text-center">Loading returnable items...</div>;
 
@@ -163,39 +205,49 @@ export default function ReturnEquipment() {
                         </div>
                     )}
 
-                    {/* STEP 2: VERIFY (Mock Camera) */}
+                    {/* STEP 2: VERIFY (Camera & QR) */}
                     {step === 2 && (
                         <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <Label>Scan QR Code (Optional)</Label>
-                                <div className="aspect-square bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden shadow-inner">
+                            <div className="space-y-4 bg-slate-50/50 p-6 rounded-3xl border border-slate-100 flex flex-col justify-between">
+                                <div>
+                                    <Label className="text-sm font-bold text-[#0b1d3a]">Scan QR Code (Optional)</Label>
+                                    <p className="text-xs text-slate-500 mt-1 mb-4">Verification scan to instantly identify this item's details.</p>
+                                </div>
+                                <div className="aspect-square bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden shadow-inner mb-4 relative">
                                     {isScanning ? (
                                         <QRScanner onScanSuccess={handleScanSuccess} />
                                     ) : (
-                                        <div className="text-center text-slate-500">
-                                            <QrCode className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                        <div className="text-center text-slate-500 animate-fade-in">
+                                            <QrCode className="w-12 h-12 mx-auto mb-2 opacity-50 text-slate-400" />
                                             <p className="text-sm font-semibold">Camera Off</p>
                                         </div>
                                     )}
                                 </div>
-                                <Button onClick={() => setIsScanning(!isScanning)} variant="outline" className="w-full">
+                                <Button onClick={() => setIsScanning(!isScanning)} variant="outline" className="w-full h-11 rounded-xl">
                                     {isScanning ? "Cancel Scanning" : "Start Scanning"}
                                 </Button>
                             </div>
 
-                            <div className="space-y-4">
-                                <Label>Condition Photo (Optional)</Label>
-                                <label className="h-40 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50">
-                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoUpload('front', e)} />
-                                    {conditionPhotos.front ? (
-                                        <img src={conditionPhotos.front} className="h-full w-full object-cover rounded-xl" />
-                                    ) : (
-                                        <>
-                                            <Camera className="w-8 h-8 text-slate-300 mb-2" />
-                                            <span className="text-xs text-slate-400">Click to upload</span>
-                                        </>
-                                    )}
-                                </label>
+                            <div className="space-y-4 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+                                <div>
+                                    <Label className="text-sm font-bold text-[#0b1d3a]">
+                                        {isProjector ? "Condition Photos (Required)" : "Condition Photos (Optional)"}
+                                    </Label>
+                                    <p className="text-xs text-slate-500 mt-1 mb-4">
+                                        {isProjector 
+                                            ? "Please take front and back photos of the projector to submit your return." 
+                                            : "Capture a photo of the item's current state to expedite check-in."}
+                                    </p>
+                                </div>
+                                <EquipmentScanAndPhotoUpload
+                                    hideScanner={true}
+                                    requireBothPhotos={isProjector}
+                                    onPhotosChange={setConditionPhotos}
+                                    equipment={selectedTransaction?.equipment}
+                                />
+                                {photoError && (
+                                    <p className="text-xs text-rose-500 font-bold mt-2 bg-rose-50 p-3 rounded-xl border border-rose-100">{photoError}</p>
+                                )}
                             </div>
                         </div>
                     )}

@@ -413,9 +413,13 @@ const UsersList = () => {
                                             </td>
                                             <td className="px-3 py-4 align-middle text-center text-sm text-slate-600 font-semibold">{user.department || t('users.general')}</td>
                                             <td className="px-3 py-4 align-middle text-center">
-                                                <span className={`inline-flex items-center justify-center min-w-[2.5rem] h-8 px-2 rounded-lg text-xs font-black border ${getScoreColor(user.responsibilityScore ?? 100)}`}>
-                                                    {user.responsibilityScore ?? 100}
-                                                </span>
+                                                {user.role === 'Student' ? (
+                                                    <span className={`inline-flex items-center justify-center min-w-[2.5rem] h-8 px-2 rounded-lg text-xs font-black border ${getScoreColor(user.responsibilityScore ?? 100)}`}>
+                                                        {user.responsibilityScore ?? 100}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-400 font-bold">—</span>
+                                                )}
                                             </td>
                                             <td className="px-3 py-4 align-middle text-right">
                                                 <div className="inline-flex items-center justify-end gap-0.5">
@@ -425,9 +429,11 @@ const UsersList = () => {
                                                     <button onClick={() => openEditModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Edit User">
                                                         <Edit className="w-4 h-4" />
                                                     </button>
-                                                    <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
-                                                        <Gavel className="w-4 h-4" />
-                                                    </button>
+                                                    {user.role === 'Student' && (
+                                                        <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
+                                                            <Gavel className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                     {user.role !== 'Admin' && (
                                                         <button
                                                             onClick={() => openStatusModal(user)}

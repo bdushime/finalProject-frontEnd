@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Toaster } from "sonner";
 
@@ -41,6 +41,7 @@ import CheckoutHistory from "./pages/IT_Staff/CheckoutHistory";
 import SearchResults from "./pages/IT_Staff/SearchResults";
 import ClassroomManagement from "./pages/IT_Staff/ClassroomManagement";
 import ITStaffTickets from "./pages/IT_Staff/ITStaffTickets";
+import { ItStaffConfirmProvider } from "./pages/IT_Staff/components/ItStaffConfirmProvider";
 
 // IT Staff Checkout Flow
 import ScanQRCode from "./pages/IT_Staff/checkout/ScanQRCode";
@@ -116,31 +117,37 @@ export default function App() {
 
                 {/* 🔒 IT STAFF ROUTES */}
                 <Route element={<ProtectedRoute allowedRoles={['IT', 'IT_Staff']} />}>
-                    <Route path="/it/dashboard" element={<ITStaffDashboard />} />
-                    <Route path="/it/browse" element={<BrowseEquipment />} />
-                    <Route path="/it/reports" element={<SimpleReports />} />
-                    <Route path="/it/profile" element={<ITStaffProfile />} />
-                    <Route path="/it/settings" element={<ITStaffSettings />} />
-                    <Route path="/it/notifications" element={<ITStaffNotifications />} />
-                    <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
-                    {/* <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} /> */}
-                    <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
-                    <Route path="/it/checkout-history" element={<CheckoutHistory />} />
-                    <Route path="/it/search-results" element={<SearchResults />} />
-                    <Route path="/it/classrooms" element={<ClassroomManagement />} />
-                    <Route path="/it/tickets" element={<ITStaffTickets />} />
+                    <Route element={
+                        <ItStaffConfirmProvider>
+                            <Outlet />
+                        </ItStaffConfirmProvider>
+                    }>
+                        <Route path="/it/dashboard" element={<ITStaffDashboard />} />
+                        <Route path="/it/browse" element={<BrowseEquipment />} />
+                        <Route path="/it/reports" element={<SimpleReports />} />
+                        <Route path="/it/profile" element={<ITStaffProfile />} />
+                        <Route path="/it/settings" element={<ITStaffSettings />} />
+                        <Route path="/it/notifications" element={<ITStaffNotifications />} />
+                        <Route path="/it/equipment/:id" element={<ITStaffEquipmentDetails />} />
+                        {/* <Route path="/it/iot-tracker" element={<IoTTrackerLiveView />} /> */}
+                        <Route path="/it/current-checkouts" element={<CurrentCheckouts />} />
+                        <Route path="/it/checkout-history" element={<CheckoutHistory />} />
+                        <Route path="/it/search-results" element={<SearchResults />} />
+                        <Route path="/it/classrooms" element={<ClassroomManagement />} />
+                        <Route path="/it/tickets" element={<ITStaffTickets />} />
 
-                    {/* Checkout Flow */}
-                    <Route path="/it/checkout/scan" element={<ScanQRCode />} />
-                    <Route path="/it/checkout/photo" element={<CaptureCondition />} />
-                    <Route path="/it/checkout/details" element={<CheckoutForm />} />
-                    <Route path="/it/checkout/sign" element={<DigitalSignature />} />
-                    <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
+                        {/* Checkout Flow */}
+                        <Route path="/it/checkout/scan" element={<ScanQRCode />} />
+                        <Route path="/it/checkout/photo" element={<CaptureCondition />} />
+                        <Route path="/it/checkout/details" element={<CheckoutForm />} />
+                        <Route path="/it/checkout/sign" element={<DigitalSignature />} />
+                        <Route path="/it/checkout/confirmation" element={<CheckoutConfirmation />} />
 
-                    {/* Return Flow */}
-                    <Route path="/it/return/select-item" element={<SelectReturnItem />} />
-                    <Route path="/it/return/scan" element={<ReturnScan />} />
-                    <Route path="/it/return/confirmation" element={<ReturnConfirmation />} />
+                        {/* Return Flow */}
+                        <Route path="/it/return/select-item" element={<SelectReturnItem />} />
+                        <Route path="/it/return/scan" element={<ReturnScan />} />
+                        <Route path="/it/return/confirmation" element={<ReturnConfirmation />} />
+                    </Route>
                 </Route>
 
                 {/* 🔒 SECURITY ROUTES */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/pages/auth/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -121,6 +121,13 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     // Exception State
     const [isException, setIsException] = useState(false);
     const [showScreenWarning, setShowScreenWarning] = useState(false);
+
+    const isProjector = useMemo(() => {
+        if (!equipment) return false;
+        const name = equipment.name || "";
+        const categoryName = equipment.category?.name || equipment.category || "";
+        return name.toLowerCase().includes("projector") || categoryName.toLowerCase().includes("projector");
+    }, [equipment]);
 
     // Modal State for Date & Time Pickers
     const [showDateModal, setShowDateModal] = useState(false);
@@ -347,7 +354,15 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
         const newErrors = {};
 
         if (bookingType === "equipment") {
-            if (!formData.equipmentId) newErrors.equipmentId = "Please select equipment";
+            if (!formData.equipmentId) {
+                newErrors.equipmentId = "Please select equipment";
+            } else if (flowType === 'borrow' && step === 1) {
+                if (isProjector) {
+                    if (!conditionPhotos.front || !conditionPhotos.back) {
+                        newErrors.photos = "Both front and back condition photos are required for borrowing a projector.";
+                    }
+                }
+            }
         } else {
             // ── PACKAGE BOOKING VALIDATION ──────────────────────────────────
             // The backend's POST /packages/:id/book requires the same destination
@@ -1036,6 +1051,7 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                         equipment={equipment}
                                         scanError={scanError}
                                         hideScanner={true}
+                                        requireBothPhotos={isProjector}
                                         onReset={() => {
                                             setScanError(null);
                                             setEquipment(null);
@@ -1043,6 +1059,9 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                                         }}
                                         onPhotosChange={setConditionPhotos}
                                     />
+                                    {errors.photos && (
+                                        <p className="text-xs text-rose-500 font-bold mt-3 bg-rose-50 p-3 rounded-xl border border-rose-100">{errors.photos}</p>
+                                    )}
                                 </div>
                             )}
                         </div>

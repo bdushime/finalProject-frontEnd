@@ -32,6 +32,7 @@ export default function ITStaffTopbar({ onMenuClick }) {
         { name: t("nav.classrooms"), path: "/it/classrooms" },
         { name: t("nav.notifications"), path: "/it/notifications" },
         { name: t("nav.reports"), path: "/it/reports" },
+        { name: t("nav.helpDesk"), path: "/it/tickets" },
     ];
 
     // --- State for User Info ---

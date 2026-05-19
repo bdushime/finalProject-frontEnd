@@ -178,7 +178,9 @@ const SecurityReportsDashboard = () => {
           setBorrowDestinationByEquipmentId({});
           setOverdueEquipmentIds({});
           const res = await api.get("/packages").catch(() => ({ data: [] }));
-          const list = Array.isArray(res.data) ? res.data : [];
+          const list = Array.isArray(res.data)
+            ? res.data
+            : (res.data?.data || res.data?.packages || []);
           setRawData(list);
         } else if (currentReport === "logs") {
           setBorrowDestinationByEquipmentId({});
@@ -299,6 +301,16 @@ const SecurityReportsDashboard = () => {
     overdueEquipmentIds,
   ]);
 
+  const categorySummary = useMemo(() => {
+    if (currentReport !== "devices" && currentReport !== "exceptions") return null;
+    const counts = {};
+    filteredData.forEach((row) => {
+      const cat = row.category || row.type || "Other";
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, [filteredData, currentReport]);
+
   const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -328,20 +340,39 @@ const SecurityReportsDashboard = () => {
           {
             header: t("security:reportsDashboard.colItemCount"),
             render: (row) => {
-              const n = Array.isArray(row.items) ? row.items.length : row.itemCount ?? "—";
-              return <span className="font-mono text-sm">{n}</span>;
+              const devices = row.devices || [];
+              const count = devices.length;
+              if (count === 0) return <span className="text-slate-400 font-medium">Empty package</span>;
+              
+              const names = devices
+                .map((d) => (typeof d === "object" && d !== null ? d.name : d))
+                .join(", ");
+              return (
+                <div>
+                  <span className="inline-flex px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-xs font-bold">
+                    {count} device{count !== 1 ? "s" : ""}
+                  </span>
+                  <div className="text-[11px] text-slate-500 mt-1 line-clamp-1 max-w-[200px]" title={names}>
+                    {names}
+                  </div>
+                </div>
+              );
             },
-            pdf: (row) =>
-              String(Array.isArray(row.items) ? row.items.length : row.itemCount ?? "—"),
+            pdf: (row) => {
+              const devices = row.devices || [];
+              return devices
+                .map((d) => (typeof d === "object" && d !== null ? d.name : d))
+                .join(", ");
+            },
           },
           {
             header: t("security:reportsDashboard.colPackageId"),
             render: (row) => (
-              <span className="font-mono text-xs text-slate-500">
-                {(row._id || row.id || "").toString().slice(-8)}
+              <span className="font-mono text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md">
+                PKG-{(row._id || row.id || "").toString().slice(-8).toUpperCase()}
               </span>
             ),
-            pdf: (row) => (row._id || row.id || "").toString(),
+            pdf: (row) => "PKG-" + (row._id || row.id || "").toString().slice(-8).toUpperCase(),
           },
         ];
       case "logs":
@@ -718,7 +749,7 @@ const SecurityReportsDashboard = () => {
           <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">
             {heroTitle}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             <div>
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                 {t("admin:reports.reportInfo")}
@@ -762,6 +793,21 @@ const SecurityReportsDashboard = () => {
                 </div>
               </div>
             </div>
+            {categorySummary && Object.keys(categorySummary).length > 0 && (
+              <div>
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                  Category Summary
+                </h4>
+                <div className="space-y-2 text-sm text-slate-700">
+                  {Object.entries(categorySummary).map(([cat, count]) => (
+                    <div key={cat} className="flex justify-between border-b border-slate-200 pb-1 border-dashed">
+                      <span className="font-semibold text-slate-500">{cat}</span>
+                      <span className="font-bold">{count} device{count !== 1 ? "s" : ""}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

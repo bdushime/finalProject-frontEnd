@@ -19,7 +19,8 @@ import {
     FileText,
     Image as ImageIcon,
     Package,
-    Trophy
+    Trophy,
+    AlertTriangle
 } from "lucide-react";
 import Loader from "@/components/common/Loader";
 
@@ -80,6 +81,11 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, checkoutId
             ? rawPhotos.filter(Boolean)
             : (rawPhotos ? [rawPhotos] : []);
 
+        const rawReturnPhotos = tx.returnPhotoUrl;
+        const returnPhotos = Array.isArray(rawReturnPhotos)
+            ? rawReturnPhotos.filter(Boolean)
+            : (rawReturnPhotos ? [rawReturnPhotos] : []);
+
         return {
             equipmentName: tx.equipmentName || tx.equipment?.name || "Unknown Item",
             serialNumber: tx.equipment?.serialNumber || null,
@@ -103,6 +109,7 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, checkoutId
             packageName: packageMatch ? packageMatch[1].trim() : null,
             screenFlag,
             photos,
+            returnPhotos,
             status: tx.status || "Unknown",
             performedBy:
                 (typeof tx.approvedBy === "string" ? tx.approvedBy : null) ||
@@ -268,49 +275,170 @@ export default function CheckoutDetailsDialog({ isOpen, onOpenChange, checkoutId
                         </CardContent>
                     </Card>
 
-                    {/* 4. Condition Photos */}
-                    <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-lg text-slate-800 font-bold flex items-center gap-2">
-                                <ImageIcon className="h-5 w-5" />
-                                {t('checkouts.dialog.photoTitle')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                <p className="text-sm text-gray-600">
-                                    {t('checkouts.dialog.photoDesc')}
+                    {/* 4. Condition Verification & Side-by-Side Comparison Panel */}
+                    {data.returnPhotos.length > 0 ? (
+                        <Card className="shadow-sm border-slate-200 bg-gradient-to-br from-slate-50 to-indigo-50/5">
+                            <CardHeader className="border-b border-slate-100 pb-3">
+                                <CardTitle className="text-lg text-slate-800 font-bold flex items-center justify-between flex-wrap gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <ImageIcon className="h-5 w-5 text-indigo-600" />
+                                        <span>Projector Condition Comparison Panel</span>
+                                    </div>
+                                    <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-100 text-indigo-800 rounded-full">
+                                        Defense Audit Mode
+                                    </span>
+                                </CardTitle>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Compare check-out state (left) versus check-in state (right) side-by-side to verify physical integrity.
                                 </p>
-                                {data.photos.length > 0 ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {data.photos.map((src, idx) => {
-                                            const label = idx === 0 ? "Front" : idx === 1 ? "Back" : `Photo ${idx + 1}`;
-                                            return (
-                                                <div key={idx} className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 group">
-                                                    <img
-                                                        src={src}
-                                                        alt={`${label} view`}
-                                                        className="w-full h-auto object-cover max-h-[400px] cursor-zoom-in"
-                                                        onClick={() => window.open(src, "_blank", "noopener,noreferrer")}
-                                                        onError={(e) => {
-                                                            e.target.src = "https://via.placeholder.com/800x600?text=Image+Load+Error";
-                                                        }}
-                                                    />
-                                                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
-                                                        {label}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                            </CardHeader>
+                            <CardContent className="pt-6 space-y-6">
+                                {/* Front View Pair */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
+                                        <span className="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                        <span className="text-xs font-bold text-slate-600 tracking-wider uppercase">1. Front View Comparison</span>
                                     </div>
-                                ) : (
-                                    <div className="h-32 bg-gray-100 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-                                        {t('checkouts.dialog.noPhoto')}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Checkout Front */}
+                                        <div className="relative rounded-lg overflow-hidden border border-slate-200 bg-white group hover:shadow-md transition-all duration-200">
+                                            <img
+                                                src={data.photos[0] || "https://via.placeholder.com/800x600?text=No+Checkout+Front+Photo"}
+                                                alt="Checkout Front View"
+                                                className="w-full h-auto object-cover max-h-[300px] cursor-zoom-in"
+                                                onClick={() => window.open(data.photos[0], "_blank", "noopener,noreferrer")}
+                                                onError={(e) => {
+                                                    e.target.src = "https://via.placeholder.com/800x600?text=No+Checkout+Front+Photo";
+                                                }}
+                                            />
+                                            <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                                                Checkout State
+                                            </div>
+                                        </div>
+                                        {/* Return Front */}
+                                        <div className="relative rounded-lg overflow-hidden border border-emerald-200 bg-white group hover:shadow-md transition-all duration-200">
+                                            <img
+                                                src={data.returnPhotos[0] || "https://via.placeholder.com/800x600?text=No+Return+Front+Photo"}
+                                                alt="Return Front View"
+                                                className="w-full h-auto object-cover max-h-[300px] cursor-zoom-in"
+                                                onClick={() => window.open(data.returnPhotos[0], "_blank", "noopener,noreferrer")}
+                                                onError={(e) => {
+                                                    e.target.src = "https://via.placeholder.com/800x600?text=No+Return+Front+Photo";
+                                                }}
+                                            />
+                                            <div className="absolute top-2 left-2 bg-emerald-800/85 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                                                Return State
+                                            </div>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
+                                </div>
+
+                                {/* Back View Pair */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
+                                        <span className="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                        <span className="text-xs font-bold text-slate-600 tracking-wider uppercase">2. Back View Comparison</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Checkout Back */}
+                                        <div className="relative rounded-lg overflow-hidden border border-slate-200 bg-white group hover:shadow-md transition-all duration-200">
+                                            <img
+                                                src={data.photos[1] || "https://via.placeholder.com/800x600?text=No+Checkout+Back+Photo"}
+                                                alt="Checkout Back View"
+                                                className="w-full h-auto object-cover max-h-[300px] cursor-zoom-in"
+                                                onClick={() => window.open(data.photos[1], "_blank", "noopener,noreferrer")}
+                                                onError={(e) => {
+                                                    e.target.src = "https://via.placeholder.com/800x600?text=No+Checkout+Back+Photo";
+                                                }}
+                                            />
+                                            <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                                                Checkout State
+                                            </div>
+                                        </div>
+                                        {/* Return Back */}
+                                        <div className="relative rounded-lg overflow-hidden border border-emerald-200 bg-white group hover:shadow-md transition-all duration-200">
+                                            <img
+                                                src={data.returnPhotos[1] || "https://via.placeholder.com/800x600?text=No+Return+Back+Photo"}
+                                                alt="Return Back View"
+                                                className="w-full h-auto object-cover max-h-[300px] cursor-zoom-in"
+                                                onClick={() => window.open(data.returnPhotos[1], "_blank", "noopener,noreferrer")}
+                                                onError={(e) => {
+                                                    e.target.src = "https://via.placeholder.com/800x600?text=No+Return+Back+Photo";
+                                                }}
+                                            />
+                                            <div className="absolute top-2 left-2 bg-emerald-800/85 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                                                Return State
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <>
+                            {/* Standard Condition Photos */}
+                            <Card className="shadow-sm">
+                                <CardHeader>
+                                    <CardTitle className="text-lg text-slate-800 font-bold flex items-center gap-2">
+                                        <ImageIcon className="h-5 w-5" />
+                                        {t('checkouts.dialog.photoTitle')}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-3">
+                                        <p className="text-sm text-gray-600">
+                                            {t('checkouts.dialog.photoDesc')}
+                                        </p>
+                                        {data.photos.length > 0 ? (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {data.photos.map((src, idx) => {
+                                                    const label = idx === 0 ? "Front" : idx === 1 ? "Back" : `Photo ${idx + 1}`;
+                                                    return (
+                                                        <div key={idx} className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 group">
+                                                            <img
+                                                                src={src}
+                                                                alt={`${label} view`}
+                                                                className="w-full h-auto object-cover max-h-[400px] cursor-zoom-in"
+                                                                onClick={() => window.open(src, "_blank", "noopener,noreferrer")}
+                                                                onError={(e) => {
+                                                                    e.target.src = "https://via.placeholder.com/800x600?text=Image+Load+Error";
+                                                                }}
+                                                            />
+                                                            <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+                                                                {label}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div className="h-32 bg-gray-100 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                                                {t('checkouts.dialog.noPhoto')}
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Alert for Pending/Returned status but missing Return photos */}
+                            {['Pending Return', 'Returned'].includes(data.status) && (
+                                <Card className="shadow-sm border-emerald-100 bg-emerald-50/10">
+                                    <CardHeader className="border-b border-emerald-50/50">
+                                        <CardTitle className="text-lg text-emerald-800 font-bold flex items-center gap-2">
+                                            <ImageIcon className="h-5 w-5 text-emerald-600" />
+                                            Return Condition Photos
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="pt-4">
+                                        <div className="h-32 bg-emerald-50/20 rounded-lg border border-dashed border-emerald-200 flex flex-col items-center justify-center text-emerald-600/70 p-4 text-center">
+                                            <AlertTriangle className="h-6 w-6 text-emerald-500 mb-1" />
+                                            <span className="text-xs font-bold">No return photos provided by student</span>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

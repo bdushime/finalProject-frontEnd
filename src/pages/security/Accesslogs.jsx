@@ -47,11 +47,18 @@ const EVENT_TYPE_COLORS = {
   movement: "bg-gray-100 text-gray-700",
 };
 
-const STATUS_COLORS = {
-  'Checked Out': "bg-blue-100 text-blue-800 border-blue-200",
-  'Returned': "bg-green-100 text-green-800 border-green-200",
-  'Overdue': "bg-red-100 text-red-800 border-red-200",
-  'Pending': "bg-yellow-100 text-yellow-800 border-yellow-200",
+const getStatusColor = (status) => {
+  const s = status ? status.trim().toLowerCase() : '';
+  const colors = {
+    'checked out': "bg-blue-100 text-blue-800 border-blue-200",
+    'returned': "bg-green-100 text-green-800 border-green-200",
+    'overdue': "bg-red-100 text-red-800 border-red-200",
+    'pending': "bg-yellow-100 text-yellow-800 border-yellow-200",
+    'pending return': "bg-orange-100 text-orange-800 border-orange-200",
+    'denied': "bg-red-100 text-red-800 border-red-200",
+    'reserved': "bg-purple-100 text-purple-800 border-purple-200"
+  };
+  return colors[s] || "bg-gray-200 text-gray-800 border-gray-300";
 };
 
 import { useTranslation } from "react-i18next";
@@ -451,7 +458,7 @@ export default function AccessLogs({
                                   <span className="truncate">{log.location}</span>
                                 </div>
                                 <div className="col-span-1 flex items-center justify-center">
-                                  <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", STATUS_COLORS[log.status] || "bg-gray-100")}>
+                                  <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getStatusColor(log.status))}>
                                     {log.status}
                                   </Badge>
                                 </div>

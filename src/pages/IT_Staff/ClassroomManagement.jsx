@@ -120,16 +120,21 @@ export default function ClassroomManagement() {
                                 <Plus className="mr-2 h-4 w-4" /> {t('classrooms.addClassroom')}
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-white sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>{t('classrooms.addNewTitle')}</DialogTitle>
-                                <DialogDescription>
+                        <DialogContent className="sm:max-w-md p-8 bg-white border-none rounded-3xl shadow-2xl">
+                            <DialogHeader className="mb-6">
+                                <DialogTitle className="text-2xl font-bold text-[#0b1d3a] flex items-center gap-3">
+                                    <div className="bg-[#1864ab]/10 p-2 rounded-xl text-[#1864ab]">
+                                        <School className="w-6 h-6" />
+                                    </div>
+                                    {t('classrooms.addNewTitle')}
+                                </DialogTitle>
+                                <DialogDescription className="text-slate-500 text-sm mt-2">
                                     {t('classrooms.addNewDesc')}
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="name" className="text-right">
+                            <div className="space-y-6 py-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name" className="text-sm font-semibold text-slate-700">
                                         {t('classrooms.roomName')}
                                     </Label>
                                     <Input
@@ -137,28 +142,40 @@ export default function ClassroomManagement() {
                                         value={newRoomName}
                                         onChange={(e) => setNewRoomName(e.target.value)}
                                         placeholder={t('classrooms.roomNamePlaceholder')}
-                                        className="col-span-3"
+                                        className="h-12 px-4 rounded-xl border-slate-200 focus-visible:ring-[#1864ab] bg-slate-100 focus-visible:bg-white transition-all text-base"
                                     />
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="screen" className="text-right">
-                                        {t('classrooms.hasScreen')}
-                                    </Label>
-                                    <div className="flex items-center space-x-2 col-span-3">
-                                        <Switch
-                                            id="screen"
-                                            checked={newRoomHasScreen}
-                                            onCheckedChange={setNewRoomHasScreen}
-                                        />
-                                        <Label htmlFor="screen" className="font-normal text-slate-500">
-                                            {newRoomHasScreen ? t('classrooms.screenYes') : t('classrooms.screenNo')}
+                                <div className="flex items-center justify-between p-4 bg-slate-100 rounded-xl border border-slate-200">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="screen" className="text-sm font-semibold text-slate-700 cursor-pointer">
+                                            {t('classrooms.hasScreen')}
                                         </Label>
+                                        <p className="text-xs text-slate-500">
+                                            {newRoomHasScreen ? t('classrooms.screenYes') : t('classrooms.screenNo')}
+                                        </p>
                                     </div>
+                                    <Switch
+                                        id="screen"
+                                        checked={newRoomHasScreen}
+                                        onCheckedChange={setNewRoomHasScreen}
+                                        className="data-[state=checked]:bg-[#1864ab]"
+                                    />
                                 </div>
                             </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t('classrooms.cancel')}</Button>
-                                <Button onClick={handleAddClassroom} disabled={submitting} className="bg-[#0b1d3a]">
+                            <DialogFooter className="mt-8 flex gap-3 sm:justify-end">
+                                <Button 
+                                    variant="outline" 
+                                    onClick={() => setIsAddDialogOpen(false)}
+                                    className="rounded-full px-6 border-slate-200 text-slate-600 hover:bg-slate-50 h-11 font-medium"
+                                >
+                                    {t('classrooms.cancel')}
+                                </Button>
+                                <Button 
+                                    onClick={handleAddClassroom} 
+                                    disabled={submitting || !newRoomName.trim()} 
+                                    className="rounded-full px-6 bg-[#0b1d3a] hover:bg-[#1a365d] text-white shadow-md disabled:opacity-50 h-11 font-medium"
+                                >
+                                    {submitting ? <Loader variant="inline" className="w-5 h-5 mr-2" /> : null}
                                     {submitting ? t('classrooms.saving') : t('classrooms.save')}
                                 </Button>
                             </DialogFooter>
