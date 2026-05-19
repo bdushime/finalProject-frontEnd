@@ -115,28 +115,11 @@ export default function MyBorrowedItems() {
         return { hours, mins, overdue: false };
     };
 
-    // --- NEW: REQUEST RETURN LOGIC ---
-    const handleRequestReturn = (transactionId) => {
-        openConfirm(
-            t("borrowed.confirmReturnTitle"),
-            t("borrowed.confirmReturnDesc"),
-            async () => {
-                try {
-                    // Send request to backend to update status
-                    await api.put(`/transactions/${transactionId}/request-return`);
-
-                    toast.success("Return request sent successfully!");
-
-                    // Optimistically update the UI so the button changes immediately
-                    setActiveBorrows(prev => prev.map(item =>
-                        item._id === transactionId ? { ...item, status: 'Pending Return' } : item
-                    ));
-                } catch (err) {
-                    console.error("Return request failed:", err);
-                    toast.error("Failed to request return. Please try again.");
-                }
-            }
-        );
+    // --- REQUEST RETURN: Navigate to the full return flow (photo capture included) ---
+    // ReturnEquipment.jsx handles: item selection, condition photos (required for projectors),
+    // QR verification, and the actual API call — so we simply redirect there.
+    const handleRequestReturn = (equipmentId) => {
+        navigate(`/student/return?itemId=${equipmentId}`);
     };
 
     const handleExtend = (item) => {
@@ -384,7 +367,7 @@ export default function MyBorrowedItems() {
                                                         ) : (
                                                             <Button
                                                                 className="flex-1 bg-[#0b1d3a] hover:bg-[#2c3e50] text-white font-semibold h-11 rounded-xl shadow-sm transition-all"
-                                                                onClick={() => handleRequestReturn(item._id)}
+                                                                onClick={() => handleRequestReturn(item.equipment._id)}
                                                             >
                                                                 Request Return
                                                             </Button>
