@@ -19,6 +19,7 @@ export default function HelpSupport() {
         subject: '',
         message: '',
         email: '',
+        priority: 'LOW',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -54,13 +55,18 @@ export default function HelpSupport() {
         const newTicketObj = {
             ...contactForm,
             ticketId: generatedId,
-            priority: (contactForm.subject.toLowerCase().includes("urgent") || contactForm.message.toLowerCase().includes("urgent")) ? "HIGH" : "MEDIUM",
+            priority: contactForm.priority || 'LOW',
             date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         };
         setCreatedTicket(newTicketObj);
 
         try {
-            await api.post('/tickets', contactForm);
+            await api.post('/tickets', {
+                subject: contactForm.subject,
+                message: contactForm.message,
+                email: contactForm.email,
+                priority: contactForm.priority || 'LOW',
+            });
             setSuccess(true);
             setContactForm(prev => ({ ...prev, subject: '', message: '' })); // Keep email filled
             toast.success("Support ticket registered successfully!");
@@ -154,7 +160,7 @@ export default function HelpSupport() {
                                         <div className="border border-slate-200 rounded-xl overflow-hidden mb-6 bg-slate-50">
                                             <div className="bg-slate-200/80 px-4 py-2 border-b border-slate-300 text-xs font-semibold text-slate-700 flex justify-between items-center">
                                                 <span>Ticket Registry</span>
-                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${createdTicket.priority === 'HIGH' ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-blue-100 text-blue-700'}`}>
+                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${createdTicket.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}`}>
                                                     {createdTicket.priority} PRIORITY
                                                 </span>
                                             </div>
@@ -204,9 +210,22 @@ export default function HelpSupport() {
                                                     value={contactForm.email}
                                                     onChange={(e) => handleInputChange('email', e.target.value)}
                                                     required
-                                                    className="pl-10 bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
+                                                    className="pl-10 bg-white border-slate-200 rounded-xl h-11 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
                                                 />
                                             </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="priority" className="text-sm font-semibold text-slate-700">Priority</Label>
+                                            <select
+                                                id="priority"
+                                                value={contactForm.priority}
+                                                onChange={(e) => handleInputChange('priority', e.target.value)}
+                                                className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-[#0b1d3a]"
+                                            >
+                                                <option value="LOW">Low</option>
+                                                <option value="MEDIUM">Medium</option>
+                                            </select>
                                         </div>
 
                                         <div className="space-y-2">
@@ -217,7 +236,7 @@ export default function HelpSupport() {
                                                 value={contactForm.subject}
                                                 onChange={(e) => handleInputChange('subject', e.target.value)}
                                                 required
-                                                className="bg-white border-slate-200 rounded-xl h-11 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
+                                                className="bg-white border-slate-200 rounded-xl h-11 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
                                             />
                                         </div>
 
@@ -230,7 +249,7 @@ export default function HelpSupport() {
                                                 onChange={(e) => handleInputChange('message', e.target.value)}
                                                 rows={5}
                                                 required
-                                                className="bg-white border-slate-200 rounded-xl resize-none focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
+                                                className="bg-white border-slate-200 rounded-xl resize-none text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-[#0b1d3a]"
                                             />
                                         </div>
 

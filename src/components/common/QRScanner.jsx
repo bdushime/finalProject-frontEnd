@@ -3,7 +3,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { toast } from 'sonner';
 import Loader from "@/components/common/Loader";
 
-export default function QRScanner({ onScanSuccess }) {
+export default function QRScanner({ onScanSuccess, className = "", compact = false }) {
     const scannerRef = useRef(null);
     const [isStarting, setIsStarting] = useState(true);
 
@@ -17,7 +17,8 @@ export default function QRScanner({ onScanSuccess }) {
                 scannerRef.current = html5QrCode;
 
                 // You can customize camera preferences here
-                const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+                const qrSize = compact ? 200 : 250;
+                const config = { fps: 10, qrbox: { width: qrSize, height: qrSize }, aspectRatio: 1.0 };
 
                 await html5QrCode.start(
                     { facingMode: "environment" }, // Prioritize back camera
@@ -55,7 +56,9 @@ export default function QRScanner({ onScanSuccess }) {
     }, [onScanSuccess]);
 
     return (
-        <div className="relative w-full max-w-md mx-auto aspect-square bg-slate-900 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center">
+        <div
+            className={`relative w-full mx-auto aspect-square bg-slate-900 overflow-hidden shadow-inner flex items-center justify-center ${compact ? "max-w-[300px] rounded-2xl" : "max-w-md rounded-3xl"} ${className}`}
+        >
             {isStarting && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-white gap-3">
                     <Loader variant="inline" />

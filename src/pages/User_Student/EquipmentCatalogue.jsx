@@ -157,13 +157,13 @@ export default function EquipmentCatalogue() {
                                         key={item._id}
                                         className={`group relative bg-white rounded-2xl p-5 border shadow-sm transition-all duration-300 flex flex-col ${
                                             inPackage
-                                                ? "border-violet-200 bg-violet-50/30 hover:border-violet-300 hover:shadow-md"
+                                                ? "border-[#126dd5]/20 bg-[#126dd5]/5 hover:border-[#126dd5]/30 hover:shadow-md"
                                                 : "border-slate-200 hover:border-[#126dd5]/30 hover:shadow-md"
                                         }`}
                                     >
                                         {/* Package-only ribbon */}
                                         {inPackage && (
-                                            <div className="absolute top-0 left-0 right-0 flex items-center gap-1.5 bg-violet-600 text-white text-[10px] font-bold px-3 py-1 rounded-t-2xl">
+                                            <div className="absolute top-0 left-0 right-0 flex items-center gap-1.5 bg-[#126dd5] text-white text-[10px] font-bold px-3 py-1 rounded-t-2xl">
                                                 <Layers className="w-3 h-3 shrink-0" />
                                                 <span className="truncate">
                                                     Package only{packageName ? ` · ${packageName}` : ""}
@@ -174,14 +174,14 @@ export default function EquipmentCatalogue() {
                                         <div className={`flex justify-between items-start mb-4 ${inPackage ? "mt-5" : ""}`}>
                                             <div className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-colors ${
                                                 inPackage
-                                                    ? "bg-violet-100 border-violet-200 text-violet-500"
+                                                    ? "bg-[#126dd5]/10 border-[#126dd5]/20 text-[#126dd5]"
                                                     : "bg-slate-50 border-slate-100 text-slate-400 group-hover:text-[#126dd5]"
                                             }`}>
                                                 <Package className="w-5 h-5" />
                                             </div>
                                             <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${
                                                 inPackage
-                                                    ? "bg-violet-100 text-violet-700 border-violet-200"
+                                                    ? "bg-[#126dd5]/10 text-[#126dd5] border-[#126dd5]/20"
                                                     : status === "available"
                                                         ? "bg-[#126dd5]/5 text-[#126dd5] border-[#126dd5]/10"
                                                         : status === "reserved"
@@ -203,7 +203,7 @@ export default function EquipmentCatalogue() {
                                             {/* Location row */}
                                             <div className="flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-3 mt-3">
                                                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                                    inPackage ? "bg-violet-400" : status === "available" ? "bg-emerald-400" : "bg-slate-300"
+                                                    inPackage ? "bg-[#126dd5]" : status === "available" ? "bg-emerald-400" : "bg-slate-300"
                                                 }`} />
                                                 {inPackage
                                                     ? (packageName ? `Part of "${packageName}"` : "Part of a package")
@@ -218,7 +218,7 @@ export default function EquipmentCatalogue() {
                                         <div className="pt-3 mt-auto">
                                             {inPackage ? (
                                                 <Button
-                                                    className="w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all bg-violet-600 hover:bg-violet-700 text-white"
+                                                    className="w-full h-9 rounded-lg text-xs font-semibold shadow-none transition-all bg-[#0b1d3a] hover:bg-[#126dd5] text-white"
                                                     onClick={() => packageId
                                                         ? navigate(`/student/package/${packageId}`)
                                                         : navigate("/student/packages")
