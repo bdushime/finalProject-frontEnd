@@ -124,7 +124,10 @@ export default function AccessLogs({
     const fetchData = async () => {
       setLoading(true);
       try {
-        const limit = shouldLimitToMaxRecords ? maxRecords : 10;
+        // Dashboard preview embeds → only fetch the few rows it shows.
+        // Standalone /security/logs page → fetch a large window so client-side
+        // pagination has actual data to walk through (was 10 → only 1 page).
+        const limit = shouldLimitToMaxRecords ? maxRecords : 2000;
         const res = await api.get(`/transactions/security/access-logs?page=1&limit=${limit}`);
 
         const backendLogs = res.data?.logs || [];
@@ -132,18 +135,30 @@ export default function AccessLogs({
         setStats(backendStats || deriveStatsFromLogs(backendLogs) || emptyStats);
 
         // Map Backend Data to Frontend Structure
+        const now = new Date();
         const mappedLogs = backendLogs.map(log => {
-          // Determine Event Type based on Status
+          const expected = log.expectedReturnTime ? new Date(log.expectedReturnTime) : null;
+          const isImplicitOverdue =
+            log.status !== 'Returned' &&
+            !log.returnTime &&
+            expected && !Number.isNaN(expected.getTime()) && expected < now;
+
           let type = 'movement';
           if (log.status === 'Checked Out') type = 'checkout';
           if (log.status === 'Returned') type = 'return';
-          if (log.status === 'Overdue') type = 'violation';
+          if (log.status === 'Overdue' || isImplicitOverdue) type = 'violation';
 
           return {
             id: log._id,
+            // equipmentId is the Mongo _id used by /security/device-movement/:deviceId
+            // (deviceId field below stays as the human-readable serial number for display)
+            equipmentId: log.equipment?._id || log.equipment?.id || null,
             timestamp: log.updatedAt || log.createdAt, // Use update time for returns
+            expectedReturnTime: log.expectedReturnTime || null,
+            isImplicitOverdue,
             eventType: type,
-            status: log.status,
+            // Visually flag implicit-overdue rows so they read as Overdue in the table.
+            status: isImplicitOverdue && log.status !== 'Overdue' ? 'Overdue' : log.status,
             userName: log.user?.fullName || (log.user?.studentId ? `Student ${log.user.studentId}` : log.user?.username) || "Unknown",
             userId: log.user?.email || "N/A",
             deviceName: log.equipment?.name || "Unknown Item",
@@ -408,9 +423,10 @@ export default function AccessLogs({
               <div className="grid grid-cols-12 gap-2 sm:gap-4 px-3 sm:px-4 md:px-8 py-3 sm:py-4 bg-gray-50/50 border-b border-gray-50 font-bold text-[10px] text-gray-400 uppercase tracking-widest">
                 <div className="col-span-1">{t('accessLogs.table.event')}</div>
                 <div className="col-span-2">{t('accessLogs.table.dateTime')}</div>
-                <div className="col-span-3">{t('accessLogs.table.user')}</div>
-                <div className="col-span-3">{t('accessLogs.table.device')}</div>
-                <div className="col-span-2">{t('accessLogs.table.location')}</div>
+                <div className="col-span-2">{t('accessLogs.table.user')}</div>
+                <div className="col-span-2">{t('accessLogs.table.device')}</div>
+                <div className="col-span-3">{t('accessLogs.table.location')}</div>
+                <div className="col-span-1">{t('accessLogs.table.expectedReturn', 'Expected Return')}</div>
                 <div className="col-span-1 text-center">{t('accessLogs.table.status')}</div>
               </div>
 
@@ -434,7 +450,7 @@ export default function AccessLogs({
                           return (
                             <div key={log.id}>
                               <div
-                                className={`grid grid-cols-12 gap-2 sm:gap-4 px-3 sm:px-4 md:px-8 py-3 sm:py-5 hover:bg-gray-50/50 cursor-pointer transition-all duration-200 border-b border-gray-50/50 group ${isExpanded ? 'bg-[#8D8DC7]/5 shadow-inner' : ''}`}
+                                className={`grid grid-cols-12 gap-2 sm:gap-2 px-3 sm:px-4 md:px-8 py-3 sm:py-5 hover:bg-gray-50/50 cursor-pointer transition-all duration-200 border-b border-gray-50/50 group ${isExpanded ? 'bg-[#8D8DC7]/5 shadow-inner' : ''}`}
                                 onClick={() => toggleExpand(log.id)}
                               >
                                 <div className="col-span-1 flex items-center">
@@ -445,17 +461,35 @@ export default function AccessLogs({
                                 <div className="col-span-2 text-[10px] font-bold text-slate-400 uppercase tracking-tight flex flex-col justify-center">
                                   <span>{format(new Date(log.timestamp), "h:mm a")}</span>
                                 </div>
-                                <div className="col-span-3 flex flex-col justify-center">
-                                  <div className="text-sm font-bold text-slate-900 group-hover:text-[#8D8DC7] transition-colors">{log.userName}</div>
-                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{log.userId}</div>
+                                <div className="col-span-2 flex flex-col justify-center">
+                                  <div className="text-sm font-bold text-slate-900 group-hover:text-[#8D8DC7] transition-colors truncate">{log.userName}</div>
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter truncate">{log.userId}</div>
                                 </div>
-                                <div className="col-span-3 flex flex-col justify-center">
+                                <div className="col-span-2 flex flex-col justify-center">
                                   <div className="text-sm font-bold text-slate-700">{log.deviceName}</div>
                                   <div className="text-[10px] font-mono font-bold text-slate-400">{log.deviceId}</div>
                                 </div>
-                                <div className="col-span-2 flex items-center text-xs font-bold text-slate-500">
+                                <div className="col-span-3 flex items-center text-xs font-bold text-slate-500">
                                   <MapPin className="h-3 w-3 mr-1.5 text-[#8D8DC7]" />
                                   <span className="truncate">{log.location}</span>
+                                </div>
+                                <div className="col-span-1 flex flex-col justify-center text-[10px] font-bold uppercase tracking-tight">
+                                  {log.expectedReturnTime ? (
+                                    <>
+                                      <span className={cn(
+                                        log.isImplicitOverdue || log.status === 'Overdue'
+                                          ? 'text-rose-600'
+                                          : 'text-slate-800'
+                                      )}>
+                                        {format(new Date(log.expectedReturnTime), "MMM d")}
+                                      </span>
+                                      <span className="text-slate-400">
+                                        {format(new Date(log.expectedReturnTime), "h:mm a")}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="text-slate-300">—</span>
+                                  )}
                                 </div>
                                 <div className="col-span-1 flex items-center justify-center">
                                   <Badge variant="outline" className={cn("rounded-lg px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border-none shadow-sm shadow-black/5", getStatusColor(log.status))}>
@@ -470,8 +504,27 @@ export default function AccessLogs({
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                       <h4 className="font-semibold text-gray-900 mb-2">{t('accessLogs.table.eventDetails')}</h4>
-                                      <p><span className="text-gray-500">{t('accessLogs.table.logId')}:</span> {log.id}</p>
-                                      <p><span className="text-gray-500">{t('accessLogs.table.fullTime')}:</span> {new Date(log.timestamp).toLocaleString()}</p>
+                                      <p className="text-gray-800"><span className="text-gray-500 font-bold">{t('accessLogs.table.logId')}:</span> {log.id}</p>
+                                      <p className="text-gray-800"><span className="text-gray-500 font-bold">{t('accessLogs.table.fullTime')}:</span> {new Date(log.timestamp).toLocaleString()}</p>
+                                      {log.expectedReturnTime && (
+                                        <p className="text-gray-800">
+                                          <span className="text-gray-500 font-bold">
+                                            {t('accessLogs.table.expectedReturn', 'Expected Return')}:
+                                          </span>{" "}
+                                          <span className={cn(
+                                            log.isImplicitOverdue || log.status === 'Overdue'
+                                              ? 'text-rose-600 font-semibold'
+                                              : ''
+                                          )}>
+                                            {new Date(log.expectedReturnTime).toLocaleString()}
+                                          </span>
+                                          {log.isImplicitOverdue && (
+                                            <span className="ml-2 text-[10px] text-rose-600 font-bold uppercase tracking-widest">
+                                              {t('accessLogs.table.pastDue', 'Past due')}
+                                            </span>
+                                          )}
+                                        </p>
+                                      )}
                                     </div>
                                     <div>
                                       <h4 className="font-semibold text-gray-900 mb-2">{t('accessLogs.table.notes')}</h4>
@@ -484,7 +537,9 @@ export default function AccessLogs({
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => navigate(`/security/device-movement/${log.deviceId}`)}
+                                      disabled={!log.equipmentId}
+                                      onClick={() => log.equipmentId && navigate(`/security/device-movement/${log.equipmentId}`)}
+                                      title={log.equipmentId ? "" : "Device record missing — cannot open history"}
                                     >
                                       <ExternalLink className="h-3 w-3 mr-2" /> {t('accessLogs.table.viewDeviceHistory')}
                                     </Button>

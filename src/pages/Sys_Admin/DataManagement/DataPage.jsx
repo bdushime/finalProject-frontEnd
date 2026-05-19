@@ -3,6 +3,8 @@ import AdminLayout from '../components/AdminLayout'; // Check path
 import api from '@/utils/api';
 import { Database, Download, Upload, Trash2, Archive, RefreshCw, HardDrive, FileText, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 import { useTranslation } from "react-i18next";
 import Loader from "@/components/common/Loader";
@@ -42,7 +44,7 @@ const DataPage = () => {
         }
     };
 
-    // EXPORT DATA
+    // EXPORT DATA (CSV) — existing flow, unchanged
     const handleExport = async (type) => {
         try {
             const res = await api.get(`/data/export/${type}`, { responseType: 'blob' });
@@ -55,6 +57,85 @@ const DataPage = () => {
             toast.success(`${type} ${t('data.messages.exportSuccess')}`);
         } catch (err) {
             toast.error(t('data.messages.exportFailure'));
+        }
+    };
+
+    // EXPORT DATA (PDF) — fetches JSON via the existing equipment/users
+    // endpoints (rather than parsing the CSV blob) and uses jspdf-autotable
+    // to render a styled table. Keeps the CSV path completely independent.
+    const handleExportPdf = async (type) => {
+        try {
+            let rows = [];
+            let columns = [];
+            let title = "Export";
+
+            if (type === "equipment") {
+                const res = await api.get(`/equipment?raw=true&limit=2000`);
+                const list = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+                columns = [
+                    { header: "Name", dataKey: "name" },
+                    { header: "Category", dataKey: "category" },
+                    { header: "Serial Number", dataKey: "serialNumber" },
+                    { header: "Status", dataKey: "status" },
+                    { header: "Condition", dataKey: "condition" },
+                ];
+                rows = list.map((d) => ({
+                    name: d.name || "—",
+                    category: d.category || d.type || "—",
+                    serialNumber: d.serialNumber || "—",
+                    status: d.status || "—",
+                    condition: d.condition || "—",
+                }));
+                title = t("data.export.equipmentTitle", "Equipment Export");
+            } else if (type === "users") {
+                const res = await api.get(`/users?raw=true&limit=2000`);
+                const list = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+                columns = [
+                    { header: "Name", dataKey: "name" },
+                    { header: "Email", dataKey: "email" },
+                    { header: "Role", dataKey: "role" },
+                    { header: "Department", dataKey: "department" },
+                ];
+                rows = list.map((u) => ({
+                    name: u.fullName || (u.studentId ? `Student ${u.studentId}` : u.username) || "—",
+                    email: u.email || "—",
+                    role: u.role || "—",
+                    department: u.department || "—",
+                }));
+                title = t("data.export.usersTitle", "Users Export");
+            } else {
+                toast.error(t("data.messages.exportFailure"));
+                return;
+            }
+
+            const doc = new jsPDF({ orientation: "landscape", unit: "pt" });
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text(title, 40, 40);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(120);
+            doc.text(
+                `Generated: ${new Date().toLocaleString()}  ·  ${rows.length} record${rows.length === 1 ? "" : "s"}`,
+                40,
+                58
+            );
+
+            autoTable(doc, {
+                startY: 75,
+                head: [columns.map((c) => c.header)],
+                body: rows.map((r) => columns.map((c) => r[c.dataKey] ?? "—")),
+                styles: { fontSize: 9, cellPadding: 6 },
+                headStyles: { fillColor: [141, 141, 199], textColor: 255, fontStyle: "bold" },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                margin: { left: 40, right: 40 },
+            });
+
+            doc.save(`${type}_export.pdf`);
+            toast.success(`${type} ${t("data.messages.exportSuccess")}`);
+        } catch (err) {
+            console.error("PDF export failed:", err);
+            toast.error(t("data.messages.exportFailure"));
         }
     };
 
@@ -137,7 +218,7 @@ const DataPage = () => {
 
                         <div className="space-y-4 flex-grow">
                             {/* Equipment Export */}
-                            <div onClick={() => handleExport('equipment')} className="p-4 border border-gray-100 rounded-xl hover:border-[#8D8DC7]/30 transition-colors cursor-pointer flex justify-between items-center group">
+                            <div className="p-4 border border-gray-100 rounded-xl hover:border-[#8D8DC7]/30 transition-colors flex justify-between items-center group">
                                 <div className="flex items-center gap-3">
                                     <FileText className="w-5 h-5 text-gray-400 group-hover:text-[#8D8DC7]" />
                                     <div>
@@ -145,11 +226,24 @@ const DataPage = () => {
                                         <p className="text-xs text-gray-500">{t('data.export.equipmentDesc')}</p>
                                     </div>
                                 </div>
-                                <button className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg">{t('data.export.csv')}</button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleExport('equipment')}
+                                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                                    >
+                                        {t('data.export.csv', 'CSV')}
+                                    </button>
+                                    <button
+                                        onClick={() => handleExportPdf('equipment')}
+                                        className="px-3 py-1.5 bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white text-sm font-semibold rounded-lg transition-colors"
+                                    >
+                                        {t('data.export.pdf', 'PDF')}
+                                    </button>
+                                </div>
                             </div>
 
                             {/* User Export */}
-                            <div onClick={() => handleExport('users')} className="p-4 border border-gray-100 rounded-xl hover:border-[#8D8DC7]/30 transition-colors cursor-pointer flex justify-between items-center group">
+                            <div className="p-4 border border-gray-100 rounded-xl hover:border-[#8D8DC7]/30 transition-colors flex justify-between items-center group">
                                 <div className="flex items-center gap-3">
                                     <FileText className="w-5 h-5 text-gray-400 group-hover:text-[#8D8DC7]" />
                                     <div>
@@ -157,7 +251,20 @@ const DataPage = () => {
                                         <p className="text-xs text-gray-500">{t('data.export.usersDesc')}</p>
                                     </div>
                                 </div>
-                                <button className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg">{t('data.export.csv')}</button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleExport('users')}
+                                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                                    >
+                                        {t('data.export.csv', 'CSV')}
+                                    </button>
+                                    <button
+                                        onClick={() => handleExportPdf('users')}
+                                        className="px-3 py-1.5 bg-[#8D8DC7] hover:bg-[#7b7bb5] text-white text-sm font-semibold rounded-lg transition-colors"
+                                    >
+                                        {t('data.export.pdf', 'PDF')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

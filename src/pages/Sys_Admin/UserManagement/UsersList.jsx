@@ -198,6 +198,22 @@ const UsersList = () => {
         }
     };
 
+    // Clear an auto-lock triggered by too many failed login attempts. Distinct
+    // from suspension — the user keeps their status; only the lock flag and
+    // attempt counter are reset so they can try logging in again.
+    const handleUnlockUser = async (user) => {
+        if (!user) return;
+        // Optimistic update so the lock badge disappears immediately.
+        setUsers(safeUsers.map((u) => (u._id === user._id ? { ...u, isLocked: false, loginAttempts: 0 } : u)));
+        try {
+            await api.put(`/users/${user._id}`, { isLocked: false, loginAttempts: 0, lockedAt: null });
+            toast.success(t('users.userUnlocked', 'Account unlocked. The user can log in again.'));
+        } catch (err) {
+            toast.error(t('users.failedUnlock', 'Failed to unlock account.'));
+            fetchUsers();
+        }
+    };
+
     // 7. SCORE LOGIC
     const openScoreModal = (user) => {
         setSelectedUser(user);
@@ -407,9 +423,20 @@ const UsersList = () => {
                                                 </span>
                                             </td>
                                             <td className="px-3 py-4 align-middle text-center">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border ${getStatusColor(user.status || 'Active')}`}>
-                                                    {user.status === 'Suspended' ? t('users.suspended') : t('users.activeStatus')}
-                                                </span>
+                                                <div className="inline-flex flex-col items-center gap-1">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border ${getStatusColor(user.status || 'Active')}`}>
+                                                        {user.status === 'Suspended' ? t('users.suspended') : t('users.activeStatus')}
+                                                    </span>
+                                                    {user.isLocked && (
+                                                        <span
+                                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200"
+                                                            title={t('users.lockedDueToAttempts', 'Locked after 3 failed login attempts')}
+                                                        >
+                                                            <Lock className="w-2.5 h-2.5" />
+                                                            {t('users.locked', 'Locked')}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-3 py-4 align-middle text-center text-sm text-slate-600 font-semibold">{user.department || t('users.general')}</td>
                                             <td className="px-3 py-4 align-middle text-center">
@@ -432,6 +459,15 @@ const UsersList = () => {
                                                     {user.role === 'Student' && (
                                                         <button onClick={() => openScoreModal(user)} className="p-2 hover:bg-slate-100 rounded-lg text-gray-500 hover:text-[#8D8DC7] transition-colors" title="Manage Score">
                                                             <Gavel className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                    {user.isLocked && user.role !== 'Admin' && (
+                                                        <button
+                                                            onClick={() => handleUnlockUser(user)}
+                                                            className="p-2 rounded-lg transition-colors hover:bg-amber-50 text-amber-600"
+                                                            title={t('users.unlockAccount', 'Unlock account')}
+                                                        >
+                                                            <Lock className="w-4 h-4" />
                                                         </button>
                                                     )}
                                                     {user.role !== 'Admin' && (

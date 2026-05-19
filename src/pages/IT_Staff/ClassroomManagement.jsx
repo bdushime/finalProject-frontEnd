@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import ITStaffLayout from "@/components/layout/ITStaffLayout";
+import AdminLayout from "@/pages/Sys_Admin/components/AdminLayout";
+import { useAuth } from "@/pages/auth/AuthContext";
 import api from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,13 +26,27 @@ import {
 } from "@/components/ui/dialog";
 import { Trash2, Monitor, MonitorOff, Plus, School } from "lucide-react";
 import { itStaffToast as toast } from "@/pages/IT_Staff/utils/itStaffToast";
-import { useItStaffConfirm } from "@/pages/IT_Staff/components/ItStaffConfirmProvider";
+import {
+    ItStaffConfirmProvider,
+    useItStaffConfirm,
+} from "@/pages/IT_Staff/components/ItStaffConfirmProvider";
 import { useTranslation } from "react-i18next";
 import Loader from "@/components/common/Loader";
 
-export default function ClassroomManagement() {
+// Inner component does all the work and consumes useItStaffConfirm().
+// The default export wraps it in ItStaffConfirmProvider so this page can be
+// reached from BOTH /it/classrooms (where the IT-staff route group already
+// mounts a provider — nesting is harmless) and /admin/classrooms (where there
+// is no provider in the route tree).
+function ClassroomManagementInner() {
     const { confirm } = useItStaffConfirm();
     const { t } = useTranslation(["itstaff", "common"]);
+    // Pick the right layout for whichever role is viewing — admins reach this
+    // page via /admin/classrooms, IT staff via /it/classrooms. The page logic
+    // (and its API calls) are identical either way.
+    const { user } = useAuth();
+    const isAdmin = (user?.role || "").toString().toLowerCase() === "admin";
+    const Layout = isAdmin ? AdminLayout : ITStaffLayout;
     const [classrooms, setClassrooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -107,7 +123,7 @@ export default function ClassroomManagement() {
     };
 
     return (
-        <ITStaffLayout>
+        <Layout>
             <div className="space-y-8 max-w-7xl mx-auto">
                 <div className="flex items-center justify-between">
                     <div>
@@ -243,7 +259,15 @@ export default function ClassroomManagement() {
                     </Table>
                 </div>
             </div>
-        </ITStaffLayout>
+        </Layout>
+    );
+}
+
+export default function ClassroomManagement() {
+    return (
+        <ItStaffConfirmProvider>
+            <ClassroomManagementInner />
+        </ItStaffConfirmProvider>
     );
 }
 

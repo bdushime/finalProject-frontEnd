@@ -170,7 +170,7 @@ export default function App() {
                 <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/users" element={<UsersList />} />
-                    <Route path="/admin/packages" element={<PackageManagement />} />
+                    <Route path="/admin/classrooms" element={<ClassroomManagement />} />
                     <Route path="/admin/config" element={<ConfigPage />} />
                     <Route path="/admin/data" element={<DataPage />} />
                     <Route path="/admin/monitoring" element={<MonitoringPage />} />

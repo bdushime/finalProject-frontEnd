@@ -71,7 +71,9 @@ const ConfigPage = () => {
     const fetchRoles = async () => {
         setRolesLoading(true);
         try {
-            const res = await api.get('/api/roles');
+            // api util's baseURL already ends in /api, so the path is /roles —
+            // not /api/roles (that produced /api/api/roles → 404).
+            const res = await api.get('/roles');
             // Merge defaults with custom ones, avoiding duplicates by name
             const customRoles = res.data || [];
             const customNames = customRoles.map(r => r.name);
@@ -87,7 +89,7 @@ const ConfigPage = () => {
     const saveRole = async () => {
         if (!newRole.name) return toast.error("Role name is required");
         try {
-            const res = await api.post('/api/roles', newRole);
+            const res = await api.post('/roles', newRole);
             setRoles(prev => [res.data, ...prev]);
             setNewRole({ name: '', description: '' });
             setIsAddingRole(false);
@@ -100,7 +102,7 @@ const ConfigPage = () => {
     const deleteRole = async (id, name) => {
         if (!window.confirm(`Are you sure you want to delete the role "${name}"?`)) return;
         try {
-            await api.delete(`/api/roles/${id}`);
+            await api.delete(`/roles/${id}`);
             setRoles(prev => prev.filter(r => r._id !== id));
             toast.success("Role deleted");
         } catch (err) {

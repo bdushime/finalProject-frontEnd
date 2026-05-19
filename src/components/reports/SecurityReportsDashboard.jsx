@@ -235,13 +235,19 @@ const SecurityReportsDashboard = () => {
 
     if (currentReport === "devices" || currentReport === "exceptions") {
       return rawData.filter((row) => {
+        const id = String(row._id || row.id || "");
+        const isOverdue =
+          !!overdueEquipmentIds[id] ||
+          normStatus(row.status).includes("overdue");
+
+        // On the Attention/Exceptions report, overdue items must always be
+        // visible — they're the whole point of the report — regardless of which
+        // status filter the user picked.
+        if (currentReport === "exceptions" && isOverdue) return true;
+
         if (selectedStatus === "All Statuses") return true;
         if (selectedStatus === "Overdue") {
-          const id = String(row._id || row.id || "");
-          return (
-            !!overdueEquipmentIds[id] ||
-            normStatus(row.status).includes("overdue")
-          );
+          return isOverdue;
         }
         const st = (row.status || "").toString().toLowerCase();
         const cond = (row.condition || "").toString().toLowerCase();
@@ -816,6 +822,38 @@ const SecurityReportsDashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Inventory category chips — visible breakdown above the table for
+            devices/exceptions reports. The sidebar still shows the same data;
+            this row makes it impossible to miss at a glance. */}
+        {categorySummary && Object.keys(categorySummary).length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 px-5 py-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-400 mr-1">
+                {t("security:reportsDashboard.inventoryBreakdown", "Inventory breakdown")}:
+              </span>
+              {Object.entries(categorySummary)
+                .sort(([, a], [, b]) => b - a)
+                .map(([cat, count]) => (
+                  <span
+                    key={cat}
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200 pl-3 pr-2.5 py-1 text-xs font-semibold text-slate-700"
+                  >
+                    {cat}
+                    <span className="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 rounded-full bg-[#8D8DC7]/15 text-[#5D5DA8] font-bold">
+                      {count}
+                    </span>
+                  </span>
+                ))}
+              <span className="ml-auto text-xs font-semibold text-slate-500">
+                {t("common:misc.total", "Total")}:{" "}
+                <span className="font-bold text-slate-800">
+                  {Object.values(categorySummary).reduce((s, n) => s + n, 0)}
+                </span>
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
           <div className="overflow-x-auto flex-1">

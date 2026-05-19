@@ -109,7 +109,15 @@ export default function Auth() {
 
         } catch (err) {
             console.error(err);
-            const errorMsg = err.response?.data?.message || t("loginFailed");
+            const data = err.response?.data;
+            let errorMsg = data?.message || t("loginFailed");
+            // Backend includes remainingAttempts on each "Invalid credentials"
+            // miss so we can warn the user before the lock kicks in.
+            if (typeof data?.remainingAttempts === "number") {
+                if (data.remainingAttempts > 0) {
+                    errorMsg = `${data.message} — ${data.remainingAttempts} attempt${data.remainingAttempts === 1 ? "" : "s"} remaining before lockout.`;
+                }
+            }
             setFeedback({ type: 'error', message: errorMsg });
         } finally {
             setIsLoading(false);

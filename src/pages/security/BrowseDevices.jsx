@@ -162,7 +162,9 @@ function BrowseDevices() {
     status: "Available",
     location: "Main Storage",
     description: "",
-    iotTag: ""
+    iotTag: "",
+    purchaseDate: "",
+    amount: ""
   });
 
   const navigateToDevice = (device) => {
@@ -257,6 +259,10 @@ function BrowseDevices() {
 
   const openEditDialog = (device) => {
     setSelectedDevice(device);
+    // Date input requires YYYY-MM-DD; trim ISO timestamp if present.
+    const purchaseDate = device.purchaseDate
+      ? new Date(device.purchaseDate).toISOString().split("T")[0]
+      : "";
     setFormData({
       name: device.name || "",
       category: device.category || device.type || "",
@@ -265,7 +271,11 @@ function BrowseDevices() {
       status: device.status || "Available",
       location: device.location || "Main Storage",
       description: device.description || "",
-      iotTag: device.iotTag || ""
+      iotTag: device.iotTag || "",
+      purchaseDate,
+      // Backend stores it as purchasePrice; the dialog uses `amount` for input,
+      // matching AddDeviceDialog. equipmentPayload.js maps amount → purchasePrice.
+      amount: device.purchasePrice ?? device.amount ?? "",
     });
     setIsEditDialogOpen(true);
   };
@@ -279,7 +289,8 @@ function BrowseDevices() {
     setFormData({
       name: "", category: "", serialNumber: "",
       condition: "Good", status: "Available", location: "Main Storage",
-      description: "", iotTag: ""
+      description: "", iotTag: "",
+      purchaseDate: "", amount: ""
     });
   };
 

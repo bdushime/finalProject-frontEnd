@@ -143,6 +143,34 @@ function EditDeviceDialog({
                         </Select>
                     </div>
 
+                    {/* Purchase info — lets staff backfill values on devices
+                        that were added before these fields existed in the form. */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-purchaseDate" className="text-sm font-semibold text-slate-700">Purchase Date</Label>
+                            <Input
+                                id="edit-purchaseDate"
+                                type="date"
+                                value={formData.purchaseDate || ""}
+                                onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+                                className={inputClass}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-amount" className="text-sm font-semibold text-slate-700">Purchase Amount (RWF)</Label>
+                            <Input
+                                id="edit-amount"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 250000"
+                                value={formData.amount ?? ""}
+                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                className={inputClass}
+                            />
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="edit-description" className="text-sm font-semibold text-slate-700">Description</Label>
                         <Textarea

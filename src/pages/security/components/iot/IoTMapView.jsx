@@ -131,9 +131,6 @@ export default function IoTMapView({
             <CardTitle className="text-base sm:text-lg font-bold">
               {t("iot.map.title")}
             </CardTitle>
-            <CardDescription className="text-xs text-slate-600">
-              {t("iot.map.liveLocation", "Your live position from this browser")}
-            </CardDescription>
           </div>
           <Button
             type="button"
