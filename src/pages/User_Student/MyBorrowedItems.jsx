@@ -49,20 +49,31 @@ export default function MyBorrowedItems() {
         });
     };
 
+    const normalizeTransactionList = (res) => {
+        const raw = res?.data;
+        if (Array.isArray(raw)) return raw;
+        if (Array.isArray(raw?.data)) return raw.data;
+        if (Array.isArray(raw?.items)) return raw.items;
+        return [];
+    };
+
     // --- FETCH DATA ---
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [activeRes, historyRes] = await Promise.all([
                     api.get('/transactions/my-borrowed'),
-                    api.get('/transactions/my-history')
+                    api.get('/transactions/my-history').catch(() => ({ data: [] })),
                 ]);
 
+                const activeList = normalizeTransactionList(activeRes);
+                const historyRaw = normalizeTransactionList(historyRes);
+
                 // 1. FILTER PENDING (Initial Checkout Requests)
-                const pending = activeRes.data.filter(t => t.status?.toLowerCase() === 'pending');
+                const pending = activeList.filter(t => t.status?.toLowerCase() === 'pending');
 
                 // 2. FILTER ACTIVE BORROWS (Now includes 'Pending Return' and 'Saved')
-                const borrowed = activeRes.data.filter(t => {
+                const borrowed = activeList.filter(t => {
                     const status = t.status?.toLowerCase();
                     return (status === 'borrowed' ||
                         status === 'checked out' ||
@@ -73,16 +84,14 @@ export default function MyBorrowedItems() {
                 });
 
                 // 3. FILTER RESERVED
-                const reserved = activeRes.data.filter(t => t.status?.toLowerCase() === 'reserved');
+                const reserved = activeList.filter(t => t.status?.toLowerCase() === 'reserved');
 
                 setPendingRequests(pending);
                 setActiveBorrows(borrowed);
                 setReservations(reserved);
 
-                // 4. FILTER HISTORY (Includes returned, cancelled, and denied)
-                const historyStatuses = ['returned', 'cancelled', 'denied', 'rejected'];
-                const history = historyRes.data.filter(t => historyStatuses.includes(t.status?.toLowerCase()));
-                setHistoryList(history);
+                // 4. HISTORY — use full my-history response (same as dashboard)
+                setHistoryList(historyRaw);
 
             } catch (err) {
                 console.error("Failed to fetch borrows:", err);
@@ -441,7 +450,11 @@ export default function MyBorrowedItems() {
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-[#0b1d3a]">{item.equipment?.name || "Unknown"}</h4>
-                                                <p className="text-sm text-slate-500">Returned on {formatDate(item.returnTime || item.updatedAt)}</p>
+                                                <p className="text-sm text-slate-500">
+                                                    {(item.status || '').toLowerCase() === 'returned'
+                                                        ? `Returned on ${formatDate(item.returnTime || item.updatedAt)}`
+                                                        : `${item.status || 'Completed'} · ${formatDate(item.updatedAt || item.createdAt)}`}
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
@@ -461,7 +474,12 @@ export default function MyBorrowedItems() {
                                                     }
                                                 </p>
                                             </div>
-                                            <Button variant="outline" size="sm" className="rounded-lg">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="rounded-lg"
+                                                onClick={() => navigate("/student/help")}
+                                            >
                                                 {t("borrowed.reportIssue")}
                                             </Button>
                                         </div>
