@@ -117,6 +117,8 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const [statusModal, setStatusModal] = useState(null);
+    // Dynamic max borrow hours from Admin Config (fallback: 5 hrs if config unavailable)
+    const [configMaxHours, setConfigMaxHours] = useState(5);
 
     // Exception State
     const [isException, setIsException] = useState(false);
@@ -138,6 +140,16 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
     useEffect(() => {
         const loadInitialData = async () => {
             try {
+                // Fetch admin config to get dynamic borrow duration limit
+                try {
+                    const cfgRes = await api.get('/config/options');
+                    if (cfgRes.data?.studentMaxHours) {
+                        setConfigMaxHours(Number(cfgRes.data.studentMaxHours));
+                    }
+                } catch (cfgErr) {
+                    console.warn("Could not load config, using default max hours.", cfgErr);
+                }
+
                 const eqRes = await api.get('/equipment');
                 const eqPayload = eqRes?.data;
                 const eqList = Array.isArray(eqPayload)
@@ -389,8 +401,8 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                     newErrors.sessionDateTime = "Borrowing is only allowed for today.";
                 } else if (diffHours <= 0) {
                     newErrors.sessionDateTime = "Return time must be in the future.";
-                } else if (diffHours > 5) {
-                    newErrors.sessionDateTime = "Maximum borrowing duration is 5 hours.";
+                } else if (diffHours > configMaxHours) {
+                    newErrors.sessionDateTime = `Maximum borrowing duration is ${configMaxHours} hour${configMaxHours !== 1 ? 's' : ''}.`;
                 }
             }
 
@@ -428,8 +440,8 @@ export default function BorrowRequestForm({ initialEquipmentId = null, onSuccess
                         newErrors.sessionDateTime = "Borrowing is only allowed for today.";
                     } else if (diffHours <= 0) {
                         newErrors.sessionDateTime = "Return time must be in the future.";
-                    } else if (diffHours > 5) {
-                        newErrors.sessionDateTime = "Maximum borrowing duration is 5 hours.";
+                    } else if (diffHours > configMaxHours) {
+                        newErrors.sessionDateTime = `Maximum borrowing duration is ${configMaxHours} hour${configMaxHours !== 1 ? 's' : ''}.`;
                     }
                 }
 
